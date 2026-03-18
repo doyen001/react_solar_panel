@@ -1,8 +1,8 @@
-import { BusinessAssociatesSection } from "@/components/contact/BusinessAssociatesSection";
-import { DesignSystemSection } from "@/components/contact/DesignSystemSection";
-import { FooterSection } from "@/components/contact/FooterSection";
-import { HeroSection } from "@/components/contact/HeroSection";
-import { SendUsAndPartnerSection } from "@/components/contact/SendUsAndPartnerSection";
+import { BusinessAssociatesSection } from "@/components/pages/contact/BusinessAssociatesSection";
+import { DesignSystemSection } from "@/components/pages/contact/DesignSystemSection";
+import { FooterSection } from "@/components/modules/LandingFooter";
+import { HeroSection } from "@/components/pages/contact/HeroSection";
+import { SendUsAndPartnerSection } from "@/components/pages/contact/SendUsAndPartnerSection";
 
 export default function ContactUsPage() {
   return (

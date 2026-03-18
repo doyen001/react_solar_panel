@@ -10,6 +10,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-source-sans: var(--font-source-sans);
+  --font-outfit: var(--font-outfit);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +24,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family:
+    var(--font-source-sans), var(--font-geist-sans), Arial, Helvetica,
+    sans-serif;
 }
 
 .contact-input {
