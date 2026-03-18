@@ -1,5 +1,7 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import searchIcon from "@/components/ui/Icons/search.svg";
 import userIcon from "@/components/ui/Icons/user.svg";
 import shopIcon from "@/components/ui/Icons/shop.svg";
@@ -15,6 +17,7 @@ const navItems = [
 ];
 
 export function Header() {
+  const pathname = usePathname();
   return (
     <header className="fixed top-0 z-30 w-full bg-white/75 backdrop-blur-md">
       <div className="mx-auto flex h-20 w-full max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -36,7 +39,7 @@ export function Header() {
             <Link
               key={index}
               href={item.link}
-              className="transition hover:text-cyan-700"
+              className={`transition hover:text-cyan-700 ${pathname === item.link ? "text-secondary" : "text-slate-800"}`}
             >
               {item.label}
             </Link>

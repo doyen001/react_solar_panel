@@ -183,7 +183,7 @@ export function SpecialDealsSection() {
       <div className="mx-auto max-w-[1216px]">
         {/* Heading */}
         <div className="text-center">
-          <h2 className="font-source-sans text-3xl font-bold tracking-[-0.9px] text-[#111c27] sm:text-4xl">
+          <h2 className="font-source-sans text-3xl font-bold tracking-[-0.9px] text-ink sm:text-4xl">
             Special Ready Deals
           </h2>
           <p className="mt-4 font-source-sans text-base text-[#65758b]">
@@ -196,7 +196,7 @@ export function SpecialDealsSection() {
         <div className="mt-8 rounded-2xl bg-white px-8 py-8 shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)]">
           <div className="flex items-center gap-[10px]">
             <FilterIcon />
-            <span className="font-source-sans text-[18px] font-semibold tracking-[-0.89px] text-[#111c27]">
+            <span className="font-source-sans text-[18px] font-semibold tracking-[-0.89px] text-ink">
               Filter packages
             </span>
           </div>
@@ -225,7 +225,7 @@ export function SpecialDealsSection() {
           <span className="inline-block rounded-full border border-[#05afd1] bg-[rgba(5,175,209,0.1)] px-3 py-1 text-xs font-medium text-[#05afd1]">
             10.1kW
           </span>
-          <h3 className="mt-3 font-source-sans text-xl font-bold tracking-[-0.5px] text-[#111c27] sm:text-2xl">
+          <h3 className="mt-3 font-source-sans text-xl font-bold tracking-[-0.5px] text-ink sm:text-2xl">
             10kW Solar System + 20kW Battery
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-[#65758b]">
@@ -233,8 +233,8 @@ export function SpecialDealsSection() {
             14.64kW Battery. FOXESS 9.9kW Hybrid Inverter.
           </p>
           <div className="mt-4 flex items-baseline gap-1">
-            <span className="text-sm text-[#111c27]">A$</span>
-            <span className="font-source-sans text-3xl font-bold text-[#111c27]">
+            <span className="text-sm text-ink">A$</span>
+            <span className="font-source-sans text-3xl font-bold text-ink">
               6,565
             </span>
             <span className="text-sm text-[#65758b]">/incl. installation</span>
@@ -251,7 +251,7 @@ export function SpecialDealsSection() {
         </div>
 
         {/* Battery Deals */}
-        <h3 className="mt-12 text-center font-source-sans text-2xl font-bold text-[#111c27]">
+        <h3 className="mt-12 text-center font-source-sans text-2xl font-bold text-ink">
           Battery Deals
         </h3>
         <div className="mt-6 grid gap-6 xl:grid-cols-2">
@@ -268,15 +268,15 @@ export function SpecialDealsSection() {
               <span className="inline-block rounded-full border border-[#05afd1] bg-[rgba(5,175,209,0.1)] px-3 py-1 text-xs font-medium text-[#05afd1]">
                 {deal.badge}
               </span>
-              <h4 className="mt-3 font-source-sans text-xl font-bold tracking-[-0.5px] text-[#111c27]">
+              <h4 className="mt-3 font-source-sans text-xl font-bold tracking-[-0.5px] text-ink">
                 {deal.title}
               </h4>
               <p className="mt-2 text-sm leading-relaxed text-[#65758b]">
                 {deal.description}
               </p>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-sm text-[#111c27]">A$</span>
-                <span className="font-source-sans text-3xl font-bold text-[#111c27]">
+                <span className="text-sm text-ink">A$</span>
+                <span className="font-source-sans text-3xl font-bold text-ink">
                   {deal.price}
                 </span>
                 <span className="text-sm text-[#65758b]">
@@ -301,38 +301,40 @@ export function SpecialDealsSection() {
         </div>
 
         {/* More Packages */}
-        <h3 className="mt-12 font-source-sans text-2xl font-bold text-[#111c27]">
+        <h3 className="mt-12 font-source-sans text-2xl font-bold text-ink">
           More Packages
         </h3>
         <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {morePackages.map((pkg) => (
             <div
               key={pkg.title}
-              className="rounded-2xl bg-white p-6 shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)]"
+              className="flex flex-col justify-between rounded-2xl bg-white p-6 shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)]"
             >
-              <span className="inline-block rounded-full border border-[#05afd1] bg-[rgba(5,175,209,0.1)] px-3 py-1 text-xs font-medium text-[#05afd1]">
-                {pkg.kw}
-              </span>
-              <h4 className="mt-3 font-source-sans text-lg font-bold text-[#111c27]">
-                {pkg.title}
-              </h4>
-              <p className="mt-2 text-sm leading-relaxed text-[#65758b]">
-                {pkg.description}
-              </p>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-xs text-[#111c27]">A$</span>
-                <span className="font-source-sans text-2xl font-bold text-[#111c27]">
-                  {pkg.price}
+              <div>
+                <span className="inline-block rounded-full border border-[#05afd1] bg-[rgba(5,175,209,0.1)] px-3 py-1 text-xs font-medium text-[#05afd1]">
+                  {pkg.kw}
                 </span>
-                <span className="text-xs text-[#65758b]">
-                  /incl. installation
-                </span>
+                <h4 className="mt-3 font-source-sans text-lg font-bold text-ink">
+                  {pkg.title}
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-[#65758b]">
+                  {pkg.description}
+                </p>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-xs text-ink">A$</span>
+                  <span className="font-source-sans text-2xl font-bold text-ink">
+                    {pkg.price}
+                  </span>
+                  <span className="text-xs text-[#65758b]">
+                    /incl. installation
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center gap-2 text-sm text-[#16a249]">
+                  <GreenCheck />
+                  <span>incl. installation</span>
+                </div>
               </div>
-              <div className="mt-2 flex items-center gap-2 text-sm text-[#16a249]">
-                <GreenCheck />
-                <span>incl. installation</span>
-              </div>
-              <button className="mt-4 w-full rounded-xl border-2 border-[#e1e7ef] py-2.5 text-center text-sm font-semibold text-[#111c27] transition hover:bg-slate-50">
+              <button className="mt-4 w-full rounded-xl border-2 border-[#e1e7ef] py-2.5 text-center text-sm font-semibold text-ink transition hover:bg-slate-50">
                 View Details
               </button>
             </div>
