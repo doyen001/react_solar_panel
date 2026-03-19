@@ -4,12 +4,11 @@ import { FeatureBarOfHero } from "../../modules/FeatureBarOfHero";
 import { VideoSlider } from "../../ui/VideoSlider";
 
 const slides = [
-  { type: "video" as const, src: "/videos/customerHero.mp4" },
+  { type: "video" as const, src: "/videos/customerLanding1.mp4" },
   {
     type: "image" as const,
     src: "/images/home/hero-slide-2.png",
     alt: "Solar installation",
-    priority: true,
   },
   {
     type: "image" as const,
