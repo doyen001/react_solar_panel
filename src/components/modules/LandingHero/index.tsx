@@ -26,8 +26,10 @@ export function Header() {
           className="flex items-center gap-2 text-sm font-semibold text-slate-900 sm:text-base"
         >
           <Image
-            src="/images/logo.png"
+            src="/images/logo.webp"
             alt="EasyLink Solar"
+            priority
+            unoptimized
             width={40}
             height={40}
           />

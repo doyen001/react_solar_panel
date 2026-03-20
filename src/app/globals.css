@@ -19,6 +19,8 @@
   --color-gray-4: #f0f0f0;
   --color-gray-5: #d9d9d9;
   --color-gray-6: #e5e7eb; /* e5e7eb */
+  --color-gray-7: #c8d3df;
+  --color-gray-8: #f2f9fc;
 
   /* Brand / typography colors (replace frequent hex usage) */
   --color-ink: #111c27;
@@ -89,6 +91,16 @@ body {
   border-color: rgb(34 211 238 / 0.7);
   box-shadow: 0 0 0 3px rgb(34 211 238 / 0.2);
 }
+
 button {
   cursor: pointer;
+}
+
+.footer-card {
+  background: linear-gradient(
+    135deg,
+    rgba(2, 132, 197, 0.1) 0%,
+    rgba(2, 132, 197, 0) 50%,
+    rgba(2, 132, 197, 0.05) 100%
+  );
 }

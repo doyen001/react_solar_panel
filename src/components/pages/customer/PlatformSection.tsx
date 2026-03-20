@@ -36,7 +36,7 @@ export function CustomerPlatformSection() {
   return (
     <section className="bg-white px-4 py-16 sm:px-6 lg:py-[62px]">
       <div className="mx-auto max-w-[1216px]">
-        <div className="flex flex-col lg:flex-row lg:gap-[43px] lg:items-start">
+        <div className="flex flex-col lg:flex-row lg:gap-[43px] lg:items-center">
           {/* Left Column */}
           <div className="flex flex-col gap-[52px] items-start w-full lg:w-[567.25px]">
             <div className="flex flex-col gap-[34px] items-start w-full">
@@ -58,12 +58,15 @@ export function CustomerPlatformSection() {
             <div className="flex flex-col gap-[27px] items-start text-text w-full">
               <div className="flex flex-col h-[28px] justify-center text-[18px] w-full font-source-sans">
                 <p className="mb-0 leading-[28px]">
-                  Connecting customers and installers for seamless solar solutions
+                  Connecting customers and installers for seamless solar
+                  solutions
                 </p>
               </div>
               <p className="mx-auto max-w-[753px] text-center font-source-sans text-[16px] leading-[26px] text-text">
-                Whether you&apos;re looking to go solar or you&apos;re an installer ready to grow your business,
-                Easylink Solar is your trusted platform for quality solar energy solutions across Australia.
+                Whether you&apos;re looking to go solar or you&apos;re an
+                installer ready to grow your business, Easylink Solar is your
+                trusted platform for quality solar energy solutions across
+                Australia.
               </p>
             </div>
           </div>

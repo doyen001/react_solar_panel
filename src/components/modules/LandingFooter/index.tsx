@@ -21,9 +21,9 @@ const footerColumns = [
 
 export function FooterSection() {
   return (
-    <footer className="bg-slate-50 pb-6">
+    <footer className="bg-gray-8 pb-6 border-t border-gray-7">
       <div className="mx-auto w-full px-4 pt-14 sm:px-6 lg:px-8">
-        <div className="mx-auto flex min-h-[280px] w-full max-w-[894px] flex-col justify-center rounded-3xl border border-sky-100 bg-white px-6 py-10 text-center shadow-sm">
+        <div className="mx-auto flex min-h-[280px] w-full max-w-[1224px] flex-col justify-center rounded-3xl border border-sky-100 bg-white px-6 py-10 text-center shadow-sm footer-card">
           <h3 className="text-4xl font-bold tracking-tight text-slate-900">
             Ready to Take Control of Your Energy?
           </h3>

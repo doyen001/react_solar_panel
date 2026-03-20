@@ -45,7 +45,7 @@ export function HeroSection() {
                   </div>
 
                   {/* Heading */}
-                  <h1 className="font-outfit text-[2.25rem] font-bold leading-none tracking-[-1.2px] text-black drop-shadow-[0_3.5px_5.9px_rgba(0,0,0,0.26)] sm:text-[52px] sm:tracking-[-1.56px]">
+                  <h1 className="font-outfit text-[2.25rem] font-bold leading-none tracking-[-1.2px] text-gold drop-shadow-[0_3.5px_5.9px_rgba(0,0,0,0.26)] sm:text-[52px] sm:tracking-[-1.56px]">
                     Power Your Home with
                     <br />
                     <span className="text-[#efad06]">Premium </span>
@@ -57,7 +57,7 @@ export function HeroSection() {
                   </h1>
 
                   {/* Subtext */}
-                  <p className="max-w-[551px] font-source-sans text-base leading-relaxed text-black drop-shadow-[0_3.8px_14.4px_white] sm:text-[23px] sm:leading-normal sm:tracking-[-0.46px]">
+                  <p className="max-w-[551px] font-source-sans text-base leading-relaxed text-[#2094f3] drop-shadow-[0_3.8px_14.4px_white] sm:text-[23px] sm:leading-normal sm:tracking-[-0.46px]">
                     Easylink Solar installations by Solar Accreditation
                     Australia Accredited Professional Installers.
                   </p>
