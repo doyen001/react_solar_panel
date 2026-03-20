@@ -45,8 +45,9 @@ export function FooterSection() {
           <div>
             <div className="flex items-center gap-2">
               <Image
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="EasyLink Solar"
+                unoptimized
                 width={40}
                 height={40}
               />
