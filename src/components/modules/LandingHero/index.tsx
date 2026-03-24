@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import searchIcon from "@/components/ui/Icons/search.svg";
 import userIcon from "@/components/ui/Icons/user.svg";
 import shopIcon from "@/components/ui/Icons/shop.svg";
@@ -18,6 +18,7 @@ const navItems = [
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   return (
     <header className="fixed top-0 z-30 w-full bg-white/75 backdrop-blur-md">
       <div className="mx-auto flex h-20 w-full max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -61,6 +62,7 @@ export function Header() {
               type="button"
               aria-label="Account"
               className="inline-flex size-9 items-center justify-center rounded-full text-slate-900 transition hover:bg-slate-900/10"
+              onClick={() => router.push("/customers/auth")}
             >
               <Image src={userIcon} alt="Account" width={16} height={16} />
             </button>

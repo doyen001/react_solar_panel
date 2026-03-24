@@ -11,6 +11,7 @@
 
   --color-primary: #05afd1;
   --color-secondary: #1cb1e1;
+  --color-primary-yellow: #ffde0bdb;
 
   /* Neutral grays (used across the UI) */
   --color-gray-1: #ffffff;
@@ -103,4 +104,8 @@ button {
     rgba(2, 132, 197, 0) 50%,
     rgba(2, 132, 197, 0.05) 100%
   );
+}
+
+.pink-gradient-border {
+  background: linear-gradient(135deg, #5474eb 0%, #ff3c3c 100%);
 }

@@ -155,7 +155,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
     formState: { errors, isSubmitting },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
-    defaultValues: { username: "", password: "", remember: false },
+    defaultValues: { email: "", password: "", remember: false },
   });
 
   const onSubmit = (data: SignInFormData) => {
@@ -186,10 +186,10 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
         <div className="flex flex-col gap-[20px]">
           <AuthField
             icon={<IconUser />}
-            placeholder="Username"
+            placeholder="Email"
             inputClassName="text-[16px] tracking-[-0.3125px]"
-            error={errors.username?.message}
-            {...register("username")}
+            error={errors.email?.message}
+            {...register("email")}
           />
           <AuthField
             icon={<IconLock />}
@@ -253,10 +253,14 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 
 function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -270,8 +274,53 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
     },
   });
 
-  const onSubmit = (data: SignUpFormData) => {
-    console.log("Sign Up:", data);
+  const onSubmit = async (data: SignUpFormData) => {
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    try {
+      const response = await fetch("/api/customers/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = (await response.json().catch(() => null)) as
+        | {
+            message?: string;
+            fieldErrors?: Partial<Record<keyof SignUpFormData, string[]>>;
+          }
+        | null;
+
+      if (!response.ok) {
+        if (result?.fieldErrors) {
+          for (const [field, messages] of Object.entries(result.fieldErrors)) {
+            const firstMessage = messages?.[0];
+            if (firstMessage) {
+              setError(field as keyof SignUpFormData, {
+                type: "server",
+                message: firstMessage,
+              });
+            }
+          }
+        }
+
+        setSubmitError(
+          result?.message ?? "Unable to create your account right now.",
+        );
+        return;
+      }
+
+      reset();
+      setSubmitSuccess(
+        result?.message ?? "Account created successfully. You can now sign in.",
+      );
+    } catch {
+      setSubmitError("Unable to reach the signup service. Please try again.");
+    }
   };
 
   return (
@@ -340,6 +389,18 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
             error={errors.address?.message}
             {...register("address")}
           />
+
+          {submitError ? (
+            <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-[#b91c1c]">
+              {submitError}
+            </p>
+          ) : null}
+
+          {submitSuccess ? (
+            <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-[#166534]">
+              {submitSuccess}
+            </p>
+          ) : null}
 
           <AuthPrimaryButton
             icon={<IconUserPlus />}
