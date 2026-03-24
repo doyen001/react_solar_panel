@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies
+      - npm ci
+
+  build:
+    commands:
+      - echo Building Next.js app
+      - npm run build
+
+artifacts:
+  files:
+    - "**/*"
