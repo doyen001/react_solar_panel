@@ -11,10 +11,10 @@ hooks:
     - location: scripts/chown-web.sh
       timeout: 120
     - location: scripts/install.sh
-      timeout: 300
+      timeout: 120
       runas: ubuntu
 
   ApplicationStart:
     - location: scripts/start.sh
-      timeout: 300
+      timeout: 120
       runas: ubuntu

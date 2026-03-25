@@ -14,6 +14,8 @@ phases:
       - echo Building Next.js app
       - npm run build
 
+# CodeBuild omits gitignored paths from the default artifact zip; .next/ is gitignored but required on the server.
 artifacts:
   files:
     - "**/*"
+    - ".next/**/*"
