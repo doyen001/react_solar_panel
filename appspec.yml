@@ -7,6 +7,9 @@ files:
 
 hooks:
   AfterInstall:
+    # No runas: runs as root — fix ownership after CodeDeploy copies files as root.
+    - location: scripts/chown-web.sh
+      timeout: 120
     - location: scripts/install.sh
       timeout: 300
       runas: ubuntu
