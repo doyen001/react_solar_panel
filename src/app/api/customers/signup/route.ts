@@ -6,7 +6,6 @@ const SIGNUP_PATH = "/auth/register";
 function buildBackendUrl(baseUrl: string, path: string) {
   const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
-  console.log("normalizedBaseUrl", new URL(normalizedPath, normalizedBaseUrl).toString());
 
   return new URL(normalizedPath, normalizedBaseUrl).toString();
 }
@@ -78,11 +77,15 @@ export async function POST(request: Request) {
       {
         method: "POST",
         headers,
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify({
+          ...parsed.data,
+          role: "CUSTOMER",
+        }),
         cache: "no-store",
       },
     );
-  } catch {
+  } catch (error) {
+    console.error("signup fetch error", error);
     return NextResponse.json(
       { message: "Unable to reach the signup service." },
       { status: 502 },

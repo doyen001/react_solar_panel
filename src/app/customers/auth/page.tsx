@@ -30,6 +30,7 @@ import {
   type SignUpFormData,
 } from "@/lib/validations/auth";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 type Mode = "signin" | "signup";
 type Lang = "en-uk" | "en-au";
@@ -163,7 +164,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   };
 
   return (
-    <div className="flex h-full w-full items-center justify-center px-[32px] pt-[32px]">
+    <div className="flex h-full w-full items-center justify-center px-[32px] py-[20px]">
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
@@ -183,7 +184,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-[20px]">
+        <div className="flex flex-col gap-[10px]">
           <AuthField
             icon={<IconUser />}
             placeholder="Email"
@@ -253,8 +254,6 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 
 function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const {
     register,
@@ -275,9 +274,6 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   });
 
   const onSubmit = async (data: SignUpFormData) => {
-    setSubmitError(null);
-    setSubmitSuccess(null);
-
     try {
       const response = await fetch("/api/customers/signup", {
         method: "POST",
@@ -288,12 +284,10 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
         body: JSON.stringify(data),
       });
 
-      const result = (await response.json().catch(() => null)) as
-        | {
-            message?: string;
-            fieldErrors?: Partial<Record<keyof SignUpFormData, string[]>>;
-          }
-        | null;
+      const result = (await response.json().catch(() => null)) as {
+        message?: string;
+        fieldErrors?: Partial<Record<keyof SignUpFormData, string[]>>;
+      } | null;
 
       if (!response.ok) {
         if (result?.fieldErrors) {
@@ -308,27 +302,28 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           }
         }
 
-        setSubmitError(
+        toast.error(
           result?.message ?? "Unable to create your account right now.",
         );
         return;
       }
 
       reset();
-      setSubmitSuccess(
-        result?.message ?? "Account created successfully. You can now sign in.",
+      toast.success(
+        result?.message ??
+          "Account created successfully. You can now sign in.",
       );
     } catch {
-      setSubmitError("Unable to reach the signup service. Please try again.");
+      toast.error("Unable to reach the signup service. Please try again.");
     }
   };
 
   return (
-    <div className="px-[32px] pt-[32px]">
+    <div className="px-[32px] py-[20px]">
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="mx-auto flex w-[435px] max-w-full flex-col gap-[24px]"
+        className="mx-auto flex w-[435px] max-w-full flex-col gap-[20px]"
       >
         <div className="flex flex-col gap-[4px] pr-[64px]">
           <p className="font-source-sans text-[24px] font-extrabold leading-[36px] tracking-[0.5px] text-auth-title">
@@ -339,7 +334,7 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex flex-col gap-[12px]">
           <AuthField
             icon={<IconUser />}
             placeholder="John"
@@ -390,18 +385,6 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
             {...register("address")}
           />
 
-          {submitError ? (
-            <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-[#b91c1c]">
-              {submitError}
-            </p>
-          ) : null}
-
-          {submitSuccess ? (
-            <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-[#166534]">
-              {submitSuccess}
-            </p>
-          ) : null}
-
           <AuthPrimaryButton
             icon={<IconUserPlus />}
             label={isSubmitting ? "Signing up..." : "Sign Up"}
@@ -429,9 +412,9 @@ export default function CustomerAuthPage() {
 
   const cardSize = useMemo(() => {
     if (mode === "signin") {
-      return "w-[min(654px,calc(100%-40px))] min-h-[485px]";
+      return "w-[min(490px,calc(100%-40px))]";
     }
-    return "w-[min(498px,calc(100%-40px))] min-h-[645px]";
+    return "w-[min(490px,calc(100%-40px))]";
   }, [mode]);
 
   return (

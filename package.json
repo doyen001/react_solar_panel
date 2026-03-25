@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "clean": "powershell -NoProfile -Command \"if (Test-Path .next) { Remove-Item -Recurse -Force .next }\""
@@ -16,6 +16,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.2",
     "react-range-slider-input": "^3.3.2",
+    "react-toastify": "^11.0.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
