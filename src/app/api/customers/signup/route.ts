@@ -1,32 +1,11 @@
 import { NextResponse } from "next/server";
 import { signUpSchema } from "@/lib/validations/auth";
+import {
+  buildBackendUrl,
+  extractMessage,
+} from "@/lib/customers/backend";
 
 const SIGNUP_PATH = "/auth/register";
-
-function buildBackendUrl(baseUrl: string, path: string) {
-  const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-  const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
-
-  return new URL(normalizedPath, normalizedBaseUrl).toString();
-}
-
-function extractMessage(payload: unknown, fallback: string) {
-  if (!payload || typeof payload !== "object") {
-    return fallback;
-  }
-
-  const record = payload as Record<string, unknown>;
-
-  if (typeof record.message === "string" && record.message.trim()) {
-    return record.message;
-  }
-
-  if (typeof record.error === "string" && record.error.trim()) {
-    return record.error;
-  }
-
-  return fallback;
-}
 
 export async function POST(request: Request) {
   let body: unknown;

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthCard } from "@/components/ui/auth/AuthCard";
@@ -29,7 +29,7 @@ import {
   type SignInFormData,
   type SignUpFormData,
 } from "@/lib/validations/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 
 type Mode = "signin" | "signup";
@@ -148,19 +148,68 @@ function TopBar({
 }
 
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: { email: "", password: "", remember: false },
   });
 
-  const onSubmit = (data: SignInFormData) => {
-    console.log("Sign In:", data);
+  const onSubmit = async (data: SignInFormData) => {
+    try {
+      const response = await fetch("/api/customers/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = (await response.json().catch(() => null)) as {
+        message?: string;
+        fieldErrors?: Partial<Record<keyof SignInFormData, string[]>>;
+      } | null;
+
+      if (!response.ok) {
+        if (result?.fieldErrors) {
+          for (const [field, messages] of Object.entries(result.fieldErrors)) {
+            const firstMessage = messages?.[0];
+            if (firstMessage) {
+              setError(field as keyof SignInFormData, {
+                type: "server",
+                message: firstMessage,
+              });
+            }
+          }
+        }
+
+        toast.error(
+          result?.message ?? "Unable to sign you in. Please try again.",
+        );
+        return;
+      }
+
+      toast.success(result?.message ?? "Signed in successfully.");
+      const from = searchParams.get("from");
+      const safeFrom =
+        from &&
+        from.startsWith("/customers") &&
+        !from.startsWith("/customers/auth")
+          ? from
+          : "/customers";
+      router.push(safeFrom);
+      router.refresh();
+    } catch {
+      toast.error("Unable to reach the login service. Please try again.");
+    }
   };
 
   return (
@@ -432,11 +481,19 @@ export default function CustomerAuthPage() {
 
       <div className="relative z-10 flex min-h-[calc(100vh-92px)] items-center justify-center px-5 py-12">
         <AuthCard className={cardSize}>
-          {mode === "signin" ? (
-            <SignInForm onSwitchMode={() => setMode("signup")} />
-          ) : (
-            <SignUpForm onSwitchMode={() => setMode("signin")} />
-          )}
+          <Suspense
+            fallback={
+              <div className="flex min-h-[240px] items-center justify-center px-[32px] py-[20px] font-source-sans text-[14px] text-(--color-auth-subtle-70)">
+                Loading…
+              </div>
+            }
+          >
+            {mode === "signin" ? (
+              <SignInForm onSwitchMode={() => setMode("signup")} />
+            ) : (
+              <SignUpForm onSwitchMode={() => setMode("signin")} />
+            )}
+          </Suspense>
         </AuthCard>
       </div>
     </main>
