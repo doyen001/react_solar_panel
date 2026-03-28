@@ -12,8 +12,8 @@ const NAV = [
     label: "My Design",
     key: "designs",
   },
-  { href: "#", label: "Messages", key: "messages" },
-  { href: "#", label: "Products", key: "products" },
+  { href: "/customers/messages", label: "Messages", key: "messages" },
+  { href: "/customers/products", label: "Products", key: "products" },
   { href: "/customers/profile", label: "Profile", key: "profile" },
 ] as const;
 
@@ -21,7 +21,7 @@ type Props = {
   firstName?: string | null;
   lastName?: string | null;
   notificationCount?: number;
-  activeNav?: "dashboard" | "designs" | "profile";
+  activeNav?: "dashboard" | "designs" | "profile" | "products" | "messages";
 };
 
 export function CustomerDashboardHeader({
@@ -69,7 +69,9 @@ export function CustomerDashboardHeader({
             const active =
               (item.key === "dashboard" && activeNav === "dashboard") ||
               (item.key === "designs" && activeNav === "designs") ||
-              (item.key === "profile" && activeNav === "profile");
+              (item.key === "profile" && activeNav === "profile") ||
+              (item.key === "products" && activeNav === "products") ||
+              (item.key === "messages" && activeNav === "messages");
             return (
               <Link
                 key={item.key}

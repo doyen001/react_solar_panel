@@ -1,6 +1,7 @@
 import { initialsFromPersonName } from "@/lib/customer/initialsFromName";
 
 const sizeClasses = {
+  xs: "size-[18px] text-[7px] font-bold leading-[10.5px]",
   sm: "size-8 text-[10px] font-semibold leading-[15px] tracking-wide",
   md: "size-8 text-[11px] font-semibold leading-4",
   lg: "size-16 text-xl font-bold leading-[30px] tracking-[-0.45px]",
@@ -9,6 +10,7 @@ const sizeClasses = {
 const variantClasses = {
   navy: "bg-gradient-to-b from-[#09234a] to-[#304566] text-white",
   gradient: "bg-gradient-to-b from-[#ffef62] to-[#f78d00] text-[#1c1a17]",
+  orange: "bg-[#f78d00] text-white",
 } as const;
 
 type Props = {
