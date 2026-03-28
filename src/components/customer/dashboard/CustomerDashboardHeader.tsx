@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { dashboardAssets } from "./assets";
 
 const NAV = [
@@ -13,18 +14,19 @@ const NAV = [
   },
   { href: "#", label: "Messages", key: "messages" },
   { href: "#", label: "Products", key: "products" },
-  { href: "#", label: "Profile", key: "profile" },
+  { href: "/customers/profile", label: "Profile", key: "profile" },
 ] as const;
 
 type Props = {
-  userInitials: string;
+  firstName?: string | null;
+  lastName?: string | null;
   notificationCount?: number;
-  /** Which primary nav item is active (matches Figma underline). */
-  activeNav?: "dashboard" | "designs";
+  activeNav?: "dashboard" | "designs" | "profile";
 };
 
 export function CustomerDashboardHeader({
-  userInitials,
+  firstName,
+  lastName,
   notificationCount = 2,
   activeNav = "dashboard",
 }: Props) {
@@ -66,7 +68,8 @@ export function CustomerDashboardHeader({
           {NAV.map((item) => {
             const active =
               (item.key === "dashboard" && activeNav === "dashboard") ||
-              (item.key === "designs" && activeNav === "designs");
+              (item.key === "designs" && activeNav === "designs") ||
+              (item.key === "profile" && activeNav === "profile");
             return (
               <Link
                 key={item.key}
@@ -123,12 +126,7 @@ export function CustomerDashboardHeader({
               </span>
             ) : null}
           </button>
-          <div
-            className="flex size-8 items-center justify-center rounded-full bg-gradient-to-b from-[#09234a] to-[#304566] font-[family-name:var(--font-inter)] text-[11px] font-semibold leading-4 tracking-wide text-white"
-            aria-hidden
-          >
-            {userInitials.slice(0, 2).toUpperCase()}
-          </div>
+          <CustomerAvatar firstName={firstName} lastName={lastName} size="md" />
         </div>
       </div>
     </header>

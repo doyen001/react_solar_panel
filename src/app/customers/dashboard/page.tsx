@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
 import {
   DASHBOARD_DESIGN_OPTIONS,
@@ -18,16 +18,6 @@ import { useAppSelector } from "@/lib/store/hooks";
 
 export default function CustomerDashboardPage() {
   const user = useAppSelector((s) => s.customerAuth.user);
-
-  const firstName = user?.firstName?.trim() || "James";
-  const initials = useMemo(() => {
-    if (user?.firstName || user?.lastName) {
-      const a = user?.firstName?.[0] ?? "";
-      const b = user?.lastName?.[0] ?? "";
-      return (a + b || "JW").toUpperCase();
-    }
-    return "JW";
-  }, [user]);
 
   const [activeNav, setActiveNav] = useState<"dashboard" | "designs">(
     "dashboard",
@@ -54,13 +44,14 @@ export default function CustomerDashboardPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <CustomerDashboardHeader
-        userInitials={initials}
+        firstName={user?.firstName}
+        lastName={user?.lastName}
         activeNav={activeNav}
       />
 
       <main className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-4 px-4 py-5 md:px-5">
         <DashboardWelcomeBanner
-          firstName={firstName}
+          firstName={user?.firstName?.trim() || "James"}
           journeyPercent={67}
           systemKw="6.6 kW"
           savingsYr="$1,840/yr"
