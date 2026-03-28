@@ -46,24 +46,24 @@ export function HeroSection() {
 
                   {/* Heading */}
                   <h1 className="font-outfit text-[2.25rem] font-bold leading-none tracking-[-1.2px] text-primary-yellow drop-shadow-[0_3.5px_5.9px_rgba(0,0,0,0.26)] sm:text-[52px] sm:tracking-[-1.56px]">
-                    <span className="[text-shadow:0_0_8px_#2563eb]">
+                    <span className="[text-shadow:0_0_8px_white]">
                       Power Your Home with
                     </span>
                     <br />
-                    <span className="text-primary-yellow [text-shadow:0_0_8px_#2563eb]">
+                    <span className="text-primary-yellow [text-shadow:0_0_8px_white]">
                       Premium{" "}
                     </span>
                     <span className="bg-linear-to-r from-[#2094f3] to-[#17cfcf] bg-clip-text text-transparent">
                       BLUETTI
                     </span>
                     <br />
-                    <span className="[text-shadow:0_0_8px_#2563eb]">
+                    <span className="[text-shadow:0_0_8px_white]">
                       Energy Storage
                     </span>
                   </h1>
 
                   {/* Subtext */}
-                  <p className="max-w-[551px] font-source-sans text-base leading-relaxed text-[#ff9913] drop-shadow-[0_3.8px_14.4px_#7967C4] sm:text-[23px] sm:leading-normal sm:tracking-[-0.46px]">
+                  <p className="max-w-[551px] font-source-sans text-base leading-relaxed text-[#ff9913] drop-shadow-[0_3.8px_14.4px_#7967C4] sm:text-[23px] sm:leading-normal sm:tracking-[-0.46px] font-bold [text-shadow:0_0_15px_white]">
                     Easylink Solar installations by Solar Accreditation
                     Australia Accredited Professional Installers.
                   </p>

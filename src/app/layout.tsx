@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Source_Sans_3, Outfit } from "next/font/google";
+import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
@@ -41,8 +42,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${sourceSans.variable} ${outfit.variable} antialiased`}
       >
-        {children}
-        <ToastProvider />
+        <ReduxProvider>
+          {children}
+          <ToastProvider />
+        </ReduxProvider>
       </body>
     </html>
   );

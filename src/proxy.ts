@@ -17,7 +17,7 @@ export function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/customers/auth")) {
     if (authed) {
-      return NextResponse.redirect(new URL("/customers", request.url));
+      return NextResponse.redirect(new URL("/customers/dashboard", request.url));
     }
     return NextResponse.next();
   }

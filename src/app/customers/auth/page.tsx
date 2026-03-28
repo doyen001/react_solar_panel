@@ -31,6 +31,8 @@ import {
 } from "@/lib/validations/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { setUser, type CustomerUser } from "@/lib/store/customerAuthSlice";
 
 type Mode = "signin" | "signup";
 type Lang = "en-uk" | "en-au";
@@ -150,6 +152,7 @@ function TopBar({
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -175,6 +178,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 
       const result = (await response.json().catch(() => null)) as {
         message?: string;
+        user?: CustomerUser;
         fieldErrors?: Partial<Record<keyof SignInFormData, string[]>>;
       } | null;
 
@@ -198,13 +202,16 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       toast.success(result?.message ?? "Signed in successfully.");
+      if (result?.user) {
+        dispatch(setUser(result.user));
+      }
       const from = searchParams.get("from");
       const safeFrom =
         from &&
         from.startsWith("/customers") &&
         !from.startsWith("/customers/auth")
           ? from
-          : "/customers";
+          : "/customers/dashboard";
       router.push(safeFrom);
       router.refresh();
     } catch {
