@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
@@ -7,11 +8,7 @@ import { dashboardAssets } from "./assets";
 
 const NAV = [
   { href: "/customers/dashboard", label: "Dashboard", key: "dashboard" },
-  {
-    href: "/customers/dashboard#your-designs",
-    label: "My Design",
-    key: "designs",
-  },
+  { href: "/customers/design", label: "My Design", key: "designs" },
   { href: "/customers/messages", label: "Messages", key: "messages" },
   { href: "/customers/products", label: "Products", key: "products" },
   { href: "/customers/profile", label: "Profile", key: "profile" },
@@ -22,6 +19,8 @@ type Props = {
   lastName?: string | null;
   notificationCount?: number;
   activeNav?: "dashboard" | "designs" | "profile" | "products" | "messages";
+  /** Extra controls (e.g. My Design toolbar) shown before search / notifications. */
+  headerAccessory?: ReactNode;
 };
 
 export function CustomerDashboardHeader({
@@ -29,13 +28,14 @@ export function CustomerDashboardHeader({
   lastName,
   notificationCount = 2,
   activeNav = "dashboard",
+  headerAccessory,
 }: Props) {
   return (
     <header className="sticky top-0 z-40 border-b border-[#dfd5c3] bg-[#fcfbf8]">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 lg:px-5">
         <div className="flex min-w-0 items-center gap-4 sm:gap-5">
           <Link
-            href="/customers/dashboard"
+            href="/"
             className="flex shrink-0 items-center gap-4 sm:gap-5"
           >
             <div className="flex size-9 shrink-0 items-center justify-center rounded-[7.72px] bg-[#09234a]">
@@ -96,7 +96,8 @@ export function CustomerDashboardHeader({
           })}
         </nav>
 
-        <div className="flex items-center justify-end gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 md:gap-4">
+          {headerAccessory}
           <button
             type="button"
             aria-label="Search"
