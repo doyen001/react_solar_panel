@@ -11,6 +11,7 @@ const navItems = [
   { label: "Products", link: "/products" },
   { label: "Customers", link: "/customers" },
   { label: "Installers", link: "/installers" },
+  { label: "Designs", link: "/designs" },
   { label: "Blog", link: "/blog" },
   { label: "About Us", link: "/about-us" },
   { label: "Contact", link: "/contact-us" },
