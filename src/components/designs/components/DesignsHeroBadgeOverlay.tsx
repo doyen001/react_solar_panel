@@ -1,5 +1,3 @@
-import { designHeroTokens } from "./designHeroTokens";
-
 /** Right triangle (211×142 in Figma) — bottom-right, yellow/orange fill only. */
 const W = 211;
 const H = 142;
@@ -28,8 +26,8 @@ export function DesignsHeroBadgeOverlay() {
               y2="100%"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stopColor={designHeroTokens.gradientFrom} />
-              <stop offset="1" stopColor={designHeroTokens.gradientTo} />
+              <stop stopColor="var(--color-auth-card-from)" />
+              <stop offset="1" stopColor="var(--color-auth-card-to)" />
             </linearGradient>
           </defs>
           <polygon
@@ -37,7 +35,7 @@ export function DesignsHeroBadgeOverlay() {
             fill={`url(#${GRAD_ID})`}
           />
         </svg>
-        <p className="absolute inset-0 flex items-end justify-center pb-[3%] pl-[18%] pr-0 pt-[28%] text-center font-source-sans text-[clamp(12px,3.2vw,18px)] font-bold uppercase leading-6 tracking-wide text-[#272727]">
+        <p className="absolute inset-0 flex items-end justify-center pb-[3%] pl-[18%] pr-0 pt-[28%] text-center font-source-sans text-[clamp(12px,3.2vw,18px)] font-bold uppercase leading-6 tracking-wide text-badge-text">
           EASYLINK SOLAR
         </p>
       </div>
