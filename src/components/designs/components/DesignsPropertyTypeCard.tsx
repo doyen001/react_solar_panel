@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { DesignsHeroBadgeOverlay } from "./components/DesignsHeroBadgeOverlay";
+import { DesignsHeroBadgeOverlay } from "./DesignsHeroBadgeOverlay";
 
 export type DesignsPropertyTypeCardProps = {
   imageSrc: string;

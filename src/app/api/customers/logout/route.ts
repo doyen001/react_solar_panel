@@ -5,28 +5,11 @@ import {
   extractMessage,
 } from "@/lib/customers/backend";
 import {
+  clearCustomerAuthCookies,
   CUSTOMER_ACCESS_COOKIE,
-  CUSTOMER_REFRESH_COOKIE,
 } from "@/lib/auth/customer-cookies";
 
 const LOGOUT_PATH = "/auth/logout";
-
-function clearAuthCookies(response: NextResponse) {
-  response.cookies.set(CUSTOMER_ACCESS_COOKIE, "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
-  response.cookies.set(CUSTOMER_REFRESH_COOKIE, "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
-}
 
 export async function POST() {
   const jar = await cookies();
@@ -67,7 +50,7 @@ export async function POST() {
           },
           { status: backendResponse.status },
         );
-        clearAuthCookies(res);
+        clearCustomerAuthCookies(res);
         return res;
       }
     } catch (error) {
@@ -76,12 +59,12 @@ export async function POST() {
         { message: "Unable to reach the logout service." },
         { status: 502 },
       );
-      clearAuthCookies(res);
+      clearCustomerAuthCookies(res);
       return res;
     }
   }
 
   const res = NextResponse.json({ message: "Signed out." }, { status: 200 });
-  clearAuthCookies(res);
+  clearCustomerAuthCookies(res);
   return res;
 }

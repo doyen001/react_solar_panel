@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import {
-  buildBackendUrl,
-  extractMessage,
-  unwrapApiData,
-} from "@/lib/customers/backend";
+import { requestBackendRefreshTokens } from "@/lib/customers/refresh-backend";
 import {
   ACCESS_COOKIE_MAX_AGE_SEC,
+  clearCustomerAuthCookies,
   cookieBaseOptions,
   CUSTOMER_ACCESS_COOKIE,
   CUSTOMER_REFRESH_COOKIE,
   REFRESH_COOKIE_MAX_AGE_SEC,
 } from "@/lib/auth/customer-cookies";
-
-const REFRESH_PATH = "/auth/refresh-token";
 
 const refreshBodySchema = z.object({
   refreshToken: z.string().min(1),
@@ -37,10 +32,12 @@ export async function POST(request: Request) {
   }
 
   if (!refreshToken) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       { message: "No refresh token available." },
       { status: 401 },
     );
+    clearCustomerAuthCookies(res);
+    return res;
   }
 
   const backendBaseUrl = process.env.BACKEND_API_BASE_URL;
@@ -55,73 +52,35 @@ export async function POST(request: Request) {
     );
   }
 
-  let backendResponse: Response;
+  const outcome = await requestBackendRefreshTokens(
+    backendBaseUrl,
+    refreshToken,
+  );
 
-  try {
-    backendResponse = await fetch(
-      buildBackendUrl(backendBaseUrl, REFRESH_PATH),
+  if (!outcome.ok) {
+    const message = outcome.clearSession
+      ? "Session expired. Please sign in again."
+      : "Unable to reach the auth service.";
+    const res = NextResponse.json(
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-        cache: "no-store",
+        message,
       },
+      { status: outcome.status },
     );
-  } catch (error) {
-    console.error("refresh fetch error", error);
-    return NextResponse.json(
-      { message: "Unable to reach the auth service." },
-      { status: 502 },
-    );
-  }
-
-  const responseText = await backendResponse.text();
-  let payload: unknown = null;
-
-  if (responseText) {
-    try {
-      payload = JSON.parse(responseText);
-    } catch {
-      payload = null;
+    if (outcome.clearSession) {
+      clearCustomerAuthCookies(res);
     }
-  }
-
-  if (!backendResponse.ok) {
-    return NextResponse.json(
-      {
-        message: extractMessage(payload, "Session expired. Please sign in again."),
-      },
-      { status: backendResponse.status },
-    );
-  }
-
-  const data = unwrapApiData<{
-    accessToken: string;
-    refreshToken: string;
-  }>(payload);
-
-  if (
-    !data ||
-    typeof data.accessToken !== "string" ||
-    typeof data.refreshToken !== "string"
-  ) {
-    return NextResponse.json(
-      { message: "Unexpected response from auth service." },
-      { status: 502 },
-    );
+    return res;
   }
 
   const base = cookieBaseOptions();
   const res = NextResponse.json({ message: "Session refreshed." }, { status: 200 });
 
-  res.cookies.set(CUSTOMER_ACCESS_COOKIE, data.accessToken, {
+  res.cookies.set(CUSTOMER_ACCESS_COOKIE, outcome.data.accessToken, {
     ...base,
     maxAge: ACCESS_COOKIE_MAX_AGE_SEC,
   });
-  res.cookies.set(CUSTOMER_REFRESH_COOKIE, data.refreshToken, {
+  res.cookies.set(CUSTOMER_REFRESH_COOKIE, outcome.data.refreshToken, {
     ...base,
     maxAge: REFRESH_COOKIE_MAX_AGE_SEC,
   });

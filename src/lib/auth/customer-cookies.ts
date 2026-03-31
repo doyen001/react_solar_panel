@@ -1,3 +1,5 @@
+import type { NextResponse } from "next/server";
+
 /** Cookie names for customer JWTs (set by Next.js API routes; httpOnly). */
 export const CUSTOMER_ACCESS_COOKIE = "customer_access_token";
 export const CUSTOMER_REFRESH_COOKIE = "customer_refresh_token";
@@ -13,4 +15,17 @@ export function cookieBaseOptions() {
     sameSite: "lax" as const,
     path: "/",
   };
+}
+
+/** Clear both customer tokens (logout / invalid refresh). */
+export function clearCustomerAuthCookies(response: NextResponse) {
+  const cleared = {
+    httpOnly: true as const,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: 0,
+  };
+  response.cookies.set(CUSTOMER_ACCESS_COOKIE, "", cleared);
+  response.cookies.set(CUSTOMER_REFRESH_COOKIE, "", cleared);
 }
