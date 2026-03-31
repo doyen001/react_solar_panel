@@ -20,7 +20,7 @@ export function ConversationSwitcher({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
       <p
-        className="shrink-0 font-[family-name:var(--font-dm-sans)] text-xs font-normal leading-[18px] text-[#7c736a]"
+        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-[#7c736a]"
         style={{ fontVariationSettings: "'opsz' 9" }}
       >
         {label}
@@ -47,7 +47,7 @@ export function ConversationSwitcher({
                 aria-label=""
               />
               <span
-                className="truncate font-[family-name:var(--font-dm-sans)] text-[11px] font-semibold leading-[16.5px]"
+                className="truncate font-dm-sans text-[11px] font-semibold leading-[16.5px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 {c.displayName}

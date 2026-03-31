@@ -19,7 +19,7 @@ export function EquipmentCard({ card }: Props) {
             unoptimized
           />
         </div>
-        <h3 className="font-[family-name:var(--font-inter)] text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+        <h3 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
           {card.title}
         </h3>
       </div>
@@ -30,13 +30,13 @@ export function EquipmentCard({ card }: Props) {
             className="flex items-start justify-between gap-2 text-xs"
           >
             <span
-              className="font-[family-name:var(--font-dm-sans)] font-normal text-[#7c736a]"
+              className="font-dm-sans font-normal text-[#7c736a]"
               style={{ fontVariationSettings: "'opsz' 9" }}
             >
               {row.label}
             </span>
             <span
-              className="text-right font-[family-name:var(--font-dm-sans)] font-medium text-[#2a2622]"
+              className="text-right font-dm-sans font-medium text-[#2a2622]"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               {row.value}

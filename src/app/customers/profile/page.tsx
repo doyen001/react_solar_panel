@@ -61,7 +61,7 @@ export default function CustomerProfilePage() {
             headerAction={
               <button
                 type="button"
-                className="flex items-center gap-1 font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold leading-[15px] text-[#f78d00]"
+                className="flex items-center gap-1 font-dm-sans text-[10px] font-semibold leading-[15px] text-[#f78d00]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 <Image
@@ -82,11 +82,11 @@ export default function CustomerProfilePage() {
                 lastName={user?.lastName}
               />
               <div className="text-center">
-                <p className="font-[family-name:var(--font-inter)] text-base font-bold leading-6 text-[#2a2622]">
+                <p className="font-inter text-base font-bold leading-6 text-[#2a2622]">
                   {displayName}
                 </p>
                 <p
-                  className="mt-1 font-[family-name:var(--font-dm-sans)] text-[11px] font-normal leading-[16.5px] text-[#7c736a]"
+                  className="mt-1 font-dm-sans text-[11px] font-normal leading-[16.5px] text-[#7c736a]"
                   style={{ fontVariationSettings: "'opsz' 9" }}
                 >
                   Solar Customer
@@ -152,13 +152,13 @@ export default function CustomerProfilePage() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span
-                  className="font-[family-name:var(--font-dm-sans)] text-[#7c736a]"
+                  className="font-dm-sans text-[#7c736a]"
                   style={{ fontVariationSettings: "'opsz' 9" }}
                 >
                   Account Created
                 </span>
                 <span
-                  className="font-[family-name:var(--font-dm-sans)] font-medium text-[#2a2622]"
+                  className="font-dm-sans font-medium text-[#2a2622]"
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
                   15 Jan 2026
@@ -166,13 +166,13 @@ export default function CustomerProfilePage() {
               </div>
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span
-                  className="font-[family-name:var(--font-dm-sans)] text-[#7c736a]"
+                  className="font-dm-sans text-[#7c736a]"
                   style={{ fontVariationSettings: "'opsz' 9" }}
                 >
                   Last Login
                 </span>
                 <span
-                  className="font-[family-name:var(--font-dm-sans)] font-medium text-[#2a2622]"
+                  className="font-dm-sans font-medium text-[#2a2622]"
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
                   4 Mar 2026
@@ -180,7 +180,7 @@ export default function CustomerProfilePage() {
               </div>
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span
-                  className="font-[family-name:var(--font-dm-sans)] text-[#7c736a]"
+                  className="font-dm-sans text-[#7c736a]"
                   style={{ fontVariationSettings: "'opsz' 9" }}
                 >
                   Account Status
@@ -189,7 +189,7 @@ export default function CustomerProfilePage() {
               </div>
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span
-                  className="font-[family-name:var(--font-dm-sans)] text-[#7c736a]"
+                  className="font-dm-sans text-[#7c736a]"
                   style={{ fontVariationSettings: "'opsz' 9" }}
                 >
                   2FA
@@ -200,7 +200,7 @@ export default function CustomerProfilePage() {
 
             <div className="mt-4 border-t border-[#dfd5c3] pt-4">
               <p
-                className="font-[family-name:var(--font-dm-sans)] text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
+                className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
                 style={{ fontVariationSettings: "'opsz' 9" }}
               >
                 Assigned Installer
@@ -216,7 +216,7 @@ export default function CustomerProfilePage() {
 
             <div className="mt-4 border-t border-[#dfd5c3] pt-4">
               <p
-                className="font-[family-name:var(--font-dm-sans)] text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
+                className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
                 style={{ fontVariationSettings: "'opsz' 9" }}
               >
                 Platform
@@ -287,7 +287,7 @@ export default function CustomerProfilePage() {
 
             <div className="mt-4 border-t border-[#dfd5c3] pt-4">
               <p
-                className="font-[family-name:var(--font-dm-sans)] text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
+                className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
                 style={{ fontVariationSettings: "'opsz' 9" }}
               >
                 Documents

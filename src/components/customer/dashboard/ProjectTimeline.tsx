@@ -33,7 +33,7 @@ export function ProjectTimeline({
   return (
     <section className="flex min-h-[min(533px,80vh)] flex-col overflow-hidden rounded-[10px] border border-[#dfd5c3] bg-[#fcfbf8] lg:min-h-[520px]">
       <div className="border-l-2 border-[#ffef62] bg-gradient-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[18px] pr-4 py-2.5">
-        <h2 className="font-[family-name:var(--font-inter)] text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
           {title}
         </h2>
       </div>
@@ -59,7 +59,7 @@ export function ProjectTimeline({
                 </div>
                 <div className={`min-w-0 pb-4 ${isLast ? "pb-0" : ""}`}>
                   <p
-                    className={`font-[family-name:var(--font-dm-sans)] text-xs font-medium leading-[18px] ${
+                    className={`font-dm-sans text-xs font-medium leading-[18px] ${
                       step.state === "completed"
                         ? "text-[#2a2622]"
                         : "text-[#7c736a]"
@@ -69,7 +69,7 @@ export function ProjectTimeline({
                     {step.title}
                   </p>
                   <p
-                    className="mt-1.5 font-[family-name:var(--font-dm-sans)] text-[10px] font-normal leading-[15px] text-[#7c736a]"
+                    className="mt-1.5 font-dm-sans text-[10px] font-normal leading-[15px] text-[#7c736a]"
                     style={{ fontVariationSettings: "'opsz' 9" }}
                   >
                     {step.dateLabel ?? "—"}

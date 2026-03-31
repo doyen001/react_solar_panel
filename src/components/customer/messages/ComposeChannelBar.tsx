@@ -29,7 +29,7 @@ export function ComposeChannelBar({ value, onChange }: Props) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
       <span
-        className="shrink-0 font-[family-name:var(--font-dm-sans)] text-xs font-normal leading-[18px] text-[#7c736a]"
+        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-[#7c736a]"
         style={{ fontVariationSettings: "'opsz' 9" }}
       >
         Compose:
@@ -43,7 +43,7 @@ export function ComposeChannelBar({ value, onChange }: Props) {
               key={ch.id}
               type="button"
               onClick={() => onChange(ch.id)}
-              className={`inline-flex h-[25px] items-center justify-center gap-1.5 rounded-lg px-3 font-[family-name:var(--font-dm-sans)] text-[11px] font-semibold leading-[16.5px] transition-opacity ${
+              className={`inline-flex h-[25px] items-center justify-center gap-1.5 rounded-lg px-3 font-dm-sans text-[11px] font-semibold leading-[16.5px] transition-opacity ${
                 isAi && active
                   ? "text-white"
                   : active

@@ -54,7 +54,7 @@ export function DashboardQuickActions() {
             />
           </div>
           <span
-            className="font-[family-name:var(--font-dm-sans)] text-[11px] font-semibold leading-[16.5px] text-[#2a2622]"
+            className="font-dm-sans text-[11px] font-semibold leading-[16.5px] text-[#2a2622]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {a.label}

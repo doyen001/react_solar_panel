@@ -14,14 +14,14 @@ export function ProfileContactField({ icon, label, value }: Props) {
           {icon}
         </span>
         <span
-          className="font-[family-name:var(--font-dm-sans)] text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
+          className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
           style={{ fontVariationSettings: "'opsz' 9" }}
         >
           {label}
         </span>
       </div>
       <p
-        className="pl-[18px] font-[family-name:var(--font-dm-sans)] text-xs font-medium leading-[18px] text-[#2a2622]"
+        className="pl-[18px] font-dm-sans text-xs font-medium leading-[18px] text-[#2a2622]"
         style={{ fontVariationSettings: "'opsz' 14" }}
       >
         {value}

@@ -18,7 +18,7 @@ export function SelectedDesignProductsSection({ items }: Props) {
           className="size-4 shrink-0"
           unoptimized
         />
-        <h2 className="font-[family-name:var(--font-inter)] text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
           Products in Your Selected Design
         </h2>
       </div>
@@ -39,13 +39,13 @@ export function SelectedDesignProductsSection({ items }: Props) {
             </div>
             <div className="min-w-0 flex-1">
               <p
-                className="font-[family-name:var(--font-dm-sans)] text-xs font-semibold leading-[18px] text-[#2a2622]"
+                className="font-dm-sans text-xs font-semibold leading-[18px] text-[#2a2622]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 {item.name}
               </p>
               <p
-                className="mt-1 font-[family-name:var(--font-dm-sans)] text-[10px] font-normal leading-[15px] text-[#7c736a]"
+                className="mt-1 font-dm-sans text-[10px] font-normal leading-[15px] text-[#7c736a]"
                 style={{ fontVariationSettings: "'opsz' 9" }}
               >
                 {item.detail}
@@ -53,7 +53,7 @@ export function SelectedDesignProductsSection({ items }: Props) {
             </div>
             <button
               type="button"
-              className="flex shrink-0 items-center gap-1 font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold leading-[15px] text-[#f78d00]"
+              className="flex shrink-0 items-center gap-1 font-dm-sans text-[10px] font-semibold leading-[15px] text-[#f78d00]"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               View Details

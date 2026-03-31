@@ -24,7 +24,7 @@ export function CustomerPanelCard({
           <span className="flex size-4 shrink-0 items-center justify-center [&_img]:size-4">
             {icon}
           </span>
-          <h2 className="font-[family-name:var(--font-inter)] text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+          <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
             {title}
           </h2>
         </div>

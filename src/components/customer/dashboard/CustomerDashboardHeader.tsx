@@ -40,7 +40,7 @@ export function CustomerDashboardHeader({
               <IconSolarDesignLogo className="w-[30px] h-[30px]" />
             </div>
             <span
-              className="font-[family-name:var(--font-inter)] text-[13px] font-bold leading-[19.5px] tracking-[0.3px] text-[#2a2622]"
+              className="font-inter text-[13px] font-bold leading-[19.5px] tracking-[0.3px] text-[#2a2622]"
               style={{ fontFeatureSettings: '"liga" 1' }}
             >
               My Solar Portal
@@ -67,7 +67,7 @@ export function CustomerDashboardHeader({
               <Link
                 key={item.key}
                 href={item.href}
-                className="relative pb-1 font-[family-name:var(--font-inter)] text-[14px] font-medium leading-[21px]"
+                className="relative pb-1 font-inter text-[14px] font-medium leading-[21px]"
               >
                 <span
                   className={
@@ -117,7 +117,7 @@ export function CustomerDashboardHeader({
               unoptimized
             />
             {notificationCount > 0 ? (
-              <span className="absolute right-0.5 top-0.5 flex size-3.5 items-center justify-center rounded-full bg-[#ef4444] font-[family-name:var(--font-inter)] text-[8px] font-bold leading-3 text-white">
+              <span className="absolute right-0.5 top-0.5 flex size-3.5 items-center justify-center rounded-full bg-[#ef4444] font-inter text-[8px] font-bold leading-3 text-white">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             ) : null}

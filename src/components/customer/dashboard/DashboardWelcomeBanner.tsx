@@ -35,11 +35,11 @@ export function DashboardWelcomeBanner({
           />
         </div>
         <div className="min-w-0">
-          <h1 className="font-[family-name:var(--font-inter)] text-xl font-bold leading-[30px] text-[#1c1a17]">
+          <h1 className="font-inter text-xl font-bold leading-[30px] text-[#1c1a17]">
             Welcome back, {firstName}!
           </h1>
           <p
-            className="mt-0.5 font-[family-name:var(--font-dm-sans)] text-xs font-medium leading-[18px] text-[rgba(28,26,23,0.65)]"
+            className="mt-0.5 font-dm-sans text-xs font-medium leading-[18px] text-[rgba(28,26,23,0.65)]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             Your solar journey is {journeyPercent}% complete
@@ -60,13 +60,13 @@ function StatBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-[88px] text-center sm:text-left">
       <p
-        className="font-[family-name:var(--font-dm-sans)] text-[10px] font-normal uppercase leading-[15px] tracking-[0.5px] text-[rgba(28,26,23,0.55)]"
+        className="font-dm-sans text-[10px] font-normal uppercase leading-[15px] tracking-[0.5px] text-[rgba(28,26,23,0.55)]"
         style={{ fontVariationSettings: "'opsz' 9" }}
       >
         {label}
       </p>
       <p
-        className="mt-1 font-[family-name:var(--font-dm-sans)] text-sm font-bold leading-[21px] text-[#1c1a17]"
+        className="mt-1 font-dm-sans text-sm font-bold leading-[21px] text-[#1c1a17]"
         style={{ fontVariationSettings: "'opsz' 14" }}
       >
         {value}

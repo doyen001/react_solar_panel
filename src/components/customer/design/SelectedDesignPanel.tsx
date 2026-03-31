@@ -29,11 +29,11 @@ export function SelectedDesignPanel({
             className="size-4 shrink-0"
             unoptimized
           />
-          <h2 className="font-[family-name:var(--font-inter)] text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+          <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
             {title}
           </h2>
         </div>
-        <span className="mb-2 shrink-0 self-start rounded-full bg-[#dcf5e0] px-2.5 py-0.5 font-[family-name:var(--font-dm-sans)] text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-[#16a34a] sm:mb-0 sm:self-center">
+        <span className="mb-2 shrink-0 self-start rounded-full bg-[#dcf5e0] px-2.5 py-0.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-[#16a34a] sm:mb-0 sm:self-center">
           Approved
         </span>
       </div>
@@ -54,7 +54,7 @@ export function SelectedDesignPanel({
             <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5">
               <button
                 type="button"
-                className="inline-flex h-7 items-center gap-1.5 rounded-md border border-[#dfd5c3] bg-white/90 px-2.5 font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold text-[#2a2622] shadow-sm backdrop-blur-sm"
+                className="inline-flex h-7 items-center gap-1.5 rounded-md border border-[#dfd5c3] bg-white/90 px-2.5 font-dm-sans text-[10px] font-semibold text-[#2a2622] shadow-sm backdrop-blur-sm"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 <Image
@@ -68,7 +68,7 @@ export function SelectedDesignPanel({
               </button>
               <button
                 type="button"
-                className="inline-flex h-7 items-center gap-1.5 rounded-md bg-[#09234a] px-2.5 font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold text-white shadow-sm"
+                className="inline-flex h-7 items-center gap-1.5 rounded-md bg-[#09234a] px-2.5 font-dm-sans text-[10px] font-semibold text-white shadow-sm"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 <Image
@@ -84,7 +84,7 @@ export function SelectedDesignPanel({
           </div>
           <div className="flex flex-col gap-1.5 pl-1">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
-              <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-dm-sans)] font-medium leading-[15px] text-[#7c736a]">
+              <span className="inline-flex items-center gap-1.5 font-dm-sans font-medium leading-[15px] text-[#7c736a]">
                 <span
                   className="size-2 shrink-0 rounded-full bg-[#22c55e]"
                   aria-hidden
@@ -92,14 +92,14 @@ export function SelectedDesignPanel({
                 Design Approved
               </span>
               <span
-                className="font-[family-name:var(--font-dm-sans)] font-normal leading-[15px] text-[rgba(124,115,106,0.6)]"
+                className="font-dm-sans font-normal leading-[15px] text-[rgba(124,115,106,0.6)]"
                 style={{ fontVariationSettings: "'opsz' 9" }}
               >
                 Last updated: {lastUpdated}
               </span>
             </div>
             <p
-              className="bg-clip-text font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold leading-[15px] text-transparent"
+              className="bg-clip-text font-dm-sans text-[10px] font-semibold leading-[15px] text-transparent"
               style={{
                 fontVariationSettings: "'opsz' 14",
                 backgroundImage:
@@ -112,7 +112,7 @@ export function SelectedDesignPanel({
         </div>
 
         <div className="min-w-0">
-          <h3 className="font-[family-name:var(--font-inter)] text-[11px] font-semibold leading-[16.5px] text-[#2a2622]">
+          <h3 className="font-inter text-[11px] font-semibold leading-[16.5px] text-[#2a2622]">
             Design Specifications
           </h3>
           <div className="mt-2 flex flex-col">
@@ -127,7 +127,7 @@ export function SelectedDesignPanel({
         </div>
 
         <div className="min-w-0">
-          <h3 className="font-[family-name:var(--font-inter)] text-[11px] font-semibold leading-[16.5px] text-[#2a2622]">
+          <h3 className="font-inter text-[11px] font-semibold leading-[16.5px] text-[#2a2622]">
             Performance Estimates
           </h3>
           <div className="mt-2 flex flex-col">

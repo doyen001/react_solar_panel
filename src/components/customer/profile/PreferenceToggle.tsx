@@ -12,7 +12,7 @@ export function PreferenceToggle({ checked, onChange, label, id }: Props) {
     <div className="flex items-center justify-between gap-3">
       <label
         htmlFor={id}
-        className="font-[family-name:var(--font-dm-sans)] text-xs leading-[18px] text-[#2a2622]"
+        className="font-dm-sans text-xs leading-[18px] text-[#2a2622]"
         style={{ fontVariationSettings: "'opsz' 9" }}
       >
         {label}

@@ -22,11 +22,11 @@ export function YourDesignsSection({
       className="overflow-hidden rounded-[10px] border border-[#dfd5c3] bg-[#081f43]"
     >
       <div className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-[#ffef62] bg-gradient-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[18px] pr-4 py-2.5">
-        <h2 className="font-[family-name:var(--font-inter)] text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-white">
+        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-white">
           Your Designs
         </h2>
         <p
-          className="font-[family-name:var(--font-dm-sans)] text-[11px] font-normal leading-[16.5px] text-[#f3f3f3]"
+          className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-[#f3f3f3]"
           style={{ fontVariationSettings: "'opsz' 9" }}
         >
           {options.length} options · {selectedCount} selected

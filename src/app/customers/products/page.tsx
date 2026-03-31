@@ -42,11 +42,11 @@ export default function SolarProductsPage() {
       <main className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-4 px-4 py-5 md:gap-5 md:px-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div>
-            <h1 className="font-[family-name:var(--font-inter)] text-lg font-bold leading-[27px] text-[#2a2622]">
+            <h1 className="font-inter text-lg font-bold leading-[27px] text-[#2a2622]">
               Solar Products
             </h1>
             <p
-              className="mt-0.5 font-[family-name:var(--font-dm-sans)] text-xs font-normal leading-[18px] text-[#7c736a]"
+              className="mt-0.5 font-dm-sans text-xs font-normal leading-[18px] text-[#7c736a]"
               style={{ fontVariationSettings: "'opsz' 9" }}
             >
               Browse our range of certified solar equipment

@@ -40,7 +40,7 @@ export function CustomerAvatar({
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-inter)] ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-full font-inter ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
       aria-label={ariaLabel ?? `Avatar ${text}`}
       role="img"
     >

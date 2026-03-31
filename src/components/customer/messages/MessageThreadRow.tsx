@@ -29,13 +29,13 @@ export function MessageThreadRow({
           className={`flex flex-wrap items-baseline gap-2 ${outgoing ? "justify-end" : "justify-start"}`}
         >
           <span
-            className="font-[family-name:var(--font-dm-sans)] text-[11px] font-semibold leading-[16.5px] text-[#2a2622]"
+            className="font-dm-sans text-[11px] font-semibold leading-[16.5px] text-[#2a2622]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {senderName}
           </span>
           <span
-            className="font-[family-name:var(--font-dm-sans)] text-[9px] font-normal leading-[13.5px] text-[#7c736a]"
+            className="font-dm-sans text-[9px] font-normal leading-[13.5px] text-[#7c736a]"
             style={{ fontVariationSettings: "'opsz' 9" }}
           >
             {timeLabel}
@@ -49,7 +49,7 @@ export function MessageThreadRow({
           }`}
         >
           <p
-            className="font-[family-name:var(--font-dm-sans)] text-xs font-normal leading-[18px]"
+            className="font-dm-sans text-xs font-normal leading-[18px]"
             style={{ fontVariationSettings: "'opsz' 9" }}
           >
             {body}

@@ -67,6 +67,8 @@
   --font-mono: var(--font-geist-mono);
   --font-source-sans: var(--font-source-sans);
   --font-outfit: var(--font-outfit);
+  --font-inter: var(--font-inter);
+  --font-dm-sans: var(--font-dm-sans);
 }
 
 @media (prefers-color-scheme: dark) {

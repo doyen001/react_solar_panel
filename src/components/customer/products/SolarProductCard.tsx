@@ -51,7 +51,7 @@ export function SolarProductCard({
           />
         </div>
         {product.bestSeller ? (
-          <span className="absolute left-2 top-2 rounded-full bg-[#16a34a] px-2 py-0.5 font-[family-name:var(--font-dm-sans)] text-[7px] font-bold uppercase leading-[10.5px] tracking-[0.3px] text-white">
+          <span className="absolute left-2 top-2 rounded-full bg-[#16a34a] px-2 py-0.5 font-dm-sans text-[7px] font-bold uppercase leading-[10.5px] tracking-[0.3px] text-white">
             Best Seller
           </span>
         ) : null}
@@ -74,13 +74,13 @@ export function SolarProductCard({
 
       <div className="flex flex-1 flex-col px-3 pb-3 pt-4">
         <p
-          className="font-[family-name:var(--font-dm-sans)] text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
+          className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-[#7c736a]"
           style={{ fontVariationSettings: "'opsz' 9" }}
         >
           {catLabel}
         </p>
         <h3
-          className="mt-2 line-clamp-2 min-h-[2.5rem] font-[family-name:var(--font-dm-sans)] text-[13px] font-semibold leading-[19.5px] text-[#2a2622]"
+          className="mt-2 line-clamp-2 min-h-[2.5rem] font-dm-sans text-[13px] font-semibold leading-[19.5px] text-[#2a2622]"
           style={{ fontVariationSettings: "'opsz' 14" }}
         >
           {product.name}
@@ -95,27 +95,27 @@ export function SolarProductCard({
               unoptimized
             />
             <span
-              className="font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold leading-[15px] text-[#2a2622]"
+              className="font-dm-sans text-[10px] font-semibold leading-[15px] text-[#2a2622]"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               {product.rating}
             </span>
           </div>
           <span
-            className="font-[family-name:var(--font-dm-sans)] text-[9px] font-normal leading-[13.5px] text-[#7c736a]"
+            className="font-dm-sans text-[9px] font-normal leading-[13.5px] text-[#7c736a]"
             style={{ fontVariationSettings: "'opsz' 9" }}
           >
             ({product.reviewCount})
           </span>
         </div>
         <div className="mt-auto flex items-center justify-between gap-2 pt-4">
-          <p className="font-[family-name:var(--font-inter)] text-base font-bold leading-6 text-[#2a2622]">
+          <p className="font-inter text-base font-bold leading-6 text-[#2a2622]">
             {product.price}
           </p>
           <button
             type="button"
             onClick={onAdd}
-            className="flex h-[26px] min-w-[58px] items-center justify-center gap-1 rounded-md px-2 font-[family-name:var(--font-dm-sans)] text-[9px] font-semibold leading-[13.5px] text-white"
+            className="flex h-[26px] min-w-[58px] items-center justify-center gap-1 rounded-md px-2 font-dm-sans text-[9px] font-semibold leading-[13.5px] text-white"
             style={{
               fontVariationSettings: "'opsz' 14",
               backgroundImage:
