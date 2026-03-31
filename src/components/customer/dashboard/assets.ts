@@ -1,6 +1,5 @@
 /** Figma-exported assets (replace with local `/public` paths when ready). */
 export const dashboardAssets = {
-  logoMark: "https://www.figma.com/api/mcp/asset/b2876455-7852-440c-98db-ef287b5d0bb4",
   designImageA: "https://www.figma.com/api/mcp/asset/f4ff1031-95cf-4582-93a3-f9c4add2c66a",
   designImageB: "https://www.figma.com/api/mcp/asset/cce485aa-84bf-4242-b91a-6a17927fe430",
   search: "https://www.figma.com/api/mcp/asset/07e1a5ba-b0a4-4f4d-841c-503c1f77b07e",

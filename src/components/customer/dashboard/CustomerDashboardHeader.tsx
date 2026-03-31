@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { dashboardAssets } from "./assets";
+import { IconSolarDesignLogo } from "../../ui/Icons";
 
 const NAV = [
   { href: "/customers/dashboard", label: "Dashboard", key: "dashboard" },
@@ -34,19 +35,9 @@ export function CustomerDashboardHeader({
     <header className="sticky top-0 z-40 border-b border-[#dfd5c3] bg-[#fcfbf8]">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 lg:px-5">
         <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-          <Link
-            href="/"
-            className="flex shrink-0 items-center gap-4 sm:gap-5"
-          >
+          <Link href="/" className="flex shrink-0 items-center gap-4 sm:gap-5">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-[7.72px] bg-[#09234a]">
-              <Image
-                src={dashboardAssets.logoMark}
-                alt=""
-                width={12}
-                height={12}
-                className="size-3 object-cover"
-                unoptimized
-              />
+              <IconSolarDesignLogo className="w-[30px] h-[30px]" />
             </div>
             <span
               className="font-[family-name:var(--font-inter)] text-[13px] font-bold leading-[19.5px] tracking-[0.3px] text-[#2a2622]"
@@ -80,7 +71,9 @@ export function CustomerDashboardHeader({
               >
                 <span
                   className={
-                    active ? "text-[#2a2622]" : "text-[#7c736a] hover:text-[#2a2622]"
+                    active
+                      ? "text-[#2a2622]"
+                      : "text-[#7c736a] hover:text-[#2a2622]"
                   }
                 >
                   {item.label}
