@@ -11,7 +11,8 @@ export const REFRESH_COOKIE_MAX_AGE_SEC = 7 * 24 * 60 * 60;
 export function cookieBaseOptions() {
   return {
     httpOnly: true as const,
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "lax" as const,
     path: "/",
   };
@@ -21,7 +22,8 @@ export function cookieBaseOptions() {
 export function clearCustomerAuthCookies(response: NextResponse) {
   const cleared = {
     httpOnly: true as const,
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "lax" as const,
     path: "/",
     maxAge: 0,
