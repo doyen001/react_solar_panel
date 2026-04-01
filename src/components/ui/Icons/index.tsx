@@ -10,7 +10,6 @@ import authEye from "@/components/ui/Icons/auth-eye.svg";
 import authArrowIn from "@/components/ui/Icons/auth-arrow-in.svg";
 import authUserPlus from "@/components/ui/Icons/auth-user-plus.svg";
 import circleQuestion from "@/components/ui/Icons/circle-question.svg";
-import solarDesignLogo from "@/components/ui/Icons/solarDesignLogo.svg";
 
 function SvgIcon({
   src,
@@ -66,10 +65,4 @@ export function IconUserPlus(props: { className?: string }) {
 
 export function IconCircleQuestion(props: { className?: string }) {
   return <SvgIcon src={circleQuestion} size={20} className={props.className} />;
-}
-
-export function IconSolarDesignLogo(props: { className?: string }) {
-  return (
-    <SvgIcon src={solarDesignLogo} size={100} className={props.className} />
-  );
 }

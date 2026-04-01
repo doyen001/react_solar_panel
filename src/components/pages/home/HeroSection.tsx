@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import solarDesignLogo from "@/components/ui/Icons/solarDesignLogo.svg";
 import { FeatureBarOfHero } from "../../modules/FeatureBarOfHero";
 import { VideoSlider } from "../../ui/VideoSlider";
 
@@ -79,7 +78,7 @@ export function HeroSection() {
                     }}
                   >
                     <Image
-                      src={solarDesignLogo}
+                      src="/images/solarDesignLogo.png"
                       alt=""
                       width={37}
                       height={37}

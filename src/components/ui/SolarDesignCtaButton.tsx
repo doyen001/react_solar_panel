@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import solarDesignLogo from "@/components/ui/Icons/solarDesignLogo.svg";
 import rightArrow from "@/components/ui/Icons/rightArrow.svg";
 
 export function SolarDesignCtaButton() {
@@ -14,7 +13,12 @@ export function SolarDesignCtaButton() {
           "linear-gradient(158.907deg, rgb(84, 116, 235) 16.143%, rgb(255, 60, 60) 99.619%)",
       }}
     >
-      <Image src={solarDesignLogo} alt="Solar Design" width={37} height={37} />
+      <Image
+        src="/images/solarDesignLogo.png"
+        alt="Solar Design"
+        width={37}
+        height={37}
+      />
       <span className="font-source-sans text-[16px] font-semibold leading-[24.876px] text-white whitespace-nowrap">
         Solar Design
       </span>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthCard } from "@/components/ui/auth/AuthCard";
@@ -13,13 +13,11 @@ import {
 } from "@/components/ui/auth/AuthButtons";
 import {
   IconArrowIn,
-  IconCircleQuestion,
   IconEye,
   IconLock,
   IconMail,
   IconPhone,
   IconPin,
-  IconSolarDesignLogo,
   IconUser,
   IconUserPlus,
 } from "@/components/ui/Icons";
@@ -124,7 +122,12 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
             </p>
           </div>
           <div>
-            <IconSolarDesignLogo className="w-[54px] h-[54px]" />
+            <Image
+              src="/images/solarDesignLogo.png"
+              alt="Solar Design Logo"
+              width={54}
+              height={54}
+            />
           </div>
         </div>
 

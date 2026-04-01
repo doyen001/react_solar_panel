@@ -1,5 +1,4 @@
 import Image from "next/image";
-import solarDesignLogo from "@/components/ui/Icons/solarDesignLogo.svg";
 import rightArrow from "@/components/ui/Icons/rightArrow.svg";
 
 export function DesignSystemSection() {
@@ -29,7 +28,7 @@ export function DesignSystemSection() {
                 className="flex items-center gap-2 cursor-pointer mt-8 rounded-xl bg-linear-to-r from-fuchsia-500 to-red-400 px-2 py-3 text-sm font-semibold text-white"
               >
                 <Image
-                  src={solarDesignLogo}
+                  src="/images/solarDesignLogo.png"
                   alt="Solar Design"
                   width={37}
                   height={37}
