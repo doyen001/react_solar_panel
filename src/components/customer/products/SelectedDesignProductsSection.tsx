@@ -9,7 +9,7 @@ type Props = {
 export function SelectedDesignProductsSection({ items }: Props) {
   return (
     <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex min-h-[42px] items-center gap-2 border-l-2 border-yellow-lemon bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4">
+      <div className="flex min-h-[42px] items-center gap-2 border-l-2 border-yellow-lemon bg-linear-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4">
         <Image
           src={productsAssets.checkCircle}
           alt=""
@@ -28,9 +28,11 @@ export function SelectedDesignProductsSection({ items }: Props) {
             key={item.id}
             className="flex min-h-[68px] items-center gap-3 rounded-lg border border-warm-border bg-white px-3 py-2"
           >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-yellow-lemon to-orange-amber">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-b from-yellow-lemon to-orange-amber">
               <Image
-                src={item.icon === "sun" ? productsAssets.sun : productsAssets.cpu}
+                src={
+                  item.icon === "sun" ? productsAssets.sun : productsAssets.cpu
+                }
                 alt=""
                 width={16}
                 height={16}

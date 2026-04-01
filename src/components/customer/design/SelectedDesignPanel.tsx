@@ -19,7 +19,7 @@ export function SelectedDesignPanel({
 }: Props) {
   return (
     <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex flex-col gap-3 border-b border-warm-border/60 bg-gradient-to-b from-amber-hot/15 to-transparent pl-4 sm:flex-row sm:items-center sm:justify-between sm:pl-[18px] sm:pr-4">
+      <div className="flex flex-col gap-3 border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent pl-4 sm:flex-row sm:items-center sm:justify-between sm:pl-[18px] sm:pr-4">
         <div className="flex items-center gap-2 border-l-2 border-yellow-lemon py-2.5 pl-4">
           <Image
             src={designAssets.sunHeader}

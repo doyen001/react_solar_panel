@@ -32,7 +32,7 @@ export function ProjectTimeline({
 
   return (
     <section className="flex min-h-[min(533px,80vh)] flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 lg:min-h-[520px]">
-      <div className="border-l-2 border-yellow-lemon bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 py-2.5">
+      <div className="border-l-2 border-yellow-lemon bg-linear-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 py-2.5">
         <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
           {title}
         </h2>

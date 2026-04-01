@@ -40,7 +40,7 @@ export function TimelineInstallerCard({
         </div>
         <button
           type="button"
-          className="flex shrink-0 items-center gap-1.5 rounded-md bg-gradient-to-b from-yellow-lemon to-orange-amber px-3 py-1.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-warm-black"
+          className="flex shrink-0 items-center gap-1.5 rounded-md bg-linear-to-b from-yellow-lemon to-orange-amber px-3 py-1.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-warm-black"
           style={{ fontVariationSettings: "'opsz' 14" }}
         >
           <Image

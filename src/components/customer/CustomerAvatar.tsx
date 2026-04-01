@@ -8,8 +8,8 @@ const sizeClasses = {
 } as const;
 
 const variantClasses = {
-  navy: "bg-gradient-to-b from-navy-800 to-blue-slate text-white",
-  gradient: "bg-gradient-to-b from-yellow-lemon to-orange-amber text-warm-black",
+  navy: "bg-linear-to-b from-navy-800 to-blue-slate text-white",
+  gradient: "bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black",
   orange: "bg-orange-amber text-white",
 } as const;
 
@@ -34,8 +34,7 @@ export function CustomerAvatar({
   "aria-label": ariaLabel,
 }: Props) {
   const raw =
-    initialsOverride?.trim() ||
-    initialsFromPersonName(firstName, lastName);
+    initialsOverride?.trim() || initialsFromPersonName(firstName, lastName);
   const text = raw.slice(0, 2).toUpperCase();
 
   return (

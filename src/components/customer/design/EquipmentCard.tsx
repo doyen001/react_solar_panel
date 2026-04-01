@@ -9,7 +9,7 @@ export function EquipmentCard({ card }: Props) {
   return (
     <div className="flex min-h-[150px] flex-col gap-3 rounded-[10px] border border-warm-border bg-gradient-to-r from-yellow-lemon to-orange-amber p-3.5">
       <div className="flex items-center gap-2">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-800/16 bg-gradient-to-b from-yellow-lemon to-orange-amber">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-800/16 bg-linear-to-b from-yellow-lemon to-orange-amber">
           <Image
             src={card.iconSrc}
             alt=""

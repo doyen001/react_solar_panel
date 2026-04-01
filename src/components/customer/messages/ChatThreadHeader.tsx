@@ -5,7 +5,7 @@ type Props = {
 
 export function ChatThreadHeader({ title, online = true }: Props) {
   return (
-    <div className="flex flex-col gap-2 border-b border-warm-border/60 bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <div className="flex flex-col gap-2 border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="border-l-2 border-yellow-lemon py-2.5 pl-4">
         <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
           {title}

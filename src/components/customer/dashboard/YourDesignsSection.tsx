@@ -9,11 +9,7 @@ type Props = {
   onSelect: (id: string) => void;
 };
 
-export function YourDesignsSection({
-  options,
-  selectedId,
-  onSelect,
-}: Props) {
+export function YourDesignsSection({ options, selectedId, onSelect }: Props) {
   const selectedCount = selectedId ? 1 : 0;
 
   return (
@@ -21,7 +17,7 @@ export function YourDesignsSection({
       id="your-designs"
       className="overflow-hidden rounded-[10px] border border-warm-border bg-navy-900"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-yellow-lemon bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 py-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-yellow-lemon bg-linear-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 py-2.5">
         <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-white">
           Your Designs
         </h2>

@@ -50,7 +50,7 @@ export function ShareJourneyCard({ shareUrl }: Props) {
 
   return (
     <section className="flex flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex items-center gap-2 border-b border-warm-border/60 bg-gradient-to-b from-amber-hot/15 to-transparent py-2.5 pl-[18px] pr-4">
+      <div className="flex items-center gap-2 border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent py-2.5 pl-[18px] pr-4">
         <Image
           src={designAssets.share2}
           alt=""

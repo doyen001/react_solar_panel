@@ -19,7 +19,7 @@ export function CustomerPanelCard({
     <section
       className={`flex min-h-0 flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 ${className}`}
     >
-      <div className="flex min-h-[42px] shrink-0 items-center gap-2 border-l-2 border-yellow-lemon bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4">
+      <div className="flex min-h-[42px] shrink-0 items-center gap-2 border-l-2 border-yellow-lemon bg-linear-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="flex size-4 shrink-0 items-center justify-center [&_img]:size-4">
             {icon}
@@ -32,7 +32,9 @@ export function CustomerPanelCard({
           <div className="flex shrink-0 items-center">{headerAction}</div>
         ) : null}
       </div>
-      <div className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-5">{children}</div>
+      <div className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-5">
+        {children}
+      </div>
     </section>
   );
 }

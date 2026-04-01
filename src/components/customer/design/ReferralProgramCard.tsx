@@ -4,7 +4,7 @@ import { designAssets } from "./designAssets";
 export function ReferralProgramCard() {
   return (
     <section className="flex flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex items-center gap-2 border-b border-warm-border/60 bg-gradient-to-b from-amber-hot/15 to-transparent py-2.5 pl-[18px] pr-4">
+      <div className="flex items-center gap-2 border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent py-2.5 pl-[18px] pr-4">
         <Image
           src={designAssets.gift}
           alt=""
@@ -18,7 +18,7 @@ export function ReferralProgramCard() {
         </h2>
       </div>
       <div className="flex flex-col gap-3 p-4">
-        <div className="rounded-[10px] bg-gradient-to-b from-navy-800 to-blue-slate px-4 py-4 text-center">
+        <div className="rounded-[10px] bg-linear-to-b from-navy-800 to-blue-slate px-4 py-4 text-center">
           <p className="font-inter text-xl font-bold leading-[30px] text-white">
             $500
           </p>
@@ -66,7 +66,7 @@ export function ReferralProgramCard() {
         </div>
         <button
           type="button"
-          className="flex h-[34px] w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-yellow-lemon to-orange-amber font-dm-sans text-[11px] font-bold text-warm-black"
+          className="flex h-[34px] w-full items-center justify-center gap-2 rounded-lg bg-linear-to-b from-yellow-lemon to-orange-amber font-dm-sans text-[11px] font-bold text-warm-black"
           style={{ fontVariationSettings: "'opsz' 14" }}
         >
           <Image

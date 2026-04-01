@@ -32,7 +32,7 @@ export function CategoryFilterChips({ value, onChange }: Props) {
             onClick={() => onChange(opt.value)}
             className={`rounded-md px-3 py-1.5 font-dm-sans text-[10px] font-semibold uppercase leading-[15px] tracking-[0.3px] transition-colors ${
               active
-                ? "bg-gradient-to-b from-yellow-lemon to-orange-amber text-warm-black"
+                ? "bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black"
                 : "text-warm-gray hover:bg-black/[0.04]"
             }`}
             style={{ fontVariationSettings: "'opsz' 14" }}

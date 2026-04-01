@@ -36,7 +36,7 @@ export function ConversationSwitcher({
               onClick={() => onSelect(c.id)}
               className={`flex min-h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors sm:flex-initial sm:px-3 ${
                 active
-                  ? "bg-gradient-to-b from-yellow-lemon to-orange-amber text-warm-black"
+                  ? "bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black"
                   : "text-warm-gray hover:bg-black/[0.04]"
               }`}
             >

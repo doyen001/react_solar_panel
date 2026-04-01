@@ -84,7 +84,7 @@ export function CustomerDashboardHeader({
                 </span>
                 {active ? (
                   <span
-                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-gradient-to-b from-yellow-lemon to-orange-amber"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber"
                     aria-hidden
                   />
                 ) : null}
