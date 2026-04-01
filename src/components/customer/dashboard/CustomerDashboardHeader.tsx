@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { dashboardAssets } from "./assets";
-import { IconSolarDesignLogo } from "../../ui/Icons";
 
 const NAV = [
   { href: "/customers/dashboard", label: "Dashboard", key: "dashboard" },
@@ -37,7 +36,12 @@ export function CustomerDashboardHeader({
         <div className="flex min-w-0 items-center gap-4 sm:gap-5">
           <Link href="/" className="flex shrink-0 items-center gap-4 sm:gap-5">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-[7.72px] bg-navy-800">
-              <IconSolarDesignLogo className="w-[30px] h-[30px]" />
+              <Image
+                src="/images/solarDesignLogo.png"
+                alt="Solar Design Logo"
+                width={30}
+                height={30}
+              />
             </div>
             <span
               className="font-inter text-[13px] font-bold leading-[19.5px] tracking-[0.3px] text-warm-ink"
