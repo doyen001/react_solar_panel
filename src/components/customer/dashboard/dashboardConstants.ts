@@ -1,4 +1,3 @@
-import { dashboardAssets } from "./assets";
 import type { DesignOption } from "./types";
 
 export const DASHBOARD_DESIGN_OPTIONS: DesignOption[] = [
@@ -11,7 +10,7 @@ export const DASHBOARD_DESIGN_OPTIONS: DesignOption[] = [
     price: "$8,500",
     savingsPerYr: "$1,840/yr",
     outputKwh: "9,636 kWh",
-    imageSrc: dashboardAssets.designImageA,
+    imageSrc: "/images/home/customer-designA.jpg",
   },
   {
     id: "b",
@@ -22,7 +21,7 @@ export const DASHBOARD_DESIGN_OPTIONS: DesignOption[] = [
     price: "$18,200",
     savingsPerYr: "$2,950/yr",
     outputKwh: "14,600 kWh",
-    imageSrc: dashboardAssets.designImageB,
+    imageSrc: "/images/home/customer-designB.jpg",
   },
   {
     id: "c",
@@ -33,7 +32,7 @@ export const DASHBOARD_DESIGN_OPTIONS: DesignOption[] = [
     price: "$19,800",
     savingsPerYr: "$2,580/yr",
     outputKwh: "9,636 kWh",
-    imageSrc: dashboardAssets.designImageA,
+    imageSrc: "/images/home/customer-designA.jpg",
   },
   {
     id: "d",
@@ -44,7 +43,7 @@ export const DASHBOARD_DESIGN_OPTIONS: DesignOption[] = [
     price: "$28,500",
     savingsPerYr: "$3,740/yr",
     outputKwh: "19,272 kWh",
-    imageSrc: dashboardAssets.designImageB,
+    imageSrc: "/images/home/customer-designB.jpg",
   },
 ];
 

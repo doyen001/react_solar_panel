@@ -1,10 +1,10 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 type Props = {
   label: string;
   value: string;
   sublabel: string;
-  iconSrc: string;
+  iconSrc: string | StaticImageData;
   iconBgClass: string;
 };
 

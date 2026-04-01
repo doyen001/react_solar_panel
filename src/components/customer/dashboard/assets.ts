@@ -1,20 +1,35 @@
-/** Figma-exported assets (replace with local `/public` paths when ready). */
+import type { StaticImageData } from "next/image";
+import dashboardActionHelp from "@/components/ui/Icons/dashboard-action-help.svg";
+import dashboardActionMessage from "@/components/ui/Icons/dashboard-action-message.svg";
+import dashboardActionPdf from "@/components/ui/Icons/dashboard-action-pdf.svg";
+import dashboardActionProducts from "@/components/ui/Icons/dashboard-action-products.svg";
+import dashboardActionSchedule from "@/components/ui/Icons/dashboard-action-schedule.svg";
+import dashboardBell from "@/components/ui/Icons/dashboard-bell.svg";
+import dashboardCheck from "@/components/ui/Icons/dashboard-check.svg";
+import dashboardCheckCircle from "@/components/ui/Icons/dashboard-check-circle.svg";
+import dashboardKpiOutput from "@/components/ui/Icons/dashboard-kpi-output.svg";
+import dashboardKpiPrice from "@/components/ui/Icons/dashboard-kpi-price.svg";
+import dashboardKpiSavings from "@/components/ui/Icons/dashboard-kpi-savings.svg";
+import dashboardKpiSystem from "@/components/ui/Icons/dashboard-kpi-system.svg";
+import dashboardMessageSquare from "@/components/ui/Icons/dashboard-message-square.svg";
+import dashboardSearch from "@/components/ui/Icons/dashboard-search.svg";
+import dashboardSun from "@/components/ui/Icons/dashboard-sun.svg";
+
+/** Local SVGs under `components/ui/Icons/dashboard-*.svg` (bundled like other Icons). */
 export const dashboardAssets = {
-  designImageA: "https://www.figma.com/api/mcp/asset/f4ff1031-95cf-4582-93a3-f9c4add2c66a",
-  designImageB: "https://www.figma.com/api/mcp/asset/cce485aa-84bf-4242-b91a-6a17927fe430",
-  search: "https://www.figma.com/api/mcp/asset/07e1a5ba-b0a4-4f4d-841c-503c1f77b07e",
-  bell: "https://www.figma.com/api/mcp/asset/6cfb48a8-0872-42c5-900e-1d398f79abe7",
-  sun: "https://www.figma.com/api/mcp/asset/0530dd27-2ff7-4966-8ec4-a66448a0d44c",
-  kpiSystem: "https://www.figma.com/api/mcp/asset/9f8c5b4f-27da-40ee-832c-6f440b4f26fc",
-  kpiOutput: "https://www.figma.com/api/mcp/asset/96d750f8-abb0-412f-95c2-9aedb2c28604",
-  kpiSavings: "https://www.figma.com/api/mcp/asset/5f8484c6-f6f3-46f3-937f-81186ee02f05",
-  kpiPrice: "https://www.figma.com/api/mcp/asset/8d255ef4-f7e2-41bf-8e8a-6a406b4bf2c5",
-  checkCircle: "https://www.figma.com/api/mcp/asset/3bf397df-65ea-44fa-b2f3-aa4d95edd4a3",
-  check: "https://www.figma.com/api/mcp/asset/e2bcd18a-ad42-43d3-aeb2-a75c8f898462",
-  messageSquare: "https://www.figma.com/api/mcp/asset/5e3a614e-974e-47b8-91a4-73e549237ae7",
-  actionPdf: "https://www.figma.com/api/mcp/asset/88230b88-31f0-4d20-a770-a150d5422854",
-  actionProducts: "https://www.figma.com/api/mcp/asset/f65e531b-78b5-45db-8cf1-26a010f722d0",
-  actionMessage: "https://www.figma.com/api/mcp/asset/72da811c-c846-4f03-a363-ff10f3f15713",
-  actionSchedule: "https://www.figma.com/api/mcp/asset/2f363a16-0428-4469-a16d-d03cc241ffff",
-  actionHelp: "https://www.figma.com/api/mcp/asset/07e39e70-dda9-4edd-b82a-b710d01cdc5d",
-} as const;
+  search: dashboardSearch,
+  bell: dashboardBell,
+  sun: dashboardSun,
+  kpiSystem: dashboardKpiSystem,
+  kpiOutput: dashboardKpiOutput,
+  kpiSavings: dashboardKpiSavings,
+  kpiPrice: dashboardKpiPrice,
+  checkCircle: dashboardCheckCircle,
+  check: dashboardCheck,
+  messageSquare: dashboardMessageSquare,
+  actionPdf: dashboardActionPdf,
+  actionProducts: dashboardActionProducts,
+  actionMessage: dashboardActionMessage,
+  actionSchedule: dashboardActionSchedule,
+  actionHelp: dashboardActionHelp,
+} as const satisfies Record<string, StaticImageData>;
