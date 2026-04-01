@@ -47,10 +47,16 @@ const morePackages = [
 
 function GreenCheck() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      className="text-success-bright"
+    >
       <path
         d="M13.3 4.7L6.5 11.5L2.7 7.7"
-        stroke="#16a249"
+        stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -67,11 +73,11 @@ function FilterIcon() {
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
-      className="shrink-0"
+      className="shrink-0 text-ink"
     >
       <path
         d="M22 3H2L10 12.46V19L14 21V12.46L22 3Z"
-        stroke="#111C27"
+        stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -88,11 +94,11 @@ function ChevronDownIcon() {
       viewBox="0 0 16 16"
       fill="none"
       aria-hidden="true"
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"
+      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-muted"
     >
       <path
         d="M4 6.5L8 10L12 6.5"
-        stroke="#62748E"
+        stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -109,12 +115,12 @@ type FilterSelectProps = {
 function FilterSelect({ label, value }: FilterSelectProps) {
   return (
     <div className="w-full min-w-[260px]">
-      <label className="block font-source-sans text-[14px] font-medium tracking-[-0.15px] text-[#65758b]">
+      <label className="block font-source-sans text-[14px] font-medium tracking-[-0.15px] text-muted">
         {label}
       </label>
       <div className="relative mt-2">
         <select
-          className="h-10 w-full appearance-none rounded-[10px] border border-transparent bg-[#f1f5f9] px-4 pr-10 font-source-sans text-[15px] font-medium tracking-[-0.23px] text-[#62748e] outline-none"
+          className="h-10 w-full appearance-none rounded-[10px] border border-transparent bg-faint px-4 pr-10 font-source-sans text-[15px] font-medium tracking-[-0.23px] text-slate-muted outline-none"
           defaultValue={value}
           aria-label={label}
         >
@@ -155,7 +161,7 @@ function VisualRange({
 
   return (
     <div className="w-full min-w-[260px]">
-      <p className="font-source-sans text-[14px] font-medium tracking-[-0.15px] text-[#65758b]">
+      <p className="font-source-sans text-[14px] font-medium tracking-[-0.15px] text-muted">
         {label}
       </p>
       <div className="mt-2">
@@ -168,7 +174,7 @@ function VisualRange({
           onInput={(value) => setRangeValue(value as [number, number])}
           ariaLabel={[`${label} minimum`, `${label} maximum`]}
         />
-        <div className="mt-2 flex items-center justify-between font-source-sans text-xs font-medium text-[#62748e]">
+        <div className="mt-2 flex items-center justify-between font-source-sans text-xs font-medium text-slate-muted">
           <span>{formatRangeValue(rangeValue[0], { prefix, suffix })}</span>
           <span>{formatRangeValue(rangeValue[1], { prefix, suffix })}</span>
         </div>
@@ -186,7 +192,7 @@ export function SpecialDealsSection() {
           <h2 className="font-source-sans text-3xl font-bold tracking-[-0.9px] text-ink sm:text-4xl">
             Special Ready Deals
           </h2>
-          <p className="mt-4 font-source-sans text-base text-[#65758b]">
+          <p className="mt-4 font-source-sans text-base text-muted">
             If you already know all of this, choose one of our professional
             pre-made solar packages
           </p>
@@ -222,13 +228,13 @@ export function SpecialDealsSection() {
 
         {/* Featured Deal */}
         <div className="mx-auto mt-10 max-w-[672px] rounded-2xl bg-white p-6 shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)]">
-          <span className="inline-block rounded-full border border-[#05afd1] bg-[rgba(5,175,209,0.1)] px-3 py-1 text-xs font-medium text-[#05afd1]">
+          <span className="inline-block rounded-full border border-primary bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             10.1kW
           </span>
           <h3 className="mt-3 font-source-sans text-xl font-bold tracking-[-0.5px] text-ink sm:text-2xl">
             10kW Solar System + 20kW Battery
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[#65758b]">
+          <p className="mt-2 text-sm leading-relaxed text-muted">
             TRINA VeRTEX S+ N-Type Dual Glass 440 watt panels. FOXESS EQ4880 -
             14.64kW Battery. FOXESS 9.9kW Hybrid Inverter.
           </p>
@@ -237,13 +243,13 @@ export function SpecialDealsSection() {
             <span className="font-source-sans text-3xl font-bold text-ink">
               6,565
             </span>
-            <span className="text-sm text-[#65758b]">/incl. installation</span>
+            <span className="text-sm text-muted">/incl. installation</span>
           </div>
           <button
             className="mt-4 w-full rounded-xl py-2.5 text-center text-base font-semibold text-white"
             style={{
               backgroundImage:
-                "linear-gradient(132deg, #2094f3 0%, #17cfcf 100%)",
+                "linear-gradient(132deg, var(--color-brand-blue) 0%, var(--color-brand-teal) 100%)",
             }}
           >
             Buy Now
@@ -261,17 +267,17 @@ export function SpecialDealsSection() {
               className="relative rounded-2xl bg-white p-6 shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)]"
             >
               {deal.bestValue && (
-                <span className="absolute -top-3 left-4 rounded-full border border-[#efad06] bg-[rgba(239,173,6,0.1)] px-3 py-1 text-xs font-semibold text-[#efad06]">
+                <span className="absolute -top-3 left-4 rounded-full border border-gold bg-gold/10 px-3 py-1 text-xs font-semibold text-gold">
                   Best Value
                 </span>
               )}
-              <span className="inline-block rounded-full border border-[#05afd1] bg-[rgba(5,175,209,0.1)] px-3 py-1 text-xs font-medium text-[#05afd1]">
+              <span className="inline-block rounded-full border border-primary bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                 {deal.badge}
               </span>
               <h4 className="mt-3 font-source-sans text-xl font-bold tracking-[-0.5px] text-ink">
                 {deal.title}
               </h4>
-              <p className="mt-2 text-sm leading-relaxed text-[#65758b]">
+              <p className="mt-2 text-sm leading-relaxed text-muted">
                 {deal.description}
               </p>
               <div className="mt-4 flex items-baseline gap-1">
@@ -279,11 +285,9 @@ export function SpecialDealsSection() {
                 <span className="font-source-sans text-3xl font-bold text-ink">
                   {deal.price}
                 </span>
-                <span className="text-sm text-[#65758b]">
-                  /incl. installation
-                </span>
+                <span className="text-sm text-muted">/incl. installation</span>
               </div>
-              <div className="mt-3 flex items-center gap-2 text-sm text-[#16a249]">
+              <div className="mt-3 flex items-center gap-2 text-sm text-success-bright">
                 <GreenCheck />
                 <span>Installation Included</span>
               </div>
@@ -291,7 +295,7 @@ export function SpecialDealsSection() {
                 className="mt-4 w-full rounded-xl py-2.5 text-center text-base font-semibold text-white"
                 style={{
                   backgroundImage:
-                    "linear-gradient(132deg, #2094f3 0%, #17cfcf 100%)",
+                    "linear-gradient(132deg, var(--color-brand-blue) 0%, var(--color-brand-teal) 100%)",
                 }}
               >
                 Buy Now
@@ -311,13 +315,13 @@ export function SpecialDealsSection() {
               className="flex flex-col justify-between rounded-2xl bg-white p-6 shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)]"
             >
               <div>
-                <span className="inline-block rounded-full border border-[#05afd1] bg-[rgba(5,175,209,0.1)] px-3 py-1 text-xs font-medium text-[#05afd1]">
+                <span className="inline-block rounded-full border border-primary bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                   {pkg.kw}
                 </span>
                 <h4 className="mt-3 font-source-sans text-lg font-bold text-ink">
                   {pkg.title}
                 </h4>
-                <p className="mt-2 text-sm leading-relaxed text-[#65758b]">
+                <p className="mt-2 text-sm leading-relaxed text-muted">
                   {pkg.description}
                 </p>
                 <div className="mt-3 flex items-baseline gap-1">
@@ -325,16 +329,16 @@ export function SpecialDealsSection() {
                   <span className="font-source-sans text-2xl font-bold text-ink">
                     {pkg.price}
                   </span>
-                  <span className="text-xs text-[#65758b]">
+                  <span className="text-xs text-muted">
                     /incl. installation
                   </span>
                 </div>
-                <div className="mt-2 flex items-center gap-2 text-sm text-[#16a249]">
+                <div className="mt-2 flex items-center gap-2 text-sm text-success-bright">
                   <GreenCheck />
                   <span>incl. installation</span>
                 </div>
               </div>
-              <button className="mt-4 w-full rounded-xl border-2 border-[#e1e7ef] py-2.5 text-center text-sm font-semibold text-ink transition hover:bg-slate-50">
+              <button className="mt-4 w-full rounded-xl border-2 border-border-soft py-2.5 text-center text-sm font-semibold text-ink transition hover:bg-slate-50">
                 View Details
               </button>
             </div>
@@ -353,7 +357,7 @@ export function SpecialDealsSection() {
           position: relative;
           width: 100%;
           height: 8px;
-          background: #e5e7eb;
+          background: var(--color-gray-6);
           border-radius: 9999px;
         }
 

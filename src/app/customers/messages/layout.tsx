@@ -4,7 +4,7 @@ export default function CustomerMessagesLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-[#f0ebe2] font-dm-sans antialiased">
+    <div className="min-h-screen bg-cream-100 font-dm-sans antialiased">
       {children}
     </div>
   );

@@ -13,10 +13,10 @@ export function DesignPageToolbar() {
         type="button"
         aria-pressed={installerView}
         onClick={() => setInstallerView((v) => !v)}
-        className={`inline-flex h-7 items-center gap-2 rounded-md border border-[#dfd5c3] px-3 font-dm-sans text-[10px] font-semibold uppercase tracking-[0.3px] transition-colors ${
+        className={`inline-flex h-7 items-center gap-2 rounded-md border border-warm-border px-3 font-dm-sans text-[10px] font-semibold uppercase tracking-[0.3px] transition-colors ${
           installerView
-            ? "bg-[#09234a] text-white"
-            : "bg-white text-[#7c736a] hover:bg-[#fcfbf8]"
+            ? "bg-navy-800 text-white"
+            : "bg-white text-warm-gray hover:bg-cream-50"
         }`}
         style={{ fontVariationSettings: "'opsz' 14" }}
       >
@@ -32,7 +32,7 @@ export function DesignPageToolbar() {
       </button>
       <button
         type="button"
-        className="inline-flex h-7 items-center gap-2 rounded-md border border-[#dfd5c3] bg-[#09234a] px-3 font-dm-sans text-[10px] font-semibold uppercase tracking-[0.3px] text-white"
+        className="inline-flex h-7 items-center gap-2 rounded-md border border-warm-border bg-navy-800 px-3 font-dm-sans text-[10px] font-semibold uppercase tracking-[0.3px] text-white"
         style={{ fontVariationSettings: "'opsz' 14" }}
       >
         <Image

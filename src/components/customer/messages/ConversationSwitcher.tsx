@@ -20,12 +20,12 @@ export function ConversationSwitcher({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
       <p
-        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-[#7c736a]"
+        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-warm-gray"
         style={{ fontVariationSettings: "'opsz' 9" }}
       >
         {label}
       </p>
-      <div className="flex min-w-0 flex-1 flex-wrap gap-1 rounded-lg border border-[#dfd5c3] bg-[#fcfbf8] p-1 sm:max-w-xl">
+      <div className="flex min-w-0 flex-1 flex-wrap gap-1 rounded-lg border border-warm-border bg-cream-50 p-1 sm:max-w-xl">
         {contacts.map((c) => {
           const active = c.id === activeId;
           const initials = initialsFromDisplayName(c.displayName);
@@ -36,8 +36,8 @@ export function ConversationSwitcher({
               onClick={() => onSelect(c.id)}
               className={`flex min-h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors sm:flex-initial sm:px-3 ${
                 active
-                  ? "bg-gradient-to-b from-[#ffef62] to-[#f78d00] text-[#1c1a17]"
-                  : "text-[#7c736a] hover:bg-black/[0.04]"
+                  ? "bg-gradient-to-b from-yellow-lemon to-orange-amber text-warm-black"
+                  : "text-warm-gray hover:bg-black/[0.04]"
               }`}
             >
               <CustomerAvatar

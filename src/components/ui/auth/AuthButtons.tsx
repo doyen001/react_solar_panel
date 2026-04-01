@@ -24,11 +24,11 @@ export function AuthPrimaryButton({
       <span
         className={`pointer-events-none absolute inset-0 rounded-[inherit] ${
           borderVariant === "gradient"
-            ? "bg-linear-to-r from-auth-outline to-[#ff3c3c]"
+            ? "bg-linear-to-r from-auth-outline to-coral"
             : "bg-auth-outline"
         }`}
       />
-      <span className="pointer-events-none absolute inset-[2px] rounded-[12px] bg-auth-card-from" />
+      <span className="pointer-events-none absolute inset-[2px] rounded-[12px] bg-yellow-lemon" />
       <span className="absolute left-1/2 top-[10px] flex -translate-x-1/2 items-center gap-[8px]">
         {icon ? <span className="text-black">{icon}</span> : null}
         <span className="font-source-sans text-[16px] font-bold leading-[24px] tracking-[-0.3125px] text-black">

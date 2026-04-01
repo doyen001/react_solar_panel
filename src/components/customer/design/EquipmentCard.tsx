@@ -7,9 +7,9 @@ type Props = {
 
 export function EquipmentCard({ card }: Props) {
   return (
-    <div className="flex min-h-[150px] flex-col gap-3 rounded-[10px] border border-[#dfd5c3] bg-gradient-to-r from-[#ffef62] to-[#f78d00] p-3.5">
+    <div className="flex min-h-[150px] flex-col gap-3 rounded-[10px] border border-warm-border bg-gradient-to-r from-yellow-lemon to-orange-amber p-3.5">
       <div className="flex items-center gap-2">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-[rgba(9,35,74,0.16)] bg-gradient-to-b from-[#ffef62] to-[#f78d00]">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-800/16 bg-gradient-to-b from-yellow-lemon to-orange-amber">
           <Image
             src={card.iconSrc}
             alt=""
@@ -19,7 +19,7 @@ export function EquipmentCard({ card }: Props) {
             unoptimized
           />
         </div>
-        <h3 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+        <h3 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
           {card.title}
         </h3>
       </div>
@@ -30,13 +30,13 @@ export function EquipmentCard({ card }: Props) {
             className="flex items-start justify-between gap-2 text-xs"
           >
             <span
-              className="font-dm-sans font-normal text-[#7c736a]"
+              className="font-dm-sans font-normal text-warm-gray"
               style={{ fontVariationSettings: "'opsz' 9" }}
             >
               {row.label}
             </span>
             <span
-              className="text-right font-dm-sans font-medium text-[#2a2622]"
+              className="text-right font-dm-sans font-medium text-warm-ink"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               {row.value}

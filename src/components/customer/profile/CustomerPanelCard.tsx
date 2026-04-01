@@ -17,14 +17,14 @@ export function CustomerPanelCard({
 }: Props) {
   return (
     <section
-      className={`flex min-h-0 flex-col overflow-hidden rounded-[10px] border border-[#dfd5c3] bg-[#fcfbf8] ${className}`}
+      className={`flex min-h-0 flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 ${className}`}
     >
-      <div className="flex min-h-[42px] shrink-0 items-center gap-2 border-l-2 border-[#ffef62] bg-gradient-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[18px] pr-4">
+      <div className="flex min-h-[42px] shrink-0 items-center gap-2 border-l-2 border-yellow-lemon bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="flex size-4 shrink-0 items-center justify-center [&_img]:size-4">
             {icon}
           </span>
-          <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+          <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
             {title}
           </h2>
         </div>

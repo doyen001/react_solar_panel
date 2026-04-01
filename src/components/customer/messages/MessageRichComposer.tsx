@@ -36,7 +36,7 @@ export function MessageRichComposer({
   const words = useMemo(() => countWords(draft), [draft]);
 
   return (
-    <div className="flex flex-col gap-3 border-t border-[#dfd5c3] pt-3">
+    <div className="flex flex-col gap-3 border-t border-warm-border pt-3">
       <ComposeChannelBar value={channel} onChange={onChannelChange} />
 
       <label className="sr-only" htmlFor="customer-message-input">
@@ -48,7 +48,7 @@ export function MessageRichComposer({
         onChange={(e) => setDraft(e.target.value)}
         rows={3}
         placeholder={placeholder}
-        className="min-h-[76px] w-full resize-y rounded-lg border border-[#dfd5c3] bg-white p-3 font-dm-sans text-sm font-normal leading-[21px] text-[#2a2622] placeholder:text-[rgba(124,115,106,0.5)] focus:outline-none focus:ring-2 focus:ring-[#2094f3]/30"
+        className="min-h-[76px] w-full resize-y rounded-lg border border-warm-border bg-white p-3 font-dm-sans text-sm font-normal leading-[21px] text-warm-ink placeholder:text-warm-gray/50 focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
         style={{ fontVariationSettings: "'opsz' 9" }}
       />
 
@@ -74,7 +74,7 @@ export function MessageRichComposer({
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
           <span
-            className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-[#7c736a]"
+            className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
             style={{ fontVariationSettings: "'opsz' 9" }}
           >
             {words} words
@@ -99,7 +99,7 @@ export function MessageRichComposer({
           </button>
           <button
             type="button"
-            className="inline-flex h-7 min-w-[76px] items-center justify-center gap-1 rounded-lg border border-[#dfd5c3] bg-white px-3 font-dm-sans text-[11px] font-medium text-[#2a2622] hover:bg-[#fcfbf8]"
+            className="inline-flex h-7 min-w-[76px] items-center justify-center gap-1 rounded-lg border border-warm-border bg-white px-3 font-dm-sans text-[11px] font-medium text-warm-ink hover:bg-cream-50"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             <Image

@@ -8,8 +8,8 @@ type Props = {
 
 export function SelectedDesignProductsSection({ items }: Props) {
   return (
-    <section className="overflow-hidden rounded-[10px] border border-[#dfd5c3] bg-[#fcfbf8]">
-      <div className="flex min-h-[42px] items-center gap-2 border-l-2 border-[#ffef62] bg-gradient-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[18px] pr-4">
+    <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
+      <div className="flex min-h-[42px] items-center gap-2 border-l-2 border-yellow-lemon bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4">
         <Image
           src={productsAssets.checkCircle}
           alt=""
@@ -18,7 +18,7 @@ export function SelectedDesignProductsSection({ items }: Props) {
           className="size-4 shrink-0"
           unoptimized
         />
-        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
           Products in Your Selected Design
         </h2>
       </div>
@@ -26,9 +26,9 @@ export function SelectedDesignProductsSection({ items }: Props) {
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex min-h-[68px] items-center gap-3 rounded-lg border border-[#dfd5c3] bg-white px-3 py-2"
+            className="flex min-h-[68px] items-center gap-3 rounded-lg border border-warm-border bg-white px-3 py-2"
           >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-[#ffef62] to-[#f78d00]">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-yellow-lemon to-orange-amber">
               <Image
                 src={item.icon === "sun" ? productsAssets.sun : productsAssets.cpu}
                 alt=""
@@ -39,13 +39,13 @@ export function SelectedDesignProductsSection({ items }: Props) {
             </div>
             <div className="min-w-0 flex-1">
               <p
-                className="font-dm-sans text-xs font-semibold leading-[18px] text-[#2a2622]"
+                className="font-dm-sans text-xs font-semibold leading-[18px] text-warm-ink"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 {item.name}
               </p>
               <p
-                className="mt-1 font-dm-sans text-[10px] font-normal leading-[15px] text-[#7c736a]"
+                className="mt-1 font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray"
                 style={{ fontVariationSettings: "'opsz' 9" }}
               >
                 {item.detail}
@@ -53,7 +53,7 @@ export function SelectedDesignProductsSection({ items }: Props) {
             </div>
             <button
               type="button"
-              className="flex shrink-0 items-center gap-1 font-dm-sans text-[10px] font-semibold leading-[15px] text-[#f78d00]"
+              className="flex shrink-0 items-center gap-1 font-dm-sans text-[10px] font-semibold leading-[15px] text-orange-amber"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               View Details

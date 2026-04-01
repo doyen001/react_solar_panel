@@ -19,7 +19,7 @@ export function DesignsHeroProgressBar({
         style={{
           width: `${Math.min(100, Math.max(0, fillPercent))}%`,
           background:
-            "linear-gradient(to right, var(--color-progress-fill-start), var(--color-progress-fill-mid), var(--color-auth-card-to))",
+            "linear-gradient(to right, var(--color-progress-fill-start), var(--color-progress-fill-mid), var(--color-orange-amber))",
         }}
       />
     </div>

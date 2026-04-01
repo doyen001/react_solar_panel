@@ -29,13 +29,13 @@ export function MessageThreadRow({
           className={`flex flex-wrap items-baseline gap-2 ${outgoing ? "justify-end" : "justify-start"}`}
         >
           <span
-            className="font-dm-sans text-[11px] font-semibold leading-[16.5px] text-[#2a2622]"
+            className="font-dm-sans text-[11px] font-semibold leading-[16.5px] text-warm-ink"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {senderName}
           </span>
           <span
-            className="font-dm-sans text-[9px] font-normal leading-[13.5px] text-[#7c736a]"
+            className="font-dm-sans text-[9px] font-normal leading-[13.5px] text-warm-gray"
             style={{ fontVariationSettings: "'opsz' 9" }}
           >
             {timeLabel}
@@ -44,8 +44,8 @@ export function MessageThreadRow({
         <div
           className={`rounded-[10px] px-3 py-2 ${
             outgoing
-              ? "bg-[#09234a] text-white"
-              : "bg-[#f5f0e8] text-[#2a2622]"
+              ? "bg-navy-800 text-white"
+              : "bg-cream-150 text-warm-ink"
           }`}
         >
           <p

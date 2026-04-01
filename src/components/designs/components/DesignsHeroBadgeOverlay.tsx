@@ -26,8 +26,8 @@ export function DesignsHeroBadgeOverlay() {
               y2="100%"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stopColor="var(--color-auth-card-from)" />
-              <stop offset="1" stopColor="var(--color-auth-card-to)" />
+              <stop stopColor="var(--color-yellow-lemon)" />
+              <stop offset="1" stopColor="var(--color-orange-amber)" />
             </linearGradient>
           </defs>
           <polygon

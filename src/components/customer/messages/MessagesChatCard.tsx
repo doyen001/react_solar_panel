@@ -34,7 +34,7 @@ export function MessagesChatCard({
   }, [userFirstName, userLastName]);
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[10px] border border-[#dfd5c3] bg-[#fcfbf8]">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
       <ChatThreadHeader title={threadHeading} online />
 
       <div className="flex min-h-[12rem] flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
@@ -70,7 +70,7 @@ export function MessagesChatCard({
         })}
       </div>
 
-      <div className="border-t border-[#dfd5c3] px-4 pb-4 pt-3">
+      <div className="border-t border-warm-border px-4 pb-4 pt-3">
         <MessageRichComposer
           channel={channel}
           onChannelChange={setChannel}

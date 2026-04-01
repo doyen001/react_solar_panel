@@ -13,9 +13,9 @@ const paymentOptions = [
 
 export function PaymentOptionsSection() {
   return (
-    <section className="bg-[rgba(241,245,249,0.3)] px-4 py-16 sm:px-6 lg:py-[85px]">
+    <section className="bg-faint/30 px-4 py-16 sm:px-6 lg:py-[85px]">
       <div className="mx-auto max-w-[1000px]">
-        <h2 className="text-center font-source-sans text-3xl font-bold tracking-[-0.75px] text-[#111c27] sm:text-[30px] sm:leading-[36px]">
+        <h2 className="text-center font-source-sans text-3xl font-bold tracking-[-0.75px] text-ink sm:text-[30px] sm:leading-[36px]">
           Choose Your Payment Options
         </h2>
 

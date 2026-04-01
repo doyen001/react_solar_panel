@@ -107,7 +107,7 @@ export function SendUsAndPartnerSection() {
         </div>
       </div>
 
-      <div className="mt-10 mb-[115px] grid min-h-[470px] items-center overflow-hidden rounded-3xl bg-[#111C27] lg:grid-cols-2">
+      <div className="mt-10 mb-[115px] grid min-h-[470px] items-center overflow-hidden rounded-3xl bg-ink lg:grid-cols-2">
         <div className="relative min-h-[280px] self-stretch lg:min-h-[470px]">
           <Image
             src="/images/business-pattern.png"

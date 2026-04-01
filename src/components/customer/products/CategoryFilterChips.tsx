@@ -19,7 +19,7 @@ type Props = {
 export function CategoryFilterChips({ value, onChange }: Props) {
   return (
     <div
-      className="inline-flex flex-wrap gap-1 rounded-lg border border-[#dfd5c3] bg-[#fcfbf8] p-1"
+      className="inline-flex flex-wrap gap-1 rounded-lg border border-warm-border bg-cream-50 p-1"
       role="group"
       aria-label="Filter by category"
     >
@@ -32,8 +32,8 @@ export function CategoryFilterChips({ value, onChange }: Props) {
             onClick={() => onChange(opt.value)}
             className={`rounded-md px-3 py-1.5 font-dm-sans text-[10px] font-semibold uppercase leading-[15px] tracking-[0.3px] transition-colors ${
               active
-                ? "bg-gradient-to-b from-[#ffef62] to-[#f78d00] text-[#1c1a17]"
-                : "text-[#7c736a] hover:bg-black/[0.04]"
+                ? "bg-gradient-to-b from-yellow-lemon to-orange-amber text-warm-black"
+                : "text-warm-gray hover:bg-black/[0.04]"
             }`}
             style={{ fontVariationSettings: "'opsz' 14" }}
           >

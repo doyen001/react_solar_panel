@@ -40,9 +40,11 @@
   --color-gold: #efad06;
   --color-gold-2: #ffc105;
 
+  /* Warm yellow → orange pair (gradients, accents) */
+  --color-yellow-lemon: #ffef62;
+  --color-orange-amber: #f78d00;
+
   /* Auth (login/signup) screen tokens */
-  --color-auth-card-from: #ffef62;
-  --color-auth-card-to: #f78d00;
   --color-auth-outline: #5474eb;
   --color-auth-title: #3d2a0a;
   --color-auth-subtle: #6b4f1e;
@@ -62,6 +64,56 @@
   --color-muted-label: #4a5565;
   --color-progress-fill-start: #fff27e;
   --color-progress-fill-mid: #f5c026;
+
+  /* Customer portal & marketing — named by hue (avoid raw hex in components) */
+  --color-warm-border: #dfd5c3;
+  --color-warm-gray: #7c736a;
+  --color-warm-ink: #2a2622;
+  --color-cream-50: #fcfbf8;
+  --color-navy-800: #09234a;
+  --color-success: #16a34a;
+  --color-warm-black: #1c1a17;
+  --color-cream-100: #f0ebe2;
+  --color-slate-ink: #0f1729;
+  --color-cream-300: #ede8de;
+  --color-mint-soft: #dcf5e0;
+  --color-cream-150: #f5f0e8;
+  --color-coral: #ff3c3c;
+  --color-navy-900: #081f43;
+  --color-success-bright: #16a249;
+  --color-blue-slate: #304566;
+  --color-brown-muted: #38332e;
+  --color-slate-muted: #62748e;
+  --color-dusk: #6f6c90;
+  --color-blue-tint: #e8f0fe;
+  --color-teal-deep: #02475a;
+  --color-teal-bright: #049ab8;
+  --color-linkedin: #0a66c2;
+  --color-void: #0b1320;
+  --color-indigo-night: #170f49;
+  --color-facebook: #1877f2;
+  --color-sky-brand: #1cb0e2;
+  --color-twitter: #1da1f2;
+  --color-leaf: #22c55e;
+  --color-stone-warm: #c4b8a8;
+  --color-cream-400: #e8dfc4;
+  --color-sky-wash: #e8f6fd;
+  --color-google-red: #ea4335;
+  --color-danger: #ef4444;
+  --color-amber-soft: #f0c775;
+  --color-neutral-mist: #f3f3f3;
+  --color-flame: #f54900;
+  --color-cream-200: #f5f0e0;
+  --color-cream-225: #f5f2ec;
+  --color-solar-gold: #f8c532;
+  --color-frost: #fbfcfd;
+  --color-blush: #fce8e6;
+  --color-tangerine: #ff9913;
+  --color-amber-hot: #f59f0a;
+  --color-surface-50: #f8fafc;
+  --color-ocean: #0284c5;
+  --color-slate-800: #1e293b;
+  --color-violet-accent: #7967c4;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -91,7 +143,7 @@ body {
   border: 1px solid rgb(255 255 255 / 0.2);
   background: rgb(255 255 255 / 0.06);
   padding: 0.72rem 0.9rem;
-  color: #fff;
+  color: var(--color-gray-1);
   outline: none;
 }
 
@@ -118,5 +170,9 @@ button {
 }
 
 .pink-gradient-border {
-  background: linear-gradient(135deg, #5474eb 0%, #ff3c3c 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-auth-outline) 0%,
+    var(--color-coral) 100%
+  );
 }

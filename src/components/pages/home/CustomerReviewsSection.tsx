@@ -42,14 +42,14 @@ export function CustomerReviewsSection() {
   const review = reviews[current];
 
   return (
-    <section className="bg-[#fbfcfd] px-4 py-16 sm:px-6 lg:py-[86px]">
+    <section className="bg-frost px-4 py-16 sm:px-6 lg:py-[86px]">
       <div className="mx-auto max-w-[1242px]">
         {/* Header */}
         <div className="text-center">
-          <h2 className="font-source-sans text-3xl font-bold tracking-[-0.9px] text-[#111c27] sm:text-[40px]">
+          <h2 className="font-source-sans text-3xl font-bold tracking-[-0.9px] text-ink sm:text-[40px]">
             Customer Reviews
           </h2>
-          <p className="mx-auto mt-4 max-w-[627px] font-source-sans text-base leading-6 text-[#65758b]">
+          <p className="mx-auto mt-4 max-w-[627px] font-source-sans text-base leading-6 text-muted">
             Easylink Solar - Making solar energy accessible and affordable for
             every Australian home and business.
           </p>
@@ -68,7 +68,7 @@ export function CustomerReviewsSection() {
           </button>
 
           {/* Card */}
-          <div className="order-1 w-full max-w-[963px] overflow-hidden rounded-[22px] border border-[rgba(31,27,27,0.2)] bg-white shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)] lg:order-0">
+          <div className="order-1 w-full max-w-[963px] overflow-hidden rounded-[22px] border border-warm-ink/20 bg-white shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)] lg:order-0">
             <div className="flex flex-col gap-8 p-8 sm:p-10 lg:flex-row lg:gap-[59px]">
               {/* Photo */}
               <div className="relative mx-auto h-[280px] w-[280px] shrink-0 overflow-hidden rounded-xl sm:h-[332px] sm:w-[338px] lg:mx-0">
@@ -98,7 +98,7 @@ export function CustomerReviewsSection() {
                     width={145}
                     height={29}
                   />
-                  <p className="font-source-sans text-base leading-relaxed text-[#6f6c90] sm:text-lg">
+                  <p className="font-source-sans text-base leading-relaxed text-dusk sm:text-lg">
                     &ldquo;{review.quote}&rdquo;
                   </p>
                 </div>
@@ -111,10 +111,10 @@ export function CustomerReviewsSection() {
                     className="rounded-full"
                   />
                   <div>
-                    <p className="font-source-sans text-lg font-bold text-[#170f49]">
+                    <p className="font-source-sans text-lg font-bold text-indigo-night">
                       {review.name}
                     </p>
-                    <p className="font-source-sans text-lg text-[#6f6c90]">
+                    <p className="font-source-sans text-lg text-dusk">
                       {review.title}
                     </p>
                   </div>
@@ -126,7 +126,7 @@ export function CustomerReviewsSection() {
           {/* Right arrow */}
           {/* <button
             onClick={next}
-            className="order-3 mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-[#05afd1] transition hover:bg-[#049ab8] lg:mx-0"
+            className="order-3 mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-primary transition hover:bg-teal-bright lg:mx-0"
             aria-label="Next review"
           > */}
           <button onClick={next}>

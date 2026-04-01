@@ -29,7 +29,7 @@ export function ComposeChannelBar({ value, onChange }: Props) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
       <span
-        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-[#7c736a]"
+        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-warm-gray"
         style={{ fontVariationSettings: "'opsz' 9" }}
       >
         Compose:
@@ -47,8 +47,8 @@ export function ComposeChannelBar({ value, onChange }: Props) {
                 isAi && active
                   ? "text-white"
                   : active
-                    ? "bg-[#ede8de] text-[#38332e]"
-                    : "bg-[#ede8de] text-[#38332e] opacity-80 hover:opacity-100"
+                    ? "bg-cream-300 text-brown-muted"
+                    : "bg-cream-300 text-brown-muted opacity-80 hover:opacity-100"
               }`}
               style={
                 isAi && active

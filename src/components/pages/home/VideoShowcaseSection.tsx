@@ -42,7 +42,7 @@ export function VideoShowcaseSection() {
             key={i}
             onClick={() => setCurrent(i)}
             className={`size-3 rounded-full transition-colors ${
-              i === current ? "bg-[#05afd1]" : "bg-[rgba(15,23,41,0.47)]"
+              i === current ? "bg-primary" : "bg-slate-ink/47"
             }`}
             aria-label={`Go to slide ${i + 1}`}
           />

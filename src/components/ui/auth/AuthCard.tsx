@@ -11,7 +11,7 @@ export function AuthCard({
 }) {
   return (
     <div
-      className={`rounded-[24px] bg-linear-to-r from-auth-card-from to-auth-card-to overflow-hidden ${className ?? ""}`}
+      className={`rounded-[24px] bg-linear-to-r from-yellow-lemon to-orange-amber overflow-hidden ${className ?? ""}`}
     >
       {children}
     </div>

@@ -34,23 +34,23 @@ export function FeatureBarOfHero() {
       {features.map((f) => (
         <div
           key={f.title}
-          className="flex shrink-0 items-center gap-4 rounded-[11px] border border-[rgba(200,211,223,0.5)] bg-[rgba(248,250,252,0.6)] px-4 py-3 backdrop-blur-[11px]"
+          className="flex shrink-0 items-center gap-4 rounded-[11px] border border-gray-7/50 bg-surface-50/60 px-4 py-3 backdrop-blur-[11px]"
           style={{ width: 247, height: 70 }}
         >
           <div
             className="flex size-[38px] items-center justify-center rounded-lg"
             style={{
               backgroundImage:
-                "linear-gradient(135deg, #efad06 0%, rgba(239,173,6,0.8) 100%)",
+                "linear-gradient(135deg, var(--color-gold) 0%, color-mix(in srgb, var(--color-gold) 80%, transparent) 100%)",
             }}
           >
             <Image src={f.icon} alt="" width={19} height={19} />
           </div>
           <div>
-            <p className="font-source-sans text-sm font-semibold text-[#0f1729]">
+            <p className="font-source-sans text-sm font-semibold text-slate-ink">
               {f.title}
             </p>
-            <p className="font-source-sans text-xs text-[rgba(15,23,41,0.6)]">
+            <p className="font-source-sans text-xs text-slate-ink/60">
               {f.sub}
             </p>
           </div>

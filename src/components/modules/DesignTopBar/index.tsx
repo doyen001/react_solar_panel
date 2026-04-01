@@ -61,7 +61,7 @@ export function DesignTopBar() {
             className="flex h-[40px] items-center gap-[4px] rounded-full bg-white pl-[12px] pr-[10px]"
           >
             <Image src={selected.flag} alt="UK" width={18} height={18} />
-            <span className="font-source-sans text-[14px] leading-[20px] tracking-[-0.1504px] text-[#4a5565] whitespace-nowrap">
+            <span className="font-source-sans text-[14px] leading-[20px] tracking-[-0.1504px] text-muted-label whitespace-nowrap">
               {selected.label}
             </span>
             <svg
@@ -69,11 +69,11 @@ export function DesignTopBar() {
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#4a5565"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`transition-transform ${open ? "rotate-180" : ""}`}
+              className={`text-muted-label transition-transform ${open ? "rotate-180" : ""}`}
             >
               <polyline points="6 9 12 15 18 9" />
             </svg>

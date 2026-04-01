@@ -32,14 +32,14 @@ export function HeroSection() {
               <div className="flex flex-col gap-5 sm:gap-8">
                 <div className="flex flex-col gap-[19px]">
                   {/* Badge */}
-                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(96,165,250,0.92)] bg-[rgba(59,130,246,0.2)] px-4 py-[9px] backdrop-blur-sm">
+                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-facebook/92 bg-facebook/20 px-4 py-[9px] backdrop-blur-sm">
                     <Image
                       src="/images/home/hero-badge-icon.svg"
                       alt=""
                       width={16}
                       height={16}
                     />
-                    <span className="font-source-sans text-sm font-medium text-[#02475a]">
+                    <span className="font-source-sans text-sm font-medium text-teal-deep">
                       Australia&apos;s Trusted Solar Partner
                     </span>
                   </div>
@@ -53,7 +53,7 @@ export function HeroSection() {
                     <span className="text-primary-yellow [text-shadow:0_0_8px_white]">
                       Premium{" "}
                     </span>
-                    <span className="bg-linear-to-r from-[#2094f3] to-[#17cfcf] bg-clip-text text-transparent">
+                    <span className="bg-linear-to-r from-brand-blue to-brand-teal bg-clip-text text-transparent">
                       BLUETTI
                     </span>
                     <br />
@@ -63,7 +63,7 @@ export function HeroSection() {
                   </h1>
 
                   {/* Subtext */}
-                  <p className="max-w-[551px] font-source-sans text-base leading-relaxed text-[#ff9913] drop-shadow-[0_3.8px_14.4px_#7967C4] sm:text-[23px] sm:leading-normal sm:tracking-[-0.46px] font-bold [text-shadow:0_0_15px_white]">
+                  <p className="max-w-[551px] font-source-sans text-base leading-relaxed text-tangerine drop-shadow-[0_3.8px_14.4px_var(--color-violet-accent)] sm:text-[23px] sm:leading-normal sm:tracking-[-0.46px] font-bold [text-shadow:0_0_15px_white]">
                     Easylink Solar installations by Solar Accreditation
                     Australia Accredited Professional Installers.
                   </p>
@@ -92,7 +92,7 @@ export function HeroSection() {
                       height={17}
                     />
                   </button>
-                  <button className="rounded-xl border-2 border-[rgba(2,132,197,0.6)] bg-white px-6 py-3 font-source-sans text-base font-medium text-[#1cb0e2] backdrop-blur-sm">
+                  <button className="rounded-xl border-2 border-ocean/60 bg-white px-6 py-3 font-source-sans text-base font-medium text-sky-brand backdrop-blur-sm">
                     Explore Products
                   </button>
                 </div>
@@ -101,15 +101,13 @@ export function HeroSection() {
               {/* Stats */}
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-source-sans text-base font-medium">
                 <div className="flex items-center gap-2">
-                  <span className="text-[#0f1729]">11,000+</span>
-                  <span className="text-[rgba(15,23,41,0.8)]">
-                    quotes created
-                  </span>
+                  <span className="text-slate-ink">11,000+</span>
+                  <span className="text-slate-ink/80">quotes created</span>
                 </div>
-                <div className="h-[17px] w-px bg-[#0f1729]" />
+                <div className="h-[17px] w-px bg-slate-ink" />
                 <div className="flex items-center gap-2">
-                  <span className="text-[#0f1729]">500+</span>
-                  <span className="text-[rgba(15,23,41,0.8)]">
+                  <span className="text-slate-ink">500+</span>
+                  <span className="text-slate-ink/80">
                     certified installers
                   </span>
                 </div>

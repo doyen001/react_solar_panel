@@ -95,8 +95,8 @@ export function VideoSlider({
                 onClick={() => goToSlide(i)}
                 className={`size-3 rounded-full transition-colors ${
                   i === currentSlide
-                    ? "bg-[#efad06]"
-                    : "bg-[rgba(15,23,41,0.3)]"
+                    ? "bg-gold"
+                    : "bg-slate-ink/30"
                 }`}
                 aria-label={`Go to slide ${i + 1}`}
               />
@@ -108,7 +108,7 @@ export function VideoSlider({
       {/* Navigation arrows */}
       <button
         onClick={() => goToSlide(currentSlide - 1)}
-        className="absolute left-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-[rgba(200,211,223,0.5)] bg-[rgba(248,250,252,0.6)] backdrop-blur-[15px] transition-colors hover:bg-[rgba(248,250,252,0.8)] sm:left-[19px] sm:size-[54px]"
+        className="absolute left-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-7/50 bg-surface-50/60 backdrop-blur-[15px] transition-colors hover:bg-surface-50/80 sm:left-[19px] sm:size-[54px]"
         aria-label="Previous slide"
       >
         <svg
@@ -116,17 +116,18 @@ export function VideoSlider({
           height="24"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#1e293b"
+          stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
+          className="text-slate-800"
         >
           <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <button
         onClick={() => goToSlide(currentSlide + 1)}
-        className="absolute right-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-[rgba(200,211,223,0.5)] bg-[rgba(248,250,252,0.6)] backdrop-blur-[15px] transition-colors hover:bg-[rgba(248,250,252,0.8)] sm:right-[19px] sm:size-[54px]"
+        className="absolute right-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-7/50 bg-surface-50/60 backdrop-blur-[15px] transition-colors hover:bg-surface-50/80 sm:right-[19px] sm:size-[54px]"
         aria-label="Next slide"
       >
         <svg
@@ -134,10 +135,11 @@ export function VideoSlider({
           height="24"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#1e293b"
+          stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
+          className="text-slate-800"
         >
           <polyline points="9 18 15 12 9 6" />
         </svg>

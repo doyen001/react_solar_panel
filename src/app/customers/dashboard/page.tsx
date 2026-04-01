@@ -64,28 +64,28 @@ export default function CustomerDashboardPage() {
             value="6.6 kW"
             sublabel="16 panels"
             iconSrc={dashboardAssets.kpiSystem}
-            iconBgClass="bg-[rgba(9,35,74,0.07)]"
+            iconBgClass="bg-navy-800/7"
           />
           <DashboardKpiCard
             label="Annual Output"
             value="9,636 kWh"
             sublabel="projected"
             iconSrc={dashboardAssets.kpiOutput}
-            iconBgClass="bg-[rgba(247,141,0,0.07)]"
+            iconBgClass="bg-orange-amber/7"
           />
           <DashboardKpiCard
             label="Est. Savings"
             value="$1,840/yr"
             sublabel="per year"
             iconSrc={dashboardAssets.kpiSavings}
-            iconBgClass="bg-[rgba(22,163,74,0.07)]"
+            iconBgClass="bg-success/7"
           />
           <DashboardKpiCard
             label="Total Price"
             value="$8,500"
             sublabel="inc. installation"
             iconSrc={dashboardAssets.kpiPrice}
-            iconBgClass="bg-[rgba(9,35,74,0.07)]"
+            iconBgClass="bg-navy-800/7"
           />
         </div>
 

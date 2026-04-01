@@ -9,27 +9,27 @@ const ACTIONS: {
   {
     label: "View Design PDF",
     icon: "actionPdf",
-    iconBg: "bg-[rgba(9,35,74,0.07)]",
+    iconBg: "bg-navy-800/7",
   },
   {
     label: "Browse Products",
     icon: "actionProducts",
-    iconBg: "bg-[rgba(247,141,0,0.07)]",
+    iconBg: "bg-orange-amber/7",
   },
   {
     label: "Message Installer",
     icon: "actionMessage",
-    iconBg: "bg-[rgba(22,163,74,0.07)]",
+    iconBg: "bg-success/7",
   },
   {
     label: "Schedule Visit",
     icon: "actionSchedule",
-    iconBg: "bg-[rgba(48,69,102,0.07)]",
+    iconBg: "bg-blue-slate/7",
   },
   {
     label: "Get Help",
     icon: "actionHelp",
-    iconBg: "bg-[rgba(124,115,106,0.07)]",
+    iconBg: "bg-warm-gray/7",
   },
 ];
 
@@ -40,7 +40,7 @@ export function DashboardQuickActions() {
         <button
           key={a.label}
           type="button"
-          className="flex flex-col items-center gap-2 rounded-[10px] border border-[#dfd5c3] bg-[#fcfbf8] px-2 py-[17px] text-center transition-colors hover:bg-[#f5f0e8]"
+          className="flex flex-col items-center gap-2 rounded-[10px] border border-warm-border bg-cream-50 px-2 py-[17px] text-center transition-colors hover:bg-cream-150"
         >
           <div
             className={`flex size-9 items-center justify-center rounded-[10px] ${a.iconBg}`}
@@ -54,7 +54,7 @@ export function DashboardQuickActions() {
             />
           </div>
           <span
-            className="font-dm-sans text-[11px] font-semibold leading-[16.5px] text-[#2a2622]"
+            className="font-dm-sans text-[11px] font-semibold leading-[16.5px] text-warm-ink"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {a.label}

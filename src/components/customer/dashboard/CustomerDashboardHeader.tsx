@@ -32,22 +32,22 @@ export function CustomerDashboardHeader({
   headerAccessory,
 }: Props) {
   return (
-    <header className="sticky top-0 z-40 border-b border-[#dfd5c3] bg-[#fcfbf8]">
+    <header className="sticky top-0 z-40 border-b border-warm-border bg-cream-50">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 lg:px-5">
         <div className="flex min-w-0 items-center gap-4 sm:gap-5">
           <Link href="/" className="flex shrink-0 items-center gap-4 sm:gap-5">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-[7.72px] bg-[#09234a]">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-[7.72px] bg-navy-800">
               <IconSolarDesignLogo className="w-[30px] h-[30px]" />
             </div>
             <span
-              className="font-inter text-[13px] font-bold leading-[19.5px] tracking-[0.3px] text-[#2a2622]"
+              className="font-inter text-[13px] font-bold leading-[19.5px] tracking-[0.3px] text-warm-ink"
               style={{ fontFeatureSettings: '"liga" 1' }}
             >
               My Solar Portal
             </span>
           </Link>
           <div
-            className="hidden h-6 w-px shrink-0 bg-[#dfd5c3] sm:block"
+            className="hidden h-6 w-px shrink-0 bg-warm-border sm:block"
             aria-hidden
           />
         </div>
@@ -72,15 +72,15 @@ export function CustomerDashboardHeader({
                 <span
                   className={
                     active
-                      ? "text-[#2a2622]"
-                      : "text-[#7c736a] hover:text-[#2a2622]"
+                      ? "text-warm-ink"
+                      : "text-warm-gray hover:text-warm-ink"
                   }
                 >
                   {item.label}
                 </span>
                 {active ? (
                   <span
-                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-gradient-to-b from-[#ffef62] to-[#f78d00]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-gradient-to-b from-yellow-lemon to-orange-amber"
                     aria-hidden
                   />
                 ) : null}
@@ -117,7 +117,7 @@ export function CustomerDashboardHeader({
               unoptimized
             />
             {notificationCount > 0 ? (
-              <span className="absolute right-0.5 top-0.5 flex size-3.5 items-center justify-center rounded-full bg-[#ef4444] font-inter text-[8px] font-bold leading-3 text-white">
+              <span className="absolute right-0.5 top-0.5 flex size-3.5 items-center justify-center rounded-full bg-danger font-inter text-[8px] font-bold leading-3 text-white">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             ) : null}

@@ -360,7 +360,7 @@ export default function CustomerAuthPage() {
   }, [mode]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0b1320]">
+    <main className="relative min-h-screen overflow-hidden bg-void">
       <div className="absolute inset-0">
         <Image
           src="/images/home/login-background.png"

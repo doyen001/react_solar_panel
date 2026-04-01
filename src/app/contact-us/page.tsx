@@ -6,7 +6,7 @@ import { SendUsAndPartnerSection } from "@/components/pages/contact/SendUsAndPar
 
 export default function ContactUsPage() {
   return (
-    <main className="min-h-screen bg-[#f8c532]">
+    <main className="min-h-screen bg-solar-gold">
       <HeroSection />
       <SendUsAndPartnerSection />
       <BusinessAssociatesSection />

@@ -31,9 +31,9 @@ export function ProjectTimeline({
   }));
 
   return (
-    <section className="flex min-h-[min(533px,80vh)] flex-col overflow-hidden rounded-[10px] border border-[#dfd5c3] bg-[#fcfbf8] lg:min-h-[520px]">
-      <div className="border-l-2 border-[#ffef62] bg-gradient-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[18px] pr-4 py-2.5">
-        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-[#2a2622]">
+    <section className="flex min-h-[min(533px,80vh)] flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 lg:min-h-[520px]">
+      <div className="border-l-2 border-yellow-lemon bg-gradient-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 py-2.5">
+        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
           {title}
         </h2>
       </div>
@@ -51,7 +51,7 @@ export function ProjectTimeline({
                   {!isLast ? (
                     <div
                       className={`mt-0.5 w-0.5 flex-1 min-h-[48px] rounded-full ${
-                        segmentGreen ? "bg-[#16a34a]" : "bg-[#dfd5c3]"
+                        segmentGreen ? "bg-success" : "bg-warm-border"
                       }`}
                       aria-hidden
                     />
@@ -61,15 +61,15 @@ export function ProjectTimeline({
                   <p
                     className={`font-dm-sans text-xs font-medium leading-[18px] ${
                       step.state === "completed"
-                        ? "text-[#2a2622]"
-                        : "text-[#7c736a]"
+                        ? "text-warm-ink"
+                        : "text-warm-gray"
                     }`}
                     style={{ fontVariationSettings: "'opsz' 14" }}
                   >
                     {step.title}
                   </p>
                   <p
-                    className="mt-1.5 font-dm-sans text-[10px] font-normal leading-[15px] text-[#7c736a]"
+                    className="mt-1.5 font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray"
                     style={{ fontVariationSettings: "'opsz' 9" }}
                   >
                     {step.dateLabel ?? "—"}
@@ -88,7 +88,7 @@ export function ProjectTimeline({
 function TimelineDot({ state }: { state: TimelineStep["state"] }) {
   if (state === "completed") {
     return (
-      <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#16a34a]">
+      <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-success">
         <Image
           src={dashboardAssets.check}
           alt=""
@@ -102,8 +102,8 @@ function TimelineDot({ state }: { state: TimelineStep["state"] }) {
 
   return (
     <div
-      className={`size-5 shrink-0 rounded-full border border-[#dfd5c3] bg-white ${
-        state === "current" ? "ring-1 ring-[#dfd5c3]" : ""
+      className={`size-5 shrink-0 rounded-full border border-warm-border bg-white ${
+        state === "current" ? "ring-1 ring-warm-border" : ""
       }`}
       aria-hidden
     />

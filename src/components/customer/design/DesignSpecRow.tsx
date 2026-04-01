@@ -10,9 +10,9 @@ export function DesignSpecRow({
   valueEmphasis = "default",
 }: Props) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-[#ede8de]/80 py-1.5 last:border-0">
+    <div className="flex items-start justify-between gap-3 border-b border-cream-300/80 py-1.5 last:border-0">
       <span
-        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-[#7c736a]"
+        className="shrink-0 font-dm-sans text-xs font-normal leading-[18px] text-warm-gray"
         style={{ fontVariationSettings: "'opsz' 9" }}
       >
         {label}
@@ -30,7 +30,7 @@ export function DesignSpecRow({
         </span>
       ) : (
         <span
-          className="max-w-[60%] text-right font-dm-sans text-xs font-medium leading-[18px] text-[#2a2622]"
+          className="max-w-[60%] text-right font-dm-sans text-xs font-medium leading-[18px] text-warm-ink"
           style={{ fontVariationSettings: "'opsz' 14" }}
         >
           {value}

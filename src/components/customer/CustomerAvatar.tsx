@@ -8,9 +8,9 @@ const sizeClasses = {
 } as const;
 
 const variantClasses = {
-  navy: "bg-gradient-to-b from-[#09234a] to-[#304566] text-white",
-  gradient: "bg-gradient-to-b from-[#ffef62] to-[#f78d00] text-[#1c1a17]",
-  orange: "bg-[#f78d00] text-white",
+  navy: "bg-gradient-to-b from-navy-800 to-blue-slate text-white",
+  gradient: "bg-gradient-to-b from-yellow-lemon to-orange-amber text-warm-black",
+  orange: "bg-orange-amber text-white",
 } as const;
 
 type Props = {
