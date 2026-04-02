@@ -1,58 +1,55 @@
 "use client";
 
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import classNames from "classnames";
 
-import authUser from "@/components/ui/Icons/auth-user.svg";
-import authLock from "@/components/ui/Icons/auth-lock.svg";
-import authPhone from "@/components/ui/Icons/auth-phone.svg";
-import authMail from "@/components/ui/Icons/auth-mail.svg";
-import authPin from "@/components/ui/Icons/auth-pin.svg";
-import authEye from "@/components/ui/Icons/auth-eye.svg";
-import authArrowIn from "@/components/ui/Icons/auth-arrow-in.svg";
-import authUserPlus from "@/components/ui/Icons/auth-user-plus.svg";
-import circleQuestion from "@/components/ui/Icons/circle-question.svg";
-const Search = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/search.svg"),
-);
-const CheckCircle = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/check-circle.svg"),
-);
-const Bell = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/bell.svg"),
-);
-const Sun = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/sun.svg"),
-);
-const Check = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/check.svg"),
-);
-const MessageSquare = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/messageSquare.svg"),
-);
-const Doc = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/doc.svg"),
-);
-const Calendar = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/calendar.svg"),
-);
-const QuestionCircle = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/question-circle.svg"),
-);
-const Dollar = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/dollar.svg"),
-);
-const Light = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/light.svg"),
-);
-const LightCheck = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/light-check.svg"),
-);
-const Shop = dynamic<{ className?: string }>(
-  () => import("@/components/ui/Icons/shop.svg"),
-);
+type SvgComponentModule = {
+  default: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
 
+function createDynamicSvgIcon(loader: () => Promise<SvgComponentModule>) {
+  return dynamic(async () => {
+    const mod = await loader();
+    return mod.default;
+  });
+}
+
+const Search = createDynamicSvgIcon(() => import("./search.svg?component"));
+const CheckCircle = createDynamicSvgIcon(
+  () => import("./check-circle.svg?component"),
+);
+const Bell = createDynamicSvgIcon(() => import("./bell.svg?component"));
+const Sun = createDynamicSvgIcon(() => import("./sun.svg?component"));
+const Check = createDynamicSvgIcon(() => import("./check.svg?component"));
+const MessageSquare = createDynamicSvgIcon(
+  () => import("./messageSquare.svg?component"),
+);
+const Doc = createDynamicSvgIcon(() => import("./doc.svg?component"));
+const Calendar = createDynamicSvgIcon(() => import("./calendar.svg?component"));
+const QuestionCircle = createDynamicSvgIcon(
+  () => import("./question-circle.svg?component"),
+);
+const Dollar = createDynamicSvgIcon(() => import("./dollar.svg?component"));
+const Light = createDynamicSvgIcon(() => import("./light.svg?component"));
+const LightCheck = createDynamicSvgIcon(
+  () => import("./light-check.svg?component"),
+);
+const Shop = createDynamicSvgIcon(() => import("./shop.svg?component"));
+const User = createDynamicSvgIcon(() => import("./user.svg?component"));
+const Lock = createDynamicSvgIcon(() => import("./lock.svg?component"));
+const Phone = createDynamicSvgIcon(() => import("./phone.svg?component"));
+const Mail = createDynamicSvgIcon(() => import("./mail.svg?component"));
+const Pin = createDynamicSvgIcon(() => import("./pin.svg?component"));
+const Eye = createDynamicSvgIcon(() => import("./eye.svg?component"));
+const ArrowRight = createDynamicSvgIcon(
+  () => import("./arrow-right.svg?component"),
+);
+const UserPlus = createDynamicSvgIcon(
+  () => import("./user-plus.svg?component"),
+);
+const CircleQuestion = createDynamicSvgIcon(
+  () => import("./circle-question.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -66,69 +63,21 @@ export type IconType =
   | "Dollar"
   | "Light"
   | "LightCheck"
-  | "Shop";
+  | "Shop"
+  | "User"
+  | "Lock"
+  | "Phone"
+  | "Mail"
+  | "Pin"
+  | "Eye"
+  | "ArrowRight"
+  | "UserPlus"
+  | "CircleQuestion";
 
 type IconProps = {
   name: IconType | undefined;
   className?: string;
-  onClick?: React.MouseEventHandler<HTMLInputElement> | undefined;
 };
-
-function SvgIcon({
-  src,
-  size,
-  className,
-}: {
-  src: unknown;
-  size: number;
-  className?: string;
-}) {
-  return (
-    <Image
-      src={src as never}
-      alt=""
-      width={size}
-      height={size}
-      className={className}
-    />
-  );
-}
-
-export function IconUser(props: { className?: string }) {
-  return <SvgIcon src={authUser} size={16} className={props.className} />;
-}
-
-export function IconLock(props: { className?: string }) {
-  return <SvgIcon src={authLock} size={16} className={props.className} />;
-}
-
-export function IconPhone(props: { className?: string }) {
-  return <SvgIcon src={authPhone} size={16} className={props.className} />;
-}
-
-export function IconMail(props: { className?: string }) {
-  return <SvgIcon src={authMail} size={16} className={props.className} />;
-}
-
-export function IconPin(props: { className?: string }) {
-  return <SvgIcon src={authPin} size={16} className={props.className} />;
-}
-
-export function IconEye(props: { className?: string }) {
-  return <SvgIcon src={authEye} size={16} className={props.className} />;
-}
-
-export function IconArrowIn(props: { className?: string }) {
-  return <SvgIcon src={authArrowIn} size={18} className={props.className} />;
-}
-
-export function IconUserPlus(props: { className?: string }) {
-  return <SvgIcon src={authUserPlus} size={18} className={props.className} />;
-}
-
-export function IconCircleQuestion(props: { className?: string }) {
-  return <SvgIcon src={circleQuestion} size={20} className={props.className} />;
-}
 
 const Icon: React.FC<IconProps> = ({ name, className }) => {
   if (!name) {
@@ -149,6 +98,15 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
     Light,
     LightCheck,
     Shop,
+    User,
+    Lock,
+    Phone,
+    Mail,
+    Pin,
+    Eye,
+    ArrowRight,
+    UserPlus,
+    CircleQuestion,
   };
 
   const CurrentIcon = icons[name];

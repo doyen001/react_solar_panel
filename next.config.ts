@@ -1,11 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  webpack(config, { isServer }) {
-    config.module.rules.push({
-      test: /\.svg$/,
+  turbopack: {},
+  webpack(config) {
+    config.module.rules.unshift({
+      test: /\.svg$/i,
+      resourceQuery: /component/,
       use: ["@svgr/webpack"],
+    });
+    config.module.rules.unshift({
+      test: /\.svg$/i,
+      resourceQuery: { not: [/component/] },
+      type: "asset/resource",
     });
 
     return config;

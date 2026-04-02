@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { IconCircleQuestion } from "../../ui/Icons";
+import Icon from "../../ui/Icons";
 
 type Lang = "en-uk" | "en-au";
 
@@ -49,7 +49,7 @@ export function DesignTopBar() {
           aria-label="Help"
           className="grid size-[20px] place-items-center text-gold-2"
         >
-          <IconCircleQuestion />
+          <Icon name="CircleQuestion" />
         </button>
 
         <div ref={dropdownRef} className="relative">

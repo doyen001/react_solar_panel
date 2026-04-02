@@ -1,5 +1,5 @@
+import Icon from "../../ui/Icons";
 import { DesignsHeroProgressBar } from "./DesignsHeroProgressBar";
-import { IconArrowIn } from "../../ui/Icons";
 
 type DesignsHeroFooterProps = {
   className?: string;
@@ -32,7 +32,7 @@ export function DesignsHeroFooter({
               className="inline-flex min-h-12 min-w-[157px] items-center justify-center gap-[14px] rounded-xl bg-design-next font-source-sans text-[18px] font-semibold uppercase leading-6 text-black shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-95"
             >
               Next
-              <IconArrowIn className="size-6" />
+              <Icon name="ArrowRight" className="size-6" />
             </button>
           </div>
         )}

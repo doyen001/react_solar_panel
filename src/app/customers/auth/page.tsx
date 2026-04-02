@@ -11,16 +11,7 @@ import {
   AuthGhostButton,
   AuthPrimaryButton,
 } from "@/components/ui/auth/AuthButtons";
-import {
-  IconArrowIn,
-  IconEye,
-  IconLock,
-  IconMail,
-  IconPhone,
-  IconPin,
-  IconUser,
-  IconUserPlus,
-} from "@/components/ui/Icons";
+import Icon from "@/components/ui/Icons";
 import {
   signInSchema,
   signUpSchema,
@@ -133,14 +124,14 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 
         <div className="flex flex-col gap-[10px]">
           <AuthField
-            icon={<IconUser />}
+            icon={<Icon name="User" />}
             placeholder="Email"
             inputClassName="text-[16px] tracking-[-0.3125px]"
             error={errors.email?.message}
             {...register("email")}
           />
           <AuthField
-            icon={<IconLock />}
+            icon={<Icon name="Lock" />}
             placeholder="Password"
             type={showPassword ? "text" : "password"}
             inputClassName="text-[16px] tracking-[-0.3125px]"
@@ -152,7 +143,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
                 onClick={() => setShowPassword((x) => !x)}
                 className="text-auth-placeholder"
               >
-                <IconEye />
+                <Icon name="Eye" />
               </button>
             }
             {...register("password")}
@@ -178,7 +169,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           </div>
 
           <AuthPrimaryButton
-            icon={<IconArrowIn />}
+            icon={<Icon name="ArrowRight" />}
             label={isSubmitting ? "Signing in..." : "Sign In"}
             borderVariant="gradient"
             type="submit"
@@ -282,33 +273,33 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 
         <div className="flex flex-col gap-[12px]">
           <AuthField
-            icon={<IconUser />}
+            icon={<Icon name="User" />}
             placeholder="John"
             error={errors.firstName?.message}
             {...register("firstName")}
           />
           <AuthField
-            icon={<IconUser />}
+            icon={<Icon name="User" />}
             placeholder="Doe"
             error={errors.lastName?.message}
             {...register("lastName")}
           />
           <AuthField
-            icon={<IconPhone />}
+            icon={<Icon name="Phone" />}
             placeholder="+1 234 567 8900"
             type="tel"
             error={errors.phone?.message}
             {...register("phone")}
           />
           <AuthField
-            icon={<IconMail />}
+            icon={<Icon name="Mail" />}
             placeholder="john@example.com"
             type="email"
             error={errors.email?.message}
             {...register("email")}
           />
           <AuthField
-            icon={<IconLock />}
+            icon={<Icon name="Lock" />}
             placeholder="Min 6 characters"
             type={showPassword ? "text" : "password"}
             error={errors.password?.message}
@@ -319,20 +310,20 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
                 onClick={() => setShowPassword((x) => !x)}
                 className="text-auth-placeholder"
               >
-                <IconEye />
+                <Icon name="Eye" />
               </button>
             }
             {...register("password")}
           />
           <AuthField
-            icon={<IconPin />}
+            icon={<Icon name="Pin" />}
             placeholder="123 Main St"
             error={errors.address?.message}
             {...register("address")}
           />
 
           <AuthPrimaryButton
-            icon={<IconUserPlus />}
+            icon={<Icon name="UserPlus" />}
             label={isSubmitting ? "Signing up..." : "Sign Up"}
             type="submit"
           />
