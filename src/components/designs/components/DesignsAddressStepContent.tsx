@@ -49,13 +49,7 @@ export function DesignsRegisterStepContent() {
           </div>
         </div>
 
-        <div
-          className="w-full max-w-[649px] shrink-0 rounded-[28px] p-[3px] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]"
-          style={{
-            background:
-              "linear-gradient(180deg, #00B0F0 0%, #F00 47.6%, #7030A0 100%)",
-          }}
-        >
+        <div className="w-full max-w-[649px] shrink-0 designs-border-gradient rounded-[28px] p-[3px] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]">
           <div className="flex min-h-[525px] w-full h-full items-center rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)] px-6 py-10 backdrop-blur-[17.8px] sm:px-10 lg:px-[71px]">
             <form
               className="flex w-full flex-col gap-[26px]"

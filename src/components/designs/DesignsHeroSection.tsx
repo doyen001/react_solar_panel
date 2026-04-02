@@ -4,6 +4,7 @@ import { useState } from "react";
 import { DesignTopBar } from "../modules/DesignTopBar";
 import { DESIGNS_PROPERTY_TYPES } from "@/utils/constant";
 import { DesignsRegisterStepContent } from "./components/DesignsAddressStepContent";
+import { DesignsLocationStepContent } from "./components/DesignsLocationStepContent";
 import { DesignsHeroBackground } from "./components/DesignsHeroBackground";
 import { DesignsHeroFooter } from "./components/DesignsHeroFooter";
 import { DesignsHeadlineBanner } from "./components/DesignsHeadlineBanner";
@@ -71,7 +72,7 @@ export function DesignsHeroSection({
       ) : activeScreen === "register" ? (
         <DesignsRegisterStepContent />
       ) : activeScreen === "address" ? (
-        <></>
+        <DesignsLocationStepContent />
       ) : activeScreen === "end" ? (
         <></>
       ) : (

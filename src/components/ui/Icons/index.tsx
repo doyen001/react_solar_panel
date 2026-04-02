@@ -50,6 +50,9 @@ const UserPlus = createDynamicSvgIcon(
 const CircleQuestion = createDynamicSvgIcon(
   () => import("./circle-question.svg?component"),
 );
+const LocationPin = createDynamicSvgIcon(
+  () => import("./location-pin.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -72,7 +75,8 @@ export type IconType =
   | "Eye"
   | "ArrowRight"
   | "UserPlus"
-  | "CircleQuestion";
+  | "CircleQuestion"
+  | "LocationPin";
 
 type IconProps = {
   name: IconType | undefined;
@@ -107,6 +111,7 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
     ArrowRight,
     UserPlus,
     CircleQuestion,
+    LocationPin,
   };
 
   const CurrentIcon = icons[name];

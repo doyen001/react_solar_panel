@@ -53,3 +53,12 @@ export const DESIGNS_REGISTER_STEP = {
   phoneCountry: "au",
   phonePlaceholder: "0451 503 035",
 } as const;
+
+export const DESIGNS_LOCATION_STEP = {
+  title: "Lets Design your System, enter your address",
+  inputLabel: "Enter your address",
+  inputPlaceholder: "e.g. 42 Bondi Rd, Bondi, NSW 2026",
+  defaultZoom: 20,
+  defaultCenter: { lat: -33.8688, lng: 151.2093 },
+  mapType: "satellite" as const,
+} as const;

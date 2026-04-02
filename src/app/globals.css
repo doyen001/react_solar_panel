@@ -246,3 +246,37 @@ button {
 .designs-phone-dropdown .country {
   padding-block: 8px !important;
 }
+
+.designs-place-autocomplete {
+  display: flex;
+  align-items: center;
+}
+
+.designs-place-autocomplete gmp-place-autocomplete {
+  --gmpx-color-surface: transparent;
+  --gmpx-color-on-surface: var(--color-ink);
+  --gmpx-font-family-base: var(--font-inter), Arial, Helvetica, sans-serif;
+  --gmpx-font-size-base: 12px;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  width: 100%;
+  height: 100%;
+}
+
+.designs-place-autocomplete gmp-place-autocomplete::part(input) {
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.1668px;
+  color: var(--color-ink);
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  height: 100%;
+}
+
+.designs-border-gradient {
+  background: linear-gradient(180deg, #00b0f0 0%, #f00 47.6%, #7030a0 100%);
+}
