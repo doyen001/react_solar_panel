@@ -176,3 +176,73 @@ button {
     var(--color-coral) 100%
   );
 }
+
+.designs-phone-field {
+  width: 100%;
+}
+
+.designs-phone-field .form-control {
+  width: 100% !important;
+  height: 55.529px !important;
+  border: 1px solid var(--color-yellow-lemon) !important;
+  border-radius: 11.094px !important;
+  background: transparent !important;
+  padding-left: 80px !important;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif !important;
+  font-size: 17.75px !important;
+  line-height: normal !important;
+  letter-spacing: -0.3467px !important;
+  color: var(--color-gray-1) !important;
+  box-shadow: none !important;
+}
+
+.designs-phone-field .form-control::placeholder {
+  color: rgb(255 255 255 / 0.7) !important;
+}
+
+.designs-phone-field .form-control:focus {
+  border-color: var(--color-yellow-lemon) !important;
+  box-shadow: 0 0 0 2px rgb(255 239 98 / 0.2) !important;
+}
+
+.designs-phone-field .flag-dropdown {
+  width: 60px !important;
+  border: 1px solid var(--color-gray-6) !important;
+  border-right: 0 !important;
+  border-radius: 11.094px 0 0 11.094px !important;
+  background: #f9fafb !important;
+}
+
+.designs-phone-field .selected-flag {
+  width: 100% !important;
+  padding: 0 30px 0 14px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.designs-phone-field .selected-flag:hover,
+.designs-phone-field .selected-flag:focus {
+  background: transparent !important;
+}
+
+.designs-phone-field .selected-flag .flag {
+  left: 14px !important;
+  margin-top: -5px !important;
+}
+
+.designs-phone-field .selected-flag .arrow {
+  right: 12px !important;
+}
+
+.designs-phone-dropdown {
+  width: 280px !important;
+  margin-top: 8px !important;
+  border: 1px solid var(--color-gray-6) !important;
+  border-radius: 12px !important;
+  background: var(--color-gray-1) !important;
+  color: var(--color-ink) !important;
+}
+
+.designs-phone-dropdown .country {
+  padding-block: 8px !important;
+}

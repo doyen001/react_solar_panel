@@ -31,9 +31,9 @@ export function DesignsPropertyTypeCard({
         <Image
           src={imageSrc}
           alt={imageAlt}
-          fill
-          className="object-cover"
-          sizes="(max-width: 1024px) 100vw, 407px"
+          className="absolute inset-0 h-full w-full object-cover"
+          width={407.6}
+          height={264.233}
         />
         <DesignsHeroBadgeOverlay />
       </div>

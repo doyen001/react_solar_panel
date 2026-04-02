@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import { DesignTopBar } from "../modules/DesignTopBar";
+import { DESIGNS_PROPERTY_TYPES } from "@/utils/constant";
+import { DesignsAddressStepContent } from "./components/DesignsAddressStepContent";
 import { DesignsHeroBackground } from "./components/DesignsHeroBackground";
 import { DesignsHeroFooter } from "./components/DesignsHeroFooter";
+import { DesignsHeadlineBanner } from "./components/DesignsHeadlineBanner";
 import { DesignsHeroImagePanel } from "./components/DesignsHeroImagePanel";
 import { DesignsHeroTagline } from "./components/DesignsHeroTagline";
+import { DesignsPropertyTypeCard } from "./components/DesignsPropertyTypeCard";
 import { DesignsSavingsPromoCard } from "./components/DesignsSavingsPromoCard";
 
 type DesignsHeroSectionProps = {
@@ -49,6 +53,24 @@ export function DesignsHeroSection({
           </div>
           <DesignsHeroTagline />
         </div>
+      ) : activeScreen === "second" ? (
+        <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col gap-[36px] px-4 pt-10 sm:px-8 sm:pt-12 lg:px-[81px] lg:pt-[37px]">
+          <DesignsHeadlineBanner />
+          <div className="flex w-full max-w-[1278px] flex-col items-center gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-[29px]">
+            {DESIGNS_PROPERTY_TYPES.map((propertyType) => (
+              <DesignsPropertyTypeCard
+                key={propertyType.id}
+                imageSrc={propertyType.imageSrc}
+                imageAlt={propertyType.imageAlt}
+                label={propertyType.label}
+              />
+            ))}
+          </div>
+        </div>
+      ) : activeScreen === "address" ? (
+        <DesignsAddressStepContent />
+      ) : activeScreen === "end" ? (
+        <></>
       ) : (
         <></>
       )}
