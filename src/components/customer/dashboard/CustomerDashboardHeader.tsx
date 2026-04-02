@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
-import { dashboardAssets } from "./assets";
+import Icon from "../../ui/Icons";
 
 const NAV = [
   { href: "/customers/dashboard", label: "Dashboard", key: "dashboard" },
@@ -98,28 +98,16 @@ export function CustomerDashboardHeader({
           <button
             type="button"
             aria-label="Search"
-            className="flex size-8 items-center justify-center rounded-full hover:bg-black/5"
+            className="flex size-8 items-center justify-center rounded-full text-warm-ink hover:bg-black/5"
           >
-            <Image
-              src={dashboardAssets.search}
-              alt=""
-              width={18}
-              height={18}
-              unoptimized
-            />
+            <Icon name="Search" className="size-[18px] text-warm-gray" />
           </button>
           <button
             type="button"
             aria-label="Notifications"
-            className="relative flex size-8 items-center justify-center rounded-full hover:bg-black/5"
+            className="relative flex size-8 items-center justify-center rounded-full text-warm-ink hover:bg-black/5"
           >
-            <Image
-              src={dashboardAssets.bell}
-              alt=""
-              width={18}
-              height={18}
-              unoptimized
-            />
+            <Icon name="Bell" className="size-[18px] text-warm-gray" />
             {notificationCount > 0 ? (
               <span className="absolute right-0.5 top-0.5 flex size-3.5 items-center justify-center rounded-full bg-danger font-inter text-[8px] font-bold leading-3 text-white">
                 {notificationCount > 9 ? "9+" : notificationCount}

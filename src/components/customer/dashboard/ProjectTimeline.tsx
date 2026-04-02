@@ -1,9 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Image from "next/image";
-import { dashboardAssets } from "./assets";
 import type { TimelineStep } from "./types";
+import Icon from "../../ui/Icons";
 
 type Props = {
   title?: string;
@@ -88,14 +87,8 @@ export function ProjectTimeline({
 function TimelineDot({ state }: { state: TimelineStep["state"] }) {
   if (state === "completed") {
     return (
-      <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-success">
-        <Image
-          src={dashboardAssets.check}
-          alt=""
-          width={12}
-          height={12}
-          unoptimized
-        />
+      <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-success text-white">
+        <Icon name="Check" className="size-3 text-white" />
       </div>
     );
   }

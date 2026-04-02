@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { dashboardAssets } from "./assets";
 import type { DesignOption } from "./types";
+import Icon from "../../ui/Icons";
 
 type Props = {
   option: DesignOption;
@@ -33,15 +33,8 @@ export function DesignOptionCard({ option, selected, onSelect }: Props) {
           />
         </div>
         {selected ? (
-          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber px-2 py-0.5 pl-2">
-            <Image
-              src={dashboardAssets.checkCircle}
-              alt=""
-              width={12}
-              height={12}
-              className="size-3"
-              unoptimized
-            />
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber px-2 py-0.5 pl-2 text-warm-black">
+            <Icon name="CheckCircle" className="size-3 text-warm-black" />
             <span
               className="font-dm-sans text-[8px] font-bold uppercase leading-3 tracking-[0.3px] text-warm-black"
               style={{ fontVariationSettings: "'opsz' 14" }}

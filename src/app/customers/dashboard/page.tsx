@@ -8,12 +8,10 @@ import {
   DEFAULT_TIMELINE_ACTIVE_INDEX,
 } from "@/components/customer/dashboard/dashboardConstants";
 import { DashboardKpiCard } from "@/components/customer/dashboard/DashboardKpiCard";
-import { DashboardQuickActions } from "@/components/customer/dashboard/DashboardQuickActions";
 import { DashboardWelcomeBanner } from "@/components/customer/dashboard/DashboardWelcomeBanner";
 import { ProjectTimeline } from "@/components/customer/dashboard/ProjectTimeline";
 import { TimelineInstallerCard } from "@/components/customer/dashboard/TimelineInstallerCard";
 import { YourDesignsSection } from "@/components/customer/dashboard/YourDesignsSection";
-import { dashboardAssets } from "@/components/customer/dashboard/assets";
 import { useAppSelector } from "@/lib/store/hooks";
 
 export default function CustomerDashboardPage() {
@@ -63,28 +61,28 @@ export default function CustomerDashboardPage() {
             label="System Size"
             value="6.6 kW"
             sublabel="16 panels"
-            iconSrc={dashboardAssets.kpiSystem}
+            icon="Light"
             iconBgClass="bg-navy-800/7"
           />
           <DashboardKpiCard
             label="Annual Output"
             value="9,636 kWh"
             sublabel="projected"
-            iconSrc={dashboardAssets.kpiOutput}
+            icon="LightCheck"
             iconBgClass="bg-orange-amber/7"
           />
           <DashboardKpiCard
             label="Est. Savings"
             value="$1,840/yr"
             sublabel="per year"
-            iconSrc={dashboardAssets.kpiSavings}
+            icon="Dollar"
             iconBgClass="bg-success/7"
           />
           <DashboardKpiCard
             label="Total Price"
             value="$8,500"
             sublabel="inc. installation"
-            iconSrc={dashboardAssets.kpiPrice}
+            icon="Shop"
             iconBgClass="bg-navy-800/7"
           />
         </div>
@@ -108,8 +106,6 @@ export default function CustomerDashboardPage() {
             }
           />
         </div>
-
-        <DashboardQuickActions />
       </main>
     </div>
   );

@@ -1,10 +1,10 @@
-import Image, { type StaticImageData } from "next/image";
+import Icon, { IconType } from "../../ui/Icons";
 
 type Props = {
   label: string;
   value: string;
   sublabel: string;
-  iconSrc: string | StaticImageData;
+  icon: IconType;
   iconBgClass: string;
 };
 
@@ -12,7 +12,7 @@ export function DashboardKpiCard({
   label,
   value,
   sublabel,
-  iconSrc,
+  icon,
   iconBgClass,
 }: Props) {
   return (
@@ -27,7 +27,7 @@ export function DashboardKpiCard({
         <div
           className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${iconBgClass}`}
         >
-          <Image src={iconSrc} alt="" width={16} height={16} unoptimized />
+          <Icon name={icon} className="size-4 text-blue-700" />
         </div>
       </div>
       <p className="mt-3 font-inter text-2xl font-bold leading-7 text-warm-ink">

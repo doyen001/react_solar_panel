@@ -1,0 +1,9 @@
+<svg viewBox="0 0 400 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pcb2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#2094f3" stop-opacity="0.08" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="80" fill="url(#pcb2)" />
+</svg>

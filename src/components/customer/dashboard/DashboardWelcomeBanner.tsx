@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { dashboardAssets } from "./assets";
+import Icon from "../../ui/Icons";
 
 type Props = {
   firstName: string;
@@ -25,14 +24,8 @@ export function DashboardWelcomeBanner({
       }}
     >
       <div className="flex min-w-0 items-center gap-4">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-warm-black/15">
-          <Image
-            src={dashboardAssets.sun}
-            alt=""
-            width={24}
-            height={24}
-            unoptimized
-          />
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-warm-black/15 text-warm-black">
+          <Icon name="Sun" className="size-6 text-warm-black" />
         </div>
         <div className="min-w-0">
           <h1 className="font-inter text-xl font-bold leading-[30px] text-warm-black">
