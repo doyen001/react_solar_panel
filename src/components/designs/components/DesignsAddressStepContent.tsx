@@ -3,20 +3,20 @@
 import { useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { DESIGNS_ADDRESS_STEP } from "@/utils/constant";
+import { DESIGNS_REGISTER_STEP } from "@/utils/constant";
 
-type AddressFormState = {
+type RegisterFormState = {
   name: string;
   email: string;
   phone: string;
 };
 
 /**
- * Figma 3:4109 — intro panel + contact form for the address step.
+ * Figma 3:4109 — intro panel + contact form for the Register step.
  */
-export function DesignsAddressStepContent() {
-  const [formValues, setFormValues] = useState<AddressFormState>({
-    ...DESIGNS_ADDRESS_STEP.defaultValues,
+export function DesignsRegisterStepContent() {
+  const [formValues, setFormValues] = useState<RegisterFormState>({
+    ...DESIGNS_REGISTER_STEP.defaultValues,
   });
 
   return (
@@ -29,22 +29,22 @@ export function DesignsAddressStepContent() {
                 className="w-full font-source-sans text-[clamp(28px,4.8vw,40px)] font-bold capitalize leading-[1.05] text-white"
                 style={{ letterSpacing: "0.248px" }}
               >
-                {DESIGNS_ADDRESS_STEP.title}
+                {DESIGNS_REGISTER_STEP.title}
               </h2>
               <p
                 className="font-source-sans text-[clamp(20px,2.5vw,22px)] font-normal capitalize leading-[1.35] text-black"
                 style={{ letterSpacing: "0.248px" }}
               >
-                {DESIGNS_ADDRESS_STEP.summaryLines[0]}
+                {DESIGNS_REGISTER_STEP.summaryLines[0]}
                 <br />
-                {DESIGNS_ADDRESS_STEP.summaryLines[1]}
+                {DESIGNS_REGISTER_STEP.summaryLines[1]}
               </p>
             </div>
             <p
               className="font-source-sans text-[clamp(18px,2.3vw,20px)] font-normal capitalize leading-[1.45] text-black"
               style={{ letterSpacing: "0.248px" }}
             >
-              {DESIGNS_ADDRESS_STEP.description}
+              {DESIGNS_REGISTER_STEP.description}
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export function DesignsAddressStepContent() {
               className="flex w-full flex-col gap-[26px]"
               onSubmit={(e) => e.preventDefault()}
             >
-              {DESIGNS_ADDRESS_STEP.fields.map((field) => (
+              {DESIGNS_REGISTER_STEP.fields.map((field) => (
                 <label key={field.id} className="flex flex-col gap-[8px]">
                   <span className="font-inter text-[15.531px] font-semibold leading-[22.188px] tracking-[-0.1668px] text-white">
                     {field.label}
@@ -82,17 +82,17 @@ export function DesignsAddressStepContent() {
 
               <label className="flex flex-col gap-[8px]">
                 <span className="font-inter text-[15.531px] font-semibold leading-[22.188px] tracking-[-0.1668px] text-white">
-                  {DESIGNS_ADDRESS_STEP.phoneLabel}
+                  {DESIGNS_REGISTER_STEP.phoneLabel}
                 </span>
                 <PhoneInput
-                  country={DESIGNS_ADDRESS_STEP.phoneCountry}
+                  country={DESIGNS_REGISTER_STEP.phoneCountry}
                   value={formValues.phone}
                   onChange={(value) =>
                     setFormValues((prev) => ({ ...prev, phone: value }))
                   }
                   countryCodeEditable={false}
                   enableSearch={false}
-                  placeholder={DESIGNS_ADDRESS_STEP.phonePlaceholder}
+                  placeholder={DESIGNS_REGISTER_STEP.phonePlaceholder}
                   containerClass="designs-phone-field"
                   inputClass="designs-phone-control"
                   buttonClass="designs-phone-button"

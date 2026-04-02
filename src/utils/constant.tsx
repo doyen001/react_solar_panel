@@ -32,7 +32,7 @@ export type DesignsAddressField = {
   type: "text" | "email";
 };
 
-export const DESIGNS_ADDRESS_STEP = {
+export const DESIGNS_REGISTER_STEP = {
   title: "Let's Design your Solar and battery system",
   summaryLines: [
     "This helps us to send your design",

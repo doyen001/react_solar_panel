@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DesignTopBar } from "../modules/DesignTopBar";
 import { DESIGNS_PROPERTY_TYPES } from "@/utils/constant";
-import { DesignsAddressStepContent } from "./components/DesignsAddressStepContent";
+import { DesignsRegisterStepContent } from "./components/DesignsAddressStepContent";
 import { DesignsHeroBackground } from "./components/DesignsHeroBackground";
 import { DesignsHeroFooter } from "./components/DesignsHeroFooter";
 import { DesignsHeadlineBanner } from "./components/DesignsHeadlineBanner";
@@ -23,13 +23,14 @@ export function DesignsHeroSection({
   showNext = true,
 }: DesignsHeroSectionProps) {
   const [activeScreen, setActiveScreen] = useState<
-    "start" | "second" | "address" | "end"
+    "start" | "second" | "register" | "address" | "end"
   >("start");
   const [fillPercent, setFillPercent] = useState(10);
   const onNext = () => {
     setActiveScreen((prev) => {
       if (prev === "start") return "second";
-      if (prev === "second") return "address";
+      if (prev === "second") return "register";
+      if (prev === "register") return "address";
       if (prev === "address") return "end";
       return prev;
     });
@@ -67,8 +68,10 @@ export function DesignsHeroSection({
             ))}
           </div>
         </div>
+      ) : activeScreen === "register" ? (
+        <DesignsRegisterStepContent />
       ) : activeScreen === "address" ? (
-        <DesignsAddressStepContent />
+        <></>
       ) : activeScreen === "end" ? (
         <></>
       ) : (
