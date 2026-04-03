@@ -25,8 +25,9 @@ type Suggestion = {
 /**
  * Figma 3:4160 — address entry card + satellite roof map.
  * - AutocompleteService fetches predictions as the user types.
- * - Selecting a suggestion pans the map and drops a draggable pin.
- * - Dragging the pin reverse-geocodes the new position back to the input.
+ * - Selecting a suggestion moves the map center to that address.
+ * - The pin stays visually fixed at the center of the map.
+ * - Moving the map updates the address to match the centered pin position.
  */
 type DesignsLocationStepContentProps = {
   selectedAddress: string;
@@ -47,27 +48,25 @@ export function DesignsLocationStepContent({
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
   const pendingMove = useRef<{ lat: number; lng: number; zoom: number } | null>(
     null,
   );
   const mapDivRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticMoveRef = useRef(false);
 
   const [center] = useState(DESIGNS_LOCATION_STEP.defaultCenter);
+  const [mapZoom, setMapZoom] = useState(14);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);
-
-  /* ── cleanup marker on unmount ────────────────────────────── */
 
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
-      markerRef.current?.setMap(null);
     };
   }, []);
 
@@ -85,52 +84,28 @@ export function DesignsLocationStepContent({
     [onAddressChange],
   );
 
-  /* ── place / move draggable marker ───────────────────────── */
-
-  const placeMarker = useCallback(
-    (loc: { lat: number; lng: number }) => {
-      if (!mapRef.current) return;
-
-      const latLng = new google.maps.LatLng(loc.lat, loc.lng);
-
-      if (markerRef.current) {
-        markerRef.current.setPosition(latLng);
-      } else {
-        const marker = new google.maps.Marker({
-          position: latLng,
-          map: mapRef.current,
-          draggable: true,
-          animation: google.maps.Animation.DROP,
-        });
-
-        marker.addListener("dragend", () => {
-          const pos = marker.getPosition();
-          if (!pos) return;
-          onLocationChange({ lat: pos.lat(), lng: pos.lng() });
-          mapRef.current?.panTo(pos);
-          reverseGeocode(pos);
-        });
-
-        markerRef.current = marker;
-      }
-    },
-    [onLocationChange, reverseGeocode],
-  );
-
-  /* ── pan map + drop pin ───────────────────────────────────── */
+  /* ── pan map so center pin stays in sync ──────────────────── */
 
   const moveTo = useCallback(
-    (loc: { lat: number; lng: number }, z: number) => {
+    (
+      loc: { lat: number; lng: number },
+      z: number,
+      shouldReverseGeocode = false,
+    ) => {
       onLocationChange(loc);
+      setMapZoom(z);
       if (mapRef.current) {
+        isProgrammaticMoveRef.current = true;
         mapRef.current.panTo(loc);
         mapRef.current.setZoom(z);
-        placeMarker(loc);
+        if (shouldReverseGeocode) {
+          reverseGeocode(new google.maps.LatLng(loc.lat, loc.lng));
+        }
       } else {
         pendingMove.current = { ...loc, zoom: z };
       }
     },
-    [onLocationChange, placeMarker],
+    [onLocationChange, reverseGeocode],
   );
 
   const onMapLoad = useCallback(
@@ -138,14 +113,48 @@ export function DesignsLocationStepContent({
       mapRef.current = map;
       if (pendingMove.current) {
         const { lat, lng, zoom } = pendingMove.current;
+        setMapZoom(zoom);
+        isProgrammaticMoveRef.current = true;
         map.panTo({ lat, lng });
         map.setZoom(zoom);
-        placeMarker({ lat, lng });
         pendingMove.current = null;
       }
     },
-    [placeMarker],
+    [],
   );
+
+  const onZoomChanged = useCallback(() => {
+    const zoom = mapRef.current?.getZoom();
+    if (typeof zoom === "number") {
+      setMapZoom(zoom);
+    }
+  }, []);
+
+  const onMapIdle = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const mapCenter = map.getCenter();
+    if (!mapCenter) return;
+
+    const loc = { lat: mapCenter.lat(), lng: mapCenter.lng() };
+
+    if (isProgrammaticMoveRef.current) {
+      isProgrammaticMoveRef.current = false;
+      return;
+    }
+
+    if (
+      selectedLocation &&
+      Math.abs(selectedLocation.lat - loc.lat) < 0.000001 &&
+      Math.abs(selectedLocation.lng - loc.lng) < 0.000001
+    ) {
+      return;
+    }
+
+    onLocationChange(loc);
+    reverseGeocode(mapCenter);
+  }, [onLocationChange, reverseGeocode, selectedLocation]);
 
   /* ── geolocation on mount ─────────────────────────────────── */
 
@@ -156,6 +165,7 @@ export function DesignsLocationStepContent({
         moveTo(
           { lat: coords.latitude, lng: coords.longitude },
           DESIGNS_LOCATION_STEP.defaultZoom,
+          true,
         ),
       () => {},
       { enableHighAccuracy: true, timeout: 8000 },
@@ -164,8 +174,26 @@ export function DesignsLocationStepContent({
 
   useEffect(() => {
     if (!selectedLocation) return;
-    moveTo(selectedLocation, DESIGNS_LOCATION_STEP.defaultZoom);
-  }, [moveTo, selectedLocation]);
+    const map = mapRef.current;
+    const currentCenter = map?.getCenter();
+
+    if (
+      currentCenter &&
+      Math.abs(currentCenter.lat() - selectedLocation.lat) < 0.000001 &&
+      Math.abs(currentCenter.lng() - selectedLocation.lng) < 0.000001
+    ) {
+      return;
+    }
+
+    const zoom = map?.getZoom() ?? DESIGNS_LOCATION_STEP.defaultZoom;
+    if (map) {
+      isProgrammaticMoveRef.current = true;
+      map.panTo(selectedLocation);
+      map.setZoom(zoom);
+    } else {
+      pendingMove.current = { ...selectedLocation, zoom };
+    }
+  }, [selectedLocation]);
 
   /* ── close dropdown on outside click ─────────────────────── */
 
@@ -369,9 +397,11 @@ export function DesignsLocationStepContent({
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={MAP_CONTAINER}
-                center={center}
-                zoom={14}
+                center={selectedLocation ?? center}
+                zoom={mapZoom}
                 onLoad={onMapLoad}
+                onIdle={onMapIdle}
+                onZoomChanged={onZoomChanged}
                 options={{
                   disableDefaultUI: true,
                   zoomControl: true,
@@ -385,6 +415,17 @@ export function DesignsLocationStepContent({
                 </p>
               </div>
             )}
+
+            {isLoaded ? (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="flex translate-y-[-18px] flex-col items-center">
+                  <Icon
+                    name="LocationPin"
+                    className="size-[44px] text-[#FF3B30] drop-shadow-[0px_6px_14px_rgba(0,0,0,0.28)]"
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
