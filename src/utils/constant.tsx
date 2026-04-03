@@ -32,6 +32,11 @@ export type DesignsAddressField = {
   type: "text" | "email";
 };
 
+export type DesignsMapLocation = {
+  lat: number;
+  lng: number;
+};
+
 export const DESIGNS_REGISTER_STEP = {
   title: "Let's Design your Solar and battery system",
   summaryLines: [
@@ -61,4 +66,40 @@ export const DESIGNS_LOCATION_STEP = {
   defaultZoom: 20,
   defaultCenter: { lat: -33.8688, lng: 151.2093 },
   mapType: "satellite" as const,
+} as const;
+
+export type DesignsSolarPanelMetric = {
+  id: "total-roof-area" | "usable-roof-area" | "panels-fit";
+  label: string;
+  actionLabel: string;
+};
+
+export const DESIGNS_SOLAR_PANEL_STEP = {
+  title: "Our AI has found your roof",
+  descriptionLines: [
+    "You can change the roof area. Select the",
+    "roof and edit the roof. Add new roof and edit to",
+    "allow a perfect selection.",
+  ],
+  metrics: [
+    {
+      id: "total-roof-area",
+      label: "Total Roof Area",
+      actionLabel: "Edit",
+    },
+    {
+      id: "usable-roof-area",
+      label: "Usable Roof Area",
+      actionLabel: "Edit",
+    },
+    {
+      id: "panels-fit",
+      label: "Panels that can fit on your roof",
+      actionLabel: "Edit",
+    },
+  ] satisfies DesignsSolarPanelMetric[],
+  mapActions: {
+    primary: "Edit",
+    secondary: "ADD New Roof",
+  },
 } as const;

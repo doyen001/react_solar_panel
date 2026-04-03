@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import Icon from "@/components/ui/Icons";
-import { DESIGNS_LOCATION_STEP } from "@/utils/constant";
+import {
+  DESIGNS_LOCATION_STEP,
+  type DesignsMapLocation,
+} from "@/utils/constant";
 
 const LIBRARIES: "places"[] = ["places"];
 
@@ -25,7 +28,19 @@ type Suggestion = {
  * - Selecting a suggestion pans the map and drops a draggable pin.
  * - Dragging the pin reverse-geocodes the new position back to the input.
  */
-export function DesignsLocationStepContent() {
+type DesignsLocationStepContentProps = {
+  selectedAddress: string;
+  selectedLocation: DesignsMapLocation | null;
+  onAddressChange: (address: string) => void;
+  onLocationChange: (location: DesignsMapLocation) => void;
+};
+
+export function DesignsLocationStepContent({
+  selectedAddress,
+  selectedLocation,
+  onAddressChange,
+  onLocationChange,
+}: DesignsLocationStepContentProps) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
     libraries: LIBRARIES,
@@ -33,13 +48,14 @@ export function DesignsLocationStepContent() {
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
-  const pendingMove = useRef<{ lat: number; lng: number; zoom: number } | null>(null);
+  const pendingMove = useRef<{ lat: number; lng: number; zoom: number } | null>(
+    null,
+  );
   const mapDivRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [center] = useState(DESIGNS_LOCATION_STEP.defaultCenter);
-  const [address, setAddress] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);
@@ -48,20 +64,26 @@ export function DesignsLocationStepContent() {
 
   useEffect(() => {
     return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
       markerRef.current?.setMap(null);
     };
   }, []);
 
   /* ── reverse geocode a LatLng → update address input ─────── */
 
-  const reverseGeocode = useCallback((latLng: google.maps.LatLng) => {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: latLng }, (results, status) => {
-      if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
-        setAddress(results[0].formatted_address);
-      }
-    });
-  }, []);
+  const reverseGeocode = useCallback(
+    (latLng: google.maps.LatLng) => {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: latLng }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
+          onAddressChange(results[0].formatted_address);
+        }
+      });
+    },
+    [onAddressChange],
+  );
 
   /* ── place / move draggable marker ───────────────────────── */
 
@@ -84,6 +106,7 @@ export function DesignsLocationStepContent() {
         marker.addListener("dragend", () => {
           const pos = marker.getPosition();
           if (!pos) return;
+          onLocationChange({ lat: pos.lat(), lng: pos.lng() });
           mapRef.current?.panTo(pos);
           reverseGeocode(pos);
         });
@@ -91,13 +114,14 @@ export function DesignsLocationStepContent() {
         markerRef.current = marker;
       }
     },
-    [reverseGeocode],
+    [onLocationChange, reverseGeocode],
   );
 
   /* ── pan map + drop pin ───────────────────────────────────── */
 
   const moveTo = useCallback(
     (loc: { lat: number; lng: number }, z: number) => {
+      onLocationChange(loc);
       if (mapRef.current) {
         mapRef.current.panTo(loc);
         mapRef.current.setZoom(z);
@@ -106,7 +130,7 @@ export function DesignsLocationStepContent() {
         pendingMove.current = { ...loc, zoom: z };
       }
     },
-    [placeMarker],
+    [onLocationChange, placeMarker],
   );
 
   const onMapLoad = useCallback(
@@ -126,7 +150,7 @@ export function DesignsLocationStepContent() {
   /* ── geolocation on mount ─────────────────────────────────── */
 
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    if (selectedLocation || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       ({ coords }) =>
         moveTo(
@@ -136,13 +160,21 @@ export function DesignsLocationStepContent() {
       () => {},
       { enableHighAccuracy: true, timeout: 8000 },
     );
-  }, [moveTo]);
+  }, [moveTo, selectedLocation]);
+
+  useEffect(() => {
+    if (!selectedLocation) return;
+    moveTo(selectedLocation, DESIGNS_LOCATION_STEP.defaultZoom);
+  }, [moveTo, selectedLocation]);
 
   /* ── close dropdown on outside click ─────────────────────── */
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -193,18 +225,18 @@ export function DesignsLocationStepContent() {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      setAddress(value);
+      onAddressChange(value);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => fetchSuggestions(value), 300);
     },
-    [fetchSuggestions],
+    [fetchSuggestions, onAddressChange],
   );
 
   /* ── place selection → move map ───────────────────────────── */
 
   const selectSuggestion = useCallback(
     (suggestion: Suggestion) => {
-      setAddress(suggestion.description);
+      onAddressChange(suggestion.description);
       setSuggestions([]);
       setIsOpen(false);
 
@@ -229,7 +261,7 @@ export function DesignsLocationStepContent() {
         },
       );
     },
-    [isLoaded, moveTo],
+    [isLoaded, moveTo, onAddressChange],
   );
 
   /* ── keyboard navigation ──────────────────────────────────── */
@@ -261,7 +293,6 @@ export function DesignsLocationStepContent() {
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
       <div className="flex w-full max-w-[1278px] flex-1 flex-col items-center justify-center gap-6 lg:flex-row lg:items-stretch lg:justify-between lg:gap-[38px]">
-
         {/* ── Left panel ── */}
         <div className="flex min-h-[525px] w-full max-w-[591px] shrink-0 flex-col items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-8 py-12 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 lg:px-[46px]">
           <div className="flex w-full max-w-[505px] flex-1 flex-col justify-center gap-[48px]">
@@ -286,7 +317,7 @@ export function DesignsLocationStepContent() {
                   />
                   {isLoaded ? (
                     <input
-                      value={address}
+                      value={selectedAddress}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
                       onFocus={() => {
@@ -312,8 +343,8 @@ export function DesignsLocationStepContent() {
                         onMouseDown={() => selectSuggestion(s)}
                         onMouseEnter={() => setActiveIndex(idx)}
                         className={`flex cursor-pointer items-center gap-3 px-4 py-3 font-inter text-[12px] font-medium leading-snug tracking-[-0.1668px] text-[#191919] transition-colors ${
-                          idx === activeIndex ? "bg-[#f5f5f5]" : "hover:bg-[#fafafa]"
-                        } ${idx !== 0 ? "border-t border-[#f0f0f0]" : ""}`}
+                          idx === activeIndex ? "bg-gray-3" : "hover:bg-gray-2"
+                        } ${idx !== 0 ? "border-t border-gray-4" : ""}`}
                       >
                         <Icon
                           name="LocationPin"

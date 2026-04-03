@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import { DesignTopBar } from "../modules/DesignTopBar";
-import { DESIGNS_PROPERTY_TYPES } from "@/utils/constant";
+import {
+  DESIGNS_PROPERTY_TYPES,
+  type DesignsMapLocation,
+} from "@/utils/constant";
 import { DesignsRegisterStepContent } from "./components/DesignsAddressStepContent";
 import { DesignsLocationStepContent } from "./components/DesignsLocationStepContent";
 import { DesignsHeroBackground } from "./components/DesignsHeroBackground";
 import { DesignsHeroFooter } from "./components/DesignsHeroFooter";
 import { DesignsHeadlineBanner } from "./components/DesignsHeadlineBanner";
 import { DesignsHeroImagePanel } from "./components/DesignsHeroImagePanel";
+import { DesignsSolarPanelStepContent } from "./components/DesignsSolarPanelStepContent";
 import { DesignsHeroTagline } from "./components/DesignsHeroTagline";
 import { DesignsPropertyTypeCard } from "./components/DesignsPropertyTypeCard";
 import { DesignsSavingsPromoCard } from "./components/DesignsSavingsPromoCard";
@@ -24,15 +28,20 @@ export function DesignsHeroSection({
   showNext = true,
 }: DesignsHeroSectionProps) {
   const [activeScreen, setActiveScreen] = useState<
-    "start" | "second" | "register" | "address" | "end"
+    "start" | "second" | "register" | "address" | "solarPanel" | "end"
   >("start");
   const [fillPercent, setFillPercent] = useState(10);
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [selectedLocation, setSelectedLocation] =
+    useState<DesignsMapLocation | null>(null);
+
   const onNext = () => {
     setActiveScreen((prev) => {
       if (prev === "start") return "second";
       if (prev === "second") return "register";
       if (prev === "register") return "address";
-      if (prev === "address") return "end";
+      if (prev === "address") return "solarPanel";
+      if (prev === "solarPanel") return "end";
       return prev;
     });
     setFillPercent((prev) => {
@@ -72,7 +81,14 @@ export function DesignsHeroSection({
       ) : activeScreen === "register" ? (
         <DesignsRegisterStepContent />
       ) : activeScreen === "address" ? (
-        <DesignsLocationStepContent />
+        <DesignsLocationStepContent
+          selectedAddress={selectedAddress}
+          selectedLocation={selectedLocation}
+          onAddressChange={setSelectedAddress}
+          onLocationChange={setSelectedLocation}
+        />
+      ) : activeScreen === "solarPanel" ? (
+        <DesignsSolarPanelStepContent selectedLocation={selectedLocation} />
       ) : activeScreen === "end" ? (
         <></>
       ) : (
