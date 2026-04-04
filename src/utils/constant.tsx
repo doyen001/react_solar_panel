@@ -74,6 +74,15 @@ export type DesignsSolarPanelMetric = {
   actionLabel: string;
 };
 
+/**
+ * Map overlays: only draw panels/outlines near the user’s pin so a large
+ * Solar “building” footprint does not flood the whole viewport.
+ */
+export const DESIGNS_SOLAR_PANEL_MAP = {
+  /** Haversine distance from selected pin → panel center (meters). */
+  maxPanelDistanceFromPinMeters: 65,
+} as const;
+
 export const DESIGNS_SOLAR_PANEL_STEP = {
   title: "Our AI has found your roof",
   descriptionLines: [

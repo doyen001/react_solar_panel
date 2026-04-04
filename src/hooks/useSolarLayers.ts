@@ -1,0 +1,204 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { GeoTiffOverlay } from "@/utils/geotiff";
+
+interface DataLayersResponse {
+  rgbUrl: string;
+  maskUrl: string;
+  annualFluxUrl: string;
+  dsmUrl: string;
+  imageryQuality: string;
+}
+
+export type SolarLayerType = "rgb" | "mask" | "flux";
+
+export interface SolarLayersState {
+  rgb: GeoTiffOverlay | null;
+  mask: GeoTiffOverlay | null;
+  flux: GeoTiffOverlay | null;
+  loading: boolean;
+  error: string | null;
+}
+
+async function fetchDataLayersMeta(
+  lat: number,
+  lng: number,
+  signal: AbortSignal,
+): Promise<DataLayersResponse> {
+  const res = await fetch("/api/solar/data-layers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ latitude: lat, longitude: lng }),
+    signal,
+  });
+
+  const json = (await res.json()) as {
+    success?: boolean;
+    data?: DataLayersResponse;
+    message?: string;
+  };
+
+  if (!res.ok || !json.data) {
+    throw new Error(json.message ?? "Failed to fetch data layers.");
+  }
+
+  return json.data;
+}
+
+async function fetchAndParseLayer(
+  tiffUrl: string,
+  type: SolarLayerType,
+  signal: AbortSignal,
+): Promise<GeoTiffOverlay> {
+  const proxyUrl = `/api/solar/geotiff-proxy?url=${encodeURIComponent(tiffUrl)}`;
+  const res = await fetch(proxyUrl, { signal });
+
+  if (!res.ok) {
+    throw new Error(`GeoTIFF download failed (${type}): HTTP ${res.status}`);
+  }
+
+  const buf = await res.arrayBuffer();
+  if (buf.byteLength === 0) {
+    throw new Error(`GeoTIFF response is empty (${type})`);
+  }
+
+  const { parseGeoTiffRgb, parseGeoTiffMask, parseGeoTiffFlux } =
+    await import("@/utils/geotiff");
+
+  switch (type) {
+    case "rgb":
+      return parseGeoTiffRgb(buf);
+    case "mask":
+      return parseGeoTiffMask(buf);
+    case "flux":
+      return parseGeoTiffFlux(buf);
+  }
+}
+
+export function useSolarLayers(
+  location: { lat: number; lng: number } | null,
+  layers: SolarLayerType[] = ["rgb", "mask"],
+) {
+  const [state, setState] = useState<SolarLayersState>({
+    rgb: null,
+    mask: null,
+    flux: null,
+    loading: false,
+    error: null,
+  });
+
+  const abortRef = useRef<AbortController | null>(null);
+  const prevUrlsRef = useRef<string[]>([]);
+
+  const loadLayers = useCallback(
+    async (lat: number, lng: number) => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+
+      try {
+        const meta = await fetchDataLayersMeta(lat, lng, controller.signal);
+
+        const urlMap: Partial<Record<SolarLayerType, string>> = {};
+        if (layers.includes("rgb") && meta.rgbUrl) urlMap.rgb = meta.rgbUrl;
+        if (layers.includes("mask") && meta.maskUrl) urlMap.mask = meta.maskUrl;
+        if (layers.includes("flux") && meta.annualFluxUrl)
+          urlMap.flux = meta.annualFluxUrl;
+
+        if (Object.keys(urlMap).length === 0) {
+          setState((prev) => ({
+            ...prev,
+            loading: false,
+            error: "No imagery URLs returned for this location.",
+          }));
+          return;
+        }
+
+        const results: Partial<Record<SolarLayerType, GeoTiffOverlay>> = {};
+        const errors: string[] = [];
+
+        const settled = await Promise.allSettled(
+          (Object.entries(urlMap) as [SolarLayerType, string][]).map(
+            async ([type, url]) => {
+              const overlay = await fetchAndParseLayer(
+                url,
+                type,
+                controller.signal,
+              );
+              results[type] = overlay;
+            },
+          ),
+        );
+
+        for (const r of settled) {
+          if (r.status === "rejected") {
+            const msg =
+              r.reason instanceof Error ? r.reason.message : String(r.reason);
+            if (
+              r.reason instanceof DOMException &&
+              r.reason.name === "AbortError"
+            )
+              return;
+            console.error("Solar layer failed:", msg);
+            errors.push(msg);
+          }
+        }
+
+        if (controller.signal.aborted) return;
+
+        setState({
+          rgb: results.rgb ?? null,
+          mask: results.mask ?? null,
+          flux: results.flux ?? null,
+          loading: false,
+          error: errors.length > 0 ? errors.join("; ") : null,
+        });
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        const msg =
+          err instanceof Error ? err.message : "Failed to load solar layers.";
+        console.error("Solar layers error:", msg, err);
+        setState((prev) => ({ ...prev, loading: false, error: msg }));
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [layers.join(",")],
+  );
+
+  useEffect(() => {
+    if (!location) return;
+    void loadLayers(location.lat, location.lng);
+
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, [location, loadLayers]);
+
+  useEffect(() => {
+    return () => {
+      prevUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  useEffect(() => {
+    const urls: string[] = [];
+    if (state.rgb) urls.push(state.rgb.imageUrl);
+    if (state.mask) urls.push(state.mask.imageUrl);
+    if (state.flux) urls.push(state.flux.imageUrl);
+
+    const prev = prevUrlsRef.current;
+    prev.forEach((url) => {
+      if (!urls.includes(url)) URL.revokeObjectURL(url);
+    });
+    prevUrlsRef.current = urls;
+  }, [state.rgb, state.mask, state.flux]);
+
+  const retry = useCallback(() => {
+    if (location) void loadLayers(location.lat, location.lng);
+  }, [location, loadLayers]);
+
+  return { ...state, retry };
+}
