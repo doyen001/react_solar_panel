@@ -104,20 +104,17 @@ export function DesignsLocationStepContent({
     [onLocationChange, reverseGeocode],
   );
 
-  const onMapLoad = useCallback(
-    (map: google.maps.Map) => {
-      mapRef.current = map;
-      if (pendingMove.current) {
-        const { lat, lng, zoom } = pendingMove.current;
-        setMapZoom(zoom);
-        isProgrammaticMoveRef.current = true;
-        map.panTo({ lat, lng });
-        map.setZoom(zoom);
-        pendingMove.current = null;
-      }
-    },
-    [],
-  );
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+    if (pendingMove.current) {
+      const { lat, lng, zoom } = pendingMove.current;
+      setMapZoom(zoom);
+      isProgrammaticMoveRef.current = true;
+      map.panTo({ lat, lng });
+      map.setZoom(zoom);
+      pendingMove.current = null;
+    }
+  }, []);
 
   const onZoomChanged = useCallback(() => {
     const zoom = mapRef.current?.getZoom();
@@ -288,7 +285,7 @@ export function DesignsLocationStepContent({
     [isLoaded, moveTo, onAddressChange],
   );
 
-  /* ── keyboard navigation ──────────────────────────────────── */
+  /* ── keyboard navigation ────────────────────────── */
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
