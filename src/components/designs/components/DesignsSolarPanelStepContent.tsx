@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GoogleMap, OverlayView, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, OverlayView, Polygon } from "@react-google-maps/api";
 import Icon from "@/components/ui/Icons";
+import { useGoogleMaps } from "@/components/providers/GoogleMapsProvider";
 import {
   DESIGNS_LOCATION_STEP,
   DESIGNS_SOLAR_PANEL_MAP,
@@ -13,12 +14,13 @@ import {
   filterPanelsForSelectedBuilding,
   filterRoofSegmentsForSelectedBuilding,
 } from "@/utils/solarMapFilter";
-import { useSolarEstimate } from "@/hooks/useSolarEstimate";
+import {
+  fetchSolarEstimate,
+  useSolarEstimate,
+} from "@/hooks/useSolarEstimate";
 import { useSolarLayers, type SolarLayerType } from "@/hooks/useSolarLayers";
 import type { GeoTiffOverlay } from "@/utils/geotiff";
 import type { SolarEstimateResult, SolarPanel } from "@/types/solar";
-
-const LIBRARIES: "places"[] = ["places"];
 
 const MAP_CONTAINER: React.CSSProperties = {
   width: "100%",
@@ -168,8 +170,9 @@ function useImperativePanels(
 
     if (!map || !panels?.length || !panelDimensions || !visible) return;
 
-    // Cap at 200 panels to stay performant on large commercial roofs
-    const subset = panels.slice(0, 200);
+    // Cap at 200 panels to stay performant on large roofs, while keeping
+    // multiple selected roofs visible instead of only drawing the first group.
+    const subset = balancePanelsAcrossSegments(panels, 200);
     const created: google.maps.Polygon[] = [];
 
     for (const panel of subset) {
@@ -287,6 +290,149 @@ function useImperativeRoofSegments(
   }, [map, panels, panelDimensions, segments, visible]);
 }
 
+/* ── Roof-polygon editing helpers ───────────────────────────── */
+
+type RoofPolygon = { id: number; paths: google.maps.LatLngLiteral[] };
+type RoofSegment = SolarEstimateResult["roofSegments"][number];
+
+function makeDefaultPolygon(
+  center: { lat: number; lng: number },
+  offsetDeg = 0,
+): google.maps.LatLngLiteral[] {
+  const d = 0.00008;
+  return [
+    { lat: center.lat - d + offsetDeg, lng: center.lng - d + offsetDeg },
+    { lat: center.lat + d + offsetDeg, lng: center.lng - d + offsetDeg },
+    { lat: center.lat + d + offsetDeg, lng: center.lng + d + offsetDeg },
+    { lat: center.lat - d + offsetDeg, lng: center.lng + d + offsetDeg },
+  ];
+}
+
+function boundingBoxToPolygon(
+  box: RoofSegment["boundingBox"],
+): google.maps.LatLngLiteral[] {
+  return [
+    { lat: box.ne.lat, lng: box.sw.lng },
+    { lat: box.ne.lat, lng: box.ne.lng },
+    { lat: box.sw.lat, lng: box.ne.lng },
+    { lat: box.sw.lat, lng: box.sw.lng },
+  ];
+}
+
+function selectionContainsPoint(
+  selectionPaths: google.maps.LatLngLiteral[],
+  point: { lat: number; lng: number },
+): boolean {
+  const selectionPolygon = new google.maps.Polygon({ paths: selectionPaths });
+  return google.maps.geometry.poly.containsLocation(
+    new google.maps.LatLng(point.lat, point.lng),
+    selectionPolygon,
+  );
+}
+
+function getPolygonRepresentativePoint(
+  paths: google.maps.LatLngLiteral[],
+): { lat: number; lng: number } {
+  const totals = paths.reduce(
+    (sum, point) => ({
+      lat: sum.lat + point.lat,
+      lng: sum.lng + point.lng,
+    }),
+    { lat: 0, lng: 0 },
+  );
+
+  return {
+    lat: totals.lat / paths.length,
+    lng: totals.lng / paths.length,
+  };
+}
+
+function getSolarPanelKey(panel: SolarPanel): string {
+  return [
+    panel.center.lat.toFixed(7),
+    panel.center.lng.toFixed(7),
+    panel.orientation,
+  ].join(":");
+}
+
+function dedupeSolarPanels(panels: SolarPanel[]): SolarPanel[] {
+  const seen = new Set<string>();
+  const unique: SolarPanel[] = [];
+
+  for (const panel of panels) {
+    const key = getSolarPanelKey(panel);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(panel);
+  }
+
+  return unique;
+}
+
+function balancePanelsAcrossSegments(
+  panels: SolarPanel[],
+  maxPanels: number,
+): SolarPanel[] {
+  if (panels.length <= maxPanels) {
+    return panels;
+  }
+
+  const grouped = new Map<number, SolarPanel[]>();
+  for (const panel of panels) {
+    const group = grouped.get(panel.segmentIndex) ?? [];
+    group.push(panel);
+    grouped.set(panel.segmentIndex, group);
+  }
+
+  const queues = [...grouped.values()];
+  const balanced: SolarPanel[] = [];
+
+  while (
+    balanced.length < maxPanels &&
+    queues.some((queue) => queue.length > 0)
+  ) {
+    for (const queue of queues) {
+      const next = queue.shift();
+      if (!next) continue;
+      balanced.push(next);
+      if (balanced.length >= maxPanels) break;
+    }
+  }
+
+  return balanced;
+}
+
+function panelIntersectsRoofSelection(
+  panel: SolarPanel,
+  selectionPaths: google.maps.LatLngLiteral[],
+  panelDimensions: { heightM: number; widthM: number } | undefined,
+): boolean {
+  const selectionPolygon = new google.maps.Polygon({ paths: selectionPaths });
+  const panelCenter = new google.maps.LatLng(panel.center.lat, panel.center.lng);
+
+  if (google.maps.geometry.poly.containsLocation(panelCenter, selectionPolygon)) {
+    return true;
+  }
+
+  if (!panelDimensions) {
+    return false;
+  }
+
+  const corners = panelCorners(
+    panel.center,
+    panelDimensions.heightM,
+    panelDimensions.widthM,
+    panel.orientation,
+  );
+
+  return corners.some((corner) =>
+    google.maps.geometry.poly.containsLocation(
+      new google.maps.LatLng(corner.lat, corner.lng),
+      selectionPolygon,
+    ),
+  );
+}
+
 /* ── Main component ──────────────────────────────────────────── */
 
 type ActiveLayer = "all" | "satellite" | "panels";
@@ -298,13 +444,26 @@ type DesignsSolarPanelStepContentProps = {
 export function DesignsSolarPanelStepContent({
   selectedLocation,
 }: DesignsSolarPanelStepContentProps) {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
-    libraries: LIBRARIES,
-  });
+  const { isLoaded } = useGoogleMaps();
 
   const [mapReady, setMapReady] = useState<google.maps.Map | null>(null);
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>("all");
+
+  /* ── Roof polygon editing state ── */
+  const [isEditing, setIsEditing] = useState(false);
+  const roofCounter = useRef(0);
+  const [editingRoofs, setEditingRoofs] = useState<RoofPolygon[]>([]);
+  const [savedRoofs, setSavedRoofs] = useState<google.maps.LatLngLiteral[][]>(
+    [],
+  );
+  const polygonRefs = useRef<Map<number, google.maps.Polygon>>(new Map());
+  const [polygonFilteredPanels, setPolygonFilteredPanels] = useState<
+    SolarPanel[] | null
+  >(null);
+  const [polygonTotalAreaM2, setPolygonTotalAreaM2] = useState<number | null>(
+    null,
+  );
+  const [isSavingSelection, setIsSavingSelection] = useState(false);
 
   const { data, loading, error, retry } = useSolarEstimate(selectedLocation);
 
@@ -330,38 +489,160 @@ export function DesignsSolarPanelStepContent({
     [data?.roofSegments, data?.boundingBox, selectedLocation],
   );
 
+  /* Reset polygon selection when address changes (derived-state pattern, avoids effect) */
+  const [prevSelectedLocation, setPrevSelectedLocation] =
+    useState(selectedLocation);
+  if (prevSelectedLocation !== selectedLocation) {
+    setPrevSelectedLocation(selectedLocation);
+    setPolygonFilteredPanels(null);
+    setSavedRoofs([]);
+    setPolygonTotalAreaM2(null);
+    setIsEditing(false);
+    setEditingRoofs([]);
+  }
+
+  /* Active panels: polygon-selection override or full AI-detected set */
+  const activePanels = polygonFilteredPanels ?? filteredPanels;
+
   const availablePanelLimit = useMemo(() => {
-    if (filteredPanels.length > 0) {
-      return filteredPanels.length;
-    }
+    if (polygonFilteredPanels !== null) return polygonFilteredPanels.length;
+    if (activePanels.length > 0) return activePanels.length;
     return data?.maxPanelsCount ?? 0;
-  }, [data?.maxPanelsCount, filteredPanels.length]);
+  }, [data?.maxPanelsCount, activePanels.length, polygonFilteredPanels]);
 
   const [panelCountInput, setPanelCountInput] = useState("");
 
   const selectedPanelCount = useMemo(() => {
     const parsed = Number.parseInt(panelCountInput, 10);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      return availablePanelLimit;
-    }
+    if (!Number.isFinite(parsed) || parsed <= 0) return availablePanelLimit;
     return Math.min(parsed, availablePanelLimit);
   }, [availablePanelLimit, panelCountInput]);
 
   const visiblePanels = useMemo(
-    () => filteredPanels.slice(0, selectedPanelCount),
-    [filteredPanels, selectedPanelCount],
+    () => activePanels.slice(0, selectedPanelCount),
+    [activePanels, selectedPanelCount],
   );
 
   const panelCountDisplayValue = useMemo(() => {
     if (!availablePanelLimit) return "";
-
     const parsed = Number.parseInt(panelCountInput, 10);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
+    if (!Number.isFinite(parsed) || parsed <= 0)
       return String(availablePanelLimit);
-    }
-
     return String(Math.min(parsed, availablePanelLimit));
   }, [availablePanelLimit, panelCountInput]);
+
+  /* ── Edit / Save handlers ── */
+
+  const handleEditClick = useCallback(() => {
+    if (!selectedLocation) return;
+    setIsEditing(true);
+    if (savedRoofs.length > 0) {
+      setEditingRoofs(
+        savedRoofs.map((paths) => ({ id: ++roofCounter.current, paths })),
+      );
+    } else {
+      setEditingRoofs([
+        {
+          id: ++roofCounter.current,
+          paths: makeDefaultPolygon(selectedLocation),
+        },
+      ]);
+    }
+  }, [selectedLocation, savedRoofs]);
+
+  const getCurrentEditingPaths = useCallback(() => {
+    return editingRoofs.map((roof) => {
+      const ref = polygonRefs.current.get(roof.id);
+      if (!ref) return roof.paths;
+      return ref
+        .getPath()
+        .getArray()
+        .map((p) => ({ lat: p.lat(), lng: p.lng() }));
+    });
+  }, [editingRoofs]);
+
+  const handleAddRoof = useCallback(() => {
+    if (!selectedLocation) return;
+
+    const currentPaths = getCurrentEditingPaths();
+    const nextRoofSegment = (data?.roofSegments ?? []).find(
+      (segment) =>
+        !currentPaths.some((paths) =>
+          selectionContainsPoint(paths, segment.center),
+        ),
+    );
+
+    setEditingRoofs((prev) => [
+      ...prev,
+      {
+        id: ++roofCounter.current,
+        paths: nextRoofSegment
+          ? boundingBoxToPolygon(nextRoofSegment.boundingBox)
+          : makeDefaultPolygon(selectedLocation, prev.length * 0.0002),
+      },
+    ]);
+  }, [data?.roofSegments, getCurrentEditingPaths, selectedLocation]);
+
+  const handleSave = useCallback(async () => {
+    /* Read final paths from imperative polygon refs (user may have dragged vertices) */
+    const currentPaths = getCurrentEditingPaths();
+    const validPaths = currentPaths.filter((p) => p.length >= 3);
+    setSavedRoofs(validPaths);
+
+    if (validPaths.length === 0) {
+      setPolygonFilteredPanels(null);
+      setPolygonTotalAreaM2(null);
+      polygonRefs.current.clear();
+      setIsEditing(false);
+      setEditingRoofs([]);
+      return;
+    }
+
+    let totalArea = 0;
+    for (const path of validPaths) {
+      totalArea += google.maps.geometry.spherical.computeArea(
+        path.map((p) => new google.maps.LatLng(p.lat, p.lng)),
+      );
+    }
+    setPolygonTotalAreaM2(totalArea);
+
+    setIsSavingSelection(true);
+
+    try {
+      const extraEstimates = await Promise.allSettled(
+        validPaths.map((path) => {
+          const point = getPolygonRepresentativePoint(path);
+          return fetchSolarEstimate(point.lat, point.lng);
+        }),
+      );
+
+      const mergedPanels = dedupeSolarPanels([
+        ...(data?.solarPanels ?? []),
+        ...extraEstimates.flatMap((result, index) => {
+          if (result.status !== "fulfilled") return [];
+
+          const segmentOffset = (index + 1) * 10_000;
+          return result.value.solarPanels.map((panel) => ({
+            ...panel,
+            segmentIndex: panel.segmentIndex + segmentOffset,
+          }));
+        }),
+      ]);
+
+      const inside = mergedPanels.filter((panel) =>
+        validPaths.some((path) =>
+          panelIntersectsRoofSelection(panel, path, data?.panelDimensions),
+        ),
+      );
+      setPolygonFilteredPanels(inside);
+    } finally {
+      setIsSavingSelection(false);
+    }
+
+    polygonRefs.current.clear();
+    setIsEditing(false);
+    setEditingRoofs([]);
+  }, [data?.panelDimensions, data?.solarPanels, getCurrentEditingPaths]);
 
   const {
     rgb: rgbOverlay,
@@ -397,7 +678,7 @@ export function DesignsSolarPanelStepContent({
   );
   useImperativeRoofSegments(
     mapReady,
-    filteredPanels,
+    activePanels,
     data?.panelDimensions,
     filteredRoofSegments,
     showPanels,
@@ -407,27 +688,34 @@ export function DesignsSolarPanelStepContent({
   const metrics = useMemo(
     () =>
       DESIGNS_SOLAR_PANEL_STEP.metrics.map((metric) => {
-        if (!data) {
-          return { ...metric, value: "—" };
-        }
+        if (!data) return { ...metric, value: "—" };
 
         if (metric.id === "total-roof-area") {
-          return {
-            ...metric,
-            value: `${formatNumber(data.wholeRoofAreaM2)} m²`,
-          };
+          const area = polygonTotalAreaM2 ?? data.wholeRoofAreaM2;
+          return { ...metric, value: `${formatNumber(area)} m²` };
         }
 
         if (metric.id === "usable-roof-area") {
+          if (polygonTotalAreaM2 !== null && data.panelDimensions) {
+            /* Usable = panels in selection × individual panel footprint */
+            const panelArea =
+              data.panelDimensions.heightM * data.panelDimensions.widthM;
+            const usable = (polygonFilteredPanels?.length ?? 0) * panelArea;
+            return { ...metric, value: `${formatNumber(usable)} m²` };
+          }
           return {
             ...metric,
             value: `${formatNumber(data.maxArrayAreaM2)} m²`,
           };
         }
 
+        /* panels-fit */
+        if (polygonFilteredPanels !== null) {
+          return { ...metric, value: String(polygonFilteredPanels.length) };
+        }
         return { ...metric, value: String(data.maxPanelsCount) };
       }),
-    [data],
+    [data, polygonTotalAreaM2, polygonFilteredPanels],
   );
 
   const combinedError = error ?? layersError;
@@ -435,6 +723,9 @@ export function DesignsSolarPanelStepContent({
     if (error) retry();
     if (layersError) layersRetry();
   };
+
+  void combinedError;
+  void combinedRetry;
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
@@ -483,7 +774,6 @@ export function DesignsSolarPanelStepContent({
                           setPanelCountInput("");
                           return;
                         }
-
                         const nextValue = availablePanelLimit
                           ? Math.min(
                               Number.parseInt(digitsOnly, 10),
@@ -505,28 +795,6 @@ export function DesignsSolarPanelStepContent({
               ))}
             </div>
 
-            {/* Extra stats grid */}
-            {/* {data && (
-              <div className="grid w-full grid-cols-2 gap-[10px]">
-                <StatCard
-                  label="Yearly Energy"
-                  value={`${formatNumber(data.yearlyEnergyDcKwh)} kWh`}
-                />
-                <StatCard
-                  label="CO₂ Savings"
-                  value={`${formatNumber(data.co2SavingsKgPerYear)} kg/yr`}
-                />
-                <StatCard
-                  label="Sunshine"
-                  value={`${formatNumber(data.maxSunshineHoursPerYear)} hrs/yr`}
-                />
-                <StatCard
-                  label="Panels shown"
-                  value={String(Math.min(visiblePanels.length, 200))}
-                />
-              </div>
-            )} */}
-
             {data?.estimated && (
               <p className="w-full rounded-[10px] bg-white/70 px-4 py-2 text-center font-inter text-[12px] font-medium text-ink/70">
                 Google Solar imagery is not available for this location yet.
@@ -534,24 +802,11 @@ export function DesignsSolarPanelStepContent({
               </p>
             )}
 
-            {/* {combinedError && (
-              <div className="flex w-full flex-col items-center gap-2 rounded-[12px] border-2 border-red-300 bg-red-50 p-4 text-center">
-                <p className="font-inter text-[13px] font-medium text-red-700">
-                  {combinedError}
-                </p>
-                <button
-                  type="button"
-                  onClick={combinedRetry}
-                  className="rounded-md bg-red-600 px-4 py-1.5 font-inter text-[12px] font-semibold text-white transition hover:bg-red-700"
-                >
-                  Retry
-                </button>
-              </div>
-            )} */}
-
-            {(loading || layersLoading) && (
+            {(loading || layersLoading || isSavingSelection) && (
               <p className="animate-pulse font-inter text-[14px] font-medium text-white/80">
-                {layersLoading
+                {isSavingSelection
+                  ? "Finding solar panels for selected roofs..."
+                  : layersLoading
                   ? "Loading roof imagery..."
                   : "Analysing solar potential..."}
               </p>
@@ -596,6 +851,50 @@ export function DesignsSolarPanelStepContent({
                       </div>
                     </OverlayView>
                   )}
+
+                  {/* Editable roof polygons (edit mode) */}
+                  {isEditing &&
+                    editingRoofs.map((roof) => (
+                      <Polygon
+                        key={roof.id}
+                        paths={roof.paths}
+                        options={{
+                          fillColor: "#51FF00",
+                          fillOpacity: 0.18,
+                          strokeColor: "#51FF00",
+                          strokeOpacity: 0.9,
+                          strokeWeight: 2.5,
+                          clickable: true,
+                          zIndex: 10,
+                        }}
+                        draggable
+                        editable
+                        onLoad={(polygon) => {
+                          polygonRefs.current.set(roof.id, polygon);
+                        }}
+                        onUnmount={() => {
+                          polygonRefs.current.delete(roof.id);
+                        }}
+                      />
+                    ))}
+
+                  {/* Saved roof outlines (view mode) */}
+                  {!isEditing &&
+                    savedRoofs.map((paths, idx) => (
+                      <Polygon
+                        key={`saved-${idx}`}
+                        paths={paths}
+                        options={{
+                          fillColor: "#22c55e",
+                          fillOpacity: 0.1,
+                          strokeColor: "#22c55e",
+                          strokeOpacity: 0.85,
+                          strokeWeight: 2,
+                          clickable: false,
+                          zIndex: 5,
+                        }}
+                      />
+                    ))}
                 </GoogleMap>
               </>
             ) : (
@@ -609,19 +908,45 @@ export function DesignsSolarPanelStepContent({
             {/* Top-right controls */}
             <div className="absolute right-[14px] top-[14px] flex items-center gap-[8px]">
               <LayerToggle active={activeLayer} onChange={setActiveLayer} />
-              <button
-                type="button"
-                className="h-[33px] rounded-[6px] bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)] px-[18px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]"
-              >
-                {DESIGNS_SOLAR_PANEL_STEP.mapActions.primary}
-              </button>
-              <button
-                type="button"
-                className="h-[33px] rounded-[6px] bg-[linear-gradient(139deg,#2094F3_0%,#17CFCF_100%)] px-[14px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]"
-              >
-                {DESIGNS_SOLAR_PANEL_STEP.mapActions.secondary}
-              </button>
+              {isEditing ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleAddRoof}
+                    disabled={isSavingSelection}
+                    className="h-[33px] rounded-[6px] bg-white/90 px-[14px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-[#2094F3] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:bg-white"
+                  >
+                    + Add New Roof
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSavingSelection}
+                    className="h-[33px] rounded-[6px] bg-[linear-gradient(126deg,#22c55e_0%,#16a34a_100%)] px-[18px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] disabled:opacity-60"
+                  >
+                    {isSavingSelection ? "Saving..." : "Save"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleEditClick}
+                  disabled={!selectedLocation}
+                  className="h-[33px] rounded-[6px] bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)] px-[18px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] disabled:opacity-50"
+                >
+                  {DESIGNS_SOLAR_PANEL_STEP.mapActions.primary}
+                </button>
+              )}
             </div>
+
+            {/* Edit mode instruction hint */}
+            {isEditing && (
+              <div className="pointer-events-none absolute bottom-[14px] left-1/2 -translate-x-1/2">
+                <p className="whitespace-nowrap rounded-[8px] bg-black/60 px-4 py-2 font-inter text-[12px] font-medium text-white backdrop-blur-sm">
+                  Drag vertices to reshape · Drag the polygon to move it
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -630,19 +955,6 @@ export function DesignsSolarPanelStepContent({
 }
 
 /* ── Sub-components ──────────────────────────────────────────── */
-
-// function StatCard({ label, value }: { label: string; value: string }) {
-//   return (
-//     <div className="flex flex-col items-center gap-1 rounded-[12px] border-2 border-yellow-lemon bg-white/90 px-3 py-3">
-//       <span className="font-inter text-[11px] font-medium uppercase tracking-wide text-ink/60">
-//         {label}
-//       </span>
-//       <span className="font-inter text-[16px] font-bold tracking-[-0.2px] text-ink">
-//         {value}
-//       </span>
-//     </div>
-//   );
-// }
 
 function LayerToggle({
   active,

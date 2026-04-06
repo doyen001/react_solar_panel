@@ -9,6 +9,33 @@ type SolarEstimateState = {
   error: string | null;
 };
 
+type SolarEstimateApiResponse = {
+  success?: boolean;
+  data?: SolarEstimateResult;
+  message?: string;
+};
+
+export async function fetchSolarEstimate(
+  lat: number,
+  lng: number,
+  signal?: AbortSignal,
+): Promise<SolarEstimateResult> {
+  const res = await fetch("/api/solar/estimate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ latitude: lat, longitude: lng }),
+    signal,
+  });
+
+  const json = (await res.json()) as SolarEstimateApiResponse;
+
+  if (!res.ok || !json.data) {
+    throw new Error(json.message ?? "Failed to fetch solar estimate.");
+  }
+
+  return json.data;
+}
+
 export function useSolarEstimate(location: {
   lat: number;
   lng: number;
@@ -30,35 +57,17 @@ export function useSolarEstimate(location: {
       setState({ data: null, loading: true, error: null });
 
       try {
-        const res = await fetch("/api/solar/estimate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ latitude: lat, longitude: lng }),
-          signal: controller.signal,
-        });
-
-        const json = (await res.json()) as {
-          success?: boolean;
-          data?: SolarEstimateResult;
-          message?: string;
-        };
-
-        if (!res.ok || !json.data) {
-          setState({
-            data: null,
-            loading: false,
-            error: json.message ?? "Failed to fetch solar estimate.",
-          });
-          return;
-        }
-
-        setState({ data: json.data, loading: false, error: null });
+        const data = await fetchSolarEstimate(lat, lng, controller.signal);
+        setState({ data, loading: false, error: null });
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setState({
           data: null,
           loading: false,
-          error: "Unable to reach the solar estimation service.",
+          error:
+            err instanceof Error
+              ? err.message
+              : "Unable to reach the solar estimation service.",
         });
       }
     },

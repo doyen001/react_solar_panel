@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GoogleMapsProvider } from "@/components/providers/GoogleMapsProvider";
 
 export const metadata: Metadata = {
   title: "Designs | EasyLink Solar",
@@ -11,5 +12,5 @@ export default function DesignsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <GoogleMapsProvider>{children}</GoogleMapsProvider>;
 }

@@ -1,14 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap } from "@react-google-maps/api";
 import Icon from "@/components/ui/Icons";
+import { useGoogleMaps } from "@/components/providers/GoogleMapsProvider";
 import {
   DESIGNS_LOCATION_STEP,
   type DesignsMapLocation,
 } from "@/utils/constant";
-
-const LIBRARIES: "places"[] = ["places"];
 
 const MAP_CONTAINER: React.CSSProperties = {
   width: "100%",
@@ -42,10 +41,7 @@ export function DesignsLocationStepContent({
   onAddressChange,
   onLocationChange,
 }: DesignsLocationStepContentProps) {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
-    libraries: LIBRARIES,
-  });
+  const { isLoaded } = useGoogleMaps();
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const pendingMove = useRef<{ lat: number; lng: number; zoom: number } | null>(
