@@ -13,11 +13,9 @@ import {
 import {
   filterPanelsForSelectedBuilding,
   filterRoofSegmentsForSelectedBuilding,
+  haversineMeters,
 } from "@/utils/solarMapFilter";
-import {
-  fetchSolarEstimate,
-  useSolarEstimate,
-} from "@/hooks/useSolarEstimate";
+import { fetchSolarEstimate, useSolarEstimate } from "@/hooks/useSolarEstimate";
 import { useSolarLayers, type SolarLayerType } from "@/hooks/useSolarLayers";
 import type { GeoTiffOverlay } from "@/utils/geotiff";
 import type { SolarEstimateResult, SolarPanel } from "@/types/solar";
@@ -330,9 +328,10 @@ function selectionContainsPoint(
   );
 }
 
-function getPolygonRepresentativePoint(
-  paths: google.maps.LatLngLiteral[],
-): { lat: number; lng: number } {
+function getPolygonRepresentativePoint(paths: google.maps.LatLngLiteral[]): {
+  lat: number;
+  lng: number;
+} {
   const totals = paths.reduce(
     (sum, point) => ({
       lat: sum.lat + point.lat,
@@ -364,6 +363,33 @@ function dedupeSolarPanels(panels: SolarPanel[]): SolarPanel[] {
     if (seen.has(key)) continue;
     seen.add(key);
     unique.push(panel);
+  }
+
+  return unique;
+}
+
+function dedupeNearbyPanels(
+  panels: SolarPanel[],
+  panelDimensions: { heightM: number; widthM: number } | undefined,
+): SolarPanel[] {
+  if (!panelDimensions || panels.length <= 1) {
+    return dedupeSolarPanels(panels);
+  }
+
+  const thresholdMeters =
+    Math.min(panelDimensions.widthM, panelDimensions.heightM) * 0.9;
+  const unique: SolarPanel[] = [];
+
+  for (const panel of panels) {
+    const hasNearbyMatch = unique.some(
+      (existing) =>
+        existing.orientation === panel.orientation &&
+        haversineMeters(existing.center, panel.center) <= thresholdMeters,
+    );
+
+    if (!hasNearbyMatch) {
+      unique.push(panel);
+    }
   }
 
   return unique;
@@ -408,9 +434,14 @@ function panelIntersectsRoofSelection(
   panelDimensions: { heightM: number; widthM: number } | undefined,
 ): boolean {
   const selectionPolygon = new google.maps.Polygon({ paths: selectionPaths });
-  const panelCenter = new google.maps.LatLng(panel.center.lat, panel.center.lng);
+  const panelCenter = new google.maps.LatLng(
+    panel.center.lat,
+    panel.center.lng,
+  );
 
-  if (google.maps.geometry.poly.containsLocation(panelCenter, selectionPolygon)) {
+  if (
+    google.maps.geometry.poly.containsLocation(panelCenter, selectionPolygon)
+  ) {
     return true;
   }
 
@@ -616,23 +647,29 @@ export function DesignsSolarPanelStepContent({
         }),
       );
 
-      const mergedPanels = dedupeSolarPanels([
-        ...(data?.solarPanels ?? []),
-        ...extraEstimates.flatMap((result, index) => {
-          if (result.status !== "fulfilled") return [];
+      const mergedPanels = dedupeNearbyPanels(
+        [
+          ...(data?.solarPanels ?? []),
+          ...extraEstimates.flatMap((result, index) => {
+            if (result.status !== "fulfilled") return [];
 
-          const segmentOffset = (index + 1) * 10_000;
-          return result.value.solarPanels.map((panel) => ({
-            ...panel,
-            segmentIndex: panel.segmentIndex + segmentOffset,
-          }));
-        }),
-      ]);
+            const segmentOffset = (index + 1) * 10_000;
+            return result.value.solarPanels.map((panel) => ({
+              ...panel,
+              segmentIndex: panel.segmentIndex + segmentOffset,
+            }));
+          }),
+        ],
+        data?.panelDimensions,
+      );
 
-      const inside = mergedPanels.filter((panel) =>
-        validPaths.some((path) =>
-          panelIntersectsRoofSelection(panel, path, data?.panelDimensions),
+      const inside = dedupeNearbyPanels(
+        mergedPanels.filter((panel) =>
+          validPaths.some((path) =>
+            panelIntersectsRoofSelection(panel, path, data?.panelDimensions),
+          ),
         ),
+        data?.panelDimensions,
       );
       setPolygonFilteredPanels(inside);
     } finally {
@@ -807,8 +844,8 @@ export function DesignsSolarPanelStepContent({
                 {isSavingSelection
                   ? "Finding solar panels for selected roofs..."
                   : layersLoading
-                  ? "Loading roof imagery..."
-                  : "Analysing solar potential..."}
+                    ? "Loading roof imagery..."
+                    : "Analysing solar potential..."}
               </p>
             )}
           </div>
