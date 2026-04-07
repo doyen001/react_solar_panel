@@ -42,6 +42,25 @@ export function DesignsHeroSection({
   const [selectedLocation, setSelectedLocation] =
     useState<DesignsMapLocation | null>(null);
 
+  const progressByScreen = {
+    start: 10,
+    second: 30,
+    register: 60,
+    address: 90,
+    solarPanel: 90,
+    energy: 90,
+    end: 90,
+  } satisfies Record<
+    | "start"
+    | "second"
+    | "register"
+    | "address"
+    | "solarPanel"
+    | "energy"
+    | "end",
+    number
+  >;
+
   const onNext = () => {
     setActiveScreen((prev) => {
       if (prev === "start") return "second";
@@ -57,6 +76,28 @@ export function DesignsHeroSection({
       if (prev === 30) return 60;
       if (prev === 60) return 90;
       return prev;
+    });
+  };
+
+  const onBack = () => {
+    setActiveScreen((prev) => {
+      const nextScreen =
+        prev === "end"
+          ? "energy"
+          : prev === "energy"
+            ? "solarPanel"
+            : prev === "solarPanel"
+              ? "address"
+              : prev === "address"
+                ? "register"
+                : prev === "register"
+                  ? "second"
+                  : prev === "second"
+                    ? "start"
+                    : prev;
+
+      setFillPercent(progressByScreen[nextScreen]);
+      return nextScreen;
     });
   };
 
@@ -106,7 +147,9 @@ export function DesignsHeroSection({
       )}
 
       <DesignsHeroFooter
+        onBack={onBack}
         onNext={onNext}
+        showBack={activeScreen !== "start"}
         showNext={showNext}
         fillPercent={fillPercent}
       />
