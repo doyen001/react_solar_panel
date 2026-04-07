@@ -500,13 +500,21 @@ export function DesignsSolarPanelStepContent({
 
   const filteredPanels = useMemo(
     () =>
-      filterPanelsForSelectedBuilding(
-        data?.solarPanels,
-        selectedLocation,
-        data?.boundingBox,
-        DESIGNS_SOLAR_PANEL_MAP.maxPanelDistanceFromPinMeters,
+      dedupeNearbyPanels(
+        filterPanelsForSelectedBuilding(
+          data?.solarPanels,
+          selectedLocation,
+          data?.boundingBox,
+          DESIGNS_SOLAR_PANEL_MAP.maxPanelDistanceFromPinMeters,
+        ),
+        data?.panelDimensions,
       ),
-    [data?.solarPanels, data?.boundingBox, selectedLocation],
+    [
+      data?.solarPanels,
+      data?.boundingBox,
+      data?.panelDimensions,
+      selectedLocation,
+    ],
   );
 
   const filteredRoofSegments = useMemo(
