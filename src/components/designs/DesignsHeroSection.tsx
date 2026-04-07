@@ -13,6 +13,7 @@ import { DesignsHeroFooter } from "./components/DesignsHeroFooter";
 import { DesignsHeadlineBanner } from "./components/DesignsHeadlineBanner";
 import { DesignsHeroImagePanel } from "./components/DesignsHeroImagePanel";
 import { DesignsSolarPanelStepContent } from "./components/DesignsSolarPanelStepContent";
+import { DesignsEnergyStepContent } from "./components/DesignsEnergyStepContent";
 import { DesignsHeroTagline } from "./components/DesignsHeroTagline";
 import { DesignsPropertyTypeCard } from "./components/DesignsPropertyTypeCard";
 import { DesignsSavingsPromoCard } from "./components/DesignsSavingsPromoCard";
@@ -28,7 +29,13 @@ export function DesignsHeroSection({
   showNext = true,
 }: DesignsHeroSectionProps) {
   const [activeScreen, setActiveScreen] = useState<
-    "start" | "second" | "register" | "address" | "solarPanel" | "end"
+    | "start"
+    | "second"
+    | "register"
+    | "address"
+    | "solarPanel"
+    | "energy"
+    | "end"
   >("start");
   const [fillPercent, setFillPercent] = useState(10);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -41,7 +48,8 @@ export function DesignsHeroSection({
       if (prev === "second") return "register";
       if (prev === "register") return "address";
       if (prev === "address") return "solarPanel";
-      if (prev === "solarPanel") return "end";
+      if (prev === "solarPanel") return "energy";
+      if (prev === "energy") return "end";
       return prev;
     });
     setFillPercent((prev) => {
@@ -89,6 +97,8 @@ export function DesignsHeroSection({
         />
       ) : activeScreen === "solarPanel" ? (
         <DesignsSolarPanelStepContent selectedLocation={selectedLocation} />
+      ) : activeScreen === "energy" ? (
+        <DesignsEnergyStepContent />
       ) : activeScreen === "end" ? (
         <></>
       ) : (
