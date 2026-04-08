@@ -61,6 +61,7 @@ function panelCorners(
 }
 
 type PlanarPoint = { x: number; y: number; lat: number; lng: number };
+type PlanarXY = { x: number; y: number };
 
 function toPlanarPoint(
   point: { lat: number; lng: number },
@@ -78,6 +79,151 @@ function toPlanarPoint(
 
 function cross(o: PlanarPoint, a: PlanarPoint, b: PlanarPoint) {
   return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+}
+
+function planarBounds(points: PlanarXY[]) {
+  return points.reduce(
+    (bounds, point) => ({
+      minX: Math.min(bounds.minX, point.x),
+      maxX: Math.max(bounds.maxX, point.x),
+      minY: Math.min(bounds.minY, point.y),
+      maxY: Math.max(bounds.maxY, point.y),
+    }),
+    {
+      minX: Number.POSITIVE_INFINITY,
+      maxX: Number.NEGATIVE_INFINITY,
+      minY: Number.POSITIVE_INFINITY,
+      maxY: Number.NEGATIVE_INFINITY,
+    },
+  );
+}
+
+function pointInPolygonPlanar(point: PlanarXY, polygon: PlanarXY[]): boolean {
+  let inside = false;
+
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x;
+    const yi = polygon[i].y;
+    const xj = polygon[j].x;
+    const yj = polygon[j].y;
+
+    const intersects =
+      yi > point.y !== yj > point.y &&
+      point.x < ((xj - xi) * (point.y - yi)) / (yj - yi || Number.EPSILON) + xi;
+
+    if (intersects) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
+}
+
+function planarToLatLng(point: PlanarXY, refLat: number): google.maps.LatLngLiteral {
+  const scaleX = 111320 * Math.cos((refLat * Math.PI) / 180);
+  const scaleY = 111320;
+
+  return {
+    lat: point.y / scaleY,
+    lng: point.x / scaleX,
+  };
+}
+
+function packPanelsInsideSegments(
+  panels: SolarPanel[] | undefined,
+  panelDimensions: { heightM: number; widthM: number } | undefined,
+): SolarPanel[] | undefined {
+  if (!panels?.length || !panelDimensions) {
+    return panels;
+  }
+
+  const groupedPanels = new Map<number, SolarPanel[]>();
+  for (const panel of panels) {
+    const group = groupedPanels.get(panel.segmentIndex) ?? [];
+    group.push(panel);
+    groupedPanels.set(panel.segmentIndex, group);
+  }
+
+  const packedPanels: SolarPanel[] = [];
+
+  for (const group of groupedPanels.values()) {
+    if (!group.length) continue;
+
+    const avgLat =
+      group.reduce((sum, panel) => sum + panel.center.lat, 0) / group.length;
+    const polygon = convexHull(
+      group
+        .flatMap((panel) =>
+          panelCorners(
+            panel.center,
+            panelDimensions.heightM,
+            panelDimensions.widthM,
+            panel.orientation,
+          ),
+        )
+        .map((point) => toPlanarPoint(point, avgLat)),
+    ).map((point) => toPlanarPoint(point, avgLat));
+
+    if (polygon.length < 3) {
+      packedPanels.push(...group);
+      continue;
+    }
+
+    const dominantOrientation =
+      group.filter((panel) => panel.orientation === "LANDSCAPE").length >
+      group.length / 2
+        ? "LANDSCAPE"
+        : "PORTRAIT";
+
+    const panelWidthMeters =
+      dominantOrientation === "LANDSCAPE"
+        ? panelDimensions.heightM
+        : panelDimensions.widthM;
+    const panelHeightMeters =
+      dominantOrientation === "LANDSCAPE"
+        ? panelDimensions.widthM
+        : panelDimensions.heightM;
+
+    const gapXMeters = 0.08;
+    const gapYMeters = 0.08;
+    const bounds = planarBounds(polygon);
+    const nextGroup: SolarPanel[] = [];
+
+    for (
+      let y = bounds.maxY - panelHeightMeters / 2;
+      y >= bounds.minY + panelHeightMeters / 2 &&
+      nextGroup.length < group.length;
+      y -= panelHeightMeters + gapYMeters
+    ) {
+      for (
+        let x = bounds.minX + panelWidthMeters / 2;
+        x <= bounds.maxX - panelWidthMeters / 2 &&
+        nextGroup.length < group.length;
+        x += panelWidthMeters + gapXMeters
+      ) {
+        const candidateCorners: PlanarXY[] = [
+          { x: x - panelWidthMeters / 2, y: y + panelHeightMeters / 2 },
+          { x: x + panelWidthMeters / 2, y: y + panelHeightMeters / 2 },
+          { x: x + panelWidthMeters / 2, y: y - panelHeightMeters / 2 },
+          { x: x - panelWidthMeters / 2, y: y - panelHeightMeters / 2 },
+        ];
+
+        if (!candidateCorners.every((corner) => pointInPolygonPlanar(corner, polygon))) {
+          continue;
+        }
+
+        nextGroup.push({
+          ...group[nextGroup.length],
+          center: planarToLatLng({ x, y }, avgLat),
+          orientation: dominantOrientation,
+        });
+      }
+    }
+
+    packedPanels.push(...nextGroup);
+  }
+
+  return packedPanels;
 }
 
 function convexHull(points: PlanarPoint[]): google.maps.LatLngLiteral[] {
@@ -562,6 +708,11 @@ export function DesignsSolarPanelStepContent({
     [activePanels, selectedPanelCount],
   );
 
+  const renderedPanels = useMemo(
+    () => packPanelsInsideSegments(visiblePanels, data?.panelDimensions),
+    [data?.panelDimensions, visiblePanels],
+  );
+
   const panelCountDisplayValue = useMemo(() => {
     if (!availablePanelLimit) return "";
     const parsed = Number.parseInt(panelCountInput, 10);
@@ -717,7 +868,7 @@ export function DesignsSolarPanelStepContent({
   /* Solar panels + roof segment outlines */
   useImperativePanels(
     mapReady,
-    visiblePanels,
+    renderedPanels,
     data?.panelDimensions,
     showPanels,
   );
