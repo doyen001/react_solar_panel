@@ -548,6 +548,8 @@ export function DesignsSolarPanelStepContent({
   const [isEditing, setIsEditing] = useState(false);
   const roofCounter = useRef(0);
   const [editingRoofs, setEditingRoofs] = useState<RoofPolygon[]>([]);
+  /** Which roof polygon is selected for delete (click a roof on the map). */
+  const [selectedRoofId, setSelectedRoofId] = useState<number | null>(null);
   const [savedRoofs, setSavedRoofs] = useState<google.maps.LatLngLiteral[][]>(
     [],
   );
@@ -605,8 +607,26 @@ export function DesignsSolarPanelStepContent({
     setPolygonTotalAreaM2(null);
     setIsEditing(false);
     setEditingRoofs([]);
+    setSelectedRoofId(null);
     setHasInitializedRoof(false);
   }
+
+  useEffect(() => {
+    if (!isEditing) {
+      setSelectedRoofId(null);
+      return;
+    }
+    if (editingRoofs.length === 0) {
+      setSelectedRoofId(null);
+      return;
+    }
+    setSelectedRoofId((prev) => {
+      if (prev !== null && editingRoofs.some((r) => r.id === prev)) {
+        return prev;
+      }
+      return editingRoofs[0].id;
+    });
+  }, [isEditing, editingRoofs]);
 
   useEffect(() => {
     if (!selectedLocation || hasInitializedRoof || !initialRoofPolygon) {
@@ -685,10 +705,11 @@ export function DesignsSolarPanelStepContent({
   const handleAddRoof = useCallback(() => {
     if (!selectedLocation) return;
 
+    const newId = ++roofCounter.current;
     setEditingRoofs((prev) => [
       ...prev,
       {
-        id: ++roofCounter.current,
+        id: newId,
         paths:
           roofMaskOutline ??
           (data?.boundingBox
@@ -696,7 +717,17 @@ export function DesignsSolarPanelStepContent({
             : makeDefaultPolygon(selectedLocation, prev.length * 0.0002)),
       },
     ]);
+    setSelectedRoofId(newId);
   }, [data?.boundingBox, roofMaskOutline, selectedLocation]);
+
+  /** Removes the roof currently selected on the map; keeps at least one polygon. */
+  const handleDeleteRoof = useCallback(() => {
+    if (selectedRoofId === null) return;
+    setEditingRoofs((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((r) => r.id !== selectedRoofId);
+    });
+  }, [selectedRoofId]);
 
   const handleSave = useCallback(() => {
     /* Read final paths from imperative polygon refs (user may have dragged vertices) */
@@ -710,6 +741,7 @@ export function DesignsSolarPanelStepContent({
       polygonRefs.current.clear();
       setIsEditing(false);
       setEditingRoofs([]);
+      setSelectedRoofId(null);
       return;
     }
 
@@ -740,6 +772,7 @@ export function DesignsSolarPanelStepContent({
     polygonRefs.current.clear();
     setIsEditing(false);
     setEditingRoofs([]);
+    setSelectedRoofId(null);
   }, [data?.panelDimensions, getCurrentEditingPaths]);
 
   const mapCenter = selectedLocation ?? DESIGNS_LOCATION_STEP.defaultCenter;
@@ -947,29 +980,33 @@ export function DesignsSolarPanelStepContent({
 
                   {/* Editable roof polygons (edit mode) */}
                   {isEditing &&
-                    editingRoofs.map((roof) => (
-                      <Polygon
-                        key={roof.id}
-                        paths={roof.paths}
-                        options={{
-                          fillColor: "#51FF00",
-                          fillOpacity: 0.18,
-                          strokeColor: "#51FF00",
-                          strokeOpacity: 0.9,
-                          strokeWeight: 2.5,
-                          clickable: true,
-                          zIndex: 10,
-                        }}
-                        draggable
-                        editable
-                        onLoad={(polygon) => {
-                          polygonRefs.current.set(roof.id, polygon);
-                        }}
-                        onUnmount={() => {
-                          polygonRefs.current.delete(roof.id);
-                        }}
-                      />
-                    ))}
+                    editingRoofs.map((roof) => {
+                      const isSelected = roof.id === selectedRoofId;
+                      return (
+                        <Polygon
+                          key={roof.id}
+                          paths={roof.paths}
+                          options={{
+                            fillColor: "#51FF00",
+                            fillOpacity: isSelected ? 0.26 : 0.18,
+                            strokeColor: isSelected ? "#FBBF24" : "#51FF00",
+                            strokeOpacity: 0.95,
+                            strokeWeight: isSelected ? 4 : 2.5,
+                            clickable: true,
+                            zIndex: isSelected ? 12 : 10,
+                          }}
+                          draggable
+                          editable
+                          onClick={() => setSelectedRoofId(roof.id)}
+                          onLoad={(polygon) => {
+                            polygonRefs.current.set(roof.id, polygon);
+                          }}
+                          onUnmount={() => {
+                            polygonRefs.current.delete(roof.id);
+                          }}
+                        />
+                      );
+                    })}
 
                   {/* Saved roof outlines (view mode) */}
                   {!isEditing &&
@@ -1013,6 +1050,19 @@ export function DesignsSolarPanelStepContent({
                   </button>
                   <button
                     type="button"
+                    onClick={handleDeleteRoof}
+                    disabled={
+                      isGeneratingPanels ||
+                      editingRoofs.length <= 1 ||
+                      selectedRoofId === null
+                    }
+                    aria-label="Delete the selected roof (click a roof on the map first)"
+                    className="h-[33px] rounded-[6px] bg-white/90 px-[14px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-[#DC2626] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    Delete roof
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleSave}
                     disabled={isGeneratingPanels}
                     className="h-[33px] rounded-[6px] bg-[linear-gradient(126deg,#22c55e_0%,#16a34a_100%)] px-[18px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] disabled:opacity-60"
@@ -1036,7 +1086,8 @@ export function DesignsSolarPanelStepContent({
             {isEditing && (
               <div className="pointer-events-none absolute bottom-[14px] left-1/2 -translate-x-1/2">
                 <p className="whitespace-nowrap rounded-[8px] bg-black/60 px-4 py-2 font-inter text-[12px] font-medium text-white backdrop-blur-sm">
-                  Drag vertices to reshape · Drag the polygon to move it
+                  Click a roof to select (amber border) · Delete removes that
+                  roof
                 </p>
               </div>
             )}
