@@ -6,18 +6,13 @@ import Icon from "@/components/ui/Icons";
 import { useGoogleMaps } from "@/components/providers/GoogleMapsProvider";
 import {
   DESIGNS_LOCATION_STEP,
-  DESIGNS_SOLAR_PANEL_MAP,
   DESIGNS_SOLAR_PANEL_STEP,
   type DesignsMapLocation,
 } from "@/utils/constant";
-import {
-  filterPanelsForSelectedBuilding,
-  filterRoofSegmentsForSelectedBuilding,
-  haversineMeters,
-} from "@/utils/solarMapFilter";
-import { fetchSolarEstimate, useSolarEstimate } from "@/hooks/useSolarEstimate";
+import { useSolarEstimate } from "@/hooks/useSolarEstimate";
 import { useSolarLayers, type SolarLayerType } from "@/hooks/useSolarLayers";
 import type { GeoTiffOverlay } from "@/utils/geotiff";
+import { extractRoofOutlineFromMask } from "@/utils/roofMaskContour";
 import type { SolarEstimateResult, SolarPanel } from "@/types/solar";
 
 const MAP_CONTAINER: React.CSSProperties = {
@@ -28,6 +23,9 @@ const MAP_CONTAINER: React.CSSProperties = {
 };
 
 const ACTIVE_LAYERS: SolarLayerType[] = ["rgb", "mask"];
+
+/** Hard cap on Google Maps Polygon instances for generated panels (perf). Keep ≥ typical “panels that fit” so the map matches the left-panel count. */
+const MAX_MAP_SOLAR_PANEL_POLYGONS = 1500;
 function formatNumber(n: number): string {
   return n.toLocaleString("en-AU", { maximumFractionDigits: 0 });
 }
@@ -36,28 +34,37 @@ function formatNumber(n: number): string {
 
 /**
  * Convert a panel center + dimensions to the four corner lat/lng coords.
- * Panel height runs north/south; width runs east/west.
+ * Rotation is measured in planar degrees from the east axis counter-clockwise.
  */
 function panelCorners(
   center: { lat: number; lng: number },
   heightM: number,
   widthM: number,
   orientation: "PORTRAIT" | "LANDSCAPE",
+  rotationDegrees = 0,
 ): google.maps.LatLngLiteral[] {
   const metersPerLat = 111320;
   const metersPerLng = 111320 * Math.cos((center.lat * Math.PI) / 180);
 
-  const halfH =
-    (orientation === "LANDSCAPE" ? widthM : heightM) / 2 / metersPerLat;
-  const halfW =
-    (orientation === "LANDSCAPE" ? heightM : widthM) / 2 / metersPerLng;
+  const halfHeightMeters = (orientation === "LANDSCAPE" ? widthM : heightM) / 2;
+  const halfWidthMeters = (orientation === "LANDSCAPE" ? heightM : widthM) / 2;
+  const angle = (rotationDegrees * Math.PI) / 180;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
 
   return [
-    { lat: center.lat + halfH, lng: center.lng - halfW },
-    { lat: center.lat + halfH, lng: center.lng + halfW },
-    { lat: center.lat - halfH, lng: center.lng + halfW },
-    { lat: center.lat - halfH, lng: center.lng - halfW },
-  ];
+    { x: -halfWidthMeters, y: halfHeightMeters },
+    { x: halfWidthMeters, y: halfHeightMeters },
+    { x: halfWidthMeters, y: -halfHeightMeters },
+    { x: -halfWidthMeters, y: -halfHeightMeters },
+  ].map((point) => {
+    const rotatedX = point.x * cos - point.y * sin;
+    const rotatedY = point.x * sin + point.y * cos;
+    return {
+      lat: center.lat + rotatedY / metersPerLat,
+      lng: center.lng + rotatedX / metersPerLng,
+    };
+  });
 }
 
 type PlanarPoint = { x: number; y: number; lat: number; lng: number };
@@ -77,10 +84,6 @@ function toPlanarPoint(
   };
 }
 
-function cross(o: PlanarPoint, a: PlanarPoint, b: PlanarPoint) {
-  return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-}
-
 function planarBounds(points: PlanarXY[]) {
   return points.reduce(
     (bounds, point) => ({
@@ -98,28 +101,10 @@ function planarBounds(points: PlanarXY[]) {
   );
 }
 
-function pointInPolygonPlanar(point: PlanarXY, polygon: PlanarXY[]): boolean {
-  let inside = false;
-
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i].x;
-    const yi = polygon[i].y;
-    const xj = polygon[j].x;
-    const yj = polygon[j].y;
-
-    const intersects =
-      yi > point.y !== yj > point.y &&
-      point.x < ((xj - xi) * (point.y - yi)) / (yj - yi || Number.EPSILON) + xi;
-
-    if (intersects) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-}
-
-function planarToLatLng(point: PlanarXY, refLat: number): google.maps.LatLngLiteral {
+function planarToLatLng(
+  point: PlanarXY,
+  refLat: number,
+): google.maps.LatLngLiteral {
   const scaleX = 111320 * Math.cos((refLat * Math.PI) / 180);
   const scaleY = 111320;
 
@@ -129,141 +114,195 @@ function planarToLatLng(point: PlanarXY, refLat: number): google.maps.LatLngLite
   };
 }
 
-function packPanelsInsideSegments(
-  panels: SolarPanel[] | undefined,
-  panelDimensions: { heightM: number; widthM: number } | undefined,
-): SolarPanel[] | undefined {
-  if (!panels?.length || !panelDimensions) {
-    return panels;
-  }
+function centroidPlanar(points: PlanarXY[]): PlanarXY {
+  return {
+    x: points.reduce((sum, point) => sum + point.x, 0) / points.length,
+    y: points.reduce((sum, point) => sum + point.y, 0) / points.length,
+  };
+}
 
-  const groupedPanels = new Map<number, SolarPanel[]>();
-  for (const panel of panels) {
-    const group = groupedPanels.get(panel.segmentIndex) ?? [];
-    group.push(panel);
-    groupedPanels.set(panel.segmentIndex, group);
-  }
+function rotatePlanarPoint(
+  point: PlanarXY,
+  center: PlanarXY,
+  angleRadians: number,
+): PlanarXY {
+  const cos = Math.cos(angleRadians);
+  const sin = Math.sin(angleRadians);
+  const dx = point.x - center.x;
+  const dy = point.y - center.y;
 
-  const packedPanels: SolarPanel[] = [];
+  return {
+    x: center.x + dx * cos - dy * sin,
+    y: center.y + dx * sin + dy * cos,
+  };
+}
 
-  for (const group of groupedPanels.values()) {
-    if (!group.length) continue;
-
-    const avgLat =
-      group.reduce((sum, panel) => sum + panel.center.lat, 0) / group.length;
-    const polygon = convexHull(
-      group
-        .flatMap((panel) =>
-          panelCorners(
-            panel.center,
-            panelDimensions.heightM,
-            panelDimensions.widthM,
-            panel.orientation,
-          ),
-        )
-        .map((point) => toPlanarPoint(point, avgLat)),
-    ).map((point) => toPlanarPoint(point, avgLat));
-
-    if (polygon.length < 3) {
-      packedPanels.push(...group);
-      continue;
+/**
+ * Angle (degrees) of the longest edge of the polygon in planar metre space.
+ */
+function longestEdgeAngleDegrees(polygon: google.maps.LatLngLiteral[]): number {
+  if (polygon.length < 2) return 0;
+  const avgLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+  let best = 0;
+  let bestLen = 0;
+  for (let i = 0; i < polygon.length; i++) {
+    const a = toPlanarPoint(polygon[i], avgLat);
+    const b = toPlanarPoint(polygon[(i + 1) % polygon.length], avgLat);
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    if (len > bestLen) {
+      bestLen = len;
+      best = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
     }
+  }
+  return best;
+}
 
-    const dominantOrientation =
-      group.filter((panel) => panel.orientation === "LANDSCAPE").length >
-      group.length / 2
-        ? "LANDSCAPE"
-        : "PORTRAIT";
+/**
+ * Compute X-spans of the polygon at a given scanline Y by intersecting every
+ * edge.  Returns sorted pairs {left, right}. For concave polygons there may
+ * be more than one span per row.
+ */
+function polygonXSpansAtY(
+  polygon: PlanarXY[],
+  y: number,
+): { left: number; right: number }[] {
+  const xs: number[] = [];
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const yi = polygon[i].y;
+    const yj = polygon[j].y;
+    if ((yi <= y && yj > y) || (yj <= y && yi > y)) {
+      const t = (y - yi) / (yj - yi);
+      xs.push(polygon[i].x + t * (polygon[j].x - polygon[i].x));
+    }
+  }
+  xs.sort((a, b) => a - b);
+  const spans: { left: number; right: number }[] = [];
+  for (let k = 0; k + 1 < xs.length; k += 2) {
+    spans.push({ left: xs[k], right: xs[k + 1] });
+  }
+  return spans;
+}
 
-    const panelWidthMeters =
-      dominantOrientation === "LANDSCAPE"
-        ? panelDimensions.heightM
-        : panelDimensions.widthM;
-    const panelHeightMeters =
-      dominantOrientation === "LANDSCAPE"
-        ? panelDimensions.widthM
-        : panelDimensions.heightM;
+function generatePanelsForRoofPolygon(
+  polygon: google.maps.LatLngLiteral[],
+  panelDimensions: { heightM: number; widthM: number },
+  segmentIndex: number,
+): SolarPanel[] {
+  if (polygon.length < 3) return [];
 
-    const gapXMeters = 0.08;
-    const gapYMeters = 0.08;
-    const bounds = planarBounds(polygon);
-    const nextGroup: SolarPanel[] = [];
+  const avgLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+  const polygonXY = polygon.map((p) => {
+    const pp = toPlanarPoint(p, avgLat);
+    return { x: pp.x, y: pp.y };
+  });
+  const centroid = centroidPlanar(polygonXY);
 
-    for (
-      let y = bounds.maxY - panelHeightMeters / 2;
-      y >= bounds.minY + panelHeightMeters / 2 &&
-      nextGroup.length < group.length;
-      y -= panelHeightMeters + gapYMeters
-    ) {
-      for (
-        let x = bounds.minX + panelWidthMeters / 2;
-        x <= bounds.maxX - panelWidthMeters / 2 &&
-        nextGroup.length < group.length;
-        x += panelWidthMeters + gapXMeters
-      ) {
-        const candidateCorners: PlanarXY[] = [
-          { x: x - panelWidthMeters / 2, y: y + panelHeightMeters / 2 },
-          { x: x + panelWidthMeters / 2, y: y + panelHeightMeters / 2 },
-          { x: x + panelWidthMeters / 2, y: y - panelHeightMeters / 2 },
-          { x: x - panelWidthMeters / 2, y: y - panelHeightMeters / 2 },
-        ];
+  const rowAngleDeg = longestEdgeAngleDegrees(polygon);
+  const rowAngleRad = (rowAngleDeg * Math.PI) / 180;
 
-        if (!candidateCorners.every((corner) => pointInPolygonPlanar(corner, polygon))) {
-          continue;
+  const rotPoly = polygonXY.map((p) =>
+    rotatePlanarPoint(p, centroid, -rowAngleRad),
+  );
+  const bounds = planarBounds(rotPoly);
+
+  const gapM = 0.08;
+  const ROW_OFFSET_SAMPLES = 12;
+
+  const panelW = (landscape: boolean) =>
+    landscape
+      ? Math.max(panelDimensions.heightM, panelDimensions.widthM)
+      : Math.min(panelDimensions.heightM, panelDimensions.widthM);
+
+  const panelH = (landscape: boolean) =>
+    landscape
+      ? Math.min(panelDimensions.heightM, panelDimensions.widthM)
+      : Math.max(panelDimensions.heightM, panelDimensions.widthM);
+
+  const toSolarPanel = (
+    x: number,
+    y: number,
+    orientation: "PORTRAIT" | "LANDSCAPE",
+  ): SolarPanel => {
+    const center = rotatePlanarPoint({ x, y }, centroid, rowAngleRad);
+    return {
+      center: planarToLatLng(center, avgLat),
+      orientation,
+      rotationDegrees: rowAngleDeg,
+      segmentIndex,
+      yearlyEnergyDcKwh: 0,
+    };
+  };
+
+  /**
+   * For a row centred at height `y`, compute the *usable* X-spans by
+   * intersecting the polygon at the panel's top and bottom edges, then
+   * greedily pack panels left-to-right within each span:
+   *  1. The first panel is placed flush against the left boundary.
+   *  2. Each subsequent panel starts at (previous panel right edge + gap).
+   *  3. A panel is placed only when the remaining distance to the right
+   *     boundary >= panelWidth, guaranteeing no overlap with the border.
+   */
+  const fillRow = (
+    y: number,
+    pw: number,
+    ph: number,
+    orientation: "PORTRAIT" | "LANDSCAPE",
+  ): SolarPanel[] => {
+    const halfH = ph / 2;
+    const topSpans = polygonXSpansAtY(rotPoly, y + halfH);
+    const botSpans = polygonXSpansAtY(rotPoly, y - halfH);
+
+    const usableSpans: { left: number; right: number }[] = [];
+    for (const top of topSpans) {
+      for (const bot of botSpans) {
+        const left = Math.max(top.left, bot.left);
+        const right = Math.min(top.right, bot.right);
+        if (right - left >= pw) {
+          usableSpans.push({ left, right });
         }
-
-        nextGroup.push({
-          ...group[nextGroup.length],
-          center: planarToLatLng({ x, y }, avgLat),
-          orientation: dominantOrientation,
-        });
       }
     }
 
-    packedPanels.push(...nextGroup);
-  }
-
-  return packedPanels;
-}
-
-function convexHull(points: PlanarPoint[]): google.maps.LatLngLiteral[] {
-  if (points.length <= 1) {
-    return points.map((point) => ({ lat: point.lat, lng: point.lng }));
-  }
-
-  const sorted = [...points].sort((a, b) =>
-    a.x === b.x ? a.y - b.y : a.x - b.x,
-  );
-  const lower: PlanarPoint[] = [];
-  for (const point of sorted) {
-    while (
-      lower.length >= 2 &&
-      cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0
-    ) {
-      lower.pop();
+    const panels: SolarPanel[] = [];
+    for (const span of usableSpans) {
+      let x = span.left + pw / 2;
+      while (x + pw / 2 <= span.right + 1e-6) {
+        panels.push(toSolarPanel(x, y, orientation));
+        x += pw + gapM;
+      }
     }
-    lower.push(point);
-  }
+    return panels;
+  };
 
-  const upper: PlanarPoint[] = [];
-  for (let i = sorted.length - 1; i >= 0; i--) {
-    const point = sorted[i];
-    while (
-      upper.length >= 2 &&
-      cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0
-    ) {
-      upper.pop();
+  let bestPanels: SolarPanel[] = [];
+
+  for (const isLandscape of [true, false]) {
+    const pw = panelW(isLandscape);
+    const ph = panelH(isLandscape);
+    const orientation: "PORTRAIT" | "LANDSCAPE" = isLandscape
+      ? "LANDSCAPE"
+      : "PORTRAIT";
+    const yStep = ph + gapM;
+
+    for (let s = 0; s < ROW_OFFSET_SAMPLES; s++) {
+      const yOffset = (s / ROW_OFFSET_SAMPLES) * yStep;
+      const generated: SolarPanel[] = [];
+
+      for (
+        let y = bounds.minY + ph / 2 + yOffset;
+        y + ph / 2 <= bounds.maxY + 1e-6;
+        y += yStep
+      ) {
+        generated.push(...fillRow(y, pw, ph, orientation));
+      }
+
+      if (generated.length > bestPanels.length) {
+        bestPanels = generated;
+      }
     }
-    upper.push(point);
   }
 
-  lower.pop();
-  upper.pop();
-
-  return [...lower, ...upper].map((point) => ({
-    lat: point.lat,
-    lng: point.lng,
-  }));
+  return bestPanels;
 }
 
 /* ── Imperative overlay hook ─────────────────────────────────── */
@@ -314,9 +353,10 @@ function useImperativePanels(
 
     if (!map || !panels?.length || !panelDimensions || !visible) return;
 
-    // Cap at 200 panels to stay performant on large roofs, while keeping
-    // multiple selected roofs visible instead of only drawing the first group.
-    const subset = balancePanelsAcrossSegments(panels, 200);
+    const subset = balancePanelsAcrossSegments(
+      panels,
+      MAX_MAP_SOLAR_PANEL_POLYGONS,
+    );
     const created: google.maps.Polygon[] = [];
 
     for (const panel of subset) {
@@ -326,6 +366,7 @@ function useImperativePanels(
           panelDimensions.heightM,
           panelDimensions.widthM,
           panel.orientation,
+          panel.rotationDegrees,
         ),
         strokeColor: "#FFF176",
         strokeWeight: 0.8,
@@ -345,99 +386,65 @@ function useImperativePanels(
   }, [map, panels, panelDimensions, visible]);
 }
 
-/* ── Imperative roof-segment outline hook ────────────────────── */
-
-function useImperativeRoofSegments(
+/**
+ * Roof outline: traced polygon from Solar roof-mask GeoTIFF (true footprint),
+ * else rectangle from Building Insights `boundingBox`.
+ */
+function useImperativeRoofOutline(
   map: google.maps.Map | null,
-  panels: SolarPanel[] | undefined,
-  panelDimensions: { heightM: number; widthM: number } | undefined,
-  segments: SolarEstimateResult["roofSegments"] | undefined,
+  maskOutline: google.maps.LatLngLiteral[] | null,
+  buildingBoundingBox: SolarEstimateResult["boundingBox"] | undefined,
   visible: boolean,
 ) {
-  const polygonsRef = useRef<(google.maps.Rectangle | google.maps.Polygon)[]>(
-    [],
+  const overlayRef = useRef<google.maps.Rectangle | google.maps.Polygon | null>(
+    null,
   );
 
   useEffect(() => {
-    polygonsRef.current.forEach((shape) => shape.setMap(null));
-    polygonsRef.current = [];
+    overlayRef.current?.setMap(null);
+    overlayRef.current = null;
 
     if (!map || !visible) return;
 
-    const created: (google.maps.Rectangle | google.maps.Polygon)[] = [];
+    const opts = {
+      strokeColor: "#00E5FF",
+      strokeWeight: 2.5,
+      strokeOpacity: 0.95,
+      fillColor: "#00E5FF",
+      fillOpacity: 0.04,
+      clickable: false,
+    } as const;
 
-    if (panels?.length && panelDimensions) {
-      const avgLat =
-        panels.reduce((sum, panel) => sum + panel.center.lat, 0) /
-        panels.length;
-      const groupedPanels = new Map<number, SolarPanel[]>();
-
-      for (const panel of panels) {
-        const group = groupedPanels.get(panel.segmentIndex) ?? [];
-        group.push(panel);
-        groupedPanels.set(panel.segmentIndex, group);
-      }
-
-      for (const group of groupedPanels.values()) {
-        const footprintPoints = group.flatMap((panel) =>
-          panelCorners(
-            panel.center,
-            panelDimensions.heightM,
-            panelDimensions.widthM,
-            panel.orientation,
-          ),
-        );
-        const hull = convexHull(
-          footprintPoints.map((point) => toPlanarPoint(point, avgLat)),
-        );
-
-        if (hull.length >= 3) {
-          const polygon = new google.maps.Polygon({
-            paths: hull,
-            strokeColor: "#00E5FF",
-            strokeWeight: 2.5,
-            strokeOpacity: 0.95,
-            fillColor: "#00E5FF",
-            fillOpacity: 0.04,
-            clickable: false,
-          });
-          polygon.setMap(map);
-          created.push(polygon);
-        }
-      }
-    } else if (segments?.length) {
-      for (const seg of segments) {
-        const rect = new google.maps.Rectangle({
-          bounds: {
-            north: seg.boundingBox.ne.lat,
-            south: seg.boundingBox.sw.lat,
-            east: seg.boundingBox.ne.lng,
-            west: seg.boundingBox.sw.lng,
-          },
-          strokeColor: "#00E5FF",
-          strokeWeight: 2.5,
-          strokeOpacity: 0.95,
-          fillColor: "#00E5FF",
-          fillOpacity: 0.04,
-          clickable: false,
-        });
-        rect.setMap(map);
-        created.push(rect);
-      }
+    if (maskOutline && maskOutline.length >= 3) {
+      const poly = new google.maps.Polygon({
+        paths: maskOutline,
+        ...opts,
+      });
+      poly.setMap(map);
+      overlayRef.current = poly;
+      return () => poly.setMap(null);
     }
 
-    polygonsRef.current = created;
-
-    return () => {
-      created.forEach((shape) => shape.setMap(null));
-    };
-  }, [map, panels, panelDimensions, segments, visible]);
+    if (buildingBoundingBox) {
+      const rect = new google.maps.Rectangle({
+        bounds: {
+          north: buildingBoundingBox.ne.lat,
+          south: buildingBoundingBox.sw.lat,
+          east: buildingBoundingBox.ne.lng,
+          west: buildingBoundingBox.sw.lng,
+        },
+        ...opts,
+      });
+      rect.setMap(map);
+      overlayRef.current = rect;
+      return () => rect.setMap(null);
+    }
+  }, [map, maskOutline, buildingBoundingBox, visible]);
 }
 
 /* ── Roof-polygon editing helpers ───────────────────────────── */
 
 type RoofPolygon = { id: number; paths: google.maps.LatLngLiteral[] };
-type RoofSegment = SolarEstimateResult["roofSegments"][number];
 
 function makeDefaultPolygon(
   center: { lat: number; lng: number },
@@ -453,7 +460,7 @@ function makeDefaultPolygon(
 }
 
 function boundingBoxToPolygon(
-  box: RoofSegment["boundingBox"],
+  box: SolarEstimateResult["boundingBox"],
 ): google.maps.LatLngLiteral[] {
   return [
     { lat: box.ne.lat, lng: box.sw.lng },
@@ -463,40 +470,14 @@ function boundingBoxToPolygon(
   ];
 }
 
-function selectionContainsPoint(
-  selectionPaths: google.maps.LatLngLiteral[],
-  point: { lat: number; lng: number },
-): boolean {
-  const selectionPolygon = new google.maps.Polygon({ paths: selectionPaths });
-  return google.maps.geometry.poly.containsLocation(
-    new google.maps.LatLng(point.lat, point.lng),
-    selectionPolygon,
-  );
-}
-
-function getPolygonRepresentativePoint(paths: google.maps.LatLngLiteral[]): {
-  lat: number;
-  lng: number;
-} {
-  const totals = paths.reduce(
-    (sum, point) => ({
-      lat: sum.lat + point.lat,
-      lng: sum.lng + point.lng,
-    }),
-    { lat: 0, lng: 0 },
-  );
-
-  return {
-    lat: totals.lat / paths.length,
-    lng: totals.lng / paths.length,
-  };
-}
-
+/** Dedupe key must include roof segment so nearby/overlapping polygons do not steal each other's panels. */
 function getSolarPanelKey(panel: SolarPanel): string {
   return [
+    panel.segmentIndex,
     panel.center.lat.toFixed(7),
     panel.center.lng.toFixed(7),
     panel.orientation,
+    (panel.rotationDegrees ?? 0).toFixed(2),
   ].join(":");
 }
 
@@ -509,33 +490,6 @@ function dedupeSolarPanels(panels: SolarPanel[]): SolarPanel[] {
     if (seen.has(key)) continue;
     seen.add(key);
     unique.push(panel);
-  }
-
-  return unique;
-}
-
-function dedupeNearbyPanels(
-  panels: SolarPanel[],
-  panelDimensions: { heightM: number; widthM: number } | undefined,
-): SolarPanel[] {
-  if (!panelDimensions || panels.length <= 1) {
-    return dedupeSolarPanels(panels);
-  }
-
-  const thresholdMeters =
-    Math.min(panelDimensions.widthM, panelDimensions.heightM) * 0.9;
-  const unique: SolarPanel[] = [];
-
-  for (const panel of panels) {
-    const hasNearbyMatch = unique.some(
-      (existing) =>
-        existing.orientation === panel.orientation &&
-        haversineMeters(existing.center, panel.center) <= thresholdMeters,
-    );
-
-    if (!hasNearbyMatch) {
-      unique.push(panel);
-    }
   }
 
   return unique;
@@ -574,45 +528,9 @@ function balancePanelsAcrossSegments(
   return balanced;
 }
 
-function panelIntersectsRoofSelection(
-  panel: SolarPanel,
-  selectionPaths: google.maps.LatLngLiteral[],
-  panelDimensions: { heightM: number; widthM: number } | undefined,
-): boolean {
-  const selectionPolygon = new google.maps.Polygon({ paths: selectionPaths });
-  const panelCenter = new google.maps.LatLng(
-    panel.center.lat,
-    panel.center.lng,
-  );
-
-  if (
-    google.maps.geometry.poly.containsLocation(panelCenter, selectionPolygon)
-  ) {
-    return true;
-  }
-
-  if (!panelDimensions) {
-    return false;
-  }
-
-  const corners = panelCorners(
-    panel.center,
-    panelDimensions.heightM,
-    panelDimensions.widthM,
-    panel.orientation,
-  );
-
-  return corners.some((corner) =>
-    google.maps.geometry.poly.containsLocation(
-      new google.maps.LatLng(corner.lat, corner.lng),
-      selectionPolygon,
-    ),
-  );
-}
-
 /* ── Main component ──────────────────────────────────────────── */
 
-type ActiveLayer = "all" | "satellite" | "panels";
+type ActiveLayer = "satellite" | "panels";
 
 type DesignsSolarPanelStepContentProps = {
   selectedLocation: DesignsMapLocation | null;
@@ -624,7 +542,7 @@ export function DesignsSolarPanelStepContent({
   const { isLoaded } = useGoogleMaps();
 
   const [mapReady, setMapReady] = useState<google.maps.Map | null>(null);
-  const [activeLayer, setActiveLayer] = useState<ActiveLayer>("all");
+  const [activeLayer, setActiveLayer] = useState<ActiveLayer>("panels");
 
   /* ── Roof polygon editing state ── */
   const [isEditing, setIsEditing] = useState(false);
@@ -634,66 +552,80 @@ export function DesignsSolarPanelStepContent({
     [],
   );
   const polygonRefs = useRef<Map<number, google.maps.Polygon>>(new Map());
-  const [polygonFilteredPanels, setPolygonFilteredPanels] = useState<
-    SolarPanel[] | null
-  >(null);
+  const [generatedPanels, setGeneratedPanels] = useState<SolarPanel[] | null>(
+    null,
+  );
   const [polygonTotalAreaM2, setPolygonTotalAreaM2] = useState<number | null>(
     null,
   );
-  const [isSavingSelection, setIsSavingSelection] = useState(false);
+  const [isGeneratingPanels, setIsGeneratingPanels] = useState(false);
+  const [hasInitializedRoof, setHasInitializedRoof] = useState(false);
 
   const { data, loading, error, retry } = useSolarEstimate(selectedLocation);
+  const {
+    rgb: rgbOverlay,
+    mask: maskOverlay,
+    loading: layersLoading,
+    error: layersError,
+    retry: layersRetry,
+  } = useSolarLayers(selectedLocation, ACTIVE_LAYERS);
 
-  const filteredPanels = useMemo(
-    () =>
-      dedupeNearbyPanels(
-        filterPanelsForSelectedBuilding(
-          data?.solarPanels,
-          selectedLocation,
-          data?.boundingBox,
-          DESIGNS_SOLAR_PANEL_MAP.maxPanelDistanceFromPinMeters,
-        ),
-        data?.panelDimensions,
-      ),
-    [
-      data?.solarPanels,
-      data?.boundingBox,
-      data?.panelDimensions,
-      selectedLocation,
-    ],
-  );
+  const maskRaster = maskOverlay?.raster ?? null;
 
-  const filteredRoofSegments = useMemo(
-    () =>
-      filterRoofSegmentsForSelectedBuilding(
-        data?.roofSegments,
-        selectedLocation,
-        data?.boundingBox,
-        DESIGNS_SOLAR_PANEL_MAP.maxPanelDistanceFromPinMeters,
-      ),
-    [data?.roofSegments, data?.boundingBox, selectedLocation],
-  );
+  const roofMaskOutline = useMemo(() => {
+    if (!maskRaster || !selectedLocation) return null;
+    return extractRoofOutlineFromMask(
+      maskRaster,
+      selectedLocation.lat,
+      selectedLocation.lng,
+    );
+  }, [maskRaster, selectedLocation]);
+
+  const initialRoofPolygon = useMemo(() => {
+    if (!selectedLocation) return null;
+    if (roofMaskOutline?.length) return roofMaskOutline;
+    if (data?.boundingBox) return boundingBoxToPolygon(data.boundingBox);
+    if (loading || layersLoading) return null;
+    return makeDefaultPolygon(selectedLocation);
+  }, [
+    data?.boundingBox,
+    layersLoading,
+    loading,
+    roofMaskOutline,
+    selectedLocation,
+  ]);
 
   /* Reset polygon selection when address changes (derived-state pattern, avoids effect) */
   const [prevSelectedLocation, setPrevSelectedLocation] =
     useState(selectedLocation);
   if (prevSelectedLocation !== selectedLocation) {
     setPrevSelectedLocation(selectedLocation);
-    setPolygonFilteredPanels(null);
+    setGeneratedPanels(null);
     setSavedRoofs([]);
     setPolygonTotalAreaM2(null);
     setIsEditing(false);
     setEditingRoofs([]);
+    setHasInitializedRoof(false);
   }
 
-  /* Active panels: polygon-selection override or full AI-detected set */
-  const activePanels = polygonFilteredPanels ?? filteredPanels;
+  useEffect(() => {
+    if (!selectedLocation || hasInitializedRoof || !initialRoofPolygon) {
+      return;
+    }
+
+    setEditingRoofs([
+      {
+        id: ++roofCounter.current,
+        paths: initialRoofPolygon,
+      },
+    ]);
+    setIsEditing(true);
+    setHasInitializedRoof(true);
+  }, [hasInitializedRoof, initialRoofPolygon, selectedLocation]);
 
   const availablePanelLimit = useMemo(() => {
-    if (polygonFilteredPanels !== null) return polygonFilteredPanels.length;
-    if (activePanels.length > 0) return activePanels.length;
-    return data?.maxPanelsCount ?? 0;
-  }, [data?.maxPanelsCount, activePanels.length, polygonFilteredPanels]);
+    return generatedPanels?.length ?? 0;
+  }, [generatedPanels]);
 
   const [panelCountInput, setPanelCountInput] = useState("");
 
@@ -704,13 +636,8 @@ export function DesignsSolarPanelStepContent({
   }, [availablePanelLimit, panelCountInput]);
 
   const visiblePanels = useMemo(
-    () => activePanels.slice(0, selectedPanelCount),
-    [activePanels, selectedPanelCount],
-  );
-
-  const renderedPanels = useMemo(
-    () => packPanelsInsideSegments(visiblePanels, data?.panelDimensions),
-    [data?.panelDimensions, visiblePanels],
+    () => (generatedPanels ?? []).slice(0, selectedPanelCount),
+    [generatedPanels, selectedPanelCount],
   );
 
   const panelCountDisplayValue = useMemo(() => {
@@ -734,11 +661,15 @@ export function DesignsSolarPanelStepContent({
       setEditingRoofs([
         {
           id: ++roofCounter.current,
-          paths: makeDefaultPolygon(selectedLocation),
+          paths:
+            roofMaskOutline ??
+            (data?.boundingBox
+              ? boundingBoxToPolygon(data.boundingBox)
+              : makeDefaultPolygon(selectedLocation)),
         },
       ]);
     }
-  }, [selectedLocation, savedRoofs]);
+  }, [data?.boundingBox, roofMaskOutline, savedRoofs, selectedLocation]);
 
   const getCurrentEditingPaths = useCallback(() => {
     return editingRoofs.map((roof) => {
@@ -754,33 +685,27 @@ export function DesignsSolarPanelStepContent({
   const handleAddRoof = useCallback(() => {
     if (!selectedLocation) return;
 
-    const currentPaths = getCurrentEditingPaths();
-    const nextRoofSegment = (data?.roofSegments ?? []).find(
-      (segment) =>
-        !currentPaths.some((paths) =>
-          selectionContainsPoint(paths, segment.center),
-        ),
-    );
-
     setEditingRoofs((prev) => [
       ...prev,
       {
         id: ++roofCounter.current,
-        paths: nextRoofSegment
-          ? boundingBoxToPolygon(nextRoofSegment.boundingBox)
-          : makeDefaultPolygon(selectedLocation, prev.length * 0.0002),
+        paths:
+          roofMaskOutline ??
+          (data?.boundingBox
+            ? boundingBoxToPolygon(data.boundingBox)
+            : makeDefaultPolygon(selectedLocation, prev.length * 0.0002)),
       },
     ]);
-  }, [data?.roofSegments, getCurrentEditingPaths, selectedLocation]);
+  }, [data?.boundingBox, roofMaskOutline, selectedLocation]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(() => {
     /* Read final paths from imperative polygon refs (user may have dragged vertices) */
     const currentPaths = getCurrentEditingPaths();
     const validPaths = currentPaths.filter((p) => p.length >= 3);
     setSavedRoofs(validPaths);
 
     if (validPaths.length === 0) {
-      setPolygonFilteredPanels(null);
+      setGeneratedPanels(null);
       setPolygonTotalAreaM2(null);
       polygonRefs.current.clear();
       setIsEditing(false);
@@ -796,57 +721,26 @@ export function DesignsSolarPanelStepContent({
     }
     setPolygonTotalAreaM2(totalArea);
 
-    setIsSavingSelection(true);
-
+    setIsGeneratingPanels(true);
     try {
-      const extraEstimates = await Promise.allSettled(
-        validPaths.map((path) => {
-          const point = getPolygonRepresentativePoint(path);
-          return fetchSolarEstimate(point.lat, point.lng);
-        }),
-      );
-
-      const mergedPanels = dedupeNearbyPanels(
-        [
-          ...(data?.solarPanels ?? []),
-          ...extraEstimates.flatMap((result, index) => {
-            if (result.status !== "fulfilled") return [];
-
-            const segmentOffset = (index + 1) * 10_000;
-            return result.value.solarPanels.map((panel) => ({
-              ...panel,
-              segmentIndex: panel.segmentIndex + segmentOffset,
-            }));
-          }),
-        ],
-        data?.panelDimensions,
-      );
-
-      const inside = dedupeNearbyPanels(
-        mergedPanels.filter((panel) =>
-          validPaths.some((path) =>
-            panelIntersectsRoofSelection(panel, path, data?.panelDimensions),
+      if (data?.panelDimensions) {
+        const nextPanels = dedupeSolarPanels(
+          validPaths.flatMap((roof, index) =>
+            generatePanelsForRoofPolygon(roof, data.panelDimensions, index),
           ),
-        ),
-        data?.panelDimensions,
-      );
-      setPolygonFilteredPanels(inside);
+        );
+        setGeneratedPanels(nextPanels);
+      } else {
+        setGeneratedPanels(null);
+      }
     } finally {
-      setIsSavingSelection(false);
+      setIsGeneratingPanels(false);
     }
 
     polygonRefs.current.clear();
     setIsEditing(false);
     setEditingRoofs([]);
-  }, [data?.panelDimensions, data?.solarPanels, getCurrentEditingPaths]);
-
-  const {
-    rgb: rgbOverlay,
-    mask: maskOverlay,
-    loading: layersLoading,
-    error: layersError,
-    retry: layersRetry,
-  } = useSolarLayers(selectedLocation, ACTIVE_LAYERS);
+  }, [data?.panelDimensions, getCurrentEditingPaths]);
 
   const mapCenter = selectedLocation ?? DESIGNS_LOCATION_STEP.defaultCenter;
   const mapZoom = selectedLocation ? DESIGNS_LOCATION_STEP.defaultZoom : 14;
@@ -858,26 +752,25 @@ export function DesignsSolarPanelStepContent({
   }, []);
 
   /* layer visibility */
-  const showSolarRgb = activeLayer === "all" || activeLayer === "satellite";
-  const showPanels = activeLayer === "all" || activeLayer === "panels";
+  const showSolarRgb = activeLayer === "satellite";
+  const showPanels = activeLayer === "panels";
 
   /* GeoTIFF imagery overlays */
   useImperativeOverlay(mapReady, rgbOverlay, 0.92, showSolarRgb);
   useImperativeOverlay(mapReady, maskOverlay, 0.45, showSolarRgb);
 
-  /* Solar panels + roof segment outlines */
+  /* Solar panels + roof outline (mask-traced perimeter, else API bounding box) */
   useImperativePanels(
     mapReady,
-    renderedPanels,
+    visiblePanels,
     data?.panelDimensions,
     showPanels,
   );
-  useImperativeRoofSegments(
+  useImperativeRoofOutline(
     mapReady,
-    activePanels,
-    data?.panelDimensions,
-    filteredRoofSegments,
-    showPanels,
+    roofMaskOutline,
+    data?.boundingBox,
+    showPanels && !isEditing && savedRoofs.length === 0,
   );
 
   /* Left panel metric rows */
@@ -893,11 +786,15 @@ export function DesignsSolarPanelStepContent({
 
         if (metric.id === "usable-roof-area") {
           if (polygonTotalAreaM2 !== null && data.panelDimensions) {
-            /* Usable = panels in selection × individual panel footprint */
             const panelArea =
               data.panelDimensions.heightM * data.panelDimensions.widthM;
-            const usable = (polygonFilteredPanels?.length ?? 0) * panelArea;
-            return { ...metric, value: `${formatNumber(usable)} m²` };
+            const usable = (generatedPanels?.length ?? 0) * panelArea;
+            return {
+              ...metric,
+              value: `${formatNumber(
+                generatedPanels ? usable : polygonTotalAreaM2,
+              )} m²`,
+            };
           }
           return {
             ...metric,
@@ -906,12 +803,12 @@ export function DesignsSolarPanelStepContent({
         }
 
         /* panels-fit */
-        if (polygonFilteredPanels !== null) {
-          return { ...metric, value: String(polygonFilteredPanels.length) };
+        if (generatedPanels !== null) {
+          return { ...metric, value: String(generatedPanels.length) };
         }
-        return { ...metric, value: String(data.maxPanelsCount) };
+        return { ...metric, value: "0" };
       }),
-    [data, polygonTotalAreaM2, polygonFilteredPanels],
+    [data, generatedPanels, polygonTotalAreaM2],
   );
 
   const combinedError = error ?? layersError;
@@ -998,10 +895,10 @@ export function DesignsSolarPanelStepContent({
               </p>
             )}
 
-            {(loading || layersLoading || isSavingSelection) && (
+            {(loading || layersLoading || isGeneratingPanels) && (
               <p className="animate-pulse font-inter text-[14px] font-medium text-white/80">
-                {isSavingSelection
-                  ? "Finding solar panels for selected roofs..."
+                {isGeneratingPanels
+                  ? "Saving roof and generating solar panels..."
                   : layersLoading
                     ? "Loading roof imagery..."
                     : "Analysing solar potential..."}
@@ -1109,7 +1006,7 @@ export function DesignsSolarPanelStepContent({
                   <button
                     type="button"
                     onClick={handleAddRoof}
-                    disabled={isSavingSelection}
+                    disabled={isGeneratingPanels}
                     className="h-[33px] rounded-[6px] bg-white/90 px-[14px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-[#2094F3] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:bg-white"
                   >
                     + Add New Roof
@@ -1117,10 +1014,10 @@ export function DesignsSolarPanelStepContent({
                   <button
                     type="button"
                     onClick={handleSave}
-                    disabled={isSavingSelection}
+                    disabled={isGeneratingPanels}
                     className="h-[33px] rounded-[6px] bg-[linear-gradient(126deg,#22c55e_0%,#16a34a_100%)] px-[18px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] disabled:opacity-60"
                   >
-                    {isSavingSelection ? "Saving..." : "Save"}
+                    {isGeneratingPanels ? "Saving..." : "Save Roof"}
                   </button>
                 </>
               ) : (
@@ -1160,7 +1057,6 @@ function LayerToggle({
   onChange: (v: ActiveLayer) => void;
 }) {
   const options: { value: ActiveLayer; label: string }[] = [
-    { value: "all", label: "All" },
     { value: "satellite", label: "RGB" },
     { value: "panels", label: "Panels" },
   ];

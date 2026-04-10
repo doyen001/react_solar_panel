@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { GeoTiffOverlay } from "@/utils/geotiff";
+import type { GeoTiffOverlay, GeoTiffMaskOverlay } from "@/utils/geotiff";
 
 interface DataLayersResponse {
   rgbUrl: string;
@@ -15,7 +15,7 @@ export type SolarLayerType = "rgb" | "mask" | "flux";
 
 export interface SolarLayersState {
   rgb: GeoTiffOverlay | null;
-  mask: GeoTiffOverlay | null;
+  mask: GeoTiffMaskOverlay | null;
   flux: GeoTiffOverlay | null;
   loading: boolean;
   error: string | null;
@@ -50,7 +50,7 @@ async function fetchAndParseLayer(
   tiffUrl: string,
   type: SolarLayerType,
   signal: AbortSignal,
-): Promise<GeoTiffOverlay> {
+): Promise<GeoTiffOverlay | GeoTiffMaskOverlay> {
   const proxyUrl = `/api/solar/geotiff-proxy?url=${encodeURIComponent(tiffUrl)}`;
   const res = await fetch(proxyUrl, { signal });
 
@@ -117,7 +117,11 @@ export function useSolarLayers(
           return;
         }
 
-        const results: Partial<Record<SolarLayerType, GeoTiffOverlay>> = {};
+        const results: {
+          rgb?: GeoTiffOverlay;
+          mask?: GeoTiffMaskOverlay;
+          flux?: GeoTiffOverlay;
+        } = {};
         const errors: string[] = [];
 
         const settled = await Promise.allSettled(
@@ -128,7 +132,9 @@ export function useSolarLayers(
                 type,
                 controller.signal,
               );
-              results[type] = overlay;
+              if (type === "mask") results.mask = overlay as GeoTiffMaskOverlay;
+              else if (type === "rgb") results.rgb = overlay as GeoTiffOverlay;
+              else if (type === "flux") results.flux = overlay as GeoTiffOverlay;
             },
           ),
         );

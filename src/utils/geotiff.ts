@@ -1,13 +1,28 @@
 import { fromArrayBuffer } from "geotiff";
 
+export interface GeoTiffBounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
+export interface GeoTiffRaster {
+  data: Float32Array | Float64Array | Uint8Array;
+  width: number;
+  height: number;
+  bounds: GeoTiffBounds;
+  noDataValue: number | null;
+}
+
 export interface GeoTiffOverlay {
   imageUrl: string;
-  bounds: {
-    north: number;
-    south: number;
-    east: number;
-    west: number;
-  };
+  bounds: GeoTiffBounds;
+}
+
+/** Mask overlay plus raw single-band raster for geometry (roof perimeter tracing). */
+export interface GeoTiffMaskOverlay extends GeoTiffOverlay {
+  raster: GeoTiffRaster;
 }
 
 /**
@@ -72,7 +87,7 @@ export async function parseGeoTiffMask(
   arrayBuffer: ArrayBuffer,
   color: [number, number, number] = [33, 148, 243],
   opacity = 0.45,
-): Promise<GeoTiffOverlay> {
+): Promise<GeoTiffMaskOverlay> {
   const tiff = await fromArrayBuffer(arrayBuffer);
   const image = await tiff.getImage();
 
@@ -85,6 +100,7 @@ export async function parseGeoTiffMask(
 
   const rasters = await image.readRasters();
   const band = rasters[0] as Uint8Array | Float32Array | Float64Array;
+  const noData = image.getGDALNoData();
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -107,7 +123,14 @@ export async function parseGeoTiffMask(
   ctx.putImageData(imageData, 0, 0);
 
   const imageUrl = await canvasToBlobUrl(canvas);
-  return { imageUrl, bounds };
+  const raster: GeoTiffRaster = {
+    data: band,
+    width,
+    height,
+    bounds,
+    noDataValue: noData ?? null,
+  };
+  return { imageUrl, bounds, raster };
 }
 
 /**

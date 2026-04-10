@@ -1,6 +1,7 @@
 export interface SolarPanel {
   center: { lat: number; lng: number };
   orientation: "PORTRAIT" | "LANDSCAPE";
+  rotationDegrees?: number;
   segmentIndex: number;
   yearlyEnergyDcKwh: number;
 }
