@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DesignTopBar } from "../modules/DesignTopBar";
 import {
   DESIGNS_PROPERTY_TYPES,
@@ -60,6 +60,10 @@ export function DesignsHeroSection({
     | "end",
     number
   >;
+
+  useEffect(() => {
+    console.log("activeScreen", activeScreen);
+  }, [activeScreen]);
 
   const onNext = () => {
     setActiveScreen((prev) => {
