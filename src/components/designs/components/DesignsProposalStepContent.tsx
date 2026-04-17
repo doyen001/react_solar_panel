@@ -1,5 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
+import { DesignsProposalDownloadModal } from "./DesignsProposalDownloadModal";
+
 const DEFAULT_ADDRESS = "42 Bondi Rd, Bondi, NSW 2026";
 
 function ProposalStatCard({
@@ -79,6 +83,12 @@ export function DesignsProposalStepContent({
   customerName = "Charli Abdo",
 }: DesignsProposalStepContentProps) {
   const displayAddress = address?.trim() ? address.trim() : DEFAULT_ADDRESS;
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+
+  const letterFirstName = useMemo(() => {
+    const first = customerName.trim().split(/\s+/)[0];
+    return first || "Adam";
+  }, [customerName]);
 
   return (
     <div className="flex flex-1 items-center">
@@ -194,6 +204,7 @@ export function DesignsProposalStepContent({
               <button
                 type="button"
                 className="py-2 w-full rounded-[14.412px] bg-[linear-gradient(172.76deg,#2094F3_0%,#17CFCF_100%)] font-source-sans text-[18.529px] font-medium uppercase leading-[27.794px] tracking-[0.9265px] text-white shadow-[0px_0px_30.882px_0px_rgba(32,148,243,0.4)] transition hover:brightness-105"
+                onClick={() => setDownloadModalOpen(true)}
               >
                 Download your proposal
               </button>
@@ -201,6 +212,12 @@ export function DesignsProposalStepContent({
           </div>
         </div>
       </div>
+
+      <DesignsProposalDownloadModal
+        open={downloadModalOpen}
+        onClose={() => setDownloadModalOpen(false)}
+        letterFirstName={letterFirstName}
+      />
     </div>
   );
 }

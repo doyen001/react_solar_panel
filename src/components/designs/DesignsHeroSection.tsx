@@ -40,7 +40,7 @@ export function DesignsHeroSection({
     | "items"
     | "proposal"
     | "end"
-  >("proposal");
+  >("start");
   const [fillPercent, setFillPercent] = useState(10);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedLocation, setSelectedLocation] =
