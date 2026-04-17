@@ -22,6 +22,7 @@ export function DesignsHeroFooter({
   showBack = false,
   showNext = false,
 }: DesignsHeroFooterProps) {
+  console.log("fillPercent", fillPercent);
   return (
     <div
       className={`relative z-10 mt-auto w-full pb-8 pt-10 ${className ?? ""}`}
@@ -49,12 +50,15 @@ export function DesignsHeroFooter({
             <button
               type="button"
               onClick={onNext}
-              className={`inline-flex min-h-12 min-w-[157px] items-center justify-center gap-[14px] rounded-xl bg-design-next font-source-sans text-[18px] font-semibold uppercase leading-6 text-black shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-95 ${
+              className={`inline-flex min-h-12 min-w-[157px] items-center justify-center gap-[14px] rounded-xl font-source-sans text-[18px] font-semibold uppercase leading-6 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-95 ${fillPercent === 100 ? "text-white bg-design-accent-cyan" : "text-black bg-design-next"} ${
                 showNext ? "" : "invisible pointer-events-none"
               }`}
             >
-              Next
-              <Icon name="ArrowRight" className="size-6" />
+              {fillPercent === 100 ? "Finish" : "Next"}
+              <Icon
+                name="ArrowRight"
+                className={`size-6 ${fillPercent === 100 ? "text-white" : "text-black"}`}
+              />
             </button>
           </div>
         )}

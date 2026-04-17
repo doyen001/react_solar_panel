@@ -39,7 +39,6 @@ export function DesignsHeroSection({
     | "energy"
     | "items"
     | "proposal"
-    | "end"
   >("start");
   const [fillPercent, setFillPercent] = useState(10);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -52,10 +51,9 @@ export function DesignsHeroSection({
     register: 30,
     address: 40,
     solarPanel: 50,
-    energy: 60,
-    items: 70,
-    proposal: 80,
-    end: 90,
+    energy: 70,
+    items: 80,
+    proposal: 100,
   } satisfies Record<
     | "start"
     | "second"
@@ -64,8 +62,7 @@ export function DesignsHeroSection({
     | "solarPanel"
     | "energy"
     | "items"
-    | "proposal"
-    | "end",
+    | "proposal",
     number
   >;
 
@@ -82,15 +79,16 @@ export function DesignsHeroSection({
       if (prev === "solarPanel") return "energy";
       if (prev === "energy") return "items";
       if (prev === "items") return "proposal";
-      if (prev === "proposal") return "end";
       return prev;
     });
     setFillPercent((prev) => {
-      if (prev === 10) return 30;
-      if (prev === 30) return 60;
-      if (prev === 60) return 70;
+      if (prev === 10) return 20;
+      if (prev === 20) return 30;
+      if (prev === 30) return 40;
+      if (prev === 40) return 50;
+      if (prev === 50) return 70;
       if (prev === 70) return 80;
-      if (prev === 80) return 90;
+      if (prev === 80) return 100;
       return prev;
     });
   };
@@ -98,23 +96,21 @@ export function DesignsHeroSection({
   const onBack = () => {
     setActiveScreen((prev) => {
       const nextScreen =
-        prev === "end"
-          ? "proposal"
-          : prev === "proposal"
-            ? "items"
-            : prev === "items"
-              ? "energy"
-              : prev === "energy"
-                ? "solarPanel"
-                : prev === "solarPanel"
-                  ? "address"
-                  : prev === "address"
-                    ? "register"
-                    : prev === "register"
-                      ? "second"
-                      : prev === "second"
-                        ? "start"
-                        : prev;
+        prev === "proposal"
+          ? "items"
+          : prev === "items"
+            ? "energy"
+            : prev === "energy"
+              ? "solarPanel"
+              : prev === "solarPanel"
+                ? "address"
+                : prev === "address"
+                  ? "register"
+                  : prev === "register"
+                    ? "second"
+                    : prev === "second"
+                      ? "start"
+                      : prev;
 
       setFillPercent(progressByScreen[nextScreen]);
       return nextScreen;
@@ -165,8 +161,6 @@ export function DesignsHeroSection({
           <DesignsItemsStepContent />
         ) : activeScreen === "proposal" ? (
           <DesignsProposalStepContent address={selectedAddress} />
-        ) : activeScreen === "end" ? (
-          <></>
         ) : (
           <></>
         )}
