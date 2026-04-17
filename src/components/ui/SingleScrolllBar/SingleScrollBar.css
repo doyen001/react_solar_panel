@@ -1,0 +1,34 @@
+.single-scroll-bar .single-scroll-bar__slider.range-slider {
+  height: 8px;
+  border-radius: 9999px;
+  background: #fff;
+}
+
+.single-scroll-bar .range-slider__range {
+  border-radius: 9999px;
+  background: linear-gradient(126deg, #2094f3 0%, #17cfcf 100%);
+}
+
+.single-scroll-bar .range-slider__thumb[data-lower] {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.single-scroll-bar .range-slider__thumb[data-upper] {
+  z-index: 4;
+  border: 1px solid #2094f3;
+  background: #fff;
+  box-shadow:
+    0 4px 6px 0 rgba(0, 0, 0, 0.1),
+    0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.single-scroll-bar .range-slider__thumb[data-upper]:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.6),
+    0 4px 6px 0 rgba(0, 0, 0, 0.1),
+    0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}

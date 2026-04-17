@@ -1,8 +1,25 @@
 "use client";
 
+import { useState } from "react";
+
+import { SingleScrollBar } from "@/components/ui/SingleScrolllBar";
+
 const USAGE_WITHOUT_SOLAR = [58, 53, 47, 52, 52, 59, 61, 60, 47, 47, 47, 48];
 const USAGE_WITH_SOLAR = [39, 37, 34, 29, 24, 20, 17, 19, 29, 34, 37, 41];
-const MONTH_LABELS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+const MONTH_LABELS = [
+  "J",
+  "F",
+  "M",
+  "A",
+  "M",
+  "J",
+  "J",
+  "A",
+  "S",
+  "O",
+  "N",
+  "D",
+];
 
 function EnergyMetricPill({
   children,
@@ -101,6 +118,8 @@ function EnergyBreakdownChart() {
 }
 
 function EnergyBillInput() {
+  const [billRatePercent, setBillRatePercent] = useState(50);
+
   return (
     <div className="w-full">
       <div className="flex items-center gap-[16px]">
@@ -119,11 +138,13 @@ function EnergyBillInput() {
       </div>
 
       <div className="mt-[24px] flex flex-col items-end gap-[24px]">
-        <div className="relative w-full">
-          <div className="h-[8px] w-full rounded-full bg-white" />
-          <div className="absolute left-0 top-0 h-[8px] w-1/2 rounded-full bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]" />
-          <div className="absolute left-1/2 top-1/2 size-[24px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#2094F3] bg-white shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1),0px_2px_4px_0px_rgba(0,0,0,0.1)]" />
-        </div>
+        <SingleScrollBar
+          value={billRatePercent}
+          onChange={setBillRatePercent}
+          min={0}
+          max={100}
+          ariaLabel="Energy bill rate"
+        />
 
         <div className="inline-flex h-[30px] items-center gap-[8px] rounded-full border border-white px-[13px] py-px">
           <span className="font-source-sans text-[14px] font-normal tracking-[-0.1504px] text-white">
@@ -138,59 +159,56 @@ function EnergyBillInput() {
 
 export function DesignsEnergyStepContent() {
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
-      <div className="flex w-full max-w-[1278px] flex-1 flex-col items-center justify-center gap-6 lg:flex-row lg:items-stretch lg:justify-between lg:gap-[58px]">
-        <div className="flex min-h-[525px] w-full max-w-[591px] shrink-0 rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-8 py-12 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 lg:px-[49px] lg:py-[48px]">
-          <div className="mx-auto flex w-full max-w-[448px] flex-col items-center">
-            <h2
-              className="w-full max-w-[320px] text-center font-source-sans text-[clamp(32px,4.6vw,40px)] font-bold capitalize leading-[1.2] text-white"
-              style={{ letterSpacing: "0.248px" }}
-            >
-              Tell us about the
-              <br />
-              Energy Bill you pay
-            </h2>
+    <div className="flex items-center flex-1">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
+        <div className="flex w-full max-w-[1278px] flex-col items-center justify-center gap-6 lg:flex-row lg:items-stretch lg:justify-between lg:gap-[58px]">
+          <div className="flex min-h-[525px] w-full max-w-[591px] shrink-0 rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-8 py-12 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 lg:px-[49px] lg:py-[48px]">
+            <div className="mx-auto flex w-full max-w-[448px] flex-col items-center">
+              <h2
+                className="w-full text-center font-source-sans text-[clamp(32px,4.6vw,40px)] font-bold capitalize leading-[1.2] text-white"
+                style={{ letterSpacing: "0.248px" }}
+              >
+                Tell us about the
+                <br />
+                Energy Bill you pay
+              </h2>
 
-            <div className="mt-[34px] w-full">
-              <EnergyBillInput />
-            </div>
+              <div className="mt-[34px] w-full">
+                <EnergyBillInput />
+              </div>
 
-            <div className="mt-[28px] flex items-center gap-[20px]">
-              <span className="font-source-sans text-[12px] font-normal leading-none text-[#101828]">
-                *Analytics calculated using optimal placement
-              </span>
-              <span className="inline-flex size-[12px] items-center justify-center rounded-full border border-[#111] text-[8px] font-bold text-[#111]">
-                i
-              </span>
-            </div>
+              <div className="mt-[28px] flex items-center gap-[20px]">
+                <span className="font-source-sans text-[12px] font-normal leading-none text-[#101828]">
+                  *Analytics calculated using optimal placement
+                </span>
+                <span className="inline-flex size-[12px] items-center justify-center rounded-full border border-[#111] text-[8px] font-bold text-[#111]">
+                  i
+                </span>
+              </div>
 
-            <div className="mt-[14px] flex items-center gap-[16px]">
-              <EnergyMetricPill>26 Panels</EnergyMetricPill>
-              <EnergyMetricPill>1 Inverter</EnergyMetricPill>
+              <div className="mt-[14px] flex items-center gap-[16px]">
+                <EnergyMetricPill>26 Panels</EnergyMetricPill>
+                <EnergyMetricPill>1 Inverter</EnergyMetricPill>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="w-full max-w-[649px] shrink-0 rounded-[28px] designs-border-gradient p-[3px] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]">
-          <div className="flex min-h-[525px] w-full flex-col rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)] px-4 py-5 backdrop-blur-[17.8px] sm:px-[42px] sm:py-[20px]">
-            <div className="flex justify-end gap-[10px]">
-              <EnergyActionButton>Edit</EnergyActionButton>
-              <EnergyActionButton>ADD New Roof</EnergyActionButton>
-            </div>
+          <div className="w-full max-w-[649px] shrink-0 rounded-[28px] designs-border-gradient p-[3px] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]">
+            <div className="flex min-h-[525px] h-full w-full flex-col rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)] px-4 py-5 backdrop-blur-[17.8px] sm:px-[42px] sm:py-[20px]">
+              <div className="mt-[44px] flex flex-col gap-[18px]">
+                <EnergyLegendItem
+                  colorClass="bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]"
+                  label="Bill without Solar"
+                />
+                <EnergyLegendItem
+                  colorClass="bg-linear-to-r from-yellow-lemon to-orange-amber"
+                  label="Bill with Solar and Battery"
+                />
+              </div>
 
-            <div className="mt-[44px] flex flex-col gap-[18px]">
-              <EnergyLegendItem
-                colorClass="bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]"
-                label="Bill without Solar"
-              />
-              <EnergyLegendItem
-                colorClass="bg-linear-to-r from-yellow-lemon to-orange-amber"
-                label="Bill with Solar and Battery"
-              />
-            </div>
-
-            <div className="mt-[22px]">
-              <EnergyBreakdownChart />
+              <div className="mt-[22px]">
+                <EnergyBreakdownChart />
+              </div>
             </div>
           </div>
         </div>
