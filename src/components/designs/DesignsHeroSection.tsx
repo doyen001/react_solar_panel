@@ -15,6 +15,7 @@ import { DesignsHeroImagePanel } from "./components/DesignsHeroImagePanel";
 import { DesignsSolarPanelStepContent } from "./components/DesignsSolarPanelStepContent";
 import { DesignsEnergyStepContent } from "./components/DesignsEnergyStepContent";
 import { DesignsItemsStepContent } from "./components/DesignsItemsStepContent";
+import { DesignsProposalStepContent } from "./components/DesignsProposalStepContent";
 import { DesignsHeroTagline } from "./components/DesignsHeroTagline";
 import { DesignsPropertyTypeCard } from "./components/DesignsPropertyTypeCard";
 import { DesignsSavingsPromoCard } from "./components/DesignsSavingsPromoCard";
@@ -37,8 +38,9 @@ export function DesignsHeroSection({
     | "solarPanel"
     | "energy"
     | "items"
+    | "proposal"
     | "end"
-  >("items");
+  >("proposal");
   const [fillPercent, setFillPercent] = useState(10);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedLocation, setSelectedLocation] =
@@ -52,6 +54,7 @@ export function DesignsHeroSection({
     solarPanel: 50,
     energy: 60,
     items: 70,
+    proposal: 80,
     end: 90,
   } satisfies Record<
     | "start"
@@ -61,6 +64,7 @@ export function DesignsHeroSection({
     | "solarPanel"
     | "energy"
     | "items"
+    | "proposal"
     | "end",
     number
   >;
@@ -77,13 +81,16 @@ export function DesignsHeroSection({
       if (prev === "address") return "solarPanel";
       if (prev === "solarPanel") return "energy";
       if (prev === "energy") return "items";
-      if (prev === "items") return "end";
+      if (prev === "items") return "proposal";
+      if (prev === "proposal") return "end";
       return prev;
     });
     setFillPercent((prev) => {
       if (prev === 10) return 30;
       if (prev === 30) return 60;
-      if (prev === 60) return 90;
+      if (prev === 60) return 70;
+      if (prev === 70) return 80;
+      if (prev === 80) return 90;
       return prev;
     });
   };
@@ -92,20 +99,22 @@ export function DesignsHeroSection({
     setActiveScreen((prev) => {
       const nextScreen =
         prev === "end"
-          ? "items"
-          : prev === "items"
-            ? "energy"
-            : prev === "energy"
-              ? "solarPanel"
-              : prev === "solarPanel"
-                ? "address"
-                : prev === "address"
-                  ? "register"
-                  : prev === "register"
-                    ? "second"
-                    : prev === "second"
-                      ? "start"
-                      : prev;
+          ? "proposal"
+          : prev === "proposal"
+            ? "items"
+            : prev === "items"
+              ? "energy"
+              : prev === "energy"
+                ? "solarPanel"
+                : prev === "solarPanel"
+                  ? "address"
+                  : prev === "address"
+                    ? "register"
+                    : prev === "register"
+                      ? "second"
+                      : prev === "second"
+                        ? "start"
+                        : prev;
 
       setFillPercent(progressByScreen[nextScreen]);
       return nextScreen;
@@ -154,6 +163,8 @@ export function DesignsHeroSection({
           <DesignsEnergyStepContent />
         ) : activeScreen === "items" ? (
           <DesignsItemsStepContent />
+        ) : activeScreen === "proposal" ? (
+          <DesignsProposalStepContent address={selectedAddress} />
         ) : activeScreen === "end" ? (
           <></>
         ) : (
