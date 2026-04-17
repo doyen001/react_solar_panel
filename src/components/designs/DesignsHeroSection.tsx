@@ -14,6 +14,7 @@ import { DesignsHeadlineBanner } from "./components/DesignsHeadlineBanner";
 import { DesignsHeroImagePanel } from "./components/DesignsHeroImagePanel";
 import { DesignsSolarPanelStepContent } from "./components/DesignsSolarPanelStepContent";
 import { DesignsEnergyStepContent } from "./components/DesignsEnergyStepContent";
+import { DesignsItemsStepContent } from "./components/DesignsItemsStepContent";
 import { DesignsHeroTagline } from "./components/DesignsHeroTagline";
 import { DesignsPropertyTypeCard } from "./components/DesignsPropertyTypeCard";
 import { DesignsSavingsPromoCard } from "./components/DesignsSavingsPromoCard";
@@ -35,8 +36,9 @@ export function DesignsHeroSection({
     | "address"
     | "solarPanel"
     | "energy"
+    | "items"
     | "end"
-  >("start");
+  >("items");
   const [fillPercent, setFillPercent] = useState(10);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedLocation, setSelectedLocation] =
@@ -44,11 +46,12 @@ export function DesignsHeroSection({
 
   const progressByScreen = {
     start: 10,
-    second: 30,
-    register: 60,
-    address: 90,
-    solarPanel: 90,
-    energy: 90,
+    second: 20,
+    register: 30,
+    address: 40,
+    solarPanel: 50,
+    energy: 60,
+    items: 70,
     end: 90,
   } satisfies Record<
     | "start"
@@ -57,6 +60,7 @@ export function DesignsHeroSection({
     | "address"
     | "solarPanel"
     | "energy"
+    | "items"
     | "end",
     number
   >;
@@ -72,7 +76,8 @@ export function DesignsHeroSection({
       if (prev === "register") return "address";
       if (prev === "address") return "solarPanel";
       if (prev === "solarPanel") return "energy";
-      if (prev === "energy") return "end";
+      if (prev === "energy") return "items";
+      if (prev === "items") return "end";
       return prev;
     });
     setFillPercent((prev) => {
@@ -87,18 +92,20 @@ export function DesignsHeroSection({
     setActiveScreen((prev) => {
       const nextScreen =
         prev === "end"
-          ? "energy"
-          : prev === "energy"
-            ? "solarPanel"
-            : prev === "solarPanel"
-              ? "address"
-              : prev === "address"
-                ? "register"
-                : prev === "register"
-                  ? "second"
-                  : prev === "second"
-                    ? "start"
-                    : prev;
+          ? "items"
+          : prev === "items"
+            ? "energy"
+            : prev === "energy"
+              ? "solarPanel"
+              : prev === "solarPanel"
+                ? "address"
+                : prev === "address"
+                  ? "register"
+                  : prev === "register"
+                    ? "second"
+                    : prev === "second"
+                      ? "start"
+                      : prev;
 
       setFillPercent(progressByScreen[nextScreen]);
       return nextScreen;
@@ -109,46 +116,50 @@ export function DesignsHeroSection({
     <section className="relative flex min-h-dvh flex-col overflow-hidden">
       <DesignsHeroBackground />
       <DesignTopBar />
-      {activeScreen === "start" ? (
-        <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col gap-[29px] px-4 pt-24 sm:px-8 sm:pt-28 lg:px-[81px] lg:pt-[155px]">
-          <div className="flex w-full max-w-[1283px] flex-col items-stretch gap-5 lg:flex-row">
-            <DesignsSavingsPromoCard className="lg:w-[629px]" />
-            <DesignsHeroImagePanel className="lg:w-[634px]" />
+      <div className="flex items-center flex-1">
+        {activeScreen === "start" ? (
+          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col gap-[29px] px-4 pt-24 sm:px-8 sm:pt-28 lg:px-[81px] lg:pt-[155px]">
+            <div className="flex w-full max-w-[1283px] flex-col items-stretch gap-5 lg:flex-row">
+              <DesignsSavingsPromoCard className="lg:w-[629px]" />
+              <DesignsHeroImagePanel className="lg:w-[634px]" />
+            </div>
+            <DesignsHeroTagline />
           </div>
-          <DesignsHeroTagline />
-        </div>
-      ) : activeScreen === "second" ? (
-        <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col gap-[36px] px-4 pt-10 sm:px-8 sm:pt-12 lg:px-[81px] lg:pt-[37px]">
-          <DesignsHeadlineBanner />
-          <div className="flex w-full max-w-[1278px] flex-col items-center gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-[29px]">
-            {DESIGNS_PROPERTY_TYPES.map((propertyType) => (
-              <DesignsPropertyTypeCard
-                key={propertyType.id}
-                imageSrc={propertyType.imageSrc}
-                imageAlt={propertyType.imageAlt}
-                label={propertyType.label}
-              />
-            ))}
+        ) : activeScreen === "second" ? (
+          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col gap-[36px] px-4 pt-10 sm:px-8 sm:pt-12 lg:px-[81px] lg:pt-[37px]">
+            <DesignsHeadlineBanner />
+            <div className="flex w-full max-w-[1278px] flex-col items-center gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-[29px]">
+              {DESIGNS_PROPERTY_TYPES.map((propertyType) => (
+                <DesignsPropertyTypeCard
+                  key={propertyType.id}
+                  imageSrc={propertyType.imageSrc}
+                  imageAlt={propertyType.imageAlt}
+                  label={propertyType.label}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      ) : activeScreen === "register" ? (
-        <DesignsRegisterStepContent />
-      ) : activeScreen === "address" ? (
-        <DesignsLocationStepContent
-          selectedAddress={selectedAddress}
-          selectedLocation={selectedLocation}
-          onAddressChange={setSelectedAddress}
-          onLocationChange={setSelectedLocation}
-        />
-      ) : activeScreen === "solarPanel" ? (
-        <DesignsSolarPanelStepContent selectedLocation={selectedLocation} />
-      ) : activeScreen === "energy" ? (
-        <DesignsEnergyStepContent />
-      ) : activeScreen === "end" ? (
-        <></>
-      ) : (
-        <></>
-      )}
+        ) : activeScreen === "register" ? (
+          <DesignsRegisterStepContent />
+        ) : activeScreen === "address" ? (
+          <DesignsLocationStepContent
+            selectedAddress={selectedAddress}
+            selectedLocation={selectedLocation}
+            onAddressChange={setSelectedAddress}
+            onLocationChange={setSelectedLocation}
+          />
+        ) : activeScreen === "solarPanel" ? (
+          <DesignsSolarPanelStepContent selectedLocation={selectedLocation} />
+        ) : activeScreen === "energy" ? (
+          <DesignsEnergyStepContent />
+        ) : activeScreen === "items" ? (
+          <DesignsItemsStepContent />
+        ) : activeScreen === "end" ? (
+          <></>
+        ) : (
+          <></>
+        )}
+      </div>
 
       <DesignsHeroFooter
         onBack={onBack}
