@@ -290,13 +290,43 @@ export const DesignsItemsStepContent = forwardRef<
     key: keyof DesignsItemsStepValue,
     next: Partial<DesignsItemsStepValue[keyof DesignsItemsStepValue]>,
   ) => {
-    setItemsValue((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        ...next,
-      },
-    }));
+    setItemsValue((prev) => {
+      const prevSection = prev[key];
+      const merged = { ...prevSection, ...next };
+      let summary = merged.summary;
+
+      if (next.brand !== undefined) {
+        const brandOpt = BRAND_OPTIONS.find((o) => o.value === next.brand);
+        if (brandOpt) {
+          summary = {
+            ...summary,
+            leftCol: summary.leftCol.map((row, i) =>
+              i === 0 ? { ...row, value: brandOpt.label } : row,
+            ),
+          };
+        }
+      }
+
+      if (next.size !== undefined) {
+        const sizeOpt = PANEL_SIZE_OPTIONS.find((o) => o.value === next.size);
+        if (sizeOpt) {
+          summary = {
+            ...summary,
+            rightCol: summary.rightCol.map((row, i) =>
+              i === 0 ? { ...row, value: sizeOpt.label } : row,
+            ),
+          };
+        }
+      }
+
+      return {
+        ...prev,
+        [key]: {
+          ...merged,
+          summary,
+        },
+      };
+    });
   };
 
   return (

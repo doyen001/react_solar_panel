@@ -181,29 +181,17 @@ export function DesignsHeroSection({
       const itemsValues = itemsStepRef.current?.getValues();
       if (itemsValues) {
         const solarPanelName =
-          itemsValues.solarPanel.brand ||
-          itemsValues.solarPanel.summary.leftCol[0]?.value ||
-          "TRINA";
+          itemsValues.solarPanel.summary.leftCol[0]?.value || "TRINA";
         const solarPanelWatts =
-          itemsValues.solarPanel.size ||
-          itemsValues.solarPanel.summary.rightCol[0]?.value ||
-          "630";
+          itemsValues.solarPanel.summary.rightCol[0]?.value || "630 W";
         const inverterName =
-          itemsValues.equipment.brand ||
-          itemsValues.equipment.summary.leftCol[0]?.value ||
-          "BLUETTI";
+          itemsValues.equipment.summary.leftCol[0]?.value || "BLUETTI";
         const inverterWatts =
-          itemsValues.equipment.size ||
-          itemsValues.equipment.summary.rightCol[0]?.value ||
-          "7.6 kW";
+          itemsValues.equipment.summary.rightCol[0]?.value || "7.6 kW";
         const batteryName =
-          itemsValues.battery.brand ||
-          itemsValues.battery.summary.leftCol[0]?.value ||
-          "BLUETTI";
+          itemsValues.battery.summary.leftCol[0]?.value || "BLUETTI";
         const batteryWatts =
-          itemsValues.battery.size ||
-          itemsValues.battery.summary.rightCol[0]?.value ||
-          "7.6 kW";
+          itemsValues.battery.summary.rightCol[0]?.value || "7.6 kW";
 
         dispatch(
           mergeProposalData({
