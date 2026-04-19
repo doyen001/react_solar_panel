@@ -6,6 +6,8 @@ export type DesignsPropertyTypeCardProps = {
   label: string;
   imageAlt: string;
   className?: string;
+  selected?: boolean;
+  onClick?: () => void;
 };
 
 /** ~407.6 / 264.233 from Figma */
@@ -19,13 +21,17 @@ export function DesignsPropertyTypeCard({
   label,
   imageAlt,
   className,
+  selected = false,
+  onClick,
 }: DesignsPropertyTypeCardProps) {
   return (
-    <div
-      className={`flex w-full max-w-[407px] flex-col items-center gap-10 ${className ?? ""}`}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full max-w-[407px] flex-col items-center gap-10 text-left transition ${selected ? "scale-[1.01]" : "hover:scale-[1.005]"} ${className ?? ""}`}
     >
       <div
-        className="relative w-full overflow-hidden rounded-2xl"
+        className={`relative w-full overflow-hidden rounded-2xl ${selected ? "ring-4 ring-design-accent-cyan/70" : ""}`}
         style={{ aspectRatio: CARD_IMAGE_ASPECT }}
       >
         <Image
@@ -38,11 +44,11 @@ export function DesignsPropertyTypeCard({
         <DesignsHeroBadgeOverlay />
       </div>
       <p
-        className="w-full text-center font-source-sans text-[22px] font-extrabold capitalize leading-normal text-white"
+        className={`w-full text-center font-source-sans text-[22px] font-extrabold capitalize leading-normal ${selected ? "text-yellow-lemon" : "text-white"}`}
         style={{ letterSpacing: "0.248px" }}
       >
         {label}
       </p>
-    </div>
+    </button>
   );
 }

@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { GoogleMap } from "@react-google-maps/api";
 import Icon from "@/components/ui/Icons";
 import { useGoogleMaps } from "@/components/providers/GoogleMapsProvider";
@@ -28,19 +35,28 @@ type Suggestion = {
  * - The pin stays visually fixed at the center of the map.
  * - Moving the map updates the address to match the centered pin position.
  */
-type DesignsLocationStepContentProps = {
-  selectedAddress: string;
-  selectedLocation: DesignsMapLocation | null;
-  onAddressChange: (address: string) => void;
-  onLocationChange: (location: DesignsMapLocation) => void;
+export type DesignsLocationStepHandle = {
+  getValues: () => {
+    address: string;
+    location: DesignsMapLocation | null;
+  };
 };
 
-export function DesignsLocationStepContent({
-  selectedAddress,
-  selectedLocation,
-  onAddressChange,
-  onLocationChange,
-}: DesignsLocationStepContentProps) {
+export const DesignsLocationStepContent = forwardRef<
+  DesignsLocationStepHandle,
+  object
+>(function DesignsLocationStepContent(_, ref) {
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [selectedLocation, setSelectedLocation] =
+    useState<DesignsMapLocation | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    getValues: () => ({
+      address: selectedAddress,
+      location: selectedLocation,
+    }),
+  }));
+
   const { isLoaded } = useGoogleMaps();
 
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -73,11 +89,11 @@ export function DesignsLocationStepContent({
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: latLng }, (results, status) => {
         if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
-          onAddressChange(results[0].formatted_address);
+          setSelectedAddress(results[0].formatted_address);
         }
       });
     },
-    [onAddressChange],
+    [setSelectedAddress],
   );
 
   /* ── pan map so center pin stays in sync ──────────────────── */
@@ -88,7 +104,7 @@ export function DesignsLocationStepContent({
       z: number,
       shouldReverseGeocode = false,
     ) => {
-      onLocationChange(loc);
+      setSelectedLocation(loc);
       setMapZoom(z);
       if (mapRef.current) {
         isProgrammaticMoveRef.current = true;
@@ -101,7 +117,7 @@ export function DesignsLocationStepContent({
         pendingMove.current = { ...loc, zoom: z };
       }
     },
-    [onLocationChange, reverseGeocode],
+    [setSelectedLocation, reverseGeocode],
   );
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
@@ -145,9 +161,9 @@ export function DesignsLocationStepContent({
       return;
     }
 
-    onLocationChange(loc);
+    setSelectedLocation(loc);
     reverseGeocode(mapCenter);
-  }, [onLocationChange, reverseGeocode, selectedLocation]);
+  }, [setSelectedLocation, reverseGeocode, selectedLocation]);
 
   /* ── geolocation on mount ─────────────────────────────────── */
 
@@ -246,18 +262,18 @@ export function DesignsLocationStepContent({
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      onAddressChange(value);
+      setSelectedAddress(value);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => fetchSuggestions(value), 300);
     },
-    [fetchSuggestions, onAddressChange],
+    [fetchSuggestions, setSelectedAddress],
   );
 
   /* ── place selection → move map ───────────────────────────── */
 
   const selectSuggestion = useCallback(
     (suggestion: Suggestion) => {
-      onAddressChange(suggestion.description);
+      setSelectedAddress(suggestion.description);
       setSuggestions([]);
       setIsOpen(false);
 
@@ -282,7 +298,7 @@ export function DesignsLocationStepContent({
         },
       );
     },
-    [isLoaded, moveTo, onAddressChange],
+    [isLoaded, moveTo, setSelectedAddress],
   );
 
   /* ── keyboard navigation ────────────────────────── */
@@ -424,4 +440,4 @@ export function DesignsLocationStepContent({
       </div>
     </div>
   );
-}
+});

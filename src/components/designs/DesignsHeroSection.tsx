@@ -1,23 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  mergeProposalData,
+  selectDesignProposal,
+} from "@/lib/store/designProposalSlice";
 import { DesignTopBar } from "../modules/DesignTopBar";
 import {
-  DESIGNS_PROPERTY_TYPES,
-  type DesignsMapLocation,
-} from "@/utils/constant";
-import { DesignsRegisterStepContent } from "./components/DesignsAddressStepContent";
-import { DesignsLocationStepContent } from "./components/DesignsLocationStepContent";
+  DesignsRegisterStepContent,
+  type DesignsRegisterStepHandle,
+} from "./components/DesignsAddressStepContent";
+import {
+  DesignsPropertyStepContent,
+  type DesignsPropertyStepHandle,
+} from "./components/DesignsPropertyStepContent";
+import {
+  DesignsLocationStepContent,
+  type DesignsLocationStepHandle,
+} from "./components/DesignsLocationStepContent";
 import { DesignsHeroBackground } from "./components/DesignsHeroBackground";
 import { DesignsHeroFooter } from "./components/DesignsHeroFooter";
-import { DesignsHeadlineBanner } from "./components/DesignsHeadlineBanner";
 import { DesignsHeroImagePanel } from "./components/DesignsHeroImagePanel";
-import { DesignsSolarPanelStepContent } from "./components/DesignsSolarPanelStepContent";
-import { DesignsEnergyStepContent } from "./components/DesignsEnergyStepContent";
-import { DesignsItemsStepContent } from "./components/DesignsItemsStepContent";
+import {
+  DesignsSolarPanelStepContent,
+  type DesignsSolarPanelStepHandle,
+} from "./components/DesignsSolarPanelStepContent";
+import {
+  DesignsEnergyStepContent,
+  type DesignsEnergyStepHandle,
+} from "./components/DesignsEnergyStepContent";
+import {
+  DesignsItemsStepContent,
+  type DesignsItemsStepHandle,
+} from "./components/DesignsItemsStepContent";
 import { DesignsProposalStepContent } from "./components/DesignsProposalStepContent";
 import { DesignsHeroTagline } from "./components/DesignsHeroTagline";
-import { DesignsPropertyTypeCard } from "./components/DesignsPropertyTypeCard";
 import { DesignsSavingsPromoCard } from "./components/DesignsSavingsPromoCard";
 
 type DesignsHeroSectionProps = {
@@ -26,10 +44,14 @@ type DesignsHeroSectionProps = {
 
 /**
  * Designs flow hero — dual cards + tagline + progress (optional Next).
+ * Step UIs keep local state; Redux merges on Next via step refs.
  */
 export function DesignsHeroSection({
   showNext = true,
 }: DesignsHeroSectionProps) {
+  const dispatch = useAppDispatch();
+  const proposal = useAppSelector(selectDesignProposal);
+
   const [activeScreen, setActiveScreen] = useState<
     | "start"
     | "second"
@@ -41,9 +63,13 @@ export function DesignsHeroSection({
     | "proposal"
   >("start");
   const [fillPercent, setFillPercent] = useState(10);
-  const [selectedAddress, setSelectedAddress] = useState("");
-  const [selectedLocation, setSelectedLocation] =
-    useState<DesignsMapLocation | null>(null);
+
+  const registerStepRef = useRef<DesignsRegisterStepHandle>(null);
+  const propertyStepRef = useRef<DesignsPropertyStepHandle>(null);
+  const locationStepRef = useRef<DesignsLocationStepHandle>(null);
+  const solarStepRef = useRef<DesignsSolarPanelStepHandle>(null);
+  const energyStepRef = useRef<DesignsEnergyStepHandle>(null);
+  const itemsStepRef = useRef<DesignsItemsStepHandle>(null);
 
   const progressByScreen = {
     start: 10,
@@ -66,11 +92,137 @@ export function DesignsHeroSection({
     number
   >;
 
-  useEffect(() => {
-    console.log("activeScreen", activeScreen);
-  }, [activeScreen]);
-
   const onNext = () => {
+    if (activeScreen === "register") {
+      const register = registerStepRef.current?.getValues();
+      if (register) {
+        dispatch(
+          mergeProposalData({
+            customer: {
+              name: register.name,
+              email: register.email,
+              phoneNumber: register.phone,
+            },
+          }),
+        );
+      }
+    }
+    if (activeScreen === "second") {
+      const property = propertyStepRef.current?.getValues();
+      if (property) {
+        dispatch(
+          mergeProposalData({
+            customer: {
+              property: property.propertyLabel,
+            },
+          }),
+        );
+      }
+    }
+    if (activeScreen === "address") {
+      const loc = locationStepRef.current?.getValues();
+      if (loc) {
+        const pin: Partial<{
+          mapLat: number;
+          mapLng: number;
+        }> =
+          loc.location != null
+            ? {
+                mapLat: loc.location.lat,
+                mapLng: loc.location.lng,
+              }
+            : {};
+        dispatch(
+          mergeProposalData({
+            customer: {
+              address: loc.address || "42 Bondi Rd, Bondi, NSW 2026",
+              ...pin,
+            },
+          }),
+        );
+      }
+    }
+    if (activeScreen === "solarPanel") {
+      const m = solarStepRef.current?.getMetrics();
+      if (m) {
+        dispatch(
+          mergeProposalData({
+            summary: {
+              systemSize: m.systemSize,
+              totalPanels: m.totalPanels,
+            },
+            equipment: {
+              numberOfPanels: m.numberOfPanels,
+              co2Offset: m.co2Offset,
+            },
+          }),
+        );
+      }
+    }
+    if (activeScreen === "energy") {
+      const e = energyStepRef.current?.getValues();
+      if (e) {
+        dispatch(
+          mergeProposalData({
+            summary: {
+              yearlySavings: e.yearlySavings,
+              payback: e.payback,
+            },
+            pricing: {
+              currentBill: e.currentBill,
+              monthlySavings: e.monthlySavings,
+              newBill: e.newBill,
+            },
+          }),
+        );
+      }
+    }
+    if (activeScreen === "items") {
+      const itemsValues = itemsStepRef.current?.getValues();
+      if (itemsValues) {
+        const solarPanelName =
+          itemsValues.solarPanel.brand ||
+          itemsValues.solarPanel.summary.leftCol[0]?.value ||
+          "TRINA";
+        const solarPanelWatts =
+          itemsValues.solarPanel.size ||
+          itemsValues.solarPanel.summary.rightCol[0]?.value ||
+          "630";
+        const inverterName =
+          itemsValues.equipment.brand ||
+          itemsValues.equipment.summary.leftCol[0]?.value ||
+          "BLUETTI";
+        const inverterWatts =
+          itemsValues.equipment.size ||
+          itemsValues.equipment.summary.rightCol[0]?.value ||
+          "7.6 kW";
+        const batteryName =
+          itemsValues.battery.brand ||
+          itemsValues.battery.summary.leftCol[0]?.value ||
+          "BLUETTI";
+        const batteryWatts =
+          itemsValues.battery.size ||
+          itemsValues.battery.summary.rightCol[0]?.value ||
+          "7.6 kW";
+
+        dispatch(
+          mergeProposalData({
+            equipment: {
+              solarPanelName,
+              solarPanelWatts,
+              inverterName,
+              inverterWatts,
+              batteryName,
+              batteryWatts,
+              numberOfPanels:
+                itemsValues.solarPanel.summary.rightCol[1]?.value ||
+                proposal.equipment.numberOfPanels,
+            },
+          }),
+        );
+      }
+    }
+
     setActiveScreen((prev) => {
       if (prev === "start") return "second";
       if (prev === "second") return "register";
@@ -131,36 +283,19 @@ export function DesignsHeroSection({
             <DesignsHeroTagline />
           </div>
         ) : activeScreen === "second" ? (
-          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col gap-[36px] px-4 pt-10 sm:px-8 sm:pt-12 lg:px-[81px] lg:pt-[37px]">
-            <DesignsHeadlineBanner />
-            <div className="flex w-full max-w-[1278px] flex-col items-center gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-[29px]">
-              {DESIGNS_PROPERTY_TYPES.map((propertyType) => (
-                <DesignsPropertyTypeCard
-                  key={propertyType.id}
-                  imageSrc={propertyType.imageSrc}
-                  imageAlt={propertyType.imageAlt}
-                  label={propertyType.label}
-                />
-              ))}
-            </div>
-          </div>
+          <DesignsPropertyStepContent ref={propertyStepRef} />
         ) : activeScreen === "register" ? (
-          <DesignsRegisterStepContent />
+          <DesignsRegisterStepContent ref={registerStepRef} />
         ) : activeScreen === "address" ? (
-          <DesignsLocationStepContent
-            selectedAddress={selectedAddress}
-            selectedLocation={selectedLocation}
-            onAddressChange={setSelectedAddress}
-            onLocationChange={setSelectedLocation}
-          />
+          <DesignsLocationStepContent ref={locationStepRef} />
         ) : activeScreen === "solarPanel" ? (
-          <DesignsSolarPanelStepContent selectedLocation={selectedLocation} />
+          <DesignsSolarPanelStepContent ref={solarStepRef} />
         ) : activeScreen === "energy" ? (
-          <DesignsEnergyStepContent />
+          <DesignsEnergyStepContent ref={energyStepRef} />
         ) : activeScreen === "items" ? (
-          <DesignsItemsStepContent />
+          <DesignsItemsStepContent ref={itemsStepRef} />
         ) : activeScreen === "proposal" ? (
-          <DesignsProposalStepContent address={selectedAddress} />
+          <DesignsProposalStepContent />
         ) : (
           <></>
         )}

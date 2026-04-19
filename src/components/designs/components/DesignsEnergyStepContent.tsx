@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 
 import { SingleScrollBar } from "@/components/ui/SingleScrolllBar";
 
@@ -34,17 +34,6 @@ function EnergyMetricPill({
     >
       {children}
     </div>
-  );
-}
-
-function EnergyActionButton({ children }: { children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      className="inline-flex h-[33px] items-center justify-center rounded-[6px] bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)] px-[18px] font-inter text-[14px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]"
-    >
-      {children}
-    </button>
   );
 }
 
@@ -117,7 +106,27 @@ function EnergyBreakdownChart() {
   );
 }
 
-function EnergyBillInput() {
+export type DesignsEnergyStepValue = {
+  currentBill: string;
+  monthlySavings: string;
+  newBill: string;
+  yearlySavings: string;
+  payback: string;
+};
+
+const DEFAULT_ENERGY_VALUES: DesignsEnergyStepValue = {
+  currentBill: "$500",
+  monthlySavings: "$132",
+  newBill: "$368",
+  yearlySavings: "$1,580",
+  payback: "7.1 yrs",
+};
+
+export type DesignsEnergyStepHandle = {
+  getValues: () => DesignsEnergyStepValue;
+};
+
+function EnergyBillInput({ value }: { value: DesignsEnergyStepValue }) {
   const [billRatePercent, setBillRatePercent] = useState(50);
 
   return (
@@ -126,7 +135,7 @@ function EnergyBillInput() {
         <div className="relative h-[58.063px] flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4">
           <input
             type="text"
-            value="500"
+            value={value.currentBill.replace(/^\$/, "")}
             readOnly
             className="size-full bg-transparent font-source-sans text-[24px] font-bold tracking-[0.0703px] text-[#101828] outline-none"
           />
@@ -157,7 +166,22 @@ function EnergyBillInput() {
   );
 }
 
-export function DesignsEnergyStepContent() {
+export const DesignsEnergyStepContent = forwardRef<
+  DesignsEnergyStepHandle,
+  object
+>(function DesignsEnergyStepContent(_, ref) {
+  const [energyValues] = useState<DesignsEnergyStepValue>(
+    DEFAULT_ENERGY_VALUES,
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getValues: () => energyValues,
+    }),
+    [energyValues],
+  );
+
   return (
     <div className="flex items-center flex-1">
       <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
@@ -174,7 +198,7 @@ export function DesignsEnergyStepContent() {
               </h2>
 
               <div className="mt-[34px] w-full">
-                <EnergyBillInput />
+                <EnergyBillInput value={energyValues} />
               </div>
 
               <div className="mt-[28px] flex items-center gap-[20px]">
@@ -215,4 +239,4 @@ export function DesignsEnergyStepContent() {
       </div>
     </div>
   );
-}
+});

@@ -1,8 +1,7 @@
 "use client";
-
-import { useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { DESIGNS_REGISTER_STEP } from "@/utils/constant";
 
 type RegisterFormState = {
@@ -11,13 +10,27 @@ type RegisterFormState = {
   phone: string;
 };
 
+export type DesignsRegisterStepValue = RegisterFormState;
+
+export type DesignsRegisterStepHandle = {
+  getValues: () => DesignsRegisterStepValue;
+};
+
 /**
  * Figma 3:4109 — intro panel + contact form for the Register step.
  */
-export function DesignsRegisterStepContent() {
-  const [formValues, setFormValues] = useState<RegisterFormState>({
-    ...DESIGNS_REGISTER_STEP.defaultValues,
-  });
+export const DesignsRegisterStepContent = forwardRef<
+  DesignsRegisterStepHandle,
+  object
+>(function DesignsRegisterStepContent(_, ref) {
+  const defaults = DESIGNS_REGISTER_STEP.defaultValues;
+  const [name, setName] = useState<string>(defaults.name);
+  const [email, setEmail] = useState<string>(defaults.email);
+  const [phone, setPhone] = useState<string>(defaults.phone);
+
+  useImperativeHandle(ref, () => ({
+    getValues: () => ({ name, email, phone }),
+  }));
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
@@ -62,12 +75,11 @@ export function DesignsRegisterStepContent() {
                   </span>
                   <input
                     type={field.type}
-                    value={formValues[field.id]}
+                    value={field.id === "name" ? name : email}
                     onChange={(event) =>
-                      setFormValues((prev) => ({
-                        ...prev,
-                        [field.id]: event.target.value,
-                      }))
+                      field.id === "name"
+                        ? setName(event.target.value)
+                        : setEmail(event.target.value)
                     }
                     className="h-[55.529px] rounded-[11.094px] border border-yellow-lemon bg-transparent px-[17.75px] font-inter text-[17.75px] leading-normal tracking-[-0.3467px] text-white outline-none transition focus:border-yellow-lemon focus:ring-2 focus:ring-yellow-lemon/20 placeholder:text-white/70"
                   />
@@ -80,10 +92,8 @@ export function DesignsRegisterStepContent() {
                 </span>
                 <PhoneInput
                   country={DESIGNS_REGISTER_STEP.phoneCountry}
-                  value={formValues.phone}
-                  onChange={(value) =>
-                    setFormValues((prev) => ({ ...prev, phone: value }))
-                  }
+                  value={phone}
+                  onChange={(value) => setPhone(value)}
                   countryCodeEditable={false}
                   enableSearch={false}
                   placeholder={DESIGNS_REGISTER_STEP.phonePlaceholder}
@@ -100,4 +110,4 @@ export function DesignsRegisterStepContent() {
       </div>
     </div>
   );
-}
+});

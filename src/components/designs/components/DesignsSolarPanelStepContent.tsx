@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { GoogleMap, OverlayView, Polygon } from "@react-google-maps/api";
 import Icon from "@/components/ui/Icons";
 import { useGoogleMaps } from "@/components/providers/GoogleMapsProvider";
@@ -14,6 +22,7 @@ import { useSolarLayers, type SolarLayerType } from "@/hooks/useSolarLayers";
 import type { GeoTiffOverlay } from "@/utils/geotiff";
 import { extractRoofOutlineFromMask } from "@/utils/roofMaskContour";
 import type { SolarEstimateResult, SolarPanel } from "@/types/solar";
+import { useAppSelector } from "@/lib/store/hooks";
 
 const MAP_CONTAINER: React.CSSProperties = {
   width: "100%",
@@ -532,14 +541,33 @@ function balancePanelsAcrossSegments(
 
 type ActiveLayer = "satellite" | "panels";
 
-type DesignsSolarPanelStepContentProps = {
-  selectedLocation: DesignsMapLocation | null;
+export type DesignsSolarMetricsValue = {
+  systemSize: string;
+  totalPanels: string;
+  numberOfPanels: string;
+  co2Offset: string;
 };
 
-export function DesignsSolarPanelStepContent({
-  selectedLocation,
-}: DesignsSolarPanelStepContentProps) {
+export type DesignsSolarPanelStepHandle = {
+  getMetrics: () => DesignsSolarMetricsValue;
+};
+
+export const DesignsSolarPanelStepContent = forwardRef<
+  DesignsSolarPanelStepHandle,
+  object
+>(function DesignsSolarPanelStepContent(_, ref) {
   const { isLoaded } = useGoogleMaps();
+
+  const proposalCustomer = useAppSelector((s) => s.designProposal.customer);
+  const selectedLocation = useMemo((): DesignsMapLocation | null => {
+    if (proposalCustomer.mapLat != null && proposalCustomer.mapLng != null) {
+      return {
+        lat: proposalCustomer.mapLat,
+        lng: proposalCustomer.mapLng,
+      };
+    }
+    return null;
+  }, [proposalCustomer.mapLat, proposalCustomer.mapLng]);
 
   const [mapReady, setMapReady] = useState<google.maps.Map | null>(null);
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>("panels");
@@ -667,6 +695,40 @@ export function DesignsSolarPanelStepContent({
       return String(availablePanelLimit);
     return String(Math.min(parsed, availablePanelLimit));
   }, [availablePanelLimit, panelCountInput]);
+
+  const [proposalMetrics, setProposalMetrics] =
+    useState<DesignsSolarMetricsValue>({
+      systemSize: "6.6 kW",
+      totalPanels: "16",
+      numberOfPanels: "16",
+      co2Offset: "7.2 tonnes/year",
+    });
+
+  useEffect(() => {
+    const panelCount =
+      panelCountDisplayValue ||
+      String(selectedPanelCount || availablePanelLimit || 0);
+    const watts = data?.panelCapacityWatts ?? 0;
+    const systemSizeKw =
+      watts > 0 ? ((Number(panelCount) * watts) / 1000).toFixed(1) : "6.6";
+    const co2OffsetTonnes =
+      data?.co2SavingsKgPerYear != null
+        ? `${(data.co2SavingsKgPerYear / 1000).toFixed(1)} tonnes/year`
+        : "7.2 tonnes/year";
+
+    setProposalMetrics({
+      systemSize: `${systemSizeKw} kW`,
+      totalPanels: panelCount,
+      numberOfPanels: panelCount,
+      co2Offset: co2OffsetTonnes,
+    });
+  }, [
+    availablePanelLimit,
+    data?.co2SavingsKgPerYear,
+    data?.panelCapacityWatts,
+    panelCountDisplayValue,
+    selectedPanelCount,
+  ]);
 
   /* ── Edit / Save handlers ── */
 
@@ -852,6 +914,14 @@ export function DesignsSolarPanelStepContent({
 
   void combinedError;
   void combinedRetry;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getMetrics: () => proposalMetrics,
+    }),
+    [proposalMetrics],
+  );
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
@@ -1096,7 +1166,7 @@ export function DesignsSolarPanelStepContent({
       </div>
     </div>
   );
-}
+});
 
 /* ── Sub-components ──────────────────────────────────────────── */
 

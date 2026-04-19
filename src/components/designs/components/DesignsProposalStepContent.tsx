@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react";
 
+import { useAppSelector } from "@/lib/store/hooks";
+import { selectDesignProposal } from "@/lib/store/designProposalSlice";
 import { DesignsProposalDownloadModal } from "./DesignsProposalDownloadModal";
-
-const DEFAULT_ADDRESS = "42 Bondi Rd, Bondi, NSW 2026";
 
 function ProposalStatCard({
   label,
@@ -70,8 +70,6 @@ function ProposalSubMetric({
 }
 
 export type DesignsProposalStepContentProps = {
-  /** When empty, uses Figma placeholder address. */
-  address?: string;
   customerName?: string;
 };
 
@@ -79,16 +77,16 @@ export type DesignsProposalStepContentProps = {
  * Figma Screen 32 (20:22020) — proposal summary, system details, pricing, CTA.
  */
 export function DesignsProposalStepContent({
-  address,
   customerName = "Charli Abdo",
 }: DesignsProposalStepContentProps) {
-  const displayAddress = address?.trim() ? address.trim() : DEFAULT_ADDRESS;
+  const proposal = useAppSelector(selectDesignProposal);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const displayCustomerName = proposal.customer.name || customerName;
 
   const letterFirstName = useMemo(() => {
-    const first = customerName.trim().split(/\s+/)[0];
+    const first = displayCustomerName.trim().split(/\s+/)[0];
     return first || "Adam";
-  }, [customerName]);
+  }, [displayCustomerName]);
 
   return (
     <div className="flex flex-1 items-center">
@@ -107,22 +105,22 @@ export function DesignsProposalStepContent({
             <div className="grid grid-cols-2 gap-[16.465px] lg:grid-cols-4">
               <ProposalStatCard
                 label="System Size"
-                value="6.6 kW"
+                value={proposal.summary.systemSize}
                 variant="cyan"
               />
               <ProposalStatCard
                 label="Total Panels"
-                value="16"
+                value={proposal.summary.totalPanels}
                 variant="gold"
               />
               <ProposalStatCard
                 label="Yearly Savings"
-                value="$1,580"
+                value={proposal.summary.yearlySavings}
                 variant="cyan"
               />
               <ProposalStatCard
                 label="Payback"
-                value="7.1 yrs"
+                value={proposal.summary.payback}
                 variant="gold"
               />
             </div>
@@ -136,31 +134,43 @@ export function DesignsProposalStepContent({
 
               <div className="mx-auto mt-[12px] flex max-w-[478.263px] flex-col gap-[12px]">
                 <div className="flex flex-col gap-[20px]">
-                  <ProposalDetailRow label="Customer" value={customerName} />
-                  <ProposalDetailRow label="Address" value={displayAddress} />
-                  <ProposalDetailRow label="Property" value="Residential" />
+                  <ProposalDetailRow
+                    label="Customer"
+                    value={displayCustomerName}
+                  />
+                  <ProposalDetailRow
+                    label="Address"
+                    value={proposal.customer.address}
+                  />
+                  <ProposalDetailRow
+                    label="Property"
+                    value={proposal.customer.property}
+                  />
                 </div>
                 <hr className="h-px w-full max-w-[478.263px] border-0 bg-black/20" />
                 <div className="flex flex-col gap-[20px]">
                   <ProposalDetailRow
                     label="Solar Panels"
-                    value="Jinko Tiger Neo 440W"
+                    value={`${proposal.equipment.solarPanelName} ${proposal.equipment.solarPanelWatts}`.trim()}
                   />
                   <ProposalDetailRow
                     label="Inverter"
-                    value="Fronius Primo GEN24 5kW"
+                    value={`${proposal.equipment.inverterName} ${proposal.equipment.inverterWatts}`.trim()}
                   />
                   <ProposalDetailRow
                     label="Battery"
-                    value="Tesla Powerwall 2 (13.5 kWh)"
+                    value={`${proposal.equipment.batteryName} ${proposal.equipment.batteryWatts}`.trim()}
                   />
                 </div>
                 <hr className="h-px w-full max-w-[478.263px] border-0 bg-black/20" />
                 <div className="flex flex-col gap-[20px]">
-                  <ProposalDetailRow label="Number of Panels" value="16" />
+                  <ProposalDetailRow
+                    label="Number of Panels"
+                    value={proposal.equipment.numberOfPanels}
+                  />
                   <ProposalDetailRow
                     label="CO₂ Offset"
-                    value="7.2 tonnes/year"
+                    value={proposal.equipment.co2Offset}
                   />
                 </div>
               </div>
@@ -173,18 +183,24 @@ export function DesignsProposalStepContent({
                 </p>
                 <p className="mt-2 text-center font-source-sans text-[clamp(36px,5vw,53.529px)] font-normal leading-[1.15]">
                   <span className="bg-[linear-gradient(154.91deg,#FFEF62_0%,#F78D00_100%)] bg-clip-text text-transparent">
-                    $11,200
+                    {proposal.pricing.totalSystemPrice}
                   </span>
                 </p>
                 <p className="mt-2 text-center font-source-sans text-[14.412px] font-normal leading-[21.618px] text-white/40">
                   *Price includes installation and GST
                 </p>
                 <div className="mt-2 flex gap-[12.352px]">
-                  <ProposalSubMetric label="Monthly Savings" value="$132" />
-                  <ProposalSubMetric label="Current Bill" value="$500" />
+                  <ProposalSubMetric
+                    label="Monthly Savings"
+                    value={proposal.pricing.monthlySavings}
+                  />
+                  <ProposalSubMetric
+                    label="Current Bill"
+                    value={proposal.pricing.currentBill}
+                  />
                   <ProposalSubMetric
                     label="New Bill"
-                    value="$368"
+                    value={proposal.pricing.newBill}
                     valueClassName="inline-block bg-[linear-gradient(142.91deg,#FFEF62_0%,#F78D00_100%)] bg-clip-text text-transparent"
                   />
                 </div>

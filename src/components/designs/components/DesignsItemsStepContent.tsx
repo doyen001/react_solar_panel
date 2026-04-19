@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import {
   DesignsSelectField,
   type DesignsSelectOption,
@@ -18,6 +18,95 @@ const PANEL_SIZE_OPTIONS: DesignsSelectOption[] = [
 ];
 
 type SpecLine = { label: string; value: string };
+type SummarySpec = {
+  imageSrc: string;
+  imageWidth: number;
+  imageHeight: number;
+  imageAlt: string;
+  leftCol: SpecLine[];
+  rightCol: SpecLine[];
+};
+
+export type DesignsItemsStepValue = {
+  solarPanel: {
+    brand: string;
+    size: string;
+    summary: SummarySpec;
+  };
+  battery: {
+    brand: string;
+    size: string;
+    summary: SummarySpec;
+  };
+  equipment: {
+    brand: string;
+    size: string;
+    summary: SummarySpec;
+  };
+};
+
+const DEFAULT_ITEMS_STEP_VALUE: DesignsItemsStepValue = {
+  solarPanel: {
+    brand: "",
+    size: "",
+    summary: {
+      imageSrc: "/images/designs/solarPanel.png",
+      imageWidth: 67,
+      imageHeight: 99,
+      imageAlt: "",
+      leftCol: [
+        { label: "Brand -", value: "TRINA" },
+        { label: "Model -", value: "9823829302" },
+        { label: "Type -", value: "Mono Perc Bifacial" },
+        { label: "CEC Approved -", value: "Yes" },
+      ],
+      rightCol: [
+        { label: "Watts per Panel -", value: "630" },
+        { label: "Number of Panels -", value: "32" },
+      ],
+    },
+  },
+  battery: {
+    brand: "",
+    size: "",
+    summary: {
+      imageSrc: "/images/designs/battery.png",
+      imageWidth: 57,
+      imageHeight: 93,
+      imageAlt: "",
+      leftCol: [
+        { label: "Brand -", value: "BLUETTI" },
+        { label: "Model -", value: "9823829302" },
+        { label: "Type -", value: "High voltage" },
+        { label: "CEC Approved -", value: "Yes" },
+      ],
+      rightCol: [
+        { label: "Watts per Panel -", value: "7.6 kW" },
+        { label: "Number of Panels -", value: "8" },
+      ],
+    },
+  },
+  equipment: {
+    brand: "",
+    size: "",
+    summary: {
+      imageSrc: "/images/designs/equipment.png",
+      imageWidth: 47,
+      imageHeight: 103,
+      imageAlt: "",
+      leftCol: [
+        { label: "Brand -", value: "BLUETTI" },
+        { label: "Model -", value: "9823829302" },
+        { label: "Type -", value: "High voltage" },
+        { label: "CEC Approved -", value: "Yes" },
+      ],
+      rightCol: [
+        { label: "Watts per Panel -", value: "7.6 kW" },
+        { label: "Number of Panels -", value: "8" },
+      ],
+    },
+  },
+};
 
 /**
  * Figma 3:4448 — nested panel: 135px height, 10px radius, 2px #00b0f0 border,
@@ -41,7 +130,7 @@ function DesignsItemProductSummary({
   const [wattsRow, countRow] = rightCol.slice(0, 2);
 
   return (
-    <div className="relative h-[135px] w-full shrink-0 overflow-clip rounded-[10px] border-2 border-solid border-[#00b0f0] bg-gradient-to-r from-[#ffef62] to-[#f78d00]">
+    <div className="relative h-[135px] w-full shrink-0 overflow-clip rounded-[10px] border-2 border-solid border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber">
       {/* 67 + 244 = 311 at spec; Figma frame is 309px — use min width so columns keep 119/111 */}
       <div className="absolute left-[calc(50%-0.19px)] top-1/2 flex w-[min(311px,calc(100%-16px))] -translate-x-1/2 -translate-y-1/2 items-center justify-between">
         <div className="relative h-[99px] w-[67px] shrink-0 overflow-hidden">
@@ -55,13 +144,13 @@ function DesignsItemProductSummary({
           />
         </div>
         <div className="flex shrink-0 gap-[14px]">
-          <div className="flex h-[93px] w-[119px] flex-col gap-[14px] leading-[0]">
+          <div className="flex h-[93px] w-[119px] flex-col gap-[14px] leading-0">
             {leftCol.map((row, i) => (
               <p
                 key={row.label}
                 className={
                   i === 0
-                    ? "min-w-full w-[min-content] shrink-0 font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]"
+                    ? "min-w-full w-min shrink-0 font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]"
                     : "shrink-0 whitespace-nowrap font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]"
                 }
               >
@@ -72,7 +161,7 @@ function DesignsItemProductSummary({
               </p>
             ))}
           </div>
-          <div className="flex w-[111px] shrink-0 flex-col items-end justify-center gap-[33px] leading-[0]">
+          <div className="flex w-[111px] shrink-0 flex-col items-end justify-center gap-[33px] leading-0">
             <div className="flex h-[42px] w-full flex-col items-end gap-[14px] whitespace-nowrap font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]">
               {wattsRow ? (
                 <p className="shrink-0">
@@ -127,16 +216,21 @@ function DesignsItemsGradientCard({
   title,
   firstSelectId,
   secondSelectId,
+  brand,
+  size,
+  onBrandChange,
+  onSizeChange,
   summary,
 }: {
   title: string;
   firstSelectId: string;
   secondSelectId: string;
+  brand: string;
+  size: string;
+  onBrandChange: (value: string) => void;
+  onSizeChange: (value: string) => void;
   summary: React.ReactNode;
 }) {
-  const [brand, setBrand] = useState("");
-  const [size, setSize] = useState("");
-
   return (
     <div className="designs-border-gradient z-10 rounded-[30px] min-w-0 max-w-[398.013px] w-full p-[3px]">
       <div className="flex min-h-[353.565px] z-20 w-full shrink-0 flex-col rounded-[30px] bg-linear-to-r from-[#FFEF62] to-[#F78D00]">
@@ -151,7 +245,7 @@ function DesignsItemsGradientCard({
                 ariaLabel={`${title}: select brand`}
                 placeholder="Select Brand"
                 value={brand}
-                onChange={setBrand}
+                onChange={onBrandChange}
                 options={BRAND_OPTIONS}
               />
               <DesignsSelectField
@@ -159,7 +253,7 @@ function DesignsItemsGradientCard({
                 ariaLabel={`${title}: select panel size`}
                 placeholder="Select Panel Size"
                 value={size}
-                onChange={setSize}
+                onChange={onSizeChange}
                 options={PANEL_SIZE_OPTIONS}
               />
             </div>
@@ -171,10 +265,40 @@ function DesignsItemsGradientCard({
   );
 }
 
+export type DesignsItemsStepHandle = {
+  getValues: () => DesignsItemsStepValue;
+};
+
 /**
  * Figma Screen 18 (3:4410) — three gradient cards, 45px gap; inner padding 28.98 / 25.98.
  */
-export function DesignsItemsStepContent() {
+export const DesignsItemsStepContent = forwardRef<
+  DesignsItemsStepHandle,
+  object
+>(function DesignsItemsStepContent(_, ref) {
+  const [itemsValue, setItemsValue] = useState(DEFAULT_ITEMS_STEP_VALUE);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getValues: () => itemsValue,
+    }),
+    [itemsValue],
+  );
+
+  const updateItem = (
+    key: keyof DesignsItemsStepValue,
+    next: Partial<DesignsItemsStepValue[keyof DesignsItemsStepValue]>,
+  ) => {
+    setItemsValue((prev) => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        ...next,
+      },
+    }));
+  };
+
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
       <div className="flex w-full flex-col items-center justify-center gap-[45px] lg:flex-row lg:items-start lg:justify-center">
@@ -182,22 +306,18 @@ export function DesignsItemsStepContent() {
           title="Select Solar Panels"
           firstSelectId="items-solar-brand"
           secondSelectId="items-solar-size"
+          brand={itemsValue.solarPanel.brand}
+          size={itemsValue.solarPanel.size}
+          onBrandChange={(next) => updateItem("solarPanel", { brand: next })}
+          onSizeChange={(next) => updateItem("solarPanel", { size: next })}
           summary={
             <DesignsItemProductSummary
-              imageSrc="/images/designs/solarPanel.png"
-              imageWidth={67}
-              imageHeight={99}
-              imageAlt=""
-              leftCol={[
-                { label: "Brand -", value: "TRINA" },
-                { label: "Model -", value: "9823829302" },
-                { label: "Type -", value: "Mono Perc Bifacial" },
-                { label: "CEC Approved -", value: "Yes" },
-              ]}
-              rightCol={[
-                { label: "Watts per Panel -", value: "630" },
-                { label: "Number of Panels -", value: "32" },
-              ]}
+              imageSrc={itemsValue.solarPanel.summary.imageSrc}
+              imageWidth={itemsValue.solarPanel.summary.imageWidth}
+              imageHeight={itemsValue.solarPanel.summary.imageHeight}
+              imageAlt={itemsValue.solarPanel.summary.imageAlt}
+              leftCol={itemsValue.solarPanel.summary.leftCol}
+              rightCol={itemsValue.solarPanel.summary.rightCol}
             />
           }
         />
@@ -205,22 +325,18 @@ export function DesignsItemsStepContent() {
           title="Select Battery"
           firstSelectId="items-battery-brand"
           secondSelectId="items-battery-size"
+          brand={itemsValue.battery.brand}
+          size={itemsValue.battery.size}
+          onBrandChange={(next) => updateItem("battery", { brand: next })}
+          onSizeChange={(next) => updateItem("battery", { size: next })}
           summary={
             <DesignsItemProductSummary
-              imageSrc="/images/designs/battery.png"
-              imageWidth={57}
-              imageHeight={93}
-              imageAlt=""
-              leftCol={[
-                { label: "Brand -", value: "BLUETTI" },
-                { label: "Model -", value: "9823829302" },
-                { label: "Type -", value: "High voltage" },
-                { label: "CEC Approved -", value: "Yes" },
-              ]}
-              rightCol={[
-                { label: "Watts per Panel -", value: "7.6 kW" },
-                { label: "Number of Panels -", value: "8" },
-              ]}
+              imageSrc={itemsValue.battery.summary.imageSrc}
+              imageWidth={itemsValue.battery.summary.imageWidth}
+              imageHeight={itemsValue.battery.summary.imageHeight}
+              imageAlt={itemsValue.battery.summary.imageAlt}
+              leftCol={itemsValue.battery.summary.leftCol}
+              rightCol={itemsValue.battery.summary.rightCol}
             />
           }
         />
@@ -228,26 +344,22 @@ export function DesignsItemsStepContent() {
           title="Select Equipment"
           firstSelectId="items-equipment-brand"
           secondSelectId="items-equipment-size"
+          brand={itemsValue.equipment.brand}
+          size={itemsValue.equipment.size}
+          onBrandChange={(next) => updateItem("equipment", { brand: next })}
+          onSizeChange={(next) => updateItem("equipment", { size: next })}
           summary={
             <DesignsItemProductSummary
-              imageSrc="/images/designs/equipment.png"
-              imageWidth={47}
-              imageHeight={103}
-              imageAlt=""
-              leftCol={[
-                { label: "Brand -", value: "BLUETTI" },
-                { label: "Model -", value: "9823829302" },
-                { label: "Type -", value: "High voltage" },
-                { label: "CEC Approved -", value: "Yes" },
-              ]}
-              rightCol={[
-                { label: "Watts per Panel -", value: "7.6 kW" },
-                { label: "Number of Panels -", value: "8" },
-              ]}
+              imageSrc={itemsValue.equipment.summary.imageSrc}
+              imageWidth={itemsValue.equipment.summary.imageWidth}
+              imageHeight={itemsValue.equipment.summary.imageHeight}
+              imageAlt={itemsValue.equipment.summary.imageAlt}
+              leftCol={itemsValue.equipment.summary.leftCol}
+              rightCol={itemsValue.equipment.summary.rightCol}
             />
           }
         />
       </div>
     </div>
   );
-}
+});

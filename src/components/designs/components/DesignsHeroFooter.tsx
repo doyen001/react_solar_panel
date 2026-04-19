@@ -22,7 +22,6 @@ export function DesignsHeroFooter({
   showBack = false,
   showNext = false,
 }: DesignsHeroFooterProps) {
-  console.log("fillPercent", fillPercent);
   return (
     <div
       className={`relative z-10 mt-auto w-full pb-8 pt-10 ${className ?? ""}`}

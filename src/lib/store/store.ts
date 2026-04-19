@@ -4,6 +4,7 @@ import customerAuthReducer, {
   CUSTOMER_AUTH_STORAGE_KEY,
   setUser,
 } from "./customerAuthSlice";
+import designProposalReducer from "./designProposalSlice";
 
 const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) => {
   const result = next(action);
@@ -22,6 +23,7 @@ const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) =
 export const store = configureStore({
   reducer: {
     customerAuth: customerAuthReducer,
+    designProposal: designProposalReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(customerAuthPersistenceMiddleware),
