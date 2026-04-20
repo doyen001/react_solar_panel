@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -22,7 +23,8 @@ import { useSolarLayers, type SolarLayerType } from "@/hooks/useSolarLayers";
 import type { GeoTiffOverlay } from "@/utils/geotiff";
 import { extractRoofOutlineFromMask } from "@/utils/roofMaskContour";
 import type { SolarEstimateResult, SolarPanel } from "@/types/solar";
-import { useAppSelector } from "@/lib/store/hooks";
+import { mergeProposalData } from "@/lib/store/designProposalSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 
 const MAP_CONTAINER: React.CSSProperties = {
   width: "100%",
@@ -37,6 +39,16 @@ const ACTIVE_LAYERS: SolarLayerType[] = ["rgb", "mask"];
 const MAX_MAP_SOLAR_PANEL_POLYGONS = 1500;
 function formatNumber(n: number): string {
   return n.toLocaleString("en-AU", { maximumFractionDigits: 0 });
+}
+
+function coordsMatchPin(
+  pinLat: number,
+  pinLng: number,
+  loc: DesignsMapLocation,
+) {
+  return (
+    Math.abs(pinLat - loc.lat) < 1e-5 && Math.abs(pinLng - loc.lng) < 1e-5
+  );
 }
 
 /* ── Geo helpers ─────────────────────────────────────────────── */
@@ -550,6 +562,8 @@ export type DesignsSolarMetricsValue = {
 
 export type DesignsSolarPanelStepHandle = {
   getMetrics: () => DesignsSolarMetricsValue;
+  /** Writes current roof + panels to Redux so Next/Back keeps the layout */
+  persistDesignToStore: () => void;
 };
 
 export const DesignsSolarPanelStepContent = forwardRef<
@@ -557,6 +571,8 @@ export const DesignsSolarPanelStepContent = forwardRef<
   object
 >(function DesignsSolarPanelStepContent(_, ref) {
   const { isLoaded } = useGoogleMaps();
+  const dispatch = useAppDispatch();
+  const solarDesignFromStore = useAppSelector((s) => s.designProposal.solarDesign);
 
   const proposalCustomer = useAppSelector((s) => s.designProposal.customer);
   const selectedLocation = useMemo((): DesignsMapLocation | null => {
@@ -568,6 +584,20 @@ export const DesignsSolarPanelStepContent = forwardRef<
     }
     return null;
   }, [proposalCustomer.mapLat, proposalCustomer.mapLng]);
+
+  useEffect(() => {
+    if (!selectedLocation || !solarDesignFromStore) return;
+    if (
+      coordsMatchPin(
+        solarDesignFromStore.pinLat,
+        solarDesignFromStore.pinLng,
+        selectedLocation,
+      )
+    ) {
+      return;
+    }
+    dispatch(mergeProposalData({ solarDesign: null }));
+  }, [dispatch, selectedLocation, solarDesignFromStore]);
 
   const [mapReady, setMapReady] = useState<google.maps.Map | null>(null);
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>("panels");
@@ -660,6 +690,18 @@ export const DesignsSolarPanelStepContent = forwardRef<
     if (!selectedLocation || hasInitializedRoof || !initialRoofPolygon) {
       return;
     }
+    if (
+      solarDesignFromStore &&
+      coordsMatchPin(
+        solarDesignFromStore.pinLat,
+        solarDesignFromStore.pinLng,
+        selectedLocation,
+      ) &&
+      (solarDesignFromStore.savedRoofs.length > 0 ||
+        (solarDesignFromStore.generatedPanels?.length ?? 0) > 0)
+    ) {
+      return;
+    }
 
     setEditingRoofs([
       {
@@ -669,13 +711,72 @@ export const DesignsSolarPanelStepContent = forwardRef<
     ]);
     setIsEditing(true);
     setHasInitializedRoof(true);
-  }, [hasInitializedRoof, initialRoofPolygon, selectedLocation]);
+  }, [
+    hasInitializedRoof,
+    initialRoofPolygon,
+    selectedLocation,
+    solarDesignFromStore,
+  ]);
 
   const availablePanelLimit = useMemo(() => {
     return generatedPanels?.length ?? 0;
   }, [generatedPanels]);
 
   const [panelCountInput, setPanelCountInput] = useState("");
+
+  const mapCaptureRef = useRef<HTMLDivElement | null>(null);
+  const panelCountInputRef = useRef("");
+  const solarPersistRef = useRef({
+    savedRoofs: [] as google.maps.LatLngLiteral[][],
+    generatedPanels: null as SolarPanel[] | null,
+    polygonTotalAreaM2: null as number | null,
+    panelCountInput: "",
+  });
+  const screenshotFromStoreRef = useRef<string | null>(null);
+  const didHydrateFromReduxRef = useRef(false);
+
+  useEffect(() => {
+    panelCountInputRef.current = panelCountInput;
+  }, [panelCountInput]);
+
+  useEffect(() => {
+    solarPersistRef.current = {
+      savedRoofs,
+      generatedPanels,
+      polygonTotalAreaM2,
+      panelCountInput,
+    };
+  }, [savedRoofs, generatedPanels, polygonTotalAreaM2, panelCountInput]);
+
+  useEffect(() => {
+    screenshotFromStoreRef.current =
+      solarDesignFromStore?.mapScreenshotDataUrl ?? null;
+  }, [solarDesignFromStore?.mapScreenshotDataUrl]);
+
+  useLayoutEffect(() => {
+    didHydrateFromReduxRef.current = false;
+  }, [proposalCustomer.mapLat, proposalCustomer.mapLng]);
+
+  useLayoutEffect(() => {
+    if (!selectedLocation || !solarDesignFromStore) return;
+    if (
+      !coordsMatchPin(
+        solarDesignFromStore.pinLat,
+        solarDesignFromStore.pinLng,
+        selectedLocation,
+      )
+    ) {
+      return;
+    }
+    if (didHydrateFromReduxRef.current) return;
+    didHydrateFromReduxRef.current = true;
+    setSavedRoofs(solarDesignFromStore.savedRoofs);
+    setGeneratedPanels(solarDesignFromStore.generatedPanels);
+    setPolygonTotalAreaM2(solarDesignFromStore.polygonTotalAreaM2);
+    setPanelCountInput(solarDesignFromStore.panelCountInput);
+    setHasInitializedRoof(true);
+    setIsEditing(false);
+  }, [selectedLocation, solarDesignFromStore]);
 
   const selectedPanelCount = useMemo(() => {
     const parsed = Number.parseInt(panelCountInput, 10);
@@ -804,6 +905,21 @@ export const DesignsSolarPanelStepContent = forwardRef<
       setIsEditing(false);
       setEditingRoofs([]);
       setSelectedRoofId(null);
+      if (selectedLocation) {
+        dispatch(
+          mergeProposalData({
+            solarDesign: {
+              pinLat: selectedLocation.lat,
+              pinLng: selectedLocation.lng,
+              savedRoofs: [],
+              generatedPanels: null,
+              polygonTotalAreaM2: null,
+              panelCountInput: panelCountInputRef.current,
+              mapScreenshotDataUrl: null,
+            },
+          }),
+        );
+      }
       return;
     }
 
@@ -815,15 +931,16 @@ export const DesignsSolarPanelStepContent = forwardRef<
     }
     setPolygonTotalAreaM2(totalArea);
 
+    let panelsToPersist: SolarPanel[] | null = null;
     setIsGeneratingPanels(true);
     try {
       if (data?.panelDimensions) {
-        const nextPanels = dedupeSolarPanels(
+        panelsToPersist = dedupeSolarPanels(
           validPaths.flatMap((roof, index) =>
             generatePanelsForRoofPolygon(roof, data.panelDimensions, index),
           ),
         );
-        setGeneratedPanels(nextPanels);
+        setGeneratedPanels(panelsToPersist);
       } else {
         setGeneratedPanels(null);
       }
@@ -835,7 +952,57 @@ export const DesignsSolarPanelStepContent = forwardRef<
     setIsEditing(false);
     setEditingRoofs([]);
     setSelectedRoofId(null);
-  }, [data?.panelDimensions, getCurrentEditingPaths]);
+
+    const pathsSnapshot = validPaths.map((p) => [...p]);
+    const totalAreaSnapshot = totalArea;
+    const pin = selectedLocation;
+    const panelSnap = panelCountInputRef.current;
+
+    const captureAndPersist = async () => {
+      let dataUrl: string | null = null;
+      try {
+        if (mapCaptureRef.current) {
+          const { default: html2canvas } = await import("html2canvas");
+          const canvas = await html2canvas(mapCaptureRef.current, {
+            scale: 1,
+            useCORS: true,
+            logging: false,
+            backgroundColor: "#1a1d29",
+          });
+          dataUrl = canvas.toDataURL("image/png");
+        }
+      } catch {
+        dataUrl = null;
+      }
+      if (!pin) return;
+      dispatch(
+        mergeProposalData({
+          solarDesign: {
+            pinLat: pin.lat,
+            pinLng: pin.lng,
+            savedRoofs: pathsSnapshot,
+            generatedPanels: panelsToPersist,
+            polygonTotalAreaM2: totalAreaSnapshot,
+            panelCountInput: panelSnap,
+            mapScreenshotDataUrl: dataUrl,
+          },
+        }),
+      );
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          void captureAndPersist();
+        }, 280);
+      });
+    });
+  }, [
+    data?.panelDimensions,
+    dispatch,
+    getCurrentEditingPaths,
+    selectedLocation,
+  ]);
 
   const mapCenter = selectedLocation ?? DESIGNS_LOCATION_STEP.defaultCenter;
   const mapZoom = selectedLocation ? DESIGNS_LOCATION_STEP.defaultZoom : 14;
@@ -919,8 +1086,24 @@ export const DesignsSolarPanelStepContent = forwardRef<
     ref,
     () => ({
       getMetrics: () => proposalMetrics,
+      persistDesignToStore: () => {
+        if (!selectedLocation) return;
+        dispatch(
+          mergeProposalData({
+            solarDesign: {
+              pinLat: selectedLocation.lat,
+              pinLng: selectedLocation.lng,
+              savedRoofs: solarPersistRef.current.savedRoofs,
+              generatedPanels: solarPersistRef.current.generatedPanels,
+              polygonTotalAreaM2: solarPersistRef.current.polygonTotalAreaM2,
+              panelCountInput: solarPersistRef.current.panelCountInput,
+              mapScreenshotDataUrl: screenshotFromStoreRef.current,
+            },
+          }),
+        );
+      },
     }),
-    [proposalMetrics],
+    [dispatch, proposalMetrics, selectedLocation],
   );
 
   return (
@@ -1012,7 +1195,10 @@ export const DesignsSolarPanelStepContent = forwardRef<
 
         {/* ── Right panel: map ── */}
         <div className="w-full max-w-[649px] shrink-0 overflow-hidden rounded-[28px] border-[3px] border-design-accent-cyan shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]">
-          <div className="relative min-h-[525px] w-full h-full overflow-hidden rounded-[25px]">
+          <div
+            ref={mapCaptureRef}
+            className="relative min-h-[525px] w-full h-full overflow-hidden rounded-[25px]"
+          >
             {isLoaded ? (
               <>
                 <GoogleMap

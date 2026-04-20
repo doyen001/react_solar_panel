@@ -1,6 +1,19 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { DESIGNS_REGISTER_STEP } from "@/utils/constant";
+import type { SolarPanel } from "@/types/solar";
 import type { RootState } from "./store";
+
+/** Serializable roof outline + generated layout for the solar step (restore after Back). */
+export type DesignProposalSolarDesign = {
+  pinLat: number;
+  pinLng: number;
+  savedRoofs: { lat: number; lng: number }[][];
+  generatedPanels: SolarPanel[] | null;
+  polygonTotalAreaM2: number | null;
+  panelCountInput: string;
+  /** PNG data URL from html2canvas on Save — for proposals / PDFs */
+  mapScreenshotDataUrl: string | null;
+};
 
 export type DesignProposalSummary = {
   systemSize: string;
@@ -43,6 +56,7 @@ export type DesignProposalState = {
   customer: DesignProposalCustomer;
   equipment: DesignProposalEquipment;
   pricing: DesignProposalPricing;
+  solarDesign: DesignProposalSolarDesign | null;
 };
 
 export type DesignProposalPayload = {
@@ -50,6 +64,7 @@ export type DesignProposalPayload = {
   customer?: Partial<DesignProposalCustomer>;
   equipment?: Partial<DesignProposalEquipment>;
   pricing?: Partial<DesignProposalPricing>;
+  solarDesign?: DesignProposalSolarDesign | null;
 };
 
 export const DESIGN_PROPOSAL_DEFAULTS: DesignProposalState = {
@@ -82,6 +97,7 @@ export const DESIGN_PROPOSAL_DEFAULTS: DesignProposalState = {
     currentBill: "$500",
     newBill: "$368",
   },
+  solarDesign: null,
 };
 
 const designProposalSlice = createSlice({
@@ -100,6 +116,9 @@ const designProposalSlice = createSlice({
       }
       if (action.payload.pricing) {
         state.pricing = { ...state.pricing, ...action.payload.pricing };
+      }
+      if (action.payload.solarDesign !== undefined) {
+        state.solarDesign = action.payload.solarDesign;
       }
     },
     resetProposalData: () => DESIGN_PROPOSAL_DEFAULTS,

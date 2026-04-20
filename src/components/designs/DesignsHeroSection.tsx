@@ -143,6 +143,7 @@ export function DesignsHeroSection({
       }
     }
     if (activeScreen === "solarPanel") {
+      solarStepRef.current?.persistDesignToStore();
       const m = solarStepRef.current?.getMetrics();
       if (m) {
         dispatch(
