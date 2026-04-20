@@ -259,7 +259,7 @@ export async function generateProposalPdfBlob(
   doc.setFont("helvetica", "normal");
   const rows: [string, string][] = [
     ["Solar panels", `${proposal.equipment.solarPanelName} · ${proposal.equipment.solarPanelWatts}`],
-    ["Panel count", proposal.equipment.numberOfPanels],
+    ["Panel count", proposal.summary.totalPanels],
     ["Inverter", `${proposal.equipment.inverterName} · ${proposal.equipment.inverterWatts}`],
     ["Battery", `${proposal.equipment.batteryName} · ${proposal.equipment.batteryWatts}`],
     ["CO2 offset", proposal.equipment.co2Offset],

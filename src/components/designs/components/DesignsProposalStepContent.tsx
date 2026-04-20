@@ -167,7 +167,7 @@ export function DesignsProposalStepContent({
                 <div className="flex flex-col gap-[20px]">
                   <ProposalDetailRow
                     label="Number of Panels"
-                    value={proposal.equipment.numberOfPanels}
+                    value={proposal.summary.totalPanels}
                   />
                   <ProposalDetailRow
                     label="CO₂ Offset"
