@@ -71,6 +71,8 @@
   --color-warm-ink: #2a2622;
   --color-cream-50: #fcfbf8;
   --color-navy-800: #09234a;
+  /* Installer portal sidebar (Figma Installer Portal Dashboard) */
+  --color-installer-sidebar: #0b1e3f;
   --color-success: #16a34a;
   --color-warm-black: #1c1a17;
   --color-cream-100: #f0ebe2;
@@ -279,4 +281,20 @@ button {
 
 .designs-border-gradient {
   background: linear-gradient(180deg, #00b0f0 0%, #f00 47.6%, #7030a0 100%);
+}
+
+.yellow-gradient-header {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  border-left: 2px solid var(--color-yellow-lemon);
+  background: linear-gradient(
+    to bottom,
+    rgba(245, 159, 10, 0.15) 0%,
+    transparent 100%
+  );
+  padding-left: 18px;
+  padding-right: 4px;
 }
