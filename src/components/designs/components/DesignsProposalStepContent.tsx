@@ -80,6 +80,7 @@ export function DesignsProposalStepContent({
   customerName = "Charli Abdo",
 }: DesignsProposalStepContentProps) {
   const proposal = useAppSelector(selectDesignProposal);
+  console.log("proposal", proposal);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const displayCustomerName = proposal.customer.name || customerName;
 

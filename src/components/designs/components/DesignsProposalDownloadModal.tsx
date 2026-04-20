@@ -1,30 +1,49 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+
+import { downloadProposalPdf } from "@/lib/proposal/generateProposalPdf";
+import { useAppSelector } from "@/lib/store/hooks";
+import { selectDesignProposal } from "@/lib/store/designProposalSlice";
 
 export type DesignsProposalDownloadModalProps = {
   open: boolean;
   onClose: () => void;
-  /** First name for “Dear …” (Figma: Adam). */
+  /** Override first name for “Dear …” (defaults from Redux `customer.name`). */
   letterFirstName?: string;
-  /** Called when user taps the modal’s download CTA. */
+  /** Optional hook after a successful PDF download. */
   onConfirmDownload?: () => void;
 };
 
 const COMPANY_BLURB =
   "Easylink Solar Company is a leading provider of solar energy solutions based in Sydney. The company has been providing top-notch services to its customers and has received 5-star reviews from its happy customers. At Easylink Solar, the focus is on the customer, with a goal of reducing electricity bills and increasing solar feed-in credit. The company specializes in residential and commercial solar installations, providing top-quality and premium solar panels, inverters, and batteries. The team at Easylink Solar ensures a worry-free experience for its customers, both before and after the installation. With a focus on customer satisfaction, Easylink Solar is the ideal choice for anyone looking to switch to solar energy.";
 
+function firstWordName(fullName: string): string {
+  const t = fullName.trim();
+  if (!t) return "Customer";
+  return t.split(/\s+/)[0] ?? "Customer";
+}
+
 /**
  * Figma 20:22302 — proposal download confirmation / letter modal.
+ * Download builds a multi-page PDF from Redux (`designProposal`) including the solar map screenshot when saved.
  */
 export function DesignsProposalDownloadModal({
   open,
   onClose,
-  letterFirstName = "Adam",
+  letterFirstName,
   onConfirmDownload,
 }: DesignsProposalDownloadModalProps) {
+  const proposal = useAppSelector(selectDesignProposal);
+  const [downloading, setDownloading] = useState(false);
+
+  const dearName = useMemo(() => {
+    if (letterFirstName?.trim()) return letterFirstName.trim();
+    return firstWordName(proposal.customer.name);
+  }, [letterFirstName, proposal.customer.name]);
+
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -40,6 +59,19 @@ export function DesignsProposalDownloadModal({
   }, [open, onClose]);
 
   if (!open || typeof document === "undefined") return null;
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      await downloadProposalPdf(proposal);
+      onConfirmDownload?.();
+      onClose();
+    } catch (err) {
+      console.error("Proposal PDF download failed", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return createPortal(
     <div
@@ -75,7 +107,7 @@ export function DesignsProposalDownloadModal({
           </header>
 
           <section className="mt-10 flex max-w-[697px] flex-col gap-5 font-source-sans text-[18px] font-medium uppercase leading-normal text-black">
-            <p>Dear {letterFirstName},</p>
+            <p>Dear {dearName},</p>
             <div className="flex flex-col gap-2">
               <p>
                 Thank you for the opportunity to present your Solar Energy
@@ -122,13 +154,11 @@ export function DesignsProposalDownloadModal({
 
           <button
             type="button"
-            className="mx-auto mt-10 flex h-12 w-full max-w-[278px] shrink-0 items-center justify-center rounded-[12px] bg-[linear-gradient(147.99deg,#2094F3_0%,#17CFCF_100%)] font-source-sans text-[18px] font-semibold uppercase leading-6 text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-105"
-            onClick={() => {
-              onConfirmDownload?.();
-              onClose();
-            }}
+            disabled={downloading}
+            className="mx-auto mt-10 flex h-12 w-full max-w-[278px] shrink-0 items-center justify-center rounded-[12px] bg-[linear-gradient(147.99deg,#2094F3_0%,#17CFCF_100%)] font-source-sans text-[18px] font-semibold uppercase leading-6 text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={() => void handleDownload()}
           >
-            download your proposal
+            {downloading ? "Preparing PDF…" : "download your proposal"}
           </button>
         </div>
       </div>

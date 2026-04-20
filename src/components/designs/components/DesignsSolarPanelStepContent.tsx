@@ -46,9 +46,7 @@ function coordsMatchPin(
   pinLng: number,
   loc: DesignsMapLocation,
 ) {
-  return (
-    Math.abs(pinLat - loc.lat) < 1e-5 && Math.abs(pinLng - loc.lng) < 1e-5
-  );
+  return Math.abs(pinLat - loc.lat) < 1e-5 && Math.abs(pinLng - loc.lng) < 1e-5;
 }
 
 /* ── Geo helpers ─────────────────────────────────────────────── */
@@ -572,7 +570,9 @@ export const DesignsSolarPanelStepContent = forwardRef<
 >(function DesignsSolarPanelStepContent(_, ref) {
   const { isLoaded } = useGoogleMaps();
   const dispatch = useAppDispatch();
-  const solarDesignFromStore = useAppSelector((s) => s.designProposal.solarDesign);
+  const solarDesignFromStore = useAppSelector(
+    (s) => s.designProposal.solarDesign,
+  );
 
   const proposalCustomer = useAppSelector((s) => s.designProposal.customer);
   const selectedLocation = useMemo((): DesignsMapLocation | null => {
@@ -1195,104 +1195,108 @@ export const DesignsSolarPanelStepContent = forwardRef<
 
         {/* ── Right panel: map ── */}
         <div className="w-full max-w-[649px] shrink-0 overflow-hidden rounded-[28px] border-[3px] border-design-accent-cyan shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]">
-          <div
-            ref={mapCaptureRef}
-            className="relative min-h-[525px] w-full h-full overflow-hidden rounded-[25px]"
-          >
-            {isLoaded ? (
-              <>
-                <GoogleMap
-                  mapContainerStyle={MAP_CONTAINER}
-                  center={mapCenter}
-                  zoom={mapZoom}
-                  onLoad={onMapLoad}
-                  options={{
-                    disableDefaultUI: true,
-                    zoomControl: true,
-                    mapTypeId: "satellite",
-                    tilt: 0,
-                    rotateControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: false,
-                  }}
-                >
-                  {selectedLocation && (
-                    <OverlayView
-                      position={selectedLocation}
-                      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                      getPixelPositionOffset={(width, height) => ({
-                        x: -(width / 2),
-                        y: -height,
+          {/* Outer wrapper: overlays (RGB/Panels/Save) sit outside capture ref */}
+          <div className="relative min-h-[525px] w-full h-full overflow-hidden rounded-[25px]">
+            {/* Capture target = satellite map + roof/panel overlays only (no UI chrome) */}
+            <div
+              ref={mapCaptureRef}
+              className="relative min-h-[525px] w-full overflow-hidden rounded-[25px]"
+            >
+              {isLoaded ? (
+                <>
+                  <GoogleMap
+                    mapContainerStyle={MAP_CONTAINER}
+                    center={mapCenter}
+                    zoom={mapZoom}
+                    onLoad={onMapLoad}
+                    options={{
+                      disableDefaultUI: true,
+                      zoomControl: false,
+                      mapTypeId: "satellite",
+                      tilt: 0,
+                      rotateControl: false,
+                      streetViewControl: false,
+                      fullscreenControl: false,
+                    }}
+                  >
+                    {selectedLocation && (
+                      <OverlayView
+                        position={selectedLocation}
+                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                        getPixelPositionOffset={(width, height) => ({
+                          x: -(width / 2),
+                          y: -height,
+                        })}
+                      >
+                        <div className="pointer-events-none flex flex-col items-center">
+                          <Icon
+                            name="LocationPin"
+                            className="size-[36px] text-[#FF3B30] drop-shadow-[0px_4px_10px_rgba(0,0,0,0.32)]"
+                          />
+                        </div>
+                      </OverlayView>
+                    )}
+
+                    {/* Editable roof polygons (edit mode) */}
+                    {isEditing &&
+                      editingRoofs.map((roof) => {
+                        const isSelected = roof.id === selectedRoofId;
+                        return (
+                          <Polygon
+                            key={roof.id}
+                            paths={roof.paths}
+                            options={{
+                              fillColor: "#51FF00",
+                              fillOpacity: isSelected ? 0.26 : 0.18,
+                              strokeColor: isSelected ? "#FBBF24" : "#51FF00",
+                              strokeOpacity: 0.95,
+                              strokeWeight: isSelected ? 4 : 2.5,
+                              clickable: true,
+                              zIndex: isSelected ? 12 : 10,
+                            }}
+                            draggable
+                            editable
+                            onClick={() => setSelectedRoofId(roof.id)}
+                            onLoad={(polygon) => {
+                              polygonRefs.current.set(roof.id, polygon);
+                            }}
+                            onUnmount={() => {
+                              polygonRefs.current.delete(roof.id);
+                            }}
+                          />
+                        );
                       })}
-                    >
-                      <div className="pointer-events-none flex flex-col items-center">
-                        <Icon
-                          name="LocationPin"
-                          className="size-[36px] text-[#FF3B30] drop-shadow-[0px_4px_10px_rgba(0,0,0,0.32)]"
-                        />
-                      </div>
-                    </OverlayView>
-                  )}
 
-                  {/* Editable roof polygons (edit mode) */}
-                  {isEditing &&
-                    editingRoofs.map((roof) => {
-                      const isSelected = roof.id === selectedRoofId;
-                      return (
+                    {/* Saved roof outlines (view mode) */}
+                    {!isEditing &&
+                      savedRoofs.map((paths, idx) => (
                         <Polygon
-                          key={roof.id}
-                          paths={roof.paths}
+                          key={`saved-${idx}`}
+                          paths={paths}
                           options={{
-                            fillColor: "#51FF00",
-                            fillOpacity: isSelected ? 0.26 : 0.18,
-                            strokeColor: isSelected ? "#FBBF24" : "#51FF00",
-                            strokeOpacity: 0.95,
-                            strokeWeight: isSelected ? 4 : 2.5,
-                            clickable: true,
-                            zIndex: isSelected ? 12 : 10,
-                          }}
-                          draggable
-                          editable
-                          onClick={() => setSelectedRoofId(roof.id)}
-                          onLoad={(polygon) => {
-                            polygonRefs.current.set(roof.id, polygon);
-                          }}
-                          onUnmount={() => {
-                            polygonRefs.current.delete(roof.id);
+                            fillColor: "#22c55e",
+                            fillOpacity: 0.1,
+                            strokeColor: "#22c55e",
+                            strokeOpacity: 0.85,
+                            strokeWeight: 2,
+                            clickable: false,
+                            zIndex: 5,
                           }}
                         />
-                      );
-                    })}
+                      ))}
+                  </GoogleMap>
+                </>
+              ) : (
+                <div className="flex h-full min-h-[525px] items-center justify-center rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)]">
+                  <p className="px-8 text-center font-source-sans text-[20px] font-medium text-white/60">
+                    Loading map...
+                  </p>
+                </div>
+              )}
+            </div>
 
-                  {/* Saved roof outlines (view mode) */}
-                  {!isEditing &&
-                    savedRoofs.map((paths, idx) => (
-                      <Polygon
-                        key={`saved-${idx}`}
-                        paths={paths}
-                        options={{
-                          fillColor: "#22c55e",
-                          fillOpacity: 0.1,
-                          strokeColor: "#22c55e",
-                          strokeOpacity: 0.85,
-                          strokeWeight: 2,
-                          clickable: false,
-                          zIndex: 5,
-                        }}
-                      />
-                    ))}
-                </GoogleMap>
-              </>
-            ) : (
-              <div className="flex h-full min-h-[525px] items-center justify-center rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)]">
-                <p className="px-8 text-center font-source-sans text-[20px] font-medium text-white/60">
-                  Loading map...
-                </p>
-              </div>
-            )}
-
-            {/* Top-right controls */}
-            <div className="absolute right-[14px] top-[14px] flex items-center gap-[8px]">
+            {/* Top-right controls — excluded from proposal screenshot */}
+            <div className="pointer-events-auto absolute right-[14px] top-[14px] z-10 flex items-center gap-[8px]">
               <LayerToggle active={activeLayer} onChange={setActiveLayer} />
               {isEditing ? (
                 <>
@@ -1338,9 +1342,9 @@ export const DesignsSolarPanelStepContent = forwardRef<
               )}
             </div>
 
-            {/* Edit mode instruction hint */}
+            {/* Edit mode instruction hint — excluded from screenshot */}
             {isEditing && (
-              <div className="pointer-events-none absolute bottom-[14px] left-1/2 -translate-x-1/2">
+              <div className="pointer-events-none absolute bottom-[14px] left-1/2 z-10 -translate-x-1/2">
                 <p className="whitespace-nowrap rounded-[8px] bg-black/60 px-4 py-2 font-inter text-[12px] font-medium text-white backdrop-blur-sm">
                   Click a roof to select (amber border) · Delete removes that
                   roof
