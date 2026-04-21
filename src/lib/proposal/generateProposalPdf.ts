@@ -1,4 +1,9 @@
 import { jsPDF } from "jspdf";
+
+import {
+  buildFinancialProjectionFromProposal,
+  type FinancialProjectionYearRow,
+} from "@/lib/proposal/financialProjection";
 import type { DesignProposalState } from "@/lib/store/designProposalSlice";
 
 const PREPARED_BY = {
@@ -9,6 +14,11 @@ const PREPARED_BY = {
 
 /** Logo under `public/` — resolved at runtime in the browser */
 const LOGO_PATH = "/images/logo.webp";
+
+/** Same horizontal inset as other PDF pages (`margin` in `generateProposalPdfBlob`). */
+const PDF_MARGIN_MM = 15;
+/** Portrait A4 body width — used as max width for the financial table on landscape pages. */
+const PDF_BODY_WIDTH_MM = 210 - 2 * PDF_MARGIN_MM;
 
 function firstName(fullName: string): string {
   const t = fullName.trim();
@@ -71,6 +81,163 @@ function quoteNumber(): string {
   return String(Math.floor(1000000 + Math.random() * 9000000));
 }
 
+function formatAudPdf(n: number): string {
+  const neg = n < 0;
+  const abs = Math.abs(Math.round(n));
+  const s = abs.toLocaleString("en-AU");
+  if (neg) return `($${s})`;
+  return `$${s}`;
+}
+
+function formatKwhPdf(n: number): string {
+  return Math.round(n).toLocaleString("en-AU");
+}
+
+function drawFinancialProjectionPage(
+  doc: jsPDF,
+  proposal: DesignProposalState,
+  logoDataUrl: string | null,
+): void {
+  doc.addPage("a4", "portrait");
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const tableW = PDF_BODY_WIDTH_MM;
+  const tableX = (pageW - tableW) / 2;
+
+  let y = drawHeader(doc, proposal, logoDataUrl, 12);
+
+  const { rows, assumptions } = buildFinancialProjectionFromProposal(proposal);
+
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text("Financial impact projection", tableX, y);
+  y += 9;
+
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "italic");
+  const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
+  const assumptionBlock = [
+    `${assumptions.projectionYears} years from ${assumptions.startYear}.`,
+    `Utility bills escalate ${pct(assumptions.utilityEscalationAnnual)}/yr.`,
+    `Solar output degrades ${pct(assumptions.solarDegradationAnnual)}/yr.`,
+    `Consumption = (monthly current bill × 12) ÷ ${assumptions.gridEffectivePricePerKwh.toFixed(3)} $/kWh.`,
+    `Year-1 solar kWh = system kW × ${assumptions.solarYieldKwhPerKwYear1} kWh/kW.`,
+  ].join(" ");
+  const assumptionLines = doc.splitTextToSize(assumptionBlock, tableW);
+  doc.text(assumptionLines, tableX, y);
+  y += assumptionLines.length * 3.6 + 5;
+
+  const colCount = 10;
+  const colW = tableW / colCount;
+  const headerLines = [
+    ["Year"],
+    ["Electricity", "consumption", "(kWh)"],
+    ["Solar", "generation", "(kWh)"],
+    ["Utility bill", "(before — $)"],
+    ["Utility bill", "(after — $)"],
+    ["Annual", "savings ($)"],
+    ["System costs", "(net — $)"],
+    ["Customer", "incentives ($)"],
+    ["Net", "savings ($)"],
+    ["Cumulative", "impacts ($)"],
+  ];
+
+  const headerTop = y;
+  const lineH = 3.2;
+  const headerBlockH = headerLines.reduce(
+    (m, lines) => Math.max(m, lines.length * lineH),
+    0,
+  );
+
+  doc.setFillColor(255, 243, 190);
+  doc.rect(tableX, headerTop - 2, tableW, headerBlockH + 5, "F");
+  doc.setDrawColor(180, 180, 180);
+  doc.rect(tableX, headerTop - 2, tableW, headerBlockH + 5, "S");
+
+  doc.setFontSize(6);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  for (let c = 0; c < colCount; c++) {
+    const lines = headerLines[c];
+    let hy = headerTop + lineH;
+    for (const line of lines) {
+      doc.text(line, tableX + c * colW + colW / 2, hy, {
+        align: "center",
+      });
+      hy += lineH;
+    }
+  }
+
+  y = headerTop + headerBlockH + 7;
+  const rowH = 5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+
+  const rowValues = (r: FinancialProjectionYearRow): string[] => [
+    String(r.calendarYear),
+    formatKwhPdf(r.electricityConsumptionKwh),
+    formatKwhPdf(r.solarGenerationKwh),
+    formatAudPdf(r.utilityBillBefore),
+    formatAudPdf(r.utilityBillAfter),
+    formatAudPdf(r.annualSavings),
+    formatAudPdf(r.systemCostsNet),
+    formatAudPdf(r.customerIncentives),
+    formatAudPdf(r.netSavings),
+    formatAudPdf(r.cumulativeImpacts),
+  ];
+
+  rows.forEach((row, idx) => {
+    if (y > pageH - PDF_MARGIN_MM - 18) {
+      doc.addPage("a4", "landscape");
+      y = drawHeader(doc, proposal, logoDataUrl, 12);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(
+        "Financial impact projection (continued)",
+        (doc.internal.pageSize.getWidth() - tableW) / 2,
+        y,
+      );
+      y += 12;
+      doc.setFontSize(6.5);
+      doc.setFont("helvetica", "normal");
+    }
+
+    if (idx % 2 === 1) {
+      doc.setFillColor(248, 248, 248);
+      doc.rect(tableX, y - rowH + 1.5, tableW, rowH, "F");
+    }
+
+    const vals = rowValues(row);
+    for (let c = 0; c < colCount; c++) {
+      const align =
+        c === 0 ? ("left" as const) : ("right" as const);
+      const px =
+        align === "left"
+          ? tableX + c * colW + 1
+          : tableX + (c + 1) * colW - 1;
+      doc.text(vals[c], px, y, { align });
+    }
+
+    doc.setDrawColor(230, 230, 230);
+    doc.line(tableX, y + 1.5, tableX + tableW, y + 1.5);
+    y += rowH;
+  });
+
+  doc.setFontSize(7);
+  doc.setTextColor(90, 90, 90);
+  const footLines = doc.splitTextToSize(
+    "Derived from proposal inputs (Redux): monthly current/new bills, total system price, system size — plus standard escalation/degradation assumptions above.",
+    tableW,
+  );
+  doc.text(
+    footLines,
+    tableX,
+    pageH - 14 - (footLines.length - 1) * 3.2,
+  );
+}
+
 function drawHeader(
   doc: jsPDF,
   proposal: DesignProposalState,
@@ -78,7 +245,7 @@ function drawHeader(
   yStart: number,
 ): number {
   const pageW = doc.internal.pageSize.getWidth();
-  const margin = 15;
+  const margin = PDF_MARGIN_MM;
   let y = yStart;
 
   if (logoDataUrl) {
@@ -114,8 +281,7 @@ export async function generateProposalPdfBlob(
 ): Promise<Blob> {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  const margin = 15;
+  const margin = PDF_MARGIN_MM;
   const contentW = pageW - 2 * margin;
   const fn = firstName(proposal.customer.name);
   const quote = quoteNumber();
@@ -276,8 +442,12 @@ export async function generateProposalPdfBlob(
     y += Math.max(6, lines.length * 5);
   });
 
-  /* ── Page 3: performance & environment (values from Redux) ── */
-  doc.addPage();
+  /* ── Landscape: multi-year financial table (computed from Redux proposal state) ── */
+  drawFinancialProjectionPage(doc, proposal, logoDataUrl);
+
+  /* ── Performance & environment (values from Redux) ── */
+  doc.addPage("a4", "portrait");
+  const pageHP = doc.internal.pageSize.getHeight();
   y = drawHeader(doc, proposal, logoDataUrl, 12);
 
   doc.setFontSize(14);
@@ -317,7 +487,7 @@ export async function generateProposalPdfBlob(
 
   if (lastImage) {
     try {
-      const remain = pageH - y - margin;
+      const remain = pageHP - y - margin;
       if (remain > 40) {
         const h = Math.min(remain - 5, 85);
         const w = contentW;
@@ -343,7 +513,7 @@ export async function generateProposalPdfBlob(
   doc.text(
     "EasyLink Solar · This proposal is indicative and not a binding quote until confirmed in writing.",
     margin,
-    pageH - 10,
+    pageHP - 10,
   );
 
   return doc.output("blob");
