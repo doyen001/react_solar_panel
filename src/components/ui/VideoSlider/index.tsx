@@ -1,4 +1,5 @@
 "use client";
+import classNames from "classnames";
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 
@@ -18,9 +19,12 @@ export type VideoSliderSlide =
 export function VideoSlider({
   slides,
   children,
+  overlayClassName,
 }: {
   slides: VideoSliderSlide[];
   children?: React.ReactNode;
+  /** Merged onto the overlay wrapper (e.g. less top padding when there is no hero title). */
+  overlayClassName?: string;
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -83,7 +87,12 @@ export function VideoSlider({
       ))}
 
       {/* Overlay content */}
-      <div className="relative z-2 flex h-full flex-col justify-end max-w-[1400px] mx-auto px-4 pb-6 pt-24 sm:px-8 sm:pt-[92px] lg:px-8">
+      <div
+        className={classNames(
+          "relative z-2 mx-auto flex h-full max-w-[1400px] flex-col justify-end px-4 pb-6 pt-24 sm:px-8 sm:pt-[92px] lg:px-8",
+          overlayClassName,
+        )}
+      >
         <div className="flex flex-col gap-4">
           {children}
 

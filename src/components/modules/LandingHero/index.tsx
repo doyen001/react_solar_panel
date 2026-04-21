@@ -10,7 +10,7 @@ const navItems = [
   { label: "Bluetti", link: "/bluetti" },
   { label: "Products", link: "/products" },
   { label: "Customers", link: "/customers" },
-  { label: "Installers", link: "/installers" },
+  { label: "Installers", link: "/installers/landing" },
   { label: "Designs", link: "/designs" },
   { label: "Blog", link: "/blog" },
   { label: "About Us", link: "/about-us" },
