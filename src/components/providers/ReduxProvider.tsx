@@ -7,6 +7,11 @@ import {
   setUser,
   type CustomerUser,
 } from "@/lib/store/customerAuthSlice";
+import {
+  INSTALLER_AUTH_STORAGE_KEY,
+  setInstallerUser,
+  type InstallerUser,
+} from "@/lib/store/installerAuthSlice";
 import { store } from "@/lib/store/store";
 
 function isCustomerUser(value: unknown): value is CustomerUser {
@@ -23,6 +28,10 @@ function isCustomerUser(value: unknown): value is CustomerUser {
   );
 }
 
+function isInstallerUser(value: unknown): value is InstallerUser {
+  return isCustomerUser(value);
+}
+
 export function ReduxProvider({ children }: { children: React.ReactNode }) {
   const hydrated = useRef(false);
 
@@ -30,16 +39,31 @@ export function ReduxProvider({ children }: { children: React.ReactNode }) {
     if (hydrated.current) return;
     hydrated.current = true;
     try {
-      const raw = sessionStorage.getItem(CUSTOMER_AUTH_STORAGE_KEY);
-      if (!raw) return;
-      const parsed: unknown = JSON.parse(raw);
-      if (isCustomerUser(parsed)) {
-        store.dispatch(setUser(parsed));
-      } else {
-        sessionStorage.removeItem(CUSTOMER_AUTH_STORAGE_KEY);
+      const rawCustomer = sessionStorage.getItem(CUSTOMER_AUTH_STORAGE_KEY);
+      if (rawCustomer) {
+        const parsed: unknown = JSON.parse(rawCustomer);
+        if (isCustomerUser(parsed)) {
+          store.dispatch(setUser(parsed));
+        } else {
+          sessionStorage.removeItem(CUSTOMER_AUTH_STORAGE_KEY);
+        }
       }
     } catch {
       sessionStorage.removeItem(CUSTOMER_AUTH_STORAGE_KEY);
+    }
+
+    try {
+      const rawInstaller = sessionStorage.getItem(INSTALLER_AUTH_STORAGE_KEY);
+      if (rawInstaller) {
+        const parsed: unknown = JSON.parse(rawInstaller);
+        if (isInstallerUser(parsed)) {
+          store.dispatch(setInstallerUser(parsed));
+        } else {
+          sessionStorage.removeItem(INSTALLER_AUTH_STORAGE_KEY);
+        }
+      }
+    } catch {
+      sessionStorage.removeItem(INSTALLER_AUTH_STORAGE_KEY);
     }
   }, []);
 

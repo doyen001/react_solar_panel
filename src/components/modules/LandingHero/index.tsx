@@ -17,6 +17,12 @@ const navItems = [
   { label: "Contact", link: "/contact-us" },
 ];
 
+function authPathForCurrentSite(pathname: string): string {
+  return pathname.startsWith("/customers")
+    ? "/customers/auth"
+    : "/installers/auth";
+}
+
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
@@ -63,7 +69,7 @@ export function Header() {
               type="button"
               aria-label="Account"
               className="inline-flex size-9 items-center justify-center rounded-full text-slate-900 transition hover:bg-slate-900/10"
-              onClick={() => router.push("/customers/auth")}
+              onClick={() => router.push(authPathForCurrentSite(pathname))}
             >
               <Image src={userIcon} alt="Account" width={16} height={16} />
             </button>

@@ -5,6 +5,11 @@ import customerAuthReducer, {
   setUser,
 } from "./customerAuthSlice";
 import designProposalReducer from "./designProposalSlice";
+import installerAuthReducer, {
+  clearInstallerUser,
+  INSTALLER_AUTH_STORAGE_KEY,
+  setInstallerUser,
+} from "./installerAuthSlice";
 
 const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) => {
   const result = next(action);
@@ -20,13 +25,32 @@ const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) =
   return result;
 };
 
+const installerAuthPersistenceMiddleware: Middleware =
+  () => (next) => (action) => {
+    const result = next(action);
+    if (typeof window === "undefined") return result;
+    if (setInstallerUser.match(action)) {
+      sessionStorage.setItem(
+        INSTALLER_AUTH_STORAGE_KEY,
+        JSON.stringify(action.payload),
+      );
+    } else if (clearInstallerUser.match(action)) {
+      sessionStorage.removeItem(INSTALLER_AUTH_STORAGE_KEY);
+    }
+    return result;
+  };
+
 export const store = configureStore({
   reducer: {
     customerAuth: customerAuthReducer,
+    installerAuth: installerAuthReducer,
     designProposal: designProposalReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(customerAuthPersistenceMiddleware),
+    getDefaultMiddleware().concat(
+      customerAuthPersistenceMiddleware,
+      installerAuthPersistenceMiddleware,
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
