@@ -1,8 +1,13 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 
 import { SingleScrollBar } from "@/components/ui/SingleScrolllBar";
+import { useAppSelector } from "@/lib/store/hooks";
+import {
+  type DesignBillPeriod,
+  selectDesignProposal,
+} from "@/lib/store/designProposalSlice";
 
 const USAGE_WITHOUT_SOLAR = [58, 53, 47, 52, 52, 59, 61, 60, 47, 47, 47, 48];
 const USAGE_WITH_SOLAR = [39, 37, 34, 29, 24, 20, 17, 19, 29, 34, 37, 41];
@@ -112,22 +117,111 @@ export type DesignsEnergyStepValue = {
   newBill: string;
   yearlySavings: string;
   payback: string;
+  billPeriod: DesignBillPeriod;
 };
 
-const DEFAULT_ENERGY_VALUES: DesignsEnergyStepValue = {
-  currentBill: "$500",
-  monthlySavings: "$132",
-  newBill: "$368",
-  yearlySavings: "$1,580",
-  payback: "7.1 yrs",
-};
+/** Monthly bill slider range ($/mo). Midpoint (50%) = $500 — matches former static default. */
+const BILL_MONTHLY_MIN = 100;
+const BILL_MONTHLY_MAX = 900;
+
+/** Relative to baseline ($500 → $368 new bill, $132 savings / mo from design defaults). */
+const NEW_BILL_RATIO = 368 / 500;
+
+function periodMultiplier(period: DesignBillPeriod): number {
+  switch (period) {
+    case "month":
+      return 1;
+    case "quarter":
+      return 3;
+    case "year":
+      return 12;
+    default:
+      return 3;
+  }
+}
+
+function parseBillPeriod(raw: unknown): DesignBillPeriod {
+  if (raw === "month" || raw === "quarter" || raw === "year") {
+    return raw;
+  }
+  return "quarter";
+}
+
+function parseMoneyToNumber(raw: string): number | null {
+  const cleaned = raw.replace(/[^0-9.-]/g, "");
+  if (!cleaned) return null;
+  const n = Number.parseFloat(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
+
+function formatAud(n: number): string {
+  return `$${Math.round(n).toLocaleString("en-AU")}`;
+}
+
+function monthlyBillFromSliderPercent(percent: number): number {
+  const t = Math.min(100, Math.max(0, percent));
+  return Math.round(
+    BILL_MONTHLY_MIN +
+      (BILL_MONTHLY_MAX - BILL_MONTHLY_MIN) * (t / 100),
+  );
+}
+
+function sliderPercentFromMonthlyBill(monthly: number): number {
+  const clamped = Math.min(
+    BILL_MONTHLY_MAX,
+    Math.max(BILL_MONTHLY_MIN, monthly),
+  );
+  return Math.round(
+    ((clamped - BILL_MONTHLY_MIN) / (BILL_MONTHLY_MAX - BILL_MONTHLY_MIN)) *
+      100,
+  );
+}
+
+function deriveEnergyValues(
+  currentMonthly: number,
+  totalSystemPrice: number | null,
+  billPeriod: DesignBillPeriod,
+): DesignsEnergyStepValue {
+  const newMonthly = Math.round(currentMonthly * NEW_BILL_RATIO);
+  const monthlySavings = Math.max(0, currentMonthly - newMonthly);
+  const yearlyNum = monthlySavings * 12;
+
+  let payback = "7.1 yrs";
+  if (totalSystemPrice != null && totalSystemPrice > 0 && yearlyNum > 0) {
+    payback = `${(totalSystemPrice / yearlyNum).toFixed(1)} yrs`;
+  }
+
+  return {
+    currentBill: formatAud(currentMonthly),
+    newBill: formatAud(newMonthly),
+    monthlySavings: formatAud(monthlySavings),
+    yearlySavings: formatAud(yearlyNum),
+    payback,
+    billPeriod,
+  };
+}
 
 export type DesignsEnergyStepHandle = {
   getValues: () => DesignsEnergyStepValue;
 };
 
-function EnergyBillInput({ value }: { value: DesignsEnergyStepValue }) {
-  const [billRatePercent, setBillRatePercent] = useState(50);
+function EnergyBillInput({
+  billRatePercent,
+  onBillRatePercentChange,
+  billPeriod,
+  onBillPeriodChange,
+  currentMonthlyAmount,
+}: {
+  billRatePercent: number;
+  onBillRatePercentChange: (percent: number) => void;
+  billPeriod: DesignBillPeriod;
+  onBillPeriodChange: (period: DesignBillPeriod) => void;
+  /** Slider basis: normalized monthly AUD (Redux `currentBill` / projections use this). */
+  currentMonthlyAmount: number;
+}) {
+  const displayAmount = Math.round(
+    currentMonthlyAmount * periodMultiplier(billPeriod),
+  );
 
   return (
     <div className="w-full">
@@ -135,7 +229,7 @@ function EnergyBillInput({ value }: { value: DesignsEnergyStepValue }) {
         <div className="relative h-[58.063px] flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4">
           <input
             type="text"
-            value={value.currentBill.replace(/^\$/, "")}
+            value={displayAmount.toLocaleString("en-AU")}
             readOnly
             className="size-full bg-transparent font-source-sans text-[24px] font-bold tracking-[0.0703px] text-[#101828] outline-none"
           />
@@ -143,13 +237,30 @@ function EnergyBillInput({ value }: { value: DesignsEnergyStepValue }) {
             $
           </span>
         </div>
-        <div className="h-[52.936px] w-[127.984px] rounded-[10px] border border-[#E5E7EB] bg-white" />
+        <select
+          value={billPeriod}
+          onChange={(e) =>
+            onBillPeriodChange(parseBillPeriod(e.target.value))
+          }
+          aria-label="Bill amount period"
+          className="h-[52.936px] w-[127.984px] shrink-0 cursor-pointer appearance-none rounded-[10px] border border-[#E5E7EB] bg-white pl-3 pr-8 font-source-sans text-[14px] font-semibold tracking-[-0.2px] text-[#101828] outline-none focus-visible:ring-2 focus-visible:ring-design-accent-cyan"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23111828' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 10px center",
+          }}
+        >
+          <option value="month">Month</option>
+          <option value="quarter">Quarter</option>
+          <option value="year">Year</option>
+        </select>
       </div>
 
       <div className="mt-[24px] flex flex-col items-end gap-[24px]">
         <SingleScrollBar
           value={billRatePercent}
-          onChange={setBillRatePercent}
+          onChange={onBillRatePercentChange}
           min={0}
           max={100}
           ariaLabel="Energy bill rate"
@@ -170,9 +281,30 @@ export const DesignsEnergyStepContent = forwardRef<
   DesignsEnergyStepHandle,
   object
 >(function DesignsEnergyStepContent(_, ref) {
-  const [energyValues] = useState<DesignsEnergyStepValue>(
-    DEFAULT_ENERGY_VALUES,
+  const proposal = useAppSelector(selectDesignProposal);
+
+  const [billRatePercent, setBillRatePercent] = useState(() => {
+    const saved = parseMoneyToNumber(proposal.pricing.currentBill);
+    const monthly =
+      saved ?? monthlyBillFromSliderPercent(50);
+    return sliderPercentFromMonthlyBill(monthly);
+  });
+
+  const [billPeriod, setBillPeriod] = useState<DesignBillPeriod>(() =>
+    parseBillPeriod(proposal.pricing.billPeriod),
   );
+
+  const currentMonthly = useMemo(
+    () => monthlyBillFromSliderPercent(billRatePercent),
+    [billRatePercent],
+  );
+
+  const energyValues = useMemo(() => {
+    const systemPrice = parseMoneyToNumber(
+      proposal.pricing.totalSystemPrice,
+    );
+    return deriveEnergyValues(currentMonthly, systemPrice, billPeriod);
+  }, [currentMonthly, proposal.pricing.totalSystemPrice, billPeriod]);
 
   useImperativeHandle(
     ref,
@@ -198,7 +330,13 @@ export const DesignsEnergyStepContent = forwardRef<
               </h2>
 
               <div className="mt-[34px] w-full">
-                <EnergyBillInput value={energyValues} />
+                <EnergyBillInput
+                  billRatePercent={billRatePercent}
+                  onBillRatePercentChange={setBillRatePercent}
+                  billPeriod={billPeriod}
+                  onBillPeriodChange={setBillPeriod}
+                  currentMonthlyAmount={currentMonthly}
+                />
               </div>
 
               <div className="mt-[28px] flex items-center gap-[20px]">
@@ -211,7 +349,9 @@ export const DesignsEnergyStepContent = forwardRef<
               </div>
 
               <div className="mt-[14px] flex items-center gap-[16px]">
-                <EnergyMetricPill>26 Panels</EnergyMetricPill>
+                <EnergyMetricPill>
+                  {proposal.summary.totalPanels || "—"} Panels
+                </EnergyMetricPill>
                 <EnergyMetricPill>1 Inverter</EnergyMetricPill>
               </div>
             </div>

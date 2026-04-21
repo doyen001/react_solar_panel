@@ -44,11 +44,15 @@ export type DesignProposalEquipment = {
   co2Offset: string;
 };
 
+/** How the user expresses their grid bill amount on the energy step (stored alongside monthly-normalized figures). */
+export type DesignBillPeriod = "month" | "quarter" | "year";
+
 export type DesignProposalPricing = {
   totalSystemPrice: string;
   monthlySavings: string;
   currentBill: string;
   newBill: string;
+  billPeriod: DesignBillPeriod;
 };
 
 export type DesignProposalState = {
@@ -96,6 +100,7 @@ export const DESIGN_PROPOSAL_DEFAULTS: DesignProposalState = {
     monthlySavings: "$132",
     currentBill: "$500",
     newBill: "$368",
+    billPeriod: "quarter",
   },
   solarDesign: null,
 };

@@ -173,6 +173,7 @@ export function DesignsHeroSection({
               currentBill: e.currentBill,
               monthlySavings: e.monthlySavings,
               newBill: e.newBill,
+              billPeriod: e.billPeriod,
             },
           }),
         );
