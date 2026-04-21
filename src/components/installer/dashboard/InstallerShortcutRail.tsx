@@ -2,13 +2,15 @@
 
 import classNames from "classnames";
 import Link from "next/link";
+import Image from "next/image";
+import { createPortal } from "react-dom";
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icons";
+import { INSTALLER_HOME_PROFILE } from "@/components/installer/home-dashboard/installerHomeMock";
 import {
   IconCheckSquare,
   IconPanelTag,
 } from "@/components/installer/dashboard/installerDashboardIcons";
-import Image from "next/image";
-
 /** --- Figma 3:9234 shortcut rail --- */
 function ShortcutRailGradientChip({ children }: { children: React.ReactNode }) {
   return (
@@ -189,11 +191,192 @@ function ShortcutIconWordMark({ className }: { className?: string }) {
   );
 }
 
+/** Figma 3:10191 — Solar Designer Auto Fetch modal */
+function SolarDesignerAutoFetchModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const [installationAddress, setInstallationAddress] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  if (!open || typeof document === "undefined") return null;
+
+  const nextSteps = [
+    "Geolocate property & analyse rooftop via satellite",
+    "Calculate optimal panel placement & system size",
+    "Auto-recommend inverter & battery configuration",
+    "Generate performance estimates, savings & payback",
+  ] as const;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8"
+      role="presentation"
+    >
+      <button
+        type="button"
+        aria-label="Close dialog"
+        className="absolute inset-0 bg-[rgba(47,47,47,0.67)] backdrop-blur-[1px]"
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="solar-designer-auto-fetch-title"
+        className="relative z-[1] max-h-[min(90vh,420px)] w-full max-w-[518px] overflow-y-auto rounded-[12px] border border-warm-border bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+        data-node-id="3:10191"
+      >
+        <div className="relative bg-linear-to-b from-yellow-lemon to-orange-amber px-3 py-3">
+          <div className="flex items-center gap-[10px] pr-10">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-[7.718px] bg-navy-800">
+              <Image
+                src="/images/solarDesignLogo.png"
+                alt=""
+                width={22}
+                height={22}
+                className="object-contain"
+              />
+            </div>
+            <h2
+              id="solar-designer-auto-fetch-title"
+              className="font-inter text-[14px] font-bold leading-[21px] text-warm-black"
+            >
+              Solar Designer – Auto Fetch
+            </h2>
+          </div>
+          <button
+            type="button"
+            className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-[rgba(28,26,23,0.1)] text-warm-black hover:bg-[rgba(28,26,23,0.18)]"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <svg
+              className="size-[14px]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden
+            >
+              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-4 px-5 pb-5 pt-4">
+          <p className="font-dm-sans text-[12px] leading-[18px] text-warm-gray">
+            <span>Customer: </span>
+            <span
+              className="font-bold text-warm-ink"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+            >
+              {INSTALLER_HOME_PROFILE.name}
+            </span>
+          </p>
+
+          <div className="flex flex-col gap-[6px]">
+            <label
+              htmlFor="solar-fetch-address"
+              className="font-dm-sans text-[10px] font-semibold uppercase tracking-[0.3px] text-warm-gray"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+            >
+              Installation Address *
+            </label>
+            <div className="relative">
+              <span
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray"
+                aria-hidden
+              >
+                <Icon name="LocationPin" className="size-4" />
+              </span>
+              <input
+                id="solar-fetch-address"
+                type="text"
+                value={installationAddress}
+                onChange={(e) => setInstallationAddress(e.target.value)}
+                placeholder="e.g. 42 Bondi Rd, Bondi, NSW 2026"
+                autoComplete="street-address"
+                className="w-full rounded-lg border border-warm-border bg-cream-50 py-2.5 pl-9 pr-3 font-dm-sans text-[13px] text-warm-ink outline-none placeholder:text-warm-gray/40"
+                style={{ fontVariationSettings: "'opsz' 9" }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-cream-200 px-3 pb-3 pt-3">
+            <p
+              className="font-dm-sans text-[10px] font-semibold leading-[15px] text-warm-ink"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+            >
+              What happens next?
+            </p>
+            <ul className="mt-2 flex flex-col gap-1 font-dm-sans text-[10px] leading-[15px] text-warm-gray">
+              {nextSteps.map((line) => (
+                <li key={line} className="flex gap-2">
+                  <span
+                    className="mt-0.5 shrink-0 text-orange-amber"
+                    aria-hidden
+                  >
+                    ›
+                  </span>
+                  <span style={{ fontVariationSettings: "'opsz' 9" }}>
+                    {line}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              type="button"
+              className="h-9 min-w-[80px] rounded-lg border border-warm-border bg-white font-dm-sans text-[11px] font-bold text-warm-gray hover:bg-cream-50"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="inline-flex h-9 min-w-[170px] items-center justify-center gap-2 rounded-lg bg-linear-to-b from-yellow-lemon to-orange-amber px-4 font-dm-sans text-[11px] font-bold text-warm-black hover:opacity-95"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+              onClick={() => {
+                void installationAddress;
+                // TODO: call solar design auto-fetch API
+              }}
+            >
+              <Icon name="Search" className="size-[14px] shrink-0" />
+              Fetch Solar Design
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 /** Figma 3:9228 — Solar Design shortcut (gradient tile + centred mark + label) */
-function ShortcutRailSolarDesignButton() {
+function ShortcutRailSolarDesignButton({ onPress }: { onPress: () => void }) {
   return (
     <button
       type="button"
+      onClick={onPress}
       className="flex h-[72.032px] w-full flex-col items-center gap-[4.413px] rounded-[11.042px] border-[1.157px] border-warm-border px-[1.157px] pb-[9.892px] pt-[9.982px] transition-opacity hover:opacity-95"
       style={{
         backgroundImage:
@@ -201,12 +384,7 @@ function ShortcutRailSolarDesignButton() {
       }}
       data-node-id="3:9228"
     >
-      <Image
-        alt="Sun"
-        src="/images/solarDesignLogo.png"
-        width={36}
-        height={36}
-      />
+      <Image alt="" src="/images/solarDesignLogo.png" width={36} height={36} />
       <span
         className="text-center font-dm-sans text-[9.938px] font-semibold uppercase leading-[12.422px] text-white px-1.5"
         style={{ fontVariationSettings: "'opsz' 14" }}
@@ -252,14 +430,22 @@ function ShortcutRailUploadButton() {
 }
 
 export function InstallerShortcutRail() {
+  const [solarDesignerModalOpen, setSolarDesignerModalOpen] = useState(false);
+
   return (
     <aside
       className="hidden shrink-0 flex-col border-l border-warm-border bg-cream-50 py-8 lg:flex"
       aria-label="Quick shortcuts"
       data-node-id="3:9234"
     >
+      <SolarDesignerAutoFetchModal
+        open={solarDesignerModalOpen}
+        onClose={() => setSolarDesignerModalOpen(false)}
+      />
       <nav className="flex flex-col gap-[7px] px-2">
-        <ShortcutRailSolarDesignButton />
+        <ShortcutRailSolarDesignButton
+          onPress={() => setSolarDesignerModalOpen(true)}
+        />
         <ShortcutRailCard
           href="/installers/dashboard/schedule"
           chip={
