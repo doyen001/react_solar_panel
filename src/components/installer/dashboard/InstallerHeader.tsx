@@ -2,14 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Icon from "@/components/ui/Icons";
 
 const NAV = [
-  { href: "/installer/dashboard", label: "Home", key: "home" },
-  { href: "/installer/dashboard", label: "Pipeline", key: "pipeline" },
-  { href: "/installer/dashboard", label: "Reports", key: "reports" },
-  { href: "/installer/dashboard", label: "Settings", key: "settings" },
-  { href: "/installer/dashboard", label: "Help", key: "help" },
+  { href: "/installers/dashboard/home", label: "Home", key: "home" },
+  {
+    href: "/installers/dashboard/pipeline",
+    label: "Pipeline",
+    key: "pipeline",
+  },
+  { href: "/installers/dashboard/home", label: "Reports", key: "reports" },
+  { href: "/installers/dashboard/home", label: "Settings", key: "settings" },
+  { href: "/installers/dashboard/home", label: "Help", key: "help" },
 ] as const;
 
 type Props = {
@@ -20,12 +25,25 @@ type Props = {
   onMenuClick?: () => void;
 };
 
+function resolveActiveNav(
+  pathname: string | null,
+  override?: (typeof NAV)[number]["key"],
+): (typeof NAV)[number]["key"] {
+  if (override) return override;
+  if (!pathname) return "home";
+  if (pathname.startsWith("/installers/dashboard/pipeline")) return "pipeline";
+  if (pathname.startsWith("/installers/dashboard/schedule")) return "home";
+  return "home";
+}
+
 export function InstallerHeader({
-  activeNav = "pipeline",
+  activeNav: activeNavProp,
   notificationCount = 4,
   userInitials = "ES",
   onMenuClick,
 }: Props) {
+  const pathname = usePathname();
+  const activeNav = resolveActiveNav(pathname, activeNavProp);
   return (
     <header className="sticky top-0 z-30 shrink-0 border-b border-warm-border bg-cream-50">
       <div className="flex h-[52px] items-center justify-between gap-3 px-4 md:px-5">
@@ -40,7 +58,10 @@ export function InstallerHeader({
               <Icon name="Menu" className="size-6 text-warm-ink" />
             </button>
           ) : null}
-          <Link href="/installer/dashboard" className="flex shrink-0 items-center gap-8">
+          <Link
+            href="/installers/dashboard/home"
+            className="flex shrink-0 items-center gap-8"
+          >
             <div className="flex size-9 items-center justify-center rounded-[7.72px] bg-navy-800">
               <Image
                 src="/images/solarDesignLogo.png"

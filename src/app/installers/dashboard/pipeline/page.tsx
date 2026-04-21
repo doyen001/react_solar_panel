@@ -13,7 +13,7 @@ import { PipelineStatStrip } from "@/components/installer/pipeline-dashboard/Pip
 import { PipelineStcAndFunnel } from "@/components/installer/pipeline-dashboard/PipelineStcAndFunnel";
 import { PipelineTeamAndActivity } from "@/components/installer/pipeline-dashboard/PipelineTeamAndActivity";
 
-export default function InstallerDashboardPage() {
+export default function InstallerPipelinePage() {
   return (
     <div className="min-h-screen bg-surface-50">
       <InstallerHeader userInitials="ES" />
