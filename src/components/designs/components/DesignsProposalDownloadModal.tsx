@@ -4,7 +4,13 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { downloadProposalPdf } from "@/lib/proposal/generateProposalPdf";
+import { toast } from "react-toastify";
+
+import { blobToBase64 } from "@/lib/proposal/blobToBase64";
+import {
+  downloadPdfBlob,
+  generateProposalPdfBlob,
+} from "@/lib/proposal/generateProposalPdf";
 import { useAppSelector } from "@/lib/store/hooks";
 import { selectDesignProposal } from "@/lib/store/designProposalSlice";
 
@@ -63,11 +69,61 @@ export function DesignsProposalDownloadModal({
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      await downloadProposalPdf(proposal);
+      const blob = await generateProposalPdfBlob(proposal);
+      downloadPdfBlob(blob, proposal.customer.name);
+
+      const emailTo = proposal.customer.email?.trim();
+      if (emailTo) {
+        try {
+          const pdfBase64 = await blobToBase64(blob);
+          const fileSlug =
+            proposal.customer.name.replace(/[^\w\d\-]+/g, "-").slice(0, 48) ||
+            "Customer";
+          const filename = `Solar-Energy-Proposal-${fileSlug}.pdf`;
+          const res = await fetch("/api/proposal/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: emailTo,
+              pdfBase64,
+              filename,
+              dearName,
+            }),
+          });
+          const raw = await res.text();
+          let payload: { message?: string } = {};
+          try {
+            payload = raw ? (JSON.parse(raw) as { message?: string }) : {};
+          } catch {
+            payload = { message: raw || undefined };
+          }
+
+          if (!res.ok) {
+            console.error(
+              "Proposal PDF email failed",
+              res.status,
+              payload.message,
+            );
+            toast.error(
+              payload.message ??
+                "Proposal downloaded, but we could not email it.",
+            );
+          } else {
+            toast.success(`Proposal emailed to ${emailTo}.`);
+          }
+        } catch (emailErr) {
+          console.error("Proposal PDF email failed", emailErr);
+          toast.error(
+            "Proposal downloaded, but sending the email failed.",
+          );
+        }
+      }
+
       onConfirmDownload?.();
       onClose();
     } catch (err) {
       console.error("Proposal PDF download failed", err);
+      toast.error("Could not generate or download your proposal PDF.");
     } finally {
       setDownloading(false);
     }

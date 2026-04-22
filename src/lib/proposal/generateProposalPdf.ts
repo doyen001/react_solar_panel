@@ -519,15 +519,19 @@ export async function generateProposalPdfBlob(
   return doc.output("blob");
 }
 
-export async function downloadProposalPdf(proposal: DesignProposalState): Promise<void> {
-  const blob = await generateProposalPdfBlob(proposal);
+/** Triggers a browser download for an already-built proposal PDF blob. */
+export function downloadPdfBlob(blob: Blob, customerNameForFile: string): void {
   const name =
-    proposal.customer.name.replace(/[^\w\d\-]+/g, "-").slice(0, 48) ||
-    "Customer";
+    customerNameForFile.replace(/[^\w\d\-]+/g, "-").slice(0, 48) || "Customer";
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = `Solar-Energy-Proposal-${name}.pdf`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+export async function downloadProposalPdf(proposal: DesignProposalState): Promise<void> {
+  const blob = await generateProposalPdfBlob(proposal);
+  downloadPdfBlob(blob, proposal.customer.name);
 }
