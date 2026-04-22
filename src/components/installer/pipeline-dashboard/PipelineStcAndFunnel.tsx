@@ -63,7 +63,6 @@ export function PipelineStcAndFunnel() {
         </div>
       </section>
 
-      {/* Figma `3:10769` — Sales Funnel */}
       <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 shadow-sm">
         <div className="yellow-gradient-header">
           <h3 className="font-inter text-[12px] font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
