@@ -291,9 +291,9 @@ export async function generateProposalPdfBlob(
   const fallbackHero = await fetchPublicImageAsDataUrl(
     "/images/home/hero-slide-3.png",
   );
-  const lastImage = await fetchPublicImageAsDataUrl(
-    "/images/home/hero-slide-2.png",
-  );
+  // const lastImage = await fetchPublicImageAsDataUrl(
+  //   "/images/home/hero-slide-2.png",
+  // );
   const logoDataUrl = await fetchPublicImageAsDataUrl(LOGO_PATH);
   const heroDataUrl = mapShot || fallbackHero;
 
@@ -485,28 +485,28 @@ export async function generateProposalPdfBlob(
   doc.text(env, margin, y);
   y += env.length * 5 + 12;
 
-  if (lastImage) {
-    try {
-      const remain = pageHP - y - margin;
-      if (remain > 40) {
-        const h = Math.min(remain - 5, 85);
-        const w = contentW;
-        const props = doc.getImageProperties(lastImage);
-        const ratio = (props.height || 1) / (props.width || 1);
-        const drawH = Math.min(h, w * ratio);
-        doc.addImage(
-          lastImage,
-          imageFormatFromDataUrl(lastImage),
-          margin,
-          y,
-          w,
-          drawH,
-        );
-      }
-    } catch {
-      /* skip */
-    }
-  }
+  // if (lastImage) {
+  //   try {
+  //     const remain = pageHP - y - margin;
+  //     if (remain > 40) {
+  //       const h = Math.min(remain - 5, 85);
+  //       const w = contentW;
+  //       const props = doc.getImageProperties(lastImage);
+  //       const ratio = (props.height || 1) / (props.width || 1);
+  //       const drawH = Math.min(h, w * ratio);
+  //       doc.addImage(
+  //         lastImage,
+  //         imageFormatFromDataUrl(lastImage),
+  //         margin,
+  //         y,
+  //         w,
+  //         drawH,
+  //       );
+  //     }
+  //   } catch {
+  //     /* skip */
+  //   }
+  // }
 
   doc.setFontSize(8);
   doc.setTextColor(120, 120, 120);
