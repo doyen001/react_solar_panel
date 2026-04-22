@@ -58,7 +58,7 @@ export async function POST(request: Request) {
         headers,
         body: JSON.stringify({
           ...parsed.data,
-          role: "DESIGNER",
+          role: "INSTALLER",
         }),
         cache: "no-store",
       },
