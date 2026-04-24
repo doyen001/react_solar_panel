@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { requestBackendRefreshTokens } from "@/lib/customers/refresh-backend";
 import {
-  ACCESS_COOKIE_MAX_AGE_SEC,
   clearCustomerAuthCookies,
-  cookieBaseOptions,
-  CUSTOMER_ACCESS_COOKIE,
   CUSTOMER_REFRESH_COOKIE,
-  REFRESH_COOKIE_MAX_AGE_SEC,
+  setCustomerSessionCookies,
 } from "@/lib/auth/customer-cookies";
+import { executeTokenRefresh } from "@/lib/auth/execute-token-refresh";
 
 const refreshBodySchema = z.object({
   refreshToken: z.string().min(1),
@@ -40,49 +37,27 @@ export async function POST(request: Request) {
     return res;
   }
 
-  const backendBaseUrl = process.env.BACKEND_API_BASE_URL;
-
-  if (!backendBaseUrl) {
-    return NextResponse.json(
-      {
-        message:
-          "Server configuration is missing BACKEND_API_BASE_URL for refresh.",
-      },
-      { status: 500 },
-    );
-  }
-
-  const outcome = await requestBackendRefreshTokens(
-    backendBaseUrl,
-    refreshToken,
-  );
+  const outcome = await executeTokenRefresh(refreshToken);
 
   if (!outcome.ok) {
-    const message = outcome.clearSession
-      ? "Session expired. Please sign in again."
-      : "Unable to reach the auth service.";
-    const res = NextResponse.json(
-      {
-        message,
-      },
-      { status: outcome.status },
-    );
+    const missingConfig =
+      outcome.status === 500 && !process.env.BACKEND_API_BASE_URL;
+    const message = missingConfig
+      ? "Server configuration is missing BACKEND_API_BASE_URL for refresh."
+      : outcome.clearSession
+        ? "Session expired. Please sign in again."
+        : "Unable to reach the auth service.";
+    const res = NextResponse.json({ message }, { status: outcome.status });
     if (outcome.clearSession) {
       clearCustomerAuthCookies(res);
     }
     return res;
   }
 
-  const base = cookieBaseOptions();
   const res = NextResponse.json({ message: "Session refreshed." }, { status: 200 });
-
-  res.cookies.set(CUSTOMER_ACCESS_COOKIE, outcome.data.accessToken, {
-    ...base,
-    maxAge: ACCESS_COOKIE_MAX_AGE_SEC,
-  });
-  res.cookies.set(CUSTOMER_REFRESH_COOKIE, outcome.data.refreshToken, {
-    ...base,
-    maxAge: REFRESH_COOKIE_MAX_AGE_SEC,
+  setCustomerSessionCookies(res, {
+    accessToken: outcome.accessToken,
+    refreshToken: outcome.refreshToken,
   });
 
   return res;

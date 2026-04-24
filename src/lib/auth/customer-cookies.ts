@@ -31,3 +31,18 @@ export function clearCustomerAuthCookies(response: NextResponse) {
   response.cookies.set(CUSTOMER_ACCESS_COOKIE, "", cleared);
   response.cookies.set(CUSTOMER_REFRESH_COOKIE, "", cleared);
 }
+
+export function setCustomerSessionCookies(
+  response: NextResponse,
+  tokens: { accessToken: string; refreshToken: string },
+) {
+  const base = cookieBaseOptions();
+  response.cookies.set(CUSTOMER_ACCESS_COOKIE, tokens.accessToken, {
+    ...base,
+    maxAge: ACCESS_COOKIE_MAX_AGE_SEC,
+  });
+  response.cookies.set(CUSTOMER_REFRESH_COOKIE, tokens.refreshToken, {
+    ...base,
+    maxAge: REFRESH_COOKIE_MAX_AGE_SEC,
+  });
+}
