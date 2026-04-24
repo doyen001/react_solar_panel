@@ -59,6 +59,22 @@ const LayoutGrid = createDynamicSvgIcon(
   () => import("./layout-grid.svg?component"),
 );
 const Menu = createDynamicSvgIcon(() => import("./menu.svg?component"));
+const Zap = createDynamicSvgIcon(() => import("./zap.svg?component"));
+const ArrowUpRight = createDynamicSvgIcon(
+  () => import("./arrow-up-right.svg?component"),
+);
+const Building2 = createDynamicSvgIcon(
+  () => import("./building-2.svg?component"),
+);
+const Users = createDynamicSvgIcon(() => import("./users.svg?component"));
+const TrendingUp = createDynamicSvgIcon(
+  () => import("./trending-up.svg?component"),
+);
+const BarChart3 = createDynamicSvgIcon(
+  () => import("./bar-chart-3.svg?component"),
+);
+const Clock = createDynamicSvgIcon(() => import("./clock.svg?component"));
+const Target = createDynamicSvgIcon(() => import("./target.svg?component"));
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -86,7 +102,15 @@ export type IconType =
   | "Pencil"
   | "Trash"
   | "LayoutGrid"
-  | "Menu";
+  | "Menu"
+  | "Zap"
+  | "ArrowUpRight"
+  | "Building2"
+  | "Users"
+  | "TrendingUp"
+  | "BarChart3"
+  | "Clock"
+  | "Target";
 
 type IconProps = {
   name: IconType | undefined;
@@ -126,6 +150,14 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
     Trash,
     LayoutGrid,
     Menu,
+    Zap,
+    ArrowUpRight,
+    Building2,
+    Users,
+    TrendingUp,
+    BarChart3,
+    Clock,
+    Target,
   };
 
   const CurrentIcon = icons[name];

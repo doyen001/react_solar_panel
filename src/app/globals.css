@@ -117,6 +117,26 @@
   --color-slate-800: #1e293b;
   --color-violet-accent: #7967c4;
 
+  /* Master dashboard (Figma 3:11526) */
+  --color-master-header-border: #1a3a6a;
+  --color-master-pill-bg: #0d2d5a;
+  --color-master-pill-border: #304566;
+  --color-master-nav-muted: rgb(241 237 228 / 0.5);
+  --color-master-pill-label: rgb(241 237 228 / 0.7);
+  --color-master-icon-tint-navy: rgb(9 35 74 / 0.07);
+  --color-master-icon-tint-orange: rgb(247 141 0 / 0.07);
+  --color-master-footnote: rgb(124 115 106 / 0.5);
+  --color-master-banner-grad-from: rgb(245 159 10 / 0.15);
+  --color-funnel-amber: #ffbf47;
+
+  /* Platform revenue chart (Figma 3:11689) */
+  --color-master-revenue-line: #09234a;
+  --color-master-revenue-fill: rgb(229 231 235 / 0.72);
+  --color-master-revenue-grid: #ede8de;
+  --color-master-revenue-tooltip-bg: #ffffff;
+  --color-master-revenue-tooltip-border: #09234a;
+  --color-master-revenue-tooltip-text: #2a2622;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-source-sans: var(--font-source-sans);
@@ -297,4 +317,150 @@ button {
   );
   padding-left: 18px;
   padding-right: 4px;
+}
+
+/* Master dashboard — semantic color utilities (use with className) */
+.master-page-bg {
+  background-color: var(--color-cream-100);
+}
+.master-header-bg {
+  background-color: var(--color-navy-800);
+}
+.master-header-border {
+  border-color: var(--color-master-header-border);
+}
+.master-nav-active-underline {
+  background: linear-gradient(
+    to bottom,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 100%
+  );
+}
+.master-pill-bg {
+  background-color: var(--color-master-pill-bg);
+}
+.master-pill-border {
+  border-color: var(--color-master-pill-border);
+}
+.master-pill-label {
+  color: var(--color-master-pill-label);
+}
+.master-nav-muted {
+  color: var(--color-master-nav-muted);
+}
+.master-nav-active {
+  color: var(--color-gray-1);
+}
+.master-icon-tint-navy {
+  background-color: var(--color-master-icon-tint-navy);
+}
+.master-icon-tint-orange {
+  background-color: var(--color-master-icon-tint-orange);
+}
+.master-footnote {
+  color: var(--color-master-footnote);
+}
+.master-section-banner {
+  border-left: 2.543px solid var(--color-yellow-lemon);
+  background: linear-gradient(
+    to bottom,
+    var(--color-master-banner-grad-from) 0%,
+    transparent 100%
+  );
+}
+.master-kpi-icon-navy {
+  color: var(--color-navy-800);
+}
+.master-kpi-icon-orange {
+  color: var(--color-orange-amber);
+}
+.master-avatar-gradient {
+  background: linear-gradient(
+    to bottom,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 100%
+  );
+}
+.master-installer-bar {
+  background: linear-gradient(
+    to bottom,
+    var(--color-navy-800) 0%,
+    var(--color-blue-slate) 100%
+  );
+}
+
+.master-invoice-pending {
+  background-color: var(--color-orange-amber);
+}
+.master-invoice-paid {
+  background-color: var(--color-success);
+}
+.master-invoice-overdue {
+  background-color: var(--color-danger);
+}
+
+.master-funnel-leads {
+  background-color: var(--color-navy-800);
+  color: var(--color-gray-1);
+}
+.master-funnel-site {
+  background-color: var(--color-blue-slate);
+  color: var(--color-gray-1);
+}
+.master-funnel-proposal {
+  background-color: var(--color-orange-amber);
+  color: var(--color-warm-black);
+}
+.master-funnel-negotiation {
+  background-color: var(--color-funnel-amber);
+  color: var(--color-warm-black);
+}
+.master-funnel-won {
+  background-color: var(--color-yellow-lemon);
+  color: var(--color-warm-black);
+}
+
+.master-region-nsw {
+  background-color: var(--color-navy-800);
+}
+.master-region-vic {
+  background-color: var(--color-blue-slate);
+}
+.master-region-qld {
+  background-color: var(--color-orange-amber);
+}
+.master-region-sa {
+  background-color: var(--color-funnel-amber);
+}
+.master-region-wa {
+  background-color: var(--color-warm-border);
+}
+
+.master-avatar-yellow {
+  background-color: var(--color-yellow-lemon);
+  color: var(--color-warm-black);
+}
+.master-avatar-orange {
+  background-color: var(--color-orange-amber);
+  color: var(--color-warm-black);
+}
+.master-avatar-slate {
+  background-color: var(--color-blue-slate);
+  color: var(--color-gray-1);
+}
+.master-avatar-warm-border {
+  background-color: var(--color-warm-border);
+  color: var(--color-warm-black);
+}
+.master-avatar-amber-funnel {
+  background-color: var(--color-funnel-amber);
+  color: var(--color-warm-black);
+}
+.master-avatar-navy {
+  background-color: var(--color-navy-800);
+  color: var(--color-gray-1);
+}
+.master-avatar-orange-2 {
+  background-color: var(--color-orange-amber);
+  color: var(--color-warm-black);
 }

@@ -179,6 +179,10 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     return handleInstallerProtected(request);
   }
 
+  if (pathname.startsWith("/master")) {
+    return handleInstallerProtected(request);
+  }
+
   return NextResponse.next();
 }
 
@@ -187,5 +191,6 @@ export const config = {
     "/customers/:path*",
     "/installers/auth",
     "/installers/dashboard/:path*",
+    "/master/:path*",
   ],
 };
