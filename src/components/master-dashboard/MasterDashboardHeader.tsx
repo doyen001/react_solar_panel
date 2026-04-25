@@ -50,13 +50,14 @@ export function MasterDashboardHeader({
               const active = item.id === activeNavId;
               return (
                 <div key={item.id} className="relative pb-1.5">
-                  <span
+                  <Link
+                    href={item.href}
                     className={`font-[family-name:var(--font-inter)] text-[14px] font-medium leading-[21px] ${
                       active ? "master-nav-active" : "master-nav-muted"
                     }`}
                   >
                     {item.label}
-                  </span>
+                  </Link>
                   {active ? (
                     <div
                       className="master-nav-active-underline absolute bottom-0 left-0 right-0 h-0.5 rounded-full"

@@ -75,6 +75,13 @@ const BarChart3 = createDynamicSvgIcon(
 );
 const Clock = createDynamicSvgIcon(() => import("./clock.svg?component"));
 const Target = createDynamicSvgIcon(() => import("./target.svg?component"));
+const Tag = createDynamicSvgIcon(() => import("./tag.svg?component"));
+const Package = createDynamicSvgIcon(() => import("./package.svg?component"));
+const Plus = createDynamicSvgIcon(() => import("./plus.svg?component"));
+const Cpu = createDynamicSvgIcon(() => import("./cpu.svg?component"));
+const Battery = createDynamicSvgIcon(() => import("./battery.svg?component"));
+const Wrench = createDynamicSvgIcon(() => import("./wrench.svg?component"));
+const Trash2 = createDynamicSvgIcon(() => import("./trash-2.svg?component"));
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -110,7 +117,14 @@ export type IconType =
   | "TrendingUp"
   | "BarChart3"
   | "Clock"
-  | "Target";
+  | "Target"
+  | "Tag"
+  | "Package"
+  | "Plus"
+  | "Cpu"
+  | "Battery"
+  | "Wrench"
+  | "Trash2";
 
 type IconProps = {
   name: IconType | undefined;
@@ -158,6 +172,13 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
     BarChart3,
     Clock,
     Target,
+    Tag,
+    Package,
+    Plus,
+    Cpu,
+    Battery,
+    Wrench,
+    Trash2,
   };
 
   const CurrentIcon = icons[name];

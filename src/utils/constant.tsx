@@ -117,11 +117,264 @@ export const DESIGNS_SOLAR_PANEL_STEP = {
 export const MASTER_DASHBOARD_TITLE = "Master Dashboard" as const;
 
 export const MASTER_DASHBOARD_NAV = [
-  { id: "overview", label: "Overview" },
-  { id: "installers", label: "Installers" },
-  { id: "products", label: "Products & Pricing" },
-  { id: "invoices", label: "Invoices" },
+  { id: "overview", label: "Overview", href: "/master/dashboard" },
+  { id: "installers", label: "Installers", href: "/master/dashboard" },
+  {
+    id: "products",
+    label: "Products & Pricing",
+    href: "/master/products-pricing",
+  },
+  { id: "invoices", label: "Invoices", href: "/master/dashboard" },
 ] as const;
+
+/** Products & Pricing (Figma 3:14281) */
+export const MASTER_PRODUCTS_PRICING_PAGE = {
+  title: "Products & Pricing",
+  subtitle:
+    "Manage wholesale prices, special deals, and installer tiers",
+} as const;
+
+export const MASTER_PRODUCTS_L1_TABS = [
+  { id: "catalog", label: "Product Catalog", icon: "Package" as const },
+  { id: "special", label: "Special Pricing", icon: "Dollar" as const },
+  { id: "tiers", label: "Installer Tiers", icon: "Users" as const },
+] as const;
+
+export type MasterProductCategoryId =
+  | "all"
+  | "panels"
+  | "inverters"
+  | "batteries"
+  | "racking"
+  | "equipment";
+
+export const MASTER_PRODUCT_CATEGORIES: {
+  id: MasterProductCategoryId;
+  label: string;
+}[] = [
+  { id: "all", label: "All" },
+  { id: "panels", label: "Panels" },
+  { id: "inverters", label: "Inverters" },
+  { id: "batteries", label: "Batteries" },
+  { id: "racking", label: "Racking" },
+  { id: "equipment", label: "Equipment" },
+];
+
+export type MasterProductRowIcon =
+  | "Sun"
+  | "Cpu"
+  | "Battery"
+  | "Wrench"
+  | "Package";
+
+export type MasterProductCatalogRow = {
+  id: string;
+  category: Exclude<MasterProductCategoryId, "all">;
+  name: string;
+  subtitle: string;
+  sku: string;
+  brand: string;
+  retail: string;
+  wholesale: string;
+  margin: string;
+  rowIcon: MasterProductRowIcon;
+};
+
+export const MASTER_PRODUCT_CATALOG_ROWS: MasterProductCatalogRow[] = [
+  {
+    id: "p1",
+    category: "panels",
+    name: "LONGi Hi-MO 6 450W",
+    subtitle: "Panels · per panel",
+    sku: "LG-HM6-450",
+    brand: "LONGi",
+    retail: "$285",
+    wholesale: "$195",
+    margin: "31.6%",
+    rowIcon: "Sun",
+  },
+  {
+    id: "p2",
+    category: "panels",
+    name: "Jinko Tiger Neo 440W",
+    subtitle: "Panels · per panel",
+    sku: "JK-TN-440",
+    brand: "Jinko",
+    retail: "$265",
+    wholesale: "$180",
+    margin: "32.1%",
+    rowIcon: "Sun",
+  },
+  {
+    id: "p3",
+    category: "panels",
+    name: "Canadian Solar 455W",
+    subtitle: "Panels · per panel",
+    sku: "CS-455-HiDM",
+    brand: "Canadian Solar",
+    retail: "$275",
+    wholesale: "$188",
+    margin: "31.6%",
+    rowIcon: "Sun",
+  },
+  {
+    id: "p4",
+    category: "panels",
+    name: "Trina Vertex S+ 445W",
+    subtitle: "Panels · per panel",
+    sku: "TR-VS445",
+    brand: "Trina",
+    retail: "$270",
+    wholesale: "$185",
+    margin: "31.5%",
+    rowIcon: "Sun",
+  },
+  {
+    id: "i1",
+    category: "inverters",
+    name: "Fronius Primo GEN24 5kW",
+    subtitle: "Inverters · per unit",
+    sku: "FR-P24-5",
+    brand: "Fronius",
+    retail: "$2,450",
+    wholesale: "$1,890",
+    margin: "22.9%",
+    rowIcon: "Cpu",
+  },
+  {
+    id: "i2",
+    category: "inverters",
+    name: "SolarEdge SE5000H",
+    subtitle: "Inverters · per unit",
+    sku: "SE-5000H",
+    brand: "SolarEdge",
+    retail: "$2,200",
+    wholesale: "$1,680",
+    margin: "23.6%",
+    rowIcon: "Cpu",
+  },
+  {
+    id: "i3",
+    category: "inverters",
+    name: "Enphase IQ8+ Micro",
+    subtitle: "Inverters · per unit",
+    sku: "EN-IQ8P",
+    brand: "Enphase",
+    retail: "$265",
+    wholesale: "$198",
+    margin: "25.3%",
+    rowIcon: "Cpu",
+  },
+  {
+    id: "i4",
+    category: "inverters",
+    name: "Sungrow SG5.0RS",
+    subtitle: "Inverters · per unit",
+    sku: "SG-5RS",
+    brand: "Sungrow",
+    retail: "$1,350",
+    wholesale: "$980",
+    margin: "27.4%",
+    rowIcon: "Cpu",
+  },
+  {
+    id: "b1",
+    category: "batteries",
+    name: "Tesla Powerwall 3",
+    subtitle: "Batteries · per unit",
+    sku: "TP-PW3",
+    brand: "Tesla",
+    retail: "$12,500",
+    wholesale: "$9,800",
+    margin: "21.6%",
+    rowIcon: "Battery",
+  },
+  {
+    id: "b2",
+    category: "batteries",
+    name: "BYD HVS 10.2kWh",
+    subtitle: "Batteries · per unit",
+    sku: "BYD-HVS102",
+    brand: "BYD",
+    retail: "$8,900",
+    wholesale: "$6,800",
+    margin: "23.6%",
+    rowIcon: "Battery",
+  },
+  {
+    id: "b3",
+    category: "batteries",
+    name: "Enphase IQ Battery 10T",
+    subtitle: "Batteries · per unit",
+    sku: "EN-IQB10T",
+    brand: "Enphase",
+    retail: "$9,200",
+    wholesale: "$7,100",
+    margin: "22.8%",
+    rowIcon: "Battery",
+  },
+  {
+    id: "r1",
+    category: "racking",
+    name: "K2 D-Dome Flat Roof",
+    subtitle: "Racking · per set",
+    sku: "K2-DDOME",
+    brand: "K2 Systems",
+    retail: "$85",
+    wholesale: "$58",
+    margin: "31.8%",
+    rowIcon: "Wrench",
+  },
+  {
+    id: "r2",
+    category: "racking",
+    name: "Clenergy TinRoof Kit",
+    subtitle: "Racking · per set",
+    sku: "CL-TRK",
+    brand: "Clenergy",
+    retail: "$45",
+    wholesale: "$32",
+    margin: "28.9%",
+    rowIcon: "Wrench",
+  },
+  {
+    id: "e1",
+    category: "equipment",
+    name: "DC Isolator 1000V",
+    subtitle: "Equipment · per unit",
+    sku: "DCI-1000V",
+    brand: "Generic",
+    retail: "$42",
+    wholesale: "$28",
+    margin: "33.3%",
+    rowIcon: "Package",
+  },
+  {
+    id: "e2",
+    category: "equipment",
+    name: "MC4 Connector Pair",
+    subtitle: "Equipment · per pair",
+    sku: "MC4-PAIR",
+    brand: "Generic",
+    retail: "$8",
+    wholesale: "$4.5",
+    margin: "43.8%",
+    rowIcon: "Package",
+  },
+];
+
+export const MASTER_PRODUCT_TABLE_COLUMNS = [
+  { id: "product", label: "Product", align: "left" as const },
+  { id: "sku", label: "SKU", align: "left" as const },
+  { id: "brand", label: "Brand", align: "left" as const },
+  { id: "retail", label: "Retail Price", align: "right" as const },
+  { id: "wholesale", label: "Wholesale Price", align: "right" as const },
+  { id: "margin", label: "Margin", align: "right" as const },
+  { id: "actions", label: "Actions", align: "right" as const },
+] as const;
+
+export const MASTER_PRODUCT_SEARCH_PLACEHOLDER = "Search products..." as const;
+export const MASTER_PRODUCT_ADD_LABEL = "Add Product" as const;
 
 export type MasterKpiIconName =
   | "Dollar"
