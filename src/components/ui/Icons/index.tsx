@@ -82,6 +82,7 @@ const Cpu = createDynamicSvgIcon(() => import("./cpu.svg?component"));
 const Battery = createDynamicSvgIcon(() => import("./battery.svg?component"));
 const Wrench = createDynamicSvgIcon(() => import("./wrench.svg?component"));
 const Trash2 = createDynamicSvgIcon(() => import("./trash-2.svg?component"));
+const Info = createDynamicSvgIcon(() => import("./info.svg?component"));
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -124,7 +125,8 @@ export type IconType =
   | "Cpu"
   | "Battery"
   | "Wrench"
-  | "Trash2";
+  | "Trash2"
+  | "Info";
 
 type IconProps = {
   name: IconType | undefined;
@@ -179,6 +181,7 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
     Battery,
     Wrench,
     Trash2,
+    Info,
   };
 
   const CurrentIcon = icons[name];

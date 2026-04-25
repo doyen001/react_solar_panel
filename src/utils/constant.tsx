@@ -446,6 +446,109 @@ export const MASTER_SPECIAL_PRICING_ROWS: MasterSpecialPricingRow[] = [
   },
 ];
 
+/** Installer Tiers tab — monthly (Figma 3:17265) & yearly (Figma 3:17632) */
+export type MasterInstallerTierBilling = "monthly" | "yearly";
+
+export const MASTER_INSTALLER_TIER_BILLING_OPTIONS = [
+  { id: "monthly" as const, label: "Monthly" },
+  { id: "yearly" as const, label: "Yearly" },
+] as const;
+
+export const MASTER_INSTALLER_TIERS_YEARLY_SAVE_LABEL = "Save 20%" as const;
+
+export const MASTER_INSTALLER_TIER_VOLUME_LABELS = [
+  "30",
+  "60",
+  "120",
+  "500",
+  "2K",
+  "5K",
+  "10K",
+] as const;
+
+export const MASTER_INSTALLER_TIER_STANDARD_CARD = {
+  title: "Standard",
+  tagline: "Core tools to capture and convert leads",
+  planSubtitle: "Standard",
+  priceSuffix: "/Month",
+} as const;
+
+export const MASTER_INSTALLER_TIER_PRO_CARD = {
+  title: "PRO",
+  tagline: "Advanced tools to maximize lead quality and business growth.",
+  planSubtitle: "Standard PRO",
+  priceSuffix: "/Month",
+  mostPopularLabel: "Most Popular",
+  upgradeLabel: "Upgrade",
+} as const;
+
+export const MASTER_INSTALLER_TIER_STANDARD_FEATURES = [
+  "120 measurements/month",
+  "AI roof measurements and solar potential analysis",
+  "Access to built-in CRM",
+  "Leads export to CSV",
+  "Lead conversion analytics",
+  "Unlimited SunnyForms",
+  "Unlimited websites integrations",
+  "Full SunnyForm customization",
+  "AI Datasheet Reader",
+  "Multilingual SunnyForms",
+  "Real-time appointment bookings",
+  "Access to pro tips",
+  "Email notifications",
+] as const;
+
+export type MasterInstallerTierProFeature = {
+  label: string;
+  multiline?: boolean;
+};
+
+export const MASTER_INSTALLER_TIER_PRO_FEATURES: MasterInstallerTierProFeature[] =
+  [
+    { label: "500 measurements/month" },
+    { label: "Everything in Standard, plus:" },
+    { label: "Remove Solarise logo in SunnyForms" },
+    { label: "Advanced lead verification" },
+    {
+      label:
+        "Integrations with 3rd-party tools (CRMs, Zapier, project management tools, solar design, automation, marketing platforms, etc.)",
+      multiline: true,
+    },
+    { label: "Email and WhatsApp notifications" },
+    { label: "Dedicated support manager" },
+  ];
+
+export type MasterInstallerTiersPricing = {
+  standardPrice: string;
+  proPrice: string;
+  standardSliderFillPct: number;
+  proSliderFillPct: number;
+  standardActiveVolumeLabel: string;
+  proActiveVolumeLabel: string;
+};
+
+export const MASTER_INSTALLER_TIERS_PRICING: Record<
+  MasterInstallerTierBilling,
+  MasterInstallerTiersPricing
+> = {
+  monthly: {
+    standardPrice: "$717",
+    proPrice: "$1797",
+    standardSliderFillPct: 33.333,
+    proSliderFillPct: 50,
+    standardActiveVolumeLabel: "120",
+    proActiveVolumeLabel: "500",
+  },
+  yearly: {
+    standardPrice: "$574",
+    proPrice: "$1438",
+    standardSliderFillPct: 33.333,
+    proSliderFillPct: 50,
+    standardActiveVolumeLabel: "120",
+    proActiveVolumeLabel: "500",
+  },
+};
+
 export type MasterKpiIconName =
   | "Dollar"
   | "Building2"

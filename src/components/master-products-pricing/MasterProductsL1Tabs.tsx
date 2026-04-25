@@ -11,7 +11,7 @@ type Props = {
 export function MasterProductsL1Tabs({ activeId, onChange }: Props) {
   return (
     <div
-      className="master-pp-l1-shell w-full max-w-full justify-start"
+      className="master-pp-l1-shell w-full max-w-fit justify-start"
       role="tablist"
     >
       {MASTER_PRODUCTS_L1_TABS.map((tab) => {
