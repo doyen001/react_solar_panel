@@ -8,15 +8,13 @@ import {
   MasterProductsL1Tabs,
   type MasterProductsL1TabId,
 } from "./MasterProductsL1Tabs";
+import { MasterSpecialPricingPanel } from "./MasterSpecialPricingPanel";
 
-const PLACEHOLDER_COPY: Record<
-  Exclude<MasterProductsL1TabId, "catalog">,
-  string
-> = {
-  special:
-    "Configure promotional pricing and limited-time offers for installers.",
-  tiers: "Define tier benefits, thresholds, and default pricing by installer level.",
-};
+const PLACEHOLDER_COPY: Record<Extract<MasterProductsL1TabId, "tiers">, string> =
+  {
+    tiers:
+      "Define tier benefits, thresholds, and default pricing by installer level.",
+  };
 
 export function MasterProductsPricingContent() {
   const [activeTab, setActiveTab] = useState<MasterProductsL1TabId>("catalog");
@@ -35,10 +33,12 @@ export function MasterProductsPricingContent() {
           search={search}
           onSearchChange={setSearch}
         />
+      ) : activeTab === "special" ? (
+        <MasterSpecialPricingPanel />
       ) : (
         <section className="master-pp-card" aria-label={activeTab}>
           <div className="master-pp-placeholder-inner">
-            {PLACEHOLDER_COPY[activeTab]}
+            {PLACEHOLDER_COPY.tiers}
           </div>
         </section>
       )}

@@ -376,6 +376,76 @@ export const MASTER_PRODUCT_TABLE_COLUMNS = [
 export const MASTER_PRODUCT_SEARCH_PLACEHOLDER = "Search products..." as const;
 export const MASTER_PRODUCT_ADD_LABEL = "Add Product" as const;
 
+/** Special Pricing tab (Figma 3:16372) */
+export const MASTER_SPECIAL_PRICING_INTRO =
+  "Set custom wholesale prices for specific installers. These override the default wholesale price." as const;
+
+export const MASTER_SPECIAL_PRICING_ADD_LABEL = "Add Special Price" as const;
+
+export const MASTER_SPECIAL_PRICING_TABLE_COLUMNS = [
+  { id: "installer", label: "Installer", align: "left" as const },
+  { id: "product", label: "Product", align: "left" as const },
+  { id: "wholesale", label: "Wholesale Price", align: "right" as const },
+  { id: "special", label: "Special Price", align: "right" as const },
+  { id: "discount", label: "Discount", align: "right" as const },
+  { id: "validUntil", label: "Valid Until", align: "left" as const },
+  { id: "actions", label: "Actions", align: "center" as const },
+] as const;
+
+export type MasterSpecialPricingRow = {
+  id: string;
+  installerName: string;
+  installerInitials: string;
+  productName: string;
+  wholesale: string;
+  specialPrice: string;
+  discount: string;
+  validUntil: string;
+};
+
+export const MASTER_SPECIAL_PRICING_ROWS: MasterSpecialPricingRow[] = [
+  {
+    id: "sp1",
+    installerName: "SolarMax Pro",
+    installerInitials: "SP",
+    productName: "LONGi Hi-MO 6 450W",
+    wholesale: "$195",
+    specialPrice: "$175",
+    discount: "-10.3%",
+    validUntil: "2026-06-30",
+  },
+  {
+    id: "sp2",
+    installerName: "SolarMax Pro",
+    installerInitials: "SP",
+    productName: "Tesla Powerwall 3",
+    wholesale: "$9,800",
+    specialPrice: "$9,200",
+    discount: "-6.1%",
+    validUntil: "2026-06-30",
+  },
+  {
+    id: "sp3",
+    installerName: "GreenGrid Energy",
+    installerInitials: "GE",
+    productName: "Fronius Primo GEN24 5kW",
+    wholesale: "$1,890",
+    specialPrice: "$1,750",
+    discount: "-7.4%",
+    validUntil: "2026-05-15",
+  },
+  {
+    id: "sp4",
+    installerName: "SunPeak Solutions",
+    installerInitials: "SS",
+    productName: "Jinko Tiger Neo 440W",
+    wholesale: "$180",
+    specialPrice: "$165",
+    discount: "-8.3%",
+    validUntil: "2026-04-30",
+  },
+];
+
 export type MasterKpiIconName =
   | "Dollar"
   | "Building2"
