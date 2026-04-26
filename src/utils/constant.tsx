@@ -124,7 +124,7 @@ export const MASTER_DASHBOARD_NAV = [
     label: "Products & Pricing",
     href: "/master/products-pricing",
   },
-  { id: "invoices", label: "Invoices", href: "/master/dashboard" },
+  { id: "invoices", label: "Invoices", href: "/master/invoices" },
 ] as const;
 
 /** Products & Pricing (Figma 3:14281) */
@@ -139,6 +139,201 @@ export const MASTER_PRODUCTS_L1_TABS = [
   { id: "special", label: "Special Pricing", icon: "Dollar" as const },
   { id: "tiers", label: "Installer Tiers", icon: "Users" as const },
 ] as const;
+
+/** Master — Invoices (Figma 3:16747) */
+export const MASTER_INVOICES_PAGE = {
+  title: "Invoices",
+  subtitle:
+    "Manage customer and internal invoices across all installers",
+} as const;
+
+export const MASTER_INVOICES_CREATE_LABEL = "Create Invoice" as const;
+
+export const MASTER_INVOICES_SEARCH_PLACEHOLDER = "Search invoices..." as const;
+
+export const MASTER_INVOICE_STAT_CARDS = [
+  {
+    id: "total",
+    label: "Total Invoices",
+    icon: "FileText" as const,
+    value: "8",
+  },
+  {
+    id: "pending",
+    label: "Pending",
+    icon: "Clock" as const,
+    value: "$61.6K",
+    footnote: "3 invoices",
+  },
+  {
+    id: "paid",
+    label: "Paid",
+    icon: "CheckCircle" as const,
+    value: "$51.1K",
+    footnote: "3 invoices",
+  },
+  {
+    id: "overdue",
+    label: "Overdue",
+    icon: "AlertTriangle" as const,
+    value: "$9.6K",
+    footnote: "1 invoices",
+  },
+] as const;
+
+export type MasterInvoiceTypeTabId = "all" | "customer" | "internal";
+
+export const MASTER_INVOICE_TYPE_TABS = [
+  { id: "all" as const, label: "All", icon: "FileText" as const },
+  { id: "customer" as const, label: "Customer", icon: "User" as const },
+  { id: "internal" as const, label: "Internal", icon: "Building2" as const },
+] as const;
+
+export type MasterInvoiceRowStatus = "draft" | "sent" | "paid" | "overdue";
+
+export type MasterInvoiceStatusFilterId = "all" | MasterInvoiceRowStatus;
+
+export const MASTER_INVOICE_STATUS_FILTERS = [
+  { id: "all" as const, label: "All" },
+  { id: "draft" as const, label: "Draft" },
+  { id: "sent" as const, label: "Sent" },
+  { id: "paid" as const, label: "Paid" },
+  { id: "overdue" as const, label: "Overdue" },
+] as const;
+
+export type MasterInvoiceKind = "internal" | "customer";
+
+export type MasterInvoiceActionId = "check" | "send" | "eye" | "trash";
+
+export type MasterInvoiceToAvatarTone = "navy" | "warm";
+
+export type MasterInvoiceRow = {
+  id: string;
+  invoiceNumber: string;
+  kind: MasterInvoiceKind;
+  fromName: string;
+  to: {
+    initials: string;
+    name: string;
+    avatarTone: MasterInvoiceToAvatarTone;
+  };
+  issueDate: string;
+  dueDate: string;
+  total: string;
+  status: MasterInvoiceRowStatus;
+  actions: MasterInvoiceActionId[];
+};
+
+export const MASTER_INVOICE_TABLE_COLUMNS = [
+  { id: "invoice", label: "Invoice #", align: "left" as const },
+  { id: "type", label: "Type", align: "left" as const },
+  { id: "from", label: "From", align: "left" as const },
+  { id: "to", label: "To", align: "left" as const },
+  { id: "date", label: "Date", align: "left" as const },
+  { id: "due", label: "Due Date", align: "left" as const },
+  { id: "total", label: "Total", align: "right" as const },
+  { id: "status", label: "Status", align: "center" as const },
+  { id: "actions", label: "Actions", align: "center" as const },
+] as const;
+
+export const MASTER_INVOICE_ROWS: MasterInvoiceRow[] = [
+  {
+    id: "1",
+    invoiceNumber: "INV-2026-001",
+    kind: "internal",
+    fromName: "Easylink HQ",
+    to: { initials: "SP", name: "SolarMax Pro", avatarTone: "navy" },
+    issueDate: "2026-02-15",
+    dueDate: "2026-03-15",
+    total: "$17,149",
+    status: "sent",
+    actions: ["check", "eye", "trash"],
+  },
+  {
+    id: "2",
+    invoiceNumber: "INV-2026-002",
+    kind: "customer",
+    fromName: "SolarMax Pro",
+    to: { initials: "ES", name: "Ethan Salvi", avatarTone: "warm" },
+    issueDate: "2026-02-10",
+    dueDate: "2026-03-10",
+    total: "$15,950",
+    status: "paid",
+    actions: ["eye", "trash"],
+  },
+  {
+    id: "3",
+    invoiceNumber: "INV-2026-003",
+    kind: "internal",
+    fromName: "Easylink HQ",
+    to: { initials: "GE", name: "GreenGrid Energy", avatarTone: "navy" },
+    issueDate: "2026-01-20",
+    dueDate: "2026-02-20",
+    total: "$9,636",
+    status: "overdue",
+    actions: ["check", "eye", "trash"],
+  },
+  {
+    id: "4",
+    invoiceNumber: "INV-2026-004",
+    kind: "customer",
+    fromName: "GreenGrid Energy",
+    to: { initials: "MC", name: "Marcus Chen", avatarTone: "warm" },
+    issueDate: "2026-02-28",
+    dueDate: "2026-03-28",
+    total: "$27,610",
+    status: "sent",
+    actions: ["check", "eye", "trash"],
+  },
+  {
+    id: "5",
+    invoiceNumber: "INV-2026-005",
+    kind: "internal",
+    fromName: "Easylink HQ",
+    to: { initials: "SS", name: "SunPeak Solutions", avatarTone: "navy" },
+    issueDate: "2026-02-05",
+    dueDate: "2026-03-05",
+    total: "$8,206",
+    status: "paid",
+    actions: ["eye", "trash"],
+  },
+  {
+    id: "6",
+    invoiceNumber: "INV-2026-006",
+    kind: "customer",
+    fromName: "BrightStar Solar",
+    to: { initials: "SJ", name: "Sarah Johnson", avatarTone: "warm" },
+    issueDate: "2026-03-01",
+    dueDate: "2026-03-31",
+    total: "$22,000",
+    status: "draft",
+    actions: ["send", "eye", "trash"],
+  },
+  {
+    id: "7",
+    invoiceNumber: "INV-2026-007",
+    kind: "internal",
+    fromName: "Easylink HQ",
+    to: { initials: "EI", name: "EcoWatt Installs", avatarTone: "navy" },
+    issueDate: "2026-03-01",
+    dueDate: "2026-03-31",
+    total: "$16,852",
+    status: "sent",
+    actions: ["check", "eye", "trash"],
+  },
+  {
+    id: "8",
+    invoiceNumber: "INV-2026-008",
+    kind: "customer",
+    fromName: "SolarMax Pro",
+    to: { initials: "DP", name: "David Park", avatarTone: "warm" },
+    issueDate: "2026-01-15",
+    dueDate: "2026-02-15",
+    total: "$26,950",
+    status: "paid",
+    actions: ["eye", "trash"],
+  },
+];
 
 export type MasterProductCategoryId =
   | "all"
@@ -645,7 +840,7 @@ export const MASTER_REVENUE_TREND = {
   valuesMillions: [2.2, 2.6, 3.0, 3.5, 4.0, 4.4, 4.9, 5.4, 5.8] as const,
 } as const;
 
-export type MasterInvoiceRow = {
+export type MasterDashboardInvoiceMetric = {
   id: string;
   label: string;
   countLabel: string;
@@ -656,7 +851,7 @@ export type MasterInvoiceRow = {
   progressClass: "master-invoice-pending" | "master-invoice-paid" | "master-invoice-overdue";
 };
 
-export const MASTER_INVOICE_ROWS: MasterInvoiceRow[] = [
+export const MASTER_DASHBOARD_INVOICE_METRICS: MasterDashboardInvoiceMetric[] = [
   {
     id: "pending",
     label: "Pending Invoices",

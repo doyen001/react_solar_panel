@@ -83,6 +83,11 @@ const Battery = createDynamicSvgIcon(() => import("./battery.svg?component"));
 const Wrench = createDynamicSvgIcon(() => import("./wrench.svg?component"));
 const Trash2 = createDynamicSvgIcon(() => import("./trash-2.svg?component"));
 const Info = createDynamicSvgIcon(() => import("./info.svg?component"));
+const FileText = createDynamicSvgIcon(() => import("./file-text.svg?component"));
+const Send = createDynamicSvgIcon(() => import("./send.svg?component"));
+const AlertTriangle = createDynamicSvgIcon(
+  () => import("./alert-triangle.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -126,7 +131,10 @@ export type IconType =
   | "Battery"
   | "Wrench"
   | "Trash2"
-  | "Info";
+  | "Info"
+  | "FileText"
+  | "Send"
+  | "AlertTriangle";
 
 type IconProps = {
   name: IconType | undefined;
@@ -182,6 +190,9 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
     Wrench,
     Trash2,
     Info,
+    FileText,
+    Send,
+    AlertTriangle,
   };
 
   const CurrentIcon = icons[name];

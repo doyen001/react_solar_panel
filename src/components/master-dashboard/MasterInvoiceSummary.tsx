@@ -1,12 +1,12 @@
 "use client";
 
 import Icon from "@/components/ui/Icons";
-import { MASTER_INVOICE_ROWS } from "@/utils/constant";
+import { MASTER_DASHBOARD_INVOICE_METRICS } from "@/utils/constant";
 
 export function MasterInvoiceSummary() {
   return (
     <div className="flex flex-col gap-3">
-      {MASTER_INVOICE_ROWS.map((row) => (
+      {MASTER_DASHBOARD_INVOICE_METRICS.map((row) => (
         <div
           key={row.id}
           className="rounded-lg border border-warm-border bg-gray-1 p-3"
