@@ -1,5 +1,7 @@
 /** Mock data for Pipeline Dashboard (Figma 3:10267) */
 
+import { IconType } from "@/components/ui/Icons";
+
 export type MonthlyMetricMode = "revenue" | "profit" | "installs";
 
 export const TITLE = {
@@ -8,10 +10,10 @@ export const TITLE = {
 } as const;
 
 export const OVERVIEW_KPIS = [
-  { label: "Active Deals", value: "47", icon: "deals" as const },
-  { label: "Installers", value: "12", icon: "people" as const },
-  { label: "Win Rate", value: "68%", icon: "target" as const },
-  { label: "Avg. Cycle", value: "23 days", icon: "clock" as const },
+  { label: "Active Deals", value: "47" },
+  { label: "Installers", value: "12" },
+  { label: "Win Rate", value: "68%" },
+  { label: "Avg. Cycle", value: "23 days" },
 ];
 
 /** Copy + order match Figma `3:10389` stat strip */
@@ -32,6 +34,7 @@ export type PrimaryKpi = {
   deltaLabel: string;
   sparkColor: string;
   sparkline: number[];
+  icon?: IconType;
 };
 
 export const PRIMARY_KPIS: PrimaryKpi[] = [
@@ -43,6 +46,7 @@ export const PRIMARY_KPIS: PrimaryKpi[] = [
     deltaLabel: "vs last qtr",
     sparkColor: "#2094f3",
     sparkline: [42, 48, 45, 52, 58, 55, 62, 68, 72, 70, 75, 78],
+    icon: "Dollar",
   },
   {
     title: "Conversion Rate",
@@ -52,6 +56,7 @@ export const PRIMARY_KPIS: PrimaryKpi[] = [
     deltaLabel: "vs last qtr",
     sparkColor: "#f78d00",
     sparkline: [22, 24, 23, 26, 28, 27, 29, 28, 30, 29, 28, 29],
+    icon: "TrendingUp",
   },
   {
     title: "Average Cycle Time",
@@ -61,6 +66,7 @@ export const PRIMARY_KPIS: PrimaryKpi[] = [
     deltaLabel: "vs last qtr",
     sparkColor: "#0369a1",
     sparkline: [28, 27, 26, 25, 24, 24, 23, 23, 23, 23, 23, 23],
+    icon: "Clock",
   },
   {
     title: "Avg. System Size",
@@ -70,14 +76,15 @@ export const PRIMARY_KPIS: PrimaryKpi[] = [
     deltaLabel: "vs last qtr",
     sparkColor: "#ea580c",
     sparkline: [7.2, 7.4, 7.6, 7.8, 8.0, 8.1, 8.2, 8.3, 8.35, 8.4, 8.4, 8.4],
+    icon: "Light",
   },
 ];
 
 export const SECONDARY_KPIS = [
-  { title: "Average Deal Size", value: "$12,500", delta: "+8.3%" },
-  { title: "Net Profit", value: "$41,040", delta: "+$6,200" },
-  { title: "Installs This Month", value: "18", delta: "+5" },
-  { title: "Pending Proposals", value: "23", delta: "" },
+  { title: "Average Deal Size", value: "$12,500", delta: "+8.3%", icon: "Dollar", iconColor: "#09234A", iconBackgroundColor: "#09234A14" },
+  { title: "Net Profit", value: "$41,040", delta: "+$6,200", icon: "BarChart3", iconColor: "#16A34A", iconBackgroundColor: "#16A34A14" },
+  { title: "Installs This Month", value: "18", delta: "+5", icon: "Light", iconColor: "#F78D00", iconBackgroundColor: "#F78D0014" },
+  { title: "Pending Proposals", value: "23", delta: "", icon: "Target", iconColor: "#09234A", iconBackgroundColor: "#09234A14" },
 ];
 
 export const MONTHS_SHORT = [
@@ -96,7 +103,7 @@ export const MONTHS_SHORT = [
 ];
 
 export const MONTHLY_REVENUE = [
-  320, 340, 310, 380, 400, 420, 410, 450, 440, 460, 480, 500,
+  100000, 140000, 200000, 250000, 380000, 420000, 550000, 460000, 400000, 300000, 400000, 440000,
 ];
 export const MONTHLY_PROFIT = [
   90, 100, 95, 110, 115, 120, 118, 125, 122, 130, 135, 140,
@@ -165,7 +172,7 @@ export type FunnelStage = {
 /** Numbers, colors, widths, and copy aligned to Figma `3:10769` */
 export const FUNNEL_STAGES: FunnelStage[] = [
   {
-    label: "New Leads",
+    label: "Leads",
     deals: 120,
     barUnits: 514.279,
     color: "#09234a",
@@ -191,7 +198,7 @@ export const FUNNEL_STAGES: FunnelStage[] = [
     convFromPrev: "73%",
   },
   {
-    label: "Negotiation",
+    label: "Deposit Paid",
     deals: 38,
     barUnits: 226.274,
     color: "#f78d00",
@@ -200,7 +207,7 @@ export const FUNNEL_STAGES: FunnelStage[] = [
     convFromPrev: "61%",
   },
   {
-    label: "Contract Signed",
+    label: "Contracted",
     deals: 28,
     barUnits: 154.272,
     color: "#ffbf47",

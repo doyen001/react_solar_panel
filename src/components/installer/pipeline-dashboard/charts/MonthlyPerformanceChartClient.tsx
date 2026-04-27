@@ -76,7 +76,7 @@ export function MonthlyPerformanceChartClient({ mode }: Props) {
           ...axisBase.axisY,
           prefix: "$",
           suffix: "",
-          interval: 30,
+          interval: 50,
         },
         data: [
           {
@@ -111,13 +111,11 @@ export function MonthlyPerformanceChartClient({ mode }: Props) {
       axisY: {
         ...axisBase.axisY,
         prefix: "$",
-        interval: 50,
+        interval: 150000,
       },
       data: [
         {
           type: "splineArea",
-          showInLegend: true,
-          legendText: "Revenue",
           color: "#2094f3",
           fillOpacity: 0.35,
           lineThickness: 2,
@@ -126,20 +124,6 @@ export function MonthlyPerformanceChartClient({ mode }: Props) {
           dataPoints: MONTHS_SHORT.map((label, i) => ({
             label,
             y: MONTHLY_REVENUE[i],
-          })),
-        },
-        {
-          type: "splineArea",
-          showInLegend: true,
-          legendText: "Profit",
-          color: "#f78d00",
-          fillOpacity: 0.28,
-          lineThickness: 2,
-          markerSize: 0,
-          toolTipContent: "{label}: ${y}",
-          dataPoints: MONTHS_SHORT.map((label, i) => ({
-            label,
-            y: MONTHLY_PROFIT[i],
           })),
         },
       ],

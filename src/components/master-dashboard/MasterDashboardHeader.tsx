@@ -23,7 +23,6 @@ export function MasterDashboardHeader({
     <header className="master-header-bg master-header-border sticky top-0 z-30 shrink-0 border-b">
       <div
         className="mx-auto flex h-[52px] max-w-[1440px] items-center justify-between gap-4 px-5"
-        style={{ borderWidth: "0.636px" }}
       >
         <div className="flex min-w-0 items-center gap-4 md:gap-8">
           <div className="flex size-[39px] shrink-0 items-center justify-center rounded-[8.36px] bg-navy-800">

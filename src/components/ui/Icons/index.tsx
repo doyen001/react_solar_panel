@@ -41,6 +41,7 @@ const Phone = createDynamicSvgIcon(() => import("./phone.svg?component"));
 const Mail = createDynamicSvgIcon(() => import("./mail.svg?component"));
 const Pin = createDynamicSvgIcon(() => import("./pin.svg?component"));
 const Eye = createDynamicSvgIcon(() => import("./eye.svg?component"));
+const Download = createDynamicSvgIcon(() => import("./download.svg?component"));
 const ArrowRight = createDynamicSvgIcon(
   () => import("./arrow-right.svg?component"),
 );
@@ -108,6 +109,7 @@ export type IconType =
   | "Mail"
   | "Pin"
   | "Eye"
+  | "Download"
   | "ArrowRight"
   | "UserPlus"
   | "CircleQuestion"
@@ -139,9 +141,10 @@ export type IconType =
 type IconProps = {
   name: IconType | undefined;
   className?: string;
+  style?: React.CSSProperties;
 };
 
-const Icon: React.FC<IconProps> = ({ name, className }) => {
+const Icon: React.FC<IconProps> = ({ name, className, style }) => {
   if (!name) {
     return null;
   }
@@ -165,6 +168,7 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
     Phone,
     Mail,
     Pin,
+    Download,
     Eye,
     ArrowRight,
     UserPlus,
@@ -197,7 +201,7 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
 
   const CurrentIcon = icons[name];
 
-  return <CurrentIcon className={classNames(className)} />;
+  return <CurrentIcon className={classNames(className)} style={style} />;
 };
 
 export default Icon;

@@ -26,7 +26,7 @@ export function PipelineDashboardTitleBar() {
           type="button"
           className="inline-flex items-center gap-2 rounded-md border border-warm-border bg-white px-4 py-2 font-inter text-[13px] font-semibold leading-[18px] text-warm-ink shadow-sm hover:bg-cream-50"
         >
-          <Icon name="Doc" className="size-[14px]" />
+          <Icon name="Download" className="size-[14px]" />
           PDF
         </button>
         <button

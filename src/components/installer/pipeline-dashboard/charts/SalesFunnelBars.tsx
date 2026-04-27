@@ -11,7 +11,7 @@ export function SalesFunnelBars() {
       {FUNNEL_STAGES.map((stage) => (
         <div
           key={stage.label}
-          className="flex h-[30px] w-full items-center justify-center"
+          className="flex h-[30px] w-full items-center"
         >
           <div
             className={`flex h-[30px] max-w-full shrink-0 items-center rounded px-2.5 font-dm-sans text-[11px] font-semibold leading-[16.5px] ${

@@ -33,7 +33,7 @@ export function PipelineKpiSparklineGrid({ kpis }: { kpis: PrimaryKpi[] }) {
               </p>
             </div>
             <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-cream-150 text-warm-gray">
-              <Icon name="Light" className="size-4" />
+              <Icon name={k?.icon || "Light"} className="size-4" style={{ color: k.sparkColor }} />
             </span>
           </div>
           <div className="mt-4 flex items-end justify-between gap-3">

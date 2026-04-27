@@ -69,11 +69,8 @@ export function PipelineStcAndFunnel() {
             Sales Funnel
           </h3>
           <div className="flex shrink-0 items-center gap-2">
-            <span className="font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray">
-              Lead → Install:
-            </span>
             <span className="font-dm-sans text-[12px] font-bold leading-[18px] text-success">
-              {SALES_FUNNEL_HEADER.leadToInstallPct}
+              {SALES_FUNNEL_HEADER.leadToInstallPct} close rate
             </span>
           </div>
         </div>
@@ -96,23 +93,6 @@ export function PipelineStcAndFunnel() {
 
           <div className="min-h-[210px] min-w-0 flex-1">
             <SalesFunnelBars />
-          </div>
-
-          <div
-            className={`flex w-8 shrink-0 flex-col justify-center md:w-9 ${ROW_GAP}`}
-          >
-            {FUNNEL_STAGES.map((stage) => (
-              <div
-                key={`${stage.label}-conv`}
-                className={`flex ${ROW_H} items-start justify-start pt-[7px]`}
-              >
-                {stage.convFromPrev ? (
-                  <span className="font-dm-sans text-[10px] font-semibold leading-[15px] text-warm-gray">
-                    {stage.convFromPrev}
-                  </span>
-                ) : null}
-              </div>
-            ))}
           </div>
         </div>
       </section>

@@ -43,7 +43,7 @@ export function MonthlyPerformanceSection() {
               onClick={() => setMode(key)}
               className={`rounded-md px-3 py-1.5 font-inter text-[12px] font-semibold leading-4 transition-colors ${
                 mode === key
-                  ? "bg-white text-warm-ink shadow-sm"
+                  ? "bg-navy-800 text-white shadow-sm"
                   : "text-warm-gray hover:text-warm-ink"
               }`}
             >

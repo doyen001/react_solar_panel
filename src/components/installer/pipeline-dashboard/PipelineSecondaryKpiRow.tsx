@@ -1,6 +1,6 @@
 "use client";
 
-import Icon from "@/components/ui/Icons";
+import Icon, { IconType } from "@/components/ui/Icons";
 import { SECONDARY_KPIS } from "./pipelineDashboardMock";
 
 export function PipelineSecondaryKpiRow() {
@@ -11,8 +11,8 @@ export function PipelineSecondaryKpiRow() {
           key={item.title}
           className="flex items-start gap-3 rounded-lg border border-warm-border bg-white px-4 py-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
         >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-frost">
-            <Icon name="Dollar" className="size-4 text-ocean" />
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: item.iconBackgroundColor }}>
+            <Icon name={item.icon as IconType || "Light"} className="size-4" style={{ color: item.iconColor, opacity: 1 }} />
           </span>
           <div className="min-w-0">
             <p className="font-inter text-[13px] font-medium leading-[15px] text-brown-muted">
