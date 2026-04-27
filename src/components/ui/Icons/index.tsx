@@ -93,6 +93,9 @@ const AlertTriangle = createDynamicSvgIcon(
   () => import("./alert-triangle.svg?component"),
 );
 const Star = createDynamicSvgIcon(() => import("./product-star.svg?component"));
+const ExternalLink = createDynamicSvgIcon(
+  () => import("./product-external-link.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -142,7 +145,8 @@ export type IconType =
   | "FileText"
   | "Send"
   | "AlertTriangle"
-  | "Star";
+  | "Star"
+  | "ExternalLink";
 
 type IconProps = {
   name: IconType | undefined;
@@ -205,6 +209,7 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     Send,
     AlertTriangle,
     Star,
+    ExternalLink,
   };
 
   const CurrentIcon = icons[name];

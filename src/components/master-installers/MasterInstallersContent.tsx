@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MASTER_INSTALLERS_ROWS,
   type MasterInstallerEntry,
@@ -31,14 +31,30 @@ function filterRows(
 export function MasterInstallersContent() {
   const [filterId, setFilterId] = useState<MasterInstallersFilterId>("all");
   const [search, setSearch] = useState("");
+  const [expandedInstallerId, setExpandedInstallerId] = useState<string | null>(
+    null,
+  );
 
   const rows = useMemo(
     () => filterRows(MASTER_INSTALLERS_ROWS, filterId, search),
     [filterId, search],
   );
 
+  useEffect(() => {
+    if (
+      expandedInstallerId &&
+      !rows.some((r) => r.id === expandedInstallerId)
+    ) {
+      setExpandedInstallerId(null);
+    }
+  }, [rows, expandedInstallerId]);
+
+  function toggleInstaller(installerId: string) {
+    setExpandedInstallerId((prev) => (prev === installerId ? null : installerId));
+  }
+
   return (
-    <main className="mx-auto max-w-[1440px] space-y-4 px-5 py-5 md:space-y-5 md:py-5">\
+    <main className="mx-auto max-w-[1440px] space-y-4 px-5 py-5 md:space-y-5 md:py-5">
       <div className="flex flex-row justify-between">
         <MasterInstallersHero />
         <MasterInstallersToolbar
@@ -48,7 +64,12 @@ export function MasterInstallersContent() {
           onSearchChange={setSearch}
         />
       </div>
-      <MasterInstallersTable rows={rows} />
+      <MasterInstallersTable
+        rows={rows}
+        expandedInstallerId={expandedInstallerId}
+        onToggleInstaller={toggleInstaller}
+      />
     </main>
   );
 }
+
