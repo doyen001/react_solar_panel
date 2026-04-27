@@ -41,6 +41,13 @@ const Phone = createDynamicSvgIcon(() => import("./phone.svg?component"));
 const Mail = createDynamicSvgIcon(() => import("./mail.svg?component"));
 const Pin = createDynamicSvgIcon(() => import("./pin.svg?component"));
 const Eye = createDynamicSvgIcon(() => import("./eye.svg?component"));
+const Link = createDynamicSvgIcon(() => import("./link.svg?component"));
+const Image = createDynamicSvgIcon(() => import("./image.svg?component"));
+const Emoji = createDynamicSvgIcon(() => import("./emoji.svg?component"));
+const Sparkles = createDynamicSvgIcon(() => import("./sparkles.svg?component"));
+const Bold = createDynamicSvgIcon(() => import("./bold.svg?component"));
+const Italic = createDynamicSvgIcon(() => import("./italic.svg?component"));
+const Attach = createDynamicSvgIcon(() => import("./attach.svg?component"));
 const Download = createDynamicSvgIcon(() => import("./download.svg?component"));
 const ArrowRight = createDynamicSvgIcon(
   () => import("./arrow-right.svg?component"),
@@ -116,6 +123,13 @@ export type IconType =
   | "Mail"
   | "Pin"
   | "Eye"
+  | "Emoji"
+  | "Bold"
+  | "Italic"
+  | "Link"
+  | "Image"
+  | "Attach"
+  | "Sparkles"
   | "Download"
   | "ArrowRight"
   | "UserPlus"
@@ -180,6 +194,13 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     Pin,
     Download,
     Eye,
+    Bold,
+    Italic,
+    Emoji,
+    Link,
+    Image,
+    Attach,
+    Sparkles,
     ArrowRight,
     UserPlus,
     CircleQuestion,

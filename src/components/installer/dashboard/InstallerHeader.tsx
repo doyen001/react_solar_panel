@@ -12,6 +12,11 @@ const NAV = [
     label: "Pipeline",
     key: "pipeline",
   },
+  {
+    href: "/installers/dashboard/messages",
+    label: "Messages",
+    key: "messages",
+  },
   { href: "/installers/dashboard/home", label: "Reports", key: "reports" },
   { href: "/installers/dashboard/home", label: "Settings", key: "settings" },
   { href: "/installers/dashboard/home", label: "Help", key: "help" },
@@ -32,6 +37,7 @@ function resolveActiveNav(
   if (override) return override;
   if (!pathname) return "home";
   if (pathname.startsWith("/installers/dashboard/pipeline")) return "pipeline";
+  if (pathname.startsWith("/installers/dashboard/messages")) return "messages";
   if (pathname.startsWith("/installers/dashboard/schedule")) return "home";
   return "home";
 }

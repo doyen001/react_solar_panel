@@ -1,18 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
-import { messagesAssets } from "./messagesAssets";
 import type { ComposeChannel } from "./ComposeChannelBar";
 import { ComposeChannelBar } from "./ComposeChannelBar";
+import Icon, { IconType } from "@/components/ui/Icons";
 
-const FORMAT_ICONS = [
-  messagesAssets.formatBold,
-  messagesAssets.formatItalic,
-  messagesAssets.formatLink,
-  messagesAssets.formatImage,
-  messagesAssets.formatAttach,
-  messagesAssets.formatEmoji,
+const FORMAT_ICONS: IconType[] = [
+  "Bold",
+  "Italic",
+  "Link",
+  "Image",
+  "Attach",
+  "Emoji",
 ] as const;
 
 function countWords(text: string): number {
@@ -25,12 +24,18 @@ type Props = {
   placeholder?: string;
   channel: ComposeChannel;
   onChannelChange: (c: ComposeChannel) => void;
+  onSend?: (text: string) => void | Promise<void>;
+  sending?: boolean;
+  disabled?: boolean;
 };
 
 export function MessageRichComposer({
   placeholder = "Type your message...",
   channel,
   onChannelChange,
+  onSend,
+  sending = false,
+  disabled = false,
 }: Props) {
   const [draft, setDraft] = useState("");
   const words = useMemo(() => countWords(draft), [draft]);
@@ -59,16 +64,9 @@ export function MessageRichComposer({
               key={i}
               type="button"
               aria-label="Formatting"
-              className="flex size-[22px] items-center justify-center rounded hover:bg-black/[0.04]"
+              className="flex size-[22px] items-center justify-center rounded hover:bg-black/[0.04] text-warm-gray"
             >
-              <Image
-                src={src}
-                alt=""
-                width={14}
-                height={14}
-                className="size-3.5"
-                unoptimized
-              />
+              <Icon name={src as IconType} className="size-3" />
             </button>
           ))}
         </div>
@@ -81,20 +79,22 @@ export function MessageRichComposer({
           </span>
           <button
             type="button"
-            className="inline-flex h-7 min-w-[76px] items-center justify-center gap-1 rounded-lg px-3 font-dm-sans text-[11px] font-semibold text-white"
+            disabled={disabled || sending || !draft.trim()}
+            onClick={() => {
+              const text = draft.trim();
+              if (!text || disabled || sending) return;
+              void Promise.resolve(onSend?.(text)).then(() => {
+                setDraft("");
+              });
+            }}
+            className="inline-flex h-7 min-w-[76px] items-center justify-center gap-2 rounded-lg font-dm-sans text-[11px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             style={{
               fontVariationSettings: "'opsz' 14",
               backgroundImage:
                 "linear-gradient(162deg, rgb(32, 148, 243) 2.36%, rgb(23, 207, 207) 97.64%)",
             }}
           >
-            <Image
-              src={messagesAssets.send}
-              alt=""
-              width={12}
-              height={12}
-              unoptimized
-            />
+            <Icon name="Send" className="size-3" />
             Send
           </button>
           <button
@@ -102,13 +102,7 @@ export function MessageRichComposer({
             className="inline-flex h-7 min-w-[76px] items-center justify-center gap-1 rounded-lg border border-warm-border bg-white px-3 font-dm-sans text-[11px] font-medium text-warm-ink hover:bg-cream-50"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
-            <Image
-              src={messagesAssets.phone}
-              alt=""
-              width={12}
-              height={12}
-              unoptimized
-            />
+            <Icon name="Phone" className="size-3" />
             Phone
           </button>
         </div>

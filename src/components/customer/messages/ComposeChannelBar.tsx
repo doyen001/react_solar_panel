@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { messagesAssets } from "./messagesAssets";
+import Icon from "@/components/ui/Icons";
 
 export type ComposeChannel =
   | "ai"
@@ -60,14 +59,7 @@ export function ComposeChannelBar({ value, onChange }: Props) {
               }
             >
               {ch.icon === "sparkles" ? (
-                <Image
-                  src={messagesAssets.sparkles}
-                  alt=""
-                  width={12}
-                  height={12}
-                  className="size-3 shrink-0"
-                  unoptimized
-                />
+                <Icon name="Sparkles" className="size-3 shrink-0" />
               ) : null}
               {ch.label}
             </button>
