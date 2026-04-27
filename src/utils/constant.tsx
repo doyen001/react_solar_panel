@@ -118,7 +118,7 @@ export const MASTER_DASHBOARD_TITLE = "Master Dashboard" as const;
 
 export const MASTER_DASHBOARD_NAV = [
   { id: "overview", label: "Overview", href: "/master/dashboard" },
-  { id: "installers", label: "Installers", href: "/master/dashboard" },
+  { id: "installers", label: "Installers", href: "/master/installers" },
   {
     id: "products",
     label: "Products & Pricing",
@@ -126,6 +126,187 @@ export const MASTER_DASHBOARD_NAV = [
   },
   { id: "invoices", label: "Invoices", href: "/master/invoices" },
 ] as const;
+
+/** Master — Installers (Figma 3:13117) */
+export const MASTER_INSTALLERS_PAGE = {
+  title: "Member Installers",
+  subtitle: "20 registered installers hosting Easylink Designer",
+} as const;
+
+export type MasterInstallersFilterId =
+  | "all"
+  | "active"
+  | "pending"
+  | "suspended";
+
+export const MASTER_INSTALLERS_FILTERS = [
+  { id: "all" as const, label: "All", count: 20 },
+  { id: "active" as const, label: "Active", count: 15 },
+  { id: "pending" as const, label: "Pending", count: 3 },
+  { id: "suspended" as const, label: "Suspended", count: 2 },
+] as const;
+
+export type MasterInstallerStatus = Exclude<MasterInstallersFilterId, "all">;
+
+export type MasterInstallerLocation = {
+  city: string;
+  state: "NSW" | "VIC" | "QLD" | "SA" | "WA";
+};
+
+export type MasterInstallerEntry = {
+  id: string;
+  initials: string;
+  name: string;
+  status: MasterInstallerStatus;
+  rating: string;
+  location: MasterInstallerLocation;
+  customers: number;
+  pipeline: string;
+  installsMtd: number;
+  conversion: string;
+  conversionDelta: string;
+  revenue: string;
+  revenueDelta: string;
+  avatarClass:
+    | "master-avatar-yellow"
+    | "master-avatar-orange"
+    | "master-avatar-slate"
+    | "master-avatar-warm-border"
+    | "master-avatar-amber-funnel"
+    | "master-avatar-navy"
+    | "master-avatar-orange-2";
+};
+
+export const MASTER_INSTALLERS_ROWS: MasterInstallerEntry[] = [
+  {
+    id: "sm",
+    initials: "SM",
+    name: "SolarMax Pro",
+    status: "active",
+    rating: "4.9",
+    location: { city: "Sydney", state: "NSW" },
+    customers: 98,
+    pipeline: "$4.2M",
+    installsMtd: 22,
+    conversion: "34.2%",
+    conversionDelta: "+3.1%",
+    revenue: "$4.2M",
+    revenueDelta: "+18%",
+    avatarClass: "master-avatar-yellow",
+  },
+  {
+    id: "gg",
+    initials: "GG",
+    name: "GreenGrid Energy",
+    status: "active",
+    rating: "4.8",
+    location: { city: "Melbourne", state: "VIC" },
+    customers: 87,
+    pipeline: "$3.8M",
+    installsMtd: 19,
+    conversion: "31.5%",
+    conversionDelta: "+2.4%",
+    revenue: "$3.8M",
+    revenueDelta: "+14%",
+    avatarClass: "master-avatar-orange",
+  },
+  {
+    id: "sp",
+    initials: "SP",
+    name: "SunPeak Solutions",
+    status: "active",
+    rating: "4.7",
+    location: { city: "Brisbane", state: "QLD" },
+    customers: 76,
+    pipeline: "$3.4M",
+    installsMtd: 17,
+    conversion: "29.8%",
+    conversionDelta: "+1.9%",
+    revenue: "$3.4M",
+    revenueDelta: "+11%",
+    avatarClass: "master-avatar-slate",
+  },
+  {
+    id: "bs",
+    initials: "BS",
+    name: "BrightStar Solar",
+    status: "active",
+    rating: "4.6",
+    location: { city: "Adelaide", state: "SA" },
+    customers: 71,
+    pipeline: "$3.1M",
+    installsMtd: 15,
+    conversion: "28.3%",
+    conversionDelta: "-0.5%",
+    revenue: "$3.1M",
+    revenueDelta: "+9%",
+    avatarClass: "master-avatar-warm-border",
+  },
+  {
+    id: "ew",
+    initials: "EW",
+    name: "EcoWatt Installs",
+    status: "active",
+    rating: "4.5",
+    location: { city: "Perth", state: "WA" },
+    customers: 65,
+    pipeline: "$2.9M",
+    installsMtd: 14,
+    conversion: "27.1%",
+    conversionDelta: "+2.2%",
+    revenue: "$2.9M",
+    revenueDelta: "+12%",
+    avatarClass: "master-avatar-amber-funnel",
+  },
+  {
+    id: "pe",
+    initials: "PE",
+    name: "PureEnergy Co",
+    status: "active",
+    rating: "4.7",
+    location: { city: "Gold Coast", state: "QLD" },
+    customers: 61,
+    pipeline: "$2.7M",
+    installsMtd: 13,
+    conversion: "26.9%",
+    conversionDelta: "+1.6%",
+    revenue: "$2.7M",
+    revenueDelta: "+8%",
+    avatarClass: "master-avatar-navy",
+  },
+  {
+    id: "se",
+    initials: "SE",
+    name: "SolarEdge AU",
+    status: "pending",
+    rating: "4.4",
+    location: { city: "Canberra", state: "NSW" },
+    customers: 58,
+    pipeline: "$2.5M",
+    installsMtd: 12,
+    conversion: "25.8%",
+    conversionDelta: "+0.9%",
+    revenue: "$2.5M",
+    revenueDelta: "+6%",
+    avatarClass: "master-avatar-slate",
+  },
+  {
+    id: "ph",
+    initials: "PH",
+    name: "PowerHouse Solar",
+    status: "suspended",
+    rating: "4.2",
+    location: { city: "Hobart", state: "VIC" },
+    customers: 52,
+    pipeline: "$2.3M",
+    installsMtd: 10,
+    conversion: "24.5%",
+    conversionDelta: "-1.2%",
+    revenue: "$2.3M",
+    revenueDelta: "+3%",
+    avatarClass: "master-avatar-orange-2",
+  },
+];
 
 /** Products & Pricing (Figma 3:14281) */
 export const MASTER_PRODUCTS_PRICING_PAGE = {

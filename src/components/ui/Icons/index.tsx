@@ -64,6 +64,9 @@ const Zap = createDynamicSvgIcon(() => import("./zap.svg?component"));
 const ArrowUpRight = createDynamicSvgIcon(
   () => import("./arrow-up-right.svg?component"),
 );
+const ChevronRight = createDynamicSvgIcon(
+  () => import("./chevron-right.svg?component"),
+);
 const Building2 = createDynamicSvgIcon(
   () => import("./building-2.svg?component"),
 );
@@ -89,6 +92,7 @@ const Send = createDynamicSvgIcon(() => import("./send.svg?component"));
 const AlertTriangle = createDynamicSvgIcon(
   () => import("./alert-triangle.svg?component"),
 );
+const Star = createDynamicSvgIcon(() => import("./product-star.svg?component"));
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -120,6 +124,7 @@ export type IconType =
   | "Menu"
   | "Zap"
   | "ArrowUpRight"
+  | "ChevronRight"
   | "Building2"
   | "Users"
   | "TrendingUp"
@@ -136,7 +141,8 @@ export type IconType =
   | "Info"
   | "FileText"
   | "Send"
-  | "AlertTriangle";
+  | "AlertTriangle"
+  | "Star";
 
 type IconProps = {
   name: IconType | undefined;
@@ -180,6 +186,7 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     Menu,
     Zap,
     ArrowUpRight,
+    ChevronRight,
     Building2,
     Users,
     TrendingUp,
@@ -197,6 +204,7 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     FileText,
     Send,
     AlertTriangle,
+    Star,
   };
 
   const CurrentIcon = icons[name];
