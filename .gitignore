@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local chat uploads (directory kept via public/uploads/chat/.gitkeep)
+public/uploads/chat/*
+!public/uploads/chat/.gitkeep

@@ -87,13 +87,14 @@ export function PortalRealtimeMessagesPanel({
         onSelect={chat.setActivePeerId}
       />
 
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
+      <section className="flex h-[min(28rem,calc(100vh-14rem))] min-h-[16rem] flex-1 flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 md:h-[28rem]">
         <ChatThreadHeader
           title={threadHeading}
           online={chat.wsState === "open"}
         />
 
-        <div className="flex min-h-[12rem] flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-4">
+          <div className="flex flex-col gap-3">
           {!chat.conversationReady ? (
             <p className="text-center font-dm-sans text-xs text-warm-gray">
               Starting conversation…
@@ -129,15 +130,19 @@ export function PortalRealtimeMessagesPanel({
               );
             })
           )}
+          </div>
         </div>
 
-        <div className="border-t border-warm-border px-4 pb-4 pt-3">
+        <div className="shrink-0 border-t border-warm-border px-4 pb-4 pt-3">
           <MessageRichComposer
             channel={channel}
             onChannelChange={setChannel}
             onSend={chat.sendText}
             sending={chat.sending}
             disabled={!chat.conversationReady}
+            chatUploadBase={
+              portal === "customer" ? "/api/customers" : "/api/installers"
+            }
           />
         </div>
       </section>

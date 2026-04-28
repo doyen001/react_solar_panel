@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { ChatMessageMarkdown } from "@/components/messages/ChatMessageMarkdown";
 
 type Props = {
   direction: "outgoing" | "incoming";
@@ -48,12 +51,15 @@ export function MessageThreadRow({
               : "bg-cream-150 text-warm-ink"
           }`}
         >
-          <p
+          <div
             className="font-dm-sans text-xs font-normal leading-[18px]"
             style={{ fontVariationSettings: "'opsz' 9" }}
           >
-            {body}
-          </p>
+            <ChatMessageMarkdown
+              content={body}
+              tone={outgoing ? "outgoing" : "incoming"}
+            />
+          </div>
         </div>
       </div>
     </div>
