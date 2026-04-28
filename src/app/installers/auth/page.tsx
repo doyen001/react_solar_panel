@@ -22,10 +22,12 @@ import {
 } from "@/lib/validations/auth";
 import { useAppDispatch } from "@/lib/store/hooks";
 import {
+  clearInstallerUser,
   setInstallerSession,
   setInstallerUser,
   type InstallerUser,
 } from "@/lib/store/installerAuthSlice";
+import { clearUser, setCustomerSession } from "@/lib/store/customerAuthSlice";
 import { DesignTopBar } from "@/components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
@@ -84,23 +86,48 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       toast.success(result?.message ?? "Signed in successfully.");
+      const role = result?.user?.role;
+      const isCustomerRole = role === "CUSTOMER";
+
       if (result?.user && typeof result.accessToken === "string") {
-        dispatch(
-          setInstallerSession({
-            user: result.user,
-            accessToken: result.accessToken,
-          }),
-        );
+        if (isCustomerRole) {
+          dispatch(clearInstallerUser());
+          dispatch(
+            setCustomerSession({
+              user: result.user,
+              accessToken: result.accessToken,
+            }),
+          );
+        } else {
+          dispatch(clearUser());
+          dispatch(
+            setInstallerSession({
+              user: result.user,
+              accessToken: result.accessToken,
+            }),
+          );
+        }
       } else if (result?.user) {
-        dispatch(setInstallerUser(result.user));
+        if (isCustomerRole) {
+          dispatch(clearInstallerUser());
+        } else {
+          dispatch(clearUser());
+          dispatch(setInstallerUser(result.user));
+        }
       }
       const from = searchParams.get("from");
-      const safeFrom =
-        from &&
-        from.startsWith("/installers") &&
-        !from.startsWith("/installers/auth")
-          ? from
-          : "/installers/dashboard/home";
+      const defaultRoute = isCustomerRole
+        ? "/customers/dashboard"
+        : "/installers/dashboard/home";
+      const safeFrom = from
+        ? isCustomerRole
+          ? from.startsWith("/customers") && !from.startsWith("/customers/auth")
+            ? from
+            : defaultRoute
+          : from.startsWith("/installers") || from.startsWith("/master")
+            ? from
+            : defaultRoute
+        : defaultRoute;
       router.push(safeFrom);
       router.refresh();
     } catch {

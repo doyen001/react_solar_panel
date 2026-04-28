@@ -22,10 +22,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/lib/store/hooks";
 import {
+  clearUser,
   setCustomerSession,
   setUser,
   type CustomerUser,
 } from "@/lib/store/customerAuthSlice";
+import {
+  clearInstallerUser,
+  setInstallerSession,
+} from "@/lib/store/installerAuthSlice";
 import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
@@ -84,23 +89,48 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       toast.success(result?.message ?? "Signed in successfully.");
+      const role = result?.user?.role;
+      const isCustomerRole = role === "CUSTOMER";
+
       if (result?.user && typeof result.accessToken === "string") {
-        dispatch(
-          setCustomerSession({
-            user: result.user,
-            accessToken: result.accessToken,
-          }),
-        );
+        if (isCustomerRole) {
+          dispatch(clearInstallerUser());
+          dispatch(
+            setCustomerSession({
+              user: result.user,
+              accessToken: result.accessToken,
+            }),
+          );
+        } else {
+          dispatch(clearUser());
+          dispatch(
+            setInstallerSession({
+              user: result.user,
+              accessToken: result.accessToken,
+            }),
+          );
+        }
       } else if (result?.user) {
-        dispatch(setUser(result.user));
+        if (isCustomerRole) {
+          dispatch(clearInstallerUser());
+          dispatch(setUser(result.user));
+        } else {
+          dispatch(clearUser());
+        }
       }
       const from = searchParams.get("from");
-      const safeFrom =
-        from &&
-        from.startsWith("/customers") &&
-        !from.startsWith("/customers/auth")
-          ? from
-          : "/customers/dashboard";
+      const defaultRoute = isCustomerRole
+        ? "/customers/dashboard"
+        : "/installers/dashboard/home";
+      const safeFrom = from
+        ? isCustomerRole
+          ? from.startsWith("/customers") && !from.startsWith("/customers/auth")
+            ? from
+            : defaultRoute
+          : from.startsWith("/installers") || from.startsWith("/master")
+            ? from
+            : defaultRoute
+        : defaultRoute;
       router.push(safeFrom);
       router.refresh();
     } catch {
