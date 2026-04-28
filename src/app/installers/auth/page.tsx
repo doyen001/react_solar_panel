@@ -22,6 +22,7 @@ import {
 } from "@/lib/validations/auth";
 import { useAppDispatch } from "@/lib/store/hooks";
 import {
+  setInstallerSession,
   setInstallerUser,
   type InstallerUser,
 } from "@/lib/store/installerAuthSlice";
@@ -59,6 +60,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       const result = (await response.json().catch(() => null)) as {
         message?: string;
         user?: InstallerUser;
+        accessToken?: string;
         fieldErrors?: Partial<Record<keyof SignInFormData, string[]>>;
       } | null;
 
@@ -82,7 +84,14 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       toast.success(result?.message ?? "Signed in successfully.");
-      if (result?.user) {
+      if (result?.user && typeof result.accessToken === "string") {
+        dispatch(
+          setInstallerSession({
+            user: result.user,
+            accessToken: result.accessToken,
+          }),
+        );
+      } else if (result?.user) {
         dispatch(setInstallerUser(result.user));
       }
       const from = searchParams.get("from");

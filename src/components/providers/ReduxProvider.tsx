@@ -9,6 +9,7 @@ import {
 } from "@/lib/store/customerAuthSlice";
 import {
   INSTALLER_AUTH_STORAGE_KEY,
+  setInstallerSession,
   setInstallerUser,
   type InstallerUser,
 } from "@/lib/store/installerAuthSlice";
@@ -30,6 +31,18 @@ function isCustomerUser(value: unknown): value is CustomerUser {
 
 function isInstallerUser(value: unknown): value is InstallerUser {
   return isCustomerUser(value);
+}
+
+function isInstallerSession(
+  value: unknown,
+): value is { user: InstallerUser; accessToken: string | null } {
+  if (!value || typeof value !== "object") return false;
+  const o = value as Record<string, unknown>;
+  const accessToken = o.accessToken;
+  return (
+    isInstallerUser(o.user) &&
+    (accessToken === null || typeof accessToken === "string")
+  );
 }
 
 export function ReduxProvider({ children }: { children: React.ReactNode }) {
@@ -56,7 +69,9 @@ export function ReduxProvider({ children }: { children: React.ReactNode }) {
       const rawInstaller = sessionStorage.getItem(INSTALLER_AUTH_STORAGE_KEY);
       if (rawInstaller) {
         const parsed: unknown = JSON.parse(rawInstaller);
-        if (isInstallerUser(parsed)) {
+        if (isInstallerSession(parsed)) {
+          store.dispatch(setInstallerSession(parsed));
+        } else if (isInstallerUser(parsed)) {
           store.dispatch(setInstallerUser(parsed));
         } else {
           sessionStorage.removeItem(INSTALLER_AUTH_STORAGE_KEY);

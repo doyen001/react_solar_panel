@@ -8,6 +8,7 @@ import designProposalReducer from "./designProposalSlice";
 import installerAuthReducer, {
   clearInstallerUser,
   INSTALLER_AUTH_STORAGE_KEY,
+  setInstallerSession,
   setInstallerUser,
 } from "./installerAuthSlice";
 
@@ -29,10 +30,15 @@ const installerAuthPersistenceMiddleware: Middleware =
   () => (next) => (action) => {
     const result = next(action);
     if (typeof window === "undefined") return result;
-    if (setInstallerUser.match(action)) {
+    if (setInstallerSession.match(action)) {
       sessionStorage.setItem(
         INSTALLER_AUTH_STORAGE_KEY,
         JSON.stringify(action.payload),
+      );
+    } else if (setInstallerUser.match(action)) {
+      sessionStorage.setItem(
+        INSTALLER_AUTH_STORAGE_KEY,
+        JSON.stringify({ user: action.payload, accessToken: null }),
       );
     } else if (clearInstallerUser.match(action)) {
       sessionStorage.removeItem(INSTALLER_AUTH_STORAGE_KEY);
