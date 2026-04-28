@@ -2,11 +2,46 @@
 
 import classNames from "classnames";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { InstallerHeader } from "@/components/installer/dashboard/InstallerHeader";
 import { InstallerShortcutRail } from "@/components/installer/dashboard/InstallerShortcutRail";
 import Icon from "@/components/ui/Icons";
-import { INSTALLER_HOME_CUSTOMERS } from "@/components/installer/home-dashboard/installerHomeMock";
+
+type HomeCustomer = {
+  id: string;
+  initials: string;
+  name: string;
+};
+
+type CustomerApiItem = {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+};
+
+type PaginatedApiResponse<T> = {
+  success?: boolean;
+  data?: T[];
+};
+
+const DEFAULT_CUSTOMERS: HomeCustomer[] = [
+  { id: "fallback-1", initials: "NA", name: "No customers yet" },
+];
+
+function toInitials(firstName?: string | null, lastName?: string | null) {
+  const first = (firstName ?? "").trim();
+  const last = (lastName ?? "").trim();
+  const fromNames = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+  if (fromNames.trim()) return fromNames;
+  return "NA";
+}
+
+function toName(customer: CustomerApiItem) {
+  const fullName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
+  if (fullName) return fullName;
+  return customer.email?.trim() || "Unnamed Customer";
+}
 
 export type InstallerDashboardSubTab = "detail" | "pipeline" | "schedule";
 
@@ -18,20 +53,53 @@ export function InstallerDashboardShell({
   children: React.ReactNode;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [customers, setCustomers] = useState<HomeCustomer[]>(DEFAULT_CUSTOMERS);
   const [selectedId, setSelectedId] = useState(
-    INSTALLER_HOME_CUSTOMERS[0]?.id ?? "1",
+    DEFAULT_CUSTOMERS[0]?.id ?? "fallback-1",
   );
   const [customerSearch, setCustomerSearch] = useState("");
 
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCustomers = async () => {
+      try {
+        const response = await fetch("/api/installers/customers?limit=100", {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const json = (await response.json()) as PaginatedApiResponse<CustomerApiItem>;
+        const rows = Array.isArray(json.data) ? json.data : [];
+        if (!rows.length || !mounted) return;
+        const mapped = rows.map((row) => ({
+          id: row.id,
+          name: toName(row),
+          initials: toInitials(row.firstName, row.lastName),
+        }));
+        setCustomers(mapped);
+        setSelectedId((prev) =>
+          mapped.some((item) => item.id === prev) ? prev : mapped[0].id,
+        );
+      } catch {
+        // Keep safe fallback list when API is unavailable.
+      }
+    };
+
+    void loadCustomers();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const filteredCustomers = useMemo(() => {
     const q = customerSearch.trim().toLowerCase();
-    if (!q) return INSTALLER_HOME_CUSTOMERS;
-    return INSTALLER_HOME_CUSTOMERS.filter(
+    if (!q) return customers;
+    return customers.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.initials.toLowerCase().includes(q),
     );
-  }, [customerSearch]);
+  }, [customerSearch, customers]);
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-50">

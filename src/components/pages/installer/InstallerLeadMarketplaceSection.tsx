@@ -1,10 +1,65 @@
 "use client";
 
 import classNames from "classnames";
+import { useEffect, useMemo, useState } from "react";
 import {
   INSTALLER_LEAD_MARKETPLACE_CARDS,
   type InstallerLeadCardData,
 } from "@/components/pages/installer/installerLeadMarketplaceMock";
+
+type LeadListItem = {
+  id: string;
+  customerName?: string;
+  address?: string;
+  estimatedValue?: number;
+  status?: string;
+};
+
+type PaginatedApiResponse<T> = {
+  success?: boolean;
+  data?: T[];
+};
+
+const STATUS_TO_BADGE: Record<string, string> = {
+  NEW: "NEW",
+  CONTACTED: "CONTACTED",
+  QUALIFIED: "QUALIFIED",
+  PROPOSAL_SENT: "PROPOSAL",
+  NEGOTIATION: "NEGOTIATION",
+  WON: "WON",
+  LOST: "LOST",
+};
+
+function toCard(lead: LeadListItem): InstallerLeadCardData {
+  const city =
+    lead.address
+      ?.split(",")
+      .map((part) => part.trim())
+      .filter(Boolean)[0] ?? "N/A";
+  const estimatedValue =
+    typeof lead.estimatedValue === "number"
+      ? lead.estimatedValue.toLocaleString(undefined, {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        })
+      : "TBD";
+  const status = lead.status ?? "NEW";
+  const badge = STATUS_TO_BADGE[status] ?? "LEAD";
+
+  return {
+    badge,
+    badgeVariant: status === "QUALIFIED" || status === "WON" ? "yellow" : "cyan",
+    title: lead.customerName ? `Lead for ${lead.customerName}` : "Lead",
+    system: "TBD",
+    panels: "TBD",
+    battery: "TBD",
+    inverter: "TBD",
+    city,
+    buildingType: "N/A",
+    price: estimatedValue,
+  };
+}
 
 function FilterFunnelIcon({ className }: { className?: string }) {
   return (
@@ -131,6 +186,42 @@ function LeadCard({ card }: { card: InstallerLeadCardData }) {
 
 /** Figma 3:2206 — installer lead filters + four lead cards */
 export function InstallerLeadMarketplaceSection() {
+  const [liveLeads, setLiveLeads] = useState<LeadListItem[] | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadLeads = async () => {
+      try {
+        const response = await fetch("/api/installers/leads?limit=8", {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const json = (await response.json()) as PaginatedApiResponse<LeadListItem>;
+        const rows = Array.isArray(json.data) ? json.data : [];
+        if (mounted) {
+          setLiveLeads(rows);
+        }
+      } catch {
+        if (mounted) {
+          setLiveLeads(null);
+        }
+      }
+    };
+
+    void loadLeads();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const cards = useMemo(() => {
+    if (!liveLeads || liveLeads.length === 0) {
+      return INSTALLER_LEAD_MARKETPLACE_CARDS;
+    }
+    return liveLeads.slice(0, 8).map(toCard);
+  }, [liveLeads]);
+
   return (
     <section
       className="mx-auto flex max-w-[1260px] flex-col gap-8 px-4 py-10 sm:px-6 lg:px-[90px]"
@@ -163,8 +254,8 @@ export function InstallerLeadMarketplaceSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 xl:gap-[19px]">
-        {INSTALLER_LEAD_MARKETPLACE_CARDS.map((card) => (
-          <LeadCard key={card.title} card={card} />
+        {cards.map((card, index) => (
+          <LeadCard key={`${card.title}-${index}`} card={card} />
         ))}
       </div>
     </section>
