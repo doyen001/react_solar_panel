@@ -2,6 +2,7 @@ import { configureStore, type Middleware } from "@reduxjs/toolkit";
 import customerAuthReducer, {
   clearUser,
   CUSTOMER_AUTH_STORAGE_KEY,
+  setCustomerSession,
   setUser,
 } from "./customerAuthSlice";
 import designProposalReducer from "./designProposalSlice";
@@ -15,10 +16,15 @@ import installerAuthReducer, {
 const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) => {
   const result = next(action);
   if (typeof window === "undefined") return result;
-  if (setUser.match(action)) {
+  if (setCustomerSession.match(action)) {
     sessionStorage.setItem(
       CUSTOMER_AUTH_STORAGE_KEY,
       JSON.stringify(action.payload),
+    );
+  } else if (setUser.match(action)) {
+    sessionStorage.setItem(
+      CUSTOMER_AUTH_STORAGE_KEY,
+      JSON.stringify({ user: action.payload, accessToken: null }),
     );
   } else if (clearUser.match(action)) {
     sessionStorage.removeItem(CUSTOMER_AUTH_STORAGE_KEY);

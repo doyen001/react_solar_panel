@@ -143,6 +143,7 @@ export async function POST(request: Request) {
     {
       message: "Signed in successfully.",
       user: data.user,
+      accessToken: data.accessToken,
     },
     { status: 200 },
   );

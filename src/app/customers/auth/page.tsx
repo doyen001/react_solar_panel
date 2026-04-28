@@ -21,7 +21,11 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/lib/store/hooks";
-import { setUser, type CustomerUser } from "@/lib/store/customerAuthSlice";
+import {
+  setCustomerSession,
+  setUser,
+  type CustomerUser,
+} from "@/lib/store/customerAuthSlice";
 import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
@@ -56,6 +60,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       const result = (await response.json().catch(() => null)) as {
         message?: string;
         user?: CustomerUser;
+        accessToken?: string;
         fieldErrors?: Partial<Record<keyof SignInFormData, string[]>>;
       } | null;
 
@@ -79,7 +84,14 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       toast.success(result?.message ?? "Signed in successfully.");
-      if (result?.user) {
+      if (result?.user && typeof result.accessToken === "string") {
+        dispatch(
+          setCustomerSession({
+            user: result.user,
+            accessToken: result.accessToken,
+          }),
+        );
+      } else if (result?.user) {
         dispatch(setUser(result.user));
       }
       const from = searchParams.get("from");

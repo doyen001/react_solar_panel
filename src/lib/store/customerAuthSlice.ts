@@ -14,10 +14,12 @@ export type CustomerUser = {
 
 export type CustomerAuthState = {
   user: CustomerUser | null;
+  accessToken: string | null;
 };
 
 const initialState: CustomerAuthState = {
   user: null,
+  accessToken: null,
 };
 
 const customerAuthSlice = createSlice({
@@ -27,11 +29,23 @@ const customerAuthSlice = createSlice({
     setUser: (state, action: PayloadAction<CustomerUser>) => {
       state.user = action.payload;
     },
+    setCustomerSession: (
+      state,
+      action: PayloadAction<{ user: CustomerUser; accessToken: string }>,
+    ) => {
+      state.user = action.payload.user;
+      state.accessToken = action.payload.accessToken;
+    },
+    setCustomerAccessToken: (state, action: PayloadAction<string | null>) => {
+      state.accessToken = action.payload;
+    },
     clearUser: (state) => {
       state.user = null;
+      state.accessToken = null;
     },
   },
 });
 
-export const { setUser, clearUser } = customerAuthSlice.actions;
+export const { setUser, setCustomerSession, setCustomerAccessToken, clearUser } =
+  customerAuthSlice.actions;
 export default customerAuthSlice.reducer;
