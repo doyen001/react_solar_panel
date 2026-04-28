@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /** pdf-parse → pdfjs-dist must not be webpacked; it throws at load time in the RSC bundle. */
+  serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
   turbopack: {},
   webpack(config) {
     config.module.rules.unshift({

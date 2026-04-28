@@ -7,6 +7,7 @@ import {
   Outfit,
   Source_Sans_3,
 } from "next/font/google";
+import { EasylinkAiChatbot } from "@/components/ai-chat/EasylinkAiChatbot";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import "react-toastify/dist/ReactToastify.css";
@@ -64,6 +65,7 @@ export default function RootLayout({
       >
         <ReduxProvider>
           {children}
+          <EasylinkAiChatbot />
           <ToastProvider />
         </ReduxProvider>
       </body>
