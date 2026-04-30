@@ -1895,3 +1895,18 @@ export const INSTALLER_LEAD_MARKETPLACE_FALLBACK: InstallerLeadMarketplaceCard[]
       postcode: "6000",
     },
   ];
+
+/** Installer schedule dashboard */
+export const INSTALLER_SCHEDULE_VIEW_MODES = [
+  "month",
+  "week",
+  "day",
+  "agenda",
+] as const;
+
+export const INSTALLER_SCHEDULE_DEFAULTS = {
+  appointmentsPage: 1,
+  appointmentsLimit: 100,
+  createDurationMs: 60 * 60 * 1000,
+  calendarHeightPx: 620,
+} as const;
