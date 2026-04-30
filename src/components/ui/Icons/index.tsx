@@ -103,6 +103,10 @@ const Star = createDynamicSvgIcon(() => import("./product-star.svg?component"));
 const ExternalLink = createDynamicSvgIcon(
   () => import("./product-external-link.svg?component"),
 );
+const Funnel = createDynamicSvgIcon(() => import("./funnel.svg?component"));
+const ChevronDown = createDynamicSvgIcon(
+  () => import("./chevron-down.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -160,7 +164,9 @@ export type IconType =
   | "Send"
   | "AlertTriangle"
   | "Star"
-  | "ExternalLink";
+  | "ExternalLink"
+  | "Funnel"
+  | "ChevronDown";
 
 type IconProps = {
   name: IconType | undefined;
@@ -231,6 +237,8 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     AlertTriangle,
     Star,
     ExternalLink,
+    Funnel,
+    ChevronDown,
   };
 
   const CurrentIcon = icons[name];

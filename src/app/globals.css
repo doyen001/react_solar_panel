@@ -104,6 +104,16 @@
   --color-danger: #ef4444;
   --color-amber-soft: #f0c775;
   --color-neutral-mist: #f3f3f3;
+
+  /* Lead marketplace (Figma Final Designs 3:2206) */
+  --color-lead-marketplace-page-bg: var(--color-neutral-mist);
+  --color-lead-marketplace-badge-teal: #00a9ce;
+  --color-lead-marketplace-badge-amber: #ffb800;
+  --color-lead-marketplace-button: #00a9ce;
+  --color-lead-marketplace-card-border: #e8e8e8;
+  --color-lead-marketplace-card-shadow: rgb(15 23 42 / 0.06);
+  --color-lead-marketplace-field-label: #6b7280;
+  --color-lead-marketplace-filter-label: #374151;
   --color-flame: #f54900;
   --color-cream-200: #f5f0e0;
   --color-cream-225: #f5f2ec;

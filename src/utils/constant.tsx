@@ -1800,3 +1800,98 @@ export const MASTER_REGION_SLICES: MasterRegionSlice[] = [
   { id: "sa", label: "SA", percent: 10, swatchClass: "master-region-sa" },
   { id: "wa", label: "WA", percent: 7, swatchClass: "master-region-wa" },
 ];
+
+/** Installer landing — Lead marketplace (Figma Final Designs 3:2206) */
+export type InstallerLeadMarketplaceBadgeVariant = "cyan" | "yellow";
+
+export type InstallerLeadMarketplaceCard = {
+  id: string;
+  badge: string;
+  badgeVariant: InstallerLeadMarketplaceBadgeVariant;
+  title: string;
+  system: string;
+  panels: string;
+  battery: string;
+  inverter: string;
+  city: string;
+  buildingType: string;
+  price: string;
+  postcode?: string;
+};
+
+export const INSTALLER_LEAD_MARKETPLACE_SECTION = {
+  heading: "Lead Marketplace",
+  filterByLabel: "Filter by:",
+  filters: {
+    buildingType: "Building Type",
+    systemType: "System Type",
+    city: "City",
+    postcode: "Lead Postcode",
+  },
+  filterAllLabel: "All",
+  signUpCta: "Sign Up to Buy",
+  signUpHref: "/installers/auth",
+  apiFallbackNotice:
+    "Showing sample leads while we connect to the marketplace.",
+} as const;
+
+/** Used when the public leads API is unreachable (offline / misconfigured). */
+export const INSTALLER_LEAD_MARKETPLACE_FALLBACK: InstallerLeadMarketplaceCard[] =
+  [
+    {
+      id: "fallback-melbourne",
+      badge: "RESIDENTIAL",
+      badgeVariant: "cyan",
+      title: "Lead from Melbourne",
+      system: "6.6kW System",
+      panels: "16 Panels",
+      battery: "No",
+      inverter: "Yes",
+      city: "Melbourne",
+      buildingType: "Brick House",
+      price: "$16,000",
+      postcode: "3000",
+    },
+    {
+      id: "fallback-sydney",
+      badge: "RESIDENTIAL",
+      badgeVariant: "yellow",
+      title: "Lead from Sydney",
+      system: "10kW System",
+      panels: "24 Panels",
+      battery: "Yes",
+      inverter: "Yes",
+      city: "Sydney",
+      buildingType: "Tile Roof",
+      price: "$45,000",
+      postcode: "2000",
+    },
+    {
+      id: "fallback-brisbane",
+      badge: "COMMERCIAL",
+      badgeVariant: "cyan",
+      title: "Lead from Brisbane",
+      system: "30kW System",
+      panels: "72 Panels",
+      battery: "Yes",
+      inverter: "Yes",
+      city: "Brisbane",
+      buildingType: "Warehouse",
+      price: "$52,000",
+      postcode: "4000",
+    },
+    {
+      id: "fallback-perth",
+      badge: "RESIDENTIAL",
+      badgeVariant: "cyan",
+      title: "Lead from Perth",
+      system: "8kW System",
+      panels: "20 Panels",
+      battery: "No",
+      inverter: "Yes",
+      city: "Perth",
+      buildingType: "New Build",
+      price: "$50,000",
+      postcode: "6000",
+    },
+  ];

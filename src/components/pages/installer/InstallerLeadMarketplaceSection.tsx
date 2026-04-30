@@ -1,262 +1,189 @@
 "use client";
 
-import classNames from "classnames";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { LeadMarketplaceCard } from "@/components/pages/installer/lead-marketplace/LeadMarketplaceCard";
+import { LeadMarketplaceFilterBar } from "@/components/pages/installer/lead-marketplace/LeadMarketplaceFilterBar";
+import { fetchPublicMarketplaceLeads } from "@/lib/public/marketplace-leads";
 import {
-  INSTALLER_LEAD_MARKETPLACE_CARDS,
-  type InstallerLeadCardData,
-} from "@/components/pages/installer/installerLeadMarketplaceMock";
+  INSTALLER_LEAD_MARKETPLACE_FALLBACK,
+  INSTALLER_LEAD_MARKETPLACE_SECTION,
+  type InstallerLeadMarketplaceCard,
+} from "@/utils/constant";
 
-type LeadListItem = {
-  id: string;
-  customerName?: string;
-  address?: string;
-  estimatedValue?: number;
-  status?: string;
-};
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [d, setD] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setD(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return d;
+}
 
-type PaginatedApiResponse<T> = {
-  success?: boolean;
-  data?: T[];
-};
+function filterLocal(
+  cards: readonly InstallerLeadMarketplaceCard[],
+  f: {
+    buildingType: string;
+    systemType: string;
+    city: string;
+    postcode: string;
+  },
+) {
+  return cards.filter((c) => {
+    if (f.buildingType && c.buildingType !== f.buildingType) return false;
+    if (f.systemType && c.system !== f.systemType) return false;
+    if (f.city && c.city !== f.city) return false;
+    if (f.postcode && !(c.postcode ?? "").includes(f.postcode)) return false;
+    return true;
+  });
+}
 
-const STATUS_TO_BADGE: Record<string, string> = {
-  NEW: "NEW",
-  CONTACTED: "CONTACTED",
-  QUALIFIED: "QUALIFIED",
-  PROPOSAL_SENT: "PROPOSAL",
-  NEGOTIATION: "NEGOTIATION",
-  WON: "WON",
-  LOST: "LOST",
-};
-
-function toCard(lead: LeadListItem): InstallerLeadCardData {
-  const city =
-    lead.address
-      ?.split(",")
-      .map((part) => part.trim())
-      .filter(Boolean)[0] ?? "N/A";
-  const estimatedValue =
-    typeof lead.estimatedValue === "number"
-      ? lead.estimatedValue.toLocaleString(undefined, {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 0,
-        })
-      : "TBD";
-  const status = lead.status ?? "NEW";
-  const badge = STATUS_TO_BADGE[status] ?? "LEAD";
-
+function hintsFromCards(cards: readonly InstallerLeadMarketplaceCard[]) {
   return {
-    badge,
-    badgeVariant: status === "QUALIFIED" || status === "WON" ? "yellow" : "cyan",
-    title: lead.customerName ? `Lead for ${lead.customerName}` : "Lead",
-    system: "TBD",
-    panels: "TBD",
-    battery: "TBD",
-    inverter: "TBD",
-    city,
-    buildingType: "N/A",
-    price: estimatedValue,
+    buildingTypes: [...new Set(cards.map((c) => c.buildingType))].sort(),
+    systemTypes: [...new Set(cards.map((c) => c.system))].sort(),
+    cities: [...new Set(cards.map((c) => c.city))].sort(),
   };
 }
 
-function FilterFunnelIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width={17}
-      height={17}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={className}
-    >
-      <path
-        d="M22 3H2L10 12.46V19L14 21V12.46L22 3Z"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width={17}
-      height={17}
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden
-      className={className}
-    >
-      <path
-        d="M4 6.5L8 10L12 6.5"
-        stroke="currentColor"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function LeadFilterSelect({
-  label,
-  defaultValue,
-}: {
-  label: string;
-  defaultValue: string;
-}) {
-  return (
-    <div className="relative h-[41px] w-full min-w-0 sm:w-[165px]">
-      <select
-        defaultValue={defaultValue}
-        aria-label={label}
-        className="h-full w-full appearance-none rounded-[10px] border border-border-soft bg-white pl-3 pr-9 font-source-sans text-[14.5px] text-ink outline-none"
-      >
-        <option value={defaultValue}>{defaultValue}</option>
-      </select>
-      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-muted">
-        <ChevronDownIcon />
-      </span>
-    </div>
-  );
-}
-
-function DetailPair({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="font-source-sans text-[12.5px] font-medium leading-tight text-ink">
-        {label}
-      </span>
-      <span className="font-source-sans text-[12.5px] font-normal leading-tight text-muted">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function LeadCard({ card }: { card: InstallerLeadCardData }) {
-  const stripClass =
-    card.badgeVariant === "yellow"
-      ? "bg-gold-2"
-      : "bg-brand-cyan";
-
-  return (
-    <article className="flex flex-col overflow-hidden rounded-[12px] border border-border-soft bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
-      <div className={classNames("h-[25px] px-3 pt-2", stripClass)}>
-        <p className="font-source-sans text-[12.5px] font-semibold uppercase leading-none text-white">
-          {card.badge}
-        </p>
-      </div>
-      <div className="flex flex-col gap-4 px-4 pb-4 pt-4">
-        <h3 className="font-source-sans text-[17px] font-bold tracking-[-0.41px] text-ink">
-          {card.title}
-        </h3>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-          <DetailPair label="System" value={card.system} />
-          <DetailPair label="Panels" value={card.panels} />
-          <DetailPair label="Battery" value={card.battery} />
-          <DetailPair label="Inverter" value={card.inverter} />
-          <DetailPair label="City" value={card.city} />
-          <DetailPair label="Type" value={card.buildingType} />
-        </div>
-        <p className="text-center font-source-sans text-[25px] font-bold leading-tight text-ink">
-          {card.price}
-        </p>
-        <button
-          type="button"
-          className="w-full rounded-[10px] bg-brand-cyan py-2.5 text-center font-source-sans text-[12.5px] font-semibold text-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition-opacity hover:opacity-95"
-        >
-          Sign Up to Buy
-        </button>
-      </div>
-    </article>
-  );
-}
-
-/** Figma 3:2206 — installer lead filters + four lead cards */
+/**
+ * Figma Final Designs 3:2206 — public installer landing; live data from GET /api/public/leads
+ * (proxies unauthenticated GET /leads/marketplace).
+ */
 export function InstallerLeadMarketplaceSection() {
-  const [liveLeads, setLiveLeads] = useState<LeadListItem[] | null>(null);
+  const [buildingType, setBuildingType] = useState("");
+  const [systemType, setSystemType] = useState("");
+  const [city, setCity] = useState("");
+  const [postcodeInput, setPostcodeInput] = useState("");
+  const debouncedPostcode = useDebouncedValue(postcodeInput, 320);
+
+  const [remoteRows, setRemoteRows] = useState<InstallerLeadMarketplaceCard[]>(
+    [],
+  );
+  const [hints, setHints] = useState({
+    buildingTypes: [] as string[],
+    systemTypes: [] as string[],
+    cities: [] as string[],
+  });
+  const [usedFallback, setUsedFallback] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const refreshRemote = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { leads, meta } = await fetchPublicMarketplaceLeads({
+        page: 1,
+        limit: 80,
+        buildingType: buildingType || undefined,
+        systemType: systemType || undefined,
+        city: city || undefined,
+        postcode: debouncedPostcode || undefined,
+      });
+      setRemoteRows(leads);
+      setHints(meta.filterHints);
+      setUsedFallback(false);
+    } catch {
+      setUsedFallback(true);
+      setRemoteRows([]);
+      setHints(hintsFromCards(INSTALLER_LEAD_MARKETPLACE_FALLBACK));
+    } finally {
+      setLoading(false);
+    }
+  }, [buildingType, systemType, city, debouncedPostcode]);
 
   useEffect(() => {
-    let mounted = true;
+    void refreshRemote();
+  }, [refreshRemote]);
 
-    const loadLeads = async () => {
-      try {
-        const response = await fetch("/api/installers/leads?limit=8", {
-          cache: "no-store",
-        });
-        if (!response.ok) return;
-        const json = (await response.json()) as PaginatedApiResponse<LeadListItem>;
-        const rows = Array.isArray(json.data) ? json.data : [];
-        if (mounted) {
-          setLiveLeads(rows);
-        }
-      } catch {
-        if (mounted) {
-          setLiveLeads(null);
-        }
-      }
-    };
+  const displayed = useMemo(() => {
+    if (!usedFallback) return remoteRows;
+    return filterLocal(INSTALLER_LEAD_MARKETPLACE_FALLBACK, {
+      buildingType,
+      systemType,
+      city,
+      postcode: debouncedPostcode,
+    });
+  }, [
+    usedFallback,
+    remoteRows,
+    buildingType,
+    systemType,
+    city,
+    debouncedPostcode,
+  ]);
 
-    void loadLeads();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const cards = useMemo(() => {
-    if (!liveLeads || liveLeads.length === 0) {
-      return INSTALLER_LEAD_MARKETPLACE_CARDS;
-    }
-    return liveLeads.slice(0, 8).map(toCard);
-  }, [liveLeads]);
+  const {
+    heading,
+    signUpCta,
+    signUpHref,
+    apiFallbackNotice,
+  } = INSTALLER_LEAD_MARKETPLACE_SECTION;
 
   return (
     <section
-      className="mx-auto flex max-w-[1260px] flex-col gap-8 px-4 py-10 sm:px-6 lg:px-[90px]"
+      className="bg-lead-marketplace-page-bg"
       data-node-id="3:2206"
+      aria-labelledby="installer-lead-marketplace-heading"
     >
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-3 lg:gap-4">
-          <div className="flex items-center gap-2">
-            <FilterFunnelIcon className="shrink-0 text-ink" />
-            <span className="font-source-sans text-[16.5px] font-medium leading-none text-ink">
-              Filter by:
-            </span>
-          </div>
-          <LeadFilterSelect label="Building Type" defaultValue="Building Type" />
-          <LeadFilterSelect label="System Type" defaultValue="System Type" />
-          <LeadFilterSelect label="City" defaultValue="City" />
-        </div>
-        <div className="flex flex-wrap items-center gap-2 lg:gap-2">
-          <span className="font-source-sans text-[14.5px] text-muted">
-            Lead Postcode
-          </span>
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder=""
-            aria-label="Lead postcode"
-            className="h-[41px] w-full min-w-[140px] rounded-[10px] border border-border-soft bg-white px-3 font-source-sans text-[14.5px] text-ink outline-none sm:w-[165px]"
+      <div className="mx-auto max-w-[1260px] px-4 py-12 sm:px-6 sm:py-14 lg:px-[90px] lg:py-16">
+        <h2
+          id="installer-lead-marketplace-heading"
+          className="text-center font-source-sans text-[22px] font-bold tracking-tight text-ink md:text-[24px]"
+        >
+          {heading}
+        </h2>
+
+        {usedFallback ? (
+          <p
+            className="mx-auto mt-3 max-w-2xl text-center font-source-sans text-[14px] leading-relaxed text-muted"
+            role="status"
+          >
+            {apiFallbackNotice}
+          </p>
+        ) : null}
+
+        <div className="mt-8 lg:mt-10">
+          <LeadMarketplaceFilterBar
+            buildingType={buildingType}
+            systemType={systemType}
+            city={city}
+            postcode={postcodeInput}
+            buildingTypes={hints.buildingTypes}
+            systemTypes={hints.systemTypes}
+            cities={hints.cities}
+            onBuildingType={setBuildingType}
+            onSystemType={setSystemType}
+            onCity={setCity}
+            onPostcode={setPostcodeInput}
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 xl:gap-[19px]">
-        {cards.map((card, index) => (
-          <LeadCard key={`${card.title}-${index}`} card={card} />
-        ))}
+        <div className="mt-10">
+          {loading ? (
+            <p className="py-16 text-center font-source-sans text-[15px] text-muted">
+              Loading leads…
+            </p>
+          ) : displayed.length === 0 ? (
+            <p
+              className="rounded-xl border border-dashed border-lead-marketplace-card-border bg-white py-16 text-center font-source-sans text-[15px] text-muted"
+              role="status"
+            >
+              No leads match these filters. Try clearing postcode or choosing
+              &ldquo;All&rdquo; in the dropdowns.
+            </p>
+          ) : (
+            <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
+              {displayed.map((card) => (
+                <li key={card.id}>
+                  <LeadMarketplaceCard
+                    card={card}
+                    signUpLabel={signUpCta}
+                    signUpHref={signUpHref}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </section>
   );
