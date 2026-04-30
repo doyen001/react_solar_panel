@@ -32,13 +32,13 @@ function isCustomerUser(value: unknown): value is CustomerUser {
 
 function isCustomerSession(
   value: unknown,
-): value is { user: CustomerUser; accessToken: string | null } {
+): value is { user: CustomerUser; accessToken: string } {
   if (!value || typeof value !== "object") return false;
   const o = value as Record<string, unknown>;
   const accessToken = o.accessToken;
   return (
     isCustomerUser(o.user) &&
-    (accessToken === null || typeof accessToken === "string")
+    typeof accessToken === "string"
   );
 }
 
@@ -48,13 +48,13 @@ function isInstallerUser(value: unknown): value is InstallerUser {
 
 function isInstallerSession(
   value: unknown,
-): value is { user: InstallerUser; accessToken: string | null } {
+): value is { user: InstallerUser; accessToken: string } {
   if (!value || typeof value !== "object") return false;
   const o = value as Record<string, unknown>;
   const accessToken = o.accessToken;
   return (
     isInstallerUser(o.user) &&
-    (accessToken === null || typeof accessToken === "string")
+    typeof accessToken === "string"
   );
 }
 
