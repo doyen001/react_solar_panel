@@ -11,6 +11,7 @@ import { PipelineRegionalAndLead } from "@/components/installer/pipeline-dashboa
 import { PipelineSecondaryKpiRow } from "@/components/installer/pipeline-dashboard/PipelineSecondaryKpiRow";
 import { PipelineStatStrip } from "@/components/installer/pipeline-dashboard/PipelineStatStrip";
 import { PipelineStcAndFunnel } from "@/components/installer/pipeline-dashboard/PipelineStcAndFunnel";
+import { InstallerPipelineLeadOutreachSection } from "@/components/installer/InstallerCommsActions";
 import { PipelineTeamAndActivity } from "@/components/installer/pipeline-dashboard/PipelineTeamAndActivity";
 
 export default function InstallerPipelinePage() {
@@ -29,6 +30,7 @@ export default function InstallerPipelinePage() {
           <MonthlyPerformanceSection />
           <PipelineStcAndFunnel />
           <PipelineTeamAndActivity />
+          <InstallerPipelineLeadOutreachSection />
           <PipelineRegionalAndLead />
           <PipelineOperationalHealth />
         </div>

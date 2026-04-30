@@ -17,6 +17,10 @@ import {
 } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
+import {
+  InstallerAppointmentConfirmationEmailAction,
+  InstallerWelcomeFollowupEmailAction,
+} from "@/components/installer/InstallerCommsActions";
 import Icon from "@/components/ui/Icons";
 import { usePollingResource } from "@/hooks/usePollingResource";
 import {
@@ -529,6 +533,32 @@ export function InstallerScheduleCalendar() {
                 className="rounded-md border border-warm-border bg-white px-3 py-2 font-inter text-sm text-warm-ink"
               />
             </label>
+            {formState.leadId ? (
+              <InstallerWelcomeFollowupEmailAction
+                key={`welcome-${formState.leadId}`}
+                leadId={formState.leadId}
+                leadName={
+                  leads.find((l) => l.id === formState.leadId)?.customerName ??
+                  "Customer"
+                }
+                hasEmail={Boolean(
+                  leads
+                    .find((l) => l.id === formState.leadId)
+                    ?.customerEmail?.trim(),
+                )}
+                variant="panel"
+              />
+            ) : null}
+            {formMode === "edit" &&
+            selectedAppointmentId &&
+            formState.status !== "CANCELLED" ? (
+              <InstallerAppointmentConfirmationEmailAction
+                key={`confirm-${selectedAppointmentId}`}
+                appointmentId={selectedAppointmentId}
+                title={formState.title.trim() || "Appointment"}
+                disabled={false}
+              />
+            ) : null}
             <div className="flex gap-2 md:col-span-2">
               <button
                 type="submit"
@@ -597,10 +627,23 @@ export function InstallerScheduleCalendar() {
                         : "Unlinked appointment")}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-cream-100 px-2 py-1 font-inter text-[10px] font-semibold text-warm-ink">
                     {appointment.status}
                   </span>
+                  {appointment.leadId && appointment.lead ? (
+                    <InstallerWelcomeFollowupEmailAction
+                      key={`list-welcome-${appointment.id}-${appointment.leadId}`}
+                      leadId={appointment.leadId}
+                      leadName={appointment.lead.customerName}
+                      hasEmail={Boolean(
+                        leads
+                          .find((l) => l.id === appointment.leadId)
+                          ?.customerEmail?.trim(),
+                      )}
+                      variant="inline"
+                    />
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => openEditForm(appointment)}
