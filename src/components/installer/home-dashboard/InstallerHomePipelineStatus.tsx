@@ -2,6 +2,7 @@
 
 import classNames from "classnames";
 import type { ComponentPropsWithoutRef } from "react";
+import { InstallerLeadsWorkspace } from "@/components/installer/leads/InstallerLeadsWorkspace";
 import Icon from "@/components/ui/Icons";
 import { INSTALLER_HOME_PROFILE } from "@/components/installer/home-dashboard/installerHomeMock";
 import { PIPELINE_KANBAN_HEADER_GRADIENTS } from "@/components/installer/home-dashboard/installerPipelineKanbanStyles";
@@ -512,6 +513,7 @@ function KanbanColumn({
 export function InstallerHomePipelineStatus() {
   return (
     <div className="space-y-5 pb-10">
+      <InstallerLeadsWorkspace />
       <PipelineStepper />
 
       <div
