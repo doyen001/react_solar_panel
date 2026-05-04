@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { DashboardNotificationBell } from "@/components/dashboard/DashboardNotificationBell";
 import Icon from "@/components/ui/Icons";
 import {
   MASTER_DASHBOARD_NAV,
@@ -11,13 +12,11 @@ import {
 type Props = {
   activeNavId?: (typeof MASTER_DASHBOARD_NAV)[number]["id"];
   userInitials?: string;
-  notificationCount?: number;
 };
 
 export function MasterDashboardHeader({
   activeNavId = "overview",
   userInitials = "AD",
-  notificationCount = 12,
 }: Props) {
   return (
     <header className="master-header-bg master-header-border sticky top-0 z-30 shrink-0 border-b">
@@ -89,16 +88,11 @@ export function MasterDashboardHeader({
           >
             <Icon name="Search" className="size-[18px]" />
           </button>
-          <button
-            type="button"
-            className="relative flex size-8 items-center justify-center rounded-full text-gray-1 hover:bg-white/10"
-            aria-label="Notifications"
-          >
-            <Icon name="Bell" className="size-[18px]" />
-            <span className="absolute left-4 top-0.5 flex size-[14px] items-center justify-center rounded-full bg-danger font-[family-name:var(--font-inter)] text-[8px] font-bold leading-3 tracking-wide text-white">
-              {notificationCount}
-            </span>
-          </button>
+          <DashboardNotificationBell
+            mode="preview"
+            bellButtonClassName="relative flex size-8 items-center justify-center rounded-full text-gray-1 hover:bg-white/10"
+            bellIconClassName="size-[18px] text-gray-1"
+          />
           <div
             className="master-avatar-gradient flex size-8 items-center justify-center rounded-full font-[family-name:var(--font-inter)] text-[11px] font-semibold leading-[16.5px] tracking-wide text-warm-black"
             aria-hidden

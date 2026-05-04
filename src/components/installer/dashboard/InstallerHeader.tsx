@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { DashboardNotificationBell } from "@/components/dashboard/DashboardNotificationBell";
 import Icon from "@/components/ui/Icons";
 
 const NAV = [
@@ -24,7 +25,6 @@ const NAV = [
 
 type Props = {
   activeNav?: (typeof NAV)[number]["key"];
-  notificationCount?: number;
   userInitials?: string;
   /** When omitted, mobile menu toggle is hidden (pipeline dashboard has no sidebar). */
   onMenuClick?: () => void;
@@ -44,7 +44,6 @@ function resolveActiveNav(
 
 export function InstallerHeader({
   activeNav: activeNavProp,
-  notificationCount = 4,
   userInitials = "ES",
   onMenuClick,
 }: Props) {
@@ -118,18 +117,7 @@ export function InstallerHeader({
           >
             <Icon name="Search" className="size-[18px] text-warm-gray" />
           </button>
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative flex size-8 items-center justify-center rounded-full hover:bg-black/5"
-          >
-            <Icon name="Bell" className="size-[18px] text-warm-gray" />
-            {notificationCount > 0 ? (
-              <span className="absolute right-0 top-0 flex size-3.5 items-center justify-center rounded-full bg-danger font-inter text-[8px] font-bold leading-3 text-white">
-                {notificationCount > 9 ? "9+" : notificationCount}
-              </span>
-            ) : null}
-          </button>
+          <DashboardNotificationBell mode="installer" />
           <div className="flex size-8 items-center justify-center rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber font-inter text-[11px] font-semibold leading-4 tracking-[0.06em] text-warm-black">
             {userInitials}
           </div>

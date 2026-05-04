@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
+import { DashboardNotificationBell } from "@/components/dashboard/DashboardNotificationBell";
 import Icon from "../../ui/Icons";
 
 const NAV = [
@@ -17,7 +18,6 @@ const NAV = [
 type Props = {
   firstName?: string | null;
   lastName?: string | null;
-  notificationCount?: number;
   activeNav?: "dashboard" | "designs" | "profile" | "products" | "messages";
   /** Extra controls (e.g. My Design toolbar) shown before search / notifications. */
   headerAccessory?: ReactNode;
@@ -26,7 +26,6 @@ type Props = {
 export function CustomerDashboardHeader({
   firstName,
   lastName,
-  notificationCount = 2,
   activeNav = "dashboard",
   headerAccessory,
 }: Props) {
@@ -102,18 +101,7 @@ export function CustomerDashboardHeader({
           >
             <Icon name="Search" className="size-[18px] text-warm-gray" />
           </button>
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative flex size-8 items-center justify-center rounded-full text-warm-ink hover:bg-black/5"
-          >
-            <Icon name="Bell" className="size-[18px] text-warm-gray" />
-            {notificationCount > 0 ? (
-              <span className="absolute right-0.5 top-0.5 flex size-3.5 items-center justify-center rounded-full bg-danger font-inter text-[8px] font-bold leading-3 text-white">
-                {notificationCount > 9 ? "9+" : notificationCount}
-              </span>
-            ) : null}
-          </button>
+          <DashboardNotificationBell mode="customer" />
           <CustomerAvatar firstName={firstName} lastName={lastName} size="md" />
         </div>
       </div>
