@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useInstallerNotificationSocket } from "@/hooks/useInstallerNotificationSocket";
 import {
   fetchDashboardNotifications,
   markAllDashboardNotificationsRead,
@@ -10,7 +11,9 @@ import type { DashboardNotificationItem } from "@/lib/notifications/types";
 import { fetchWithCustomerSession } from "@/lib/customers/customer-fetch-client";
 import { fetchWithInstallerSession } from "@/lib/installers/installer-fetch-client";
 
-const POLL_MS = 45_000;
+/** Installer: WS push + HTTP fallback per Phase 4 (plan ~30s poll when WS unavailable). */
+const INSTALLER_POLL_MS = 30_000;
+const CUSTOMER_POLL_MS = 45_000;
 
 export type DashboardNotificationMode = "installer" | "customer";
 
@@ -39,11 +42,31 @@ export function useDashboardNotifications(
   const polling = options?.polling ?? true;
   const enabled = options?.enabled ?? true;
   const { apiBase, fetchSession } = modeConfig(mode);
+  const pollMs =
+    mode === "installer" ? INSTALLER_POLL_MS : CUSTOMER_POLL_MS;
 
   const [items, setItems] = useState<DashboardNotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
+
+  const mergePushRef = useRef<(item: DashboardNotificationItem) => void>(
+    () => {},
+  );
+
+  mergePushRef.current = (item: DashboardNotificationItem) => {
+    setItems((prev) => {
+      if (prev.some((n) => n.id === item.id)) return prev;
+      const next = [item, ...prev];
+      return next.slice(0, limit);
+    });
+    setUnreadCount((c) => (item.readAt == null ? c + 1 : c));
+  };
+
+  useInstallerNotificationSocket({
+    enabled: Boolean(enabled && mode === "installer"),
+    onNotification: (item) => mergePushRef.current(item),
+  });
 
   const load = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -84,9 +107,12 @@ export function useDashboardNotifications(
 
   useEffect(() => {
     if (!enabled || !polling) return;
-    const id = window.setInterval(() => void load({ silent: true }), POLL_MS);
+    const id = window.setInterval(
+      () => void load({ silent: true }),
+      pollMs,
+    );
     return () => window.clearInterval(id);
-  }, [enabled, polling, load]);
+  }, [enabled, polling, load, pollMs]);
 
   const markRead = useCallback(
     async (id: string) => {
