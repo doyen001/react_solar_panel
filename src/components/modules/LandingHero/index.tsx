@@ -132,20 +132,6 @@ export function Header() {
           </summary>
           <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 p-3 shadow-2xl">
             <div className="mb-2 flex flex-col gap-2">
-              <button
-                type="button"
-                className="rounded-md bg-white/10 px-2 py-1 text-left text-sm font-semibold text-white hover:bg-white/15"
-                onClick={() => router.push("/customers/auth")}
-              >
-                Customer login
-              </button>
-              <button
-                type="button"
-                className="rounded-md bg-white/10 px-2 py-1 text-left text-sm font-semibold text-white hover:bg-white/15"
-                onClick={() => router.push("/installers/auth")}
-              >
-                Installer / Master login
-              </button>
               {navItems.map((item, index) => (
                 <Link
                   key={index}

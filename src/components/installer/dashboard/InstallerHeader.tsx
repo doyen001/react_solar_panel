@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRef } from "react";
 import { DashboardNotificationBell } from "@/components/dashboard/DashboardNotificationBell";
 import Icon from "@/components/ui/Icons";
 import { usePortalLogout } from "@/hooks/usePortalLogout";
@@ -51,6 +52,7 @@ export function InstallerHeader({
   const pathname = usePathname();
   const activeNav = resolveActiveNav(pathname, activeNavProp);
   const { logout, pending } = usePortalLogout("installer");
+  const mobileNavRef = useRef<HTMLDetailsElement>(null);
 
   return (
     <header className="sticky top-0 z-30 shrink-0 border-b border-warm-border bg-cream-50">
@@ -60,12 +62,40 @@ export function InstallerHeader({
             <button
               type="button"
               className="flex shrink-0 md:hidden"
-              aria-label="Open menu"
+              aria-label="Open customers"
               onClick={onMenuClick}
             >
-              <Icon name="Menu" className="size-6 text-warm-ink" />
+              <Icon name="Users" className="size-6 text-warm-ink" />
             </button>
           ) : null}
+          <details ref={mobileNavRef} className="relative shrink-0 md:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-center marker:content-['']">
+              <span className="flex size-9 items-center justify-center rounded-full text-warm-ink hover:bg-black/5">
+                <Icon name="Menu" className="size-6 text-warm-ink" />
+              </span>
+            </summary>
+            <div className="absolute left-0 mt-2 w-56 overflow-hidden rounded-xl border border-warm-border bg-cream-50 shadow-lg">
+              <nav aria-label="Installer navigation" className="grid p-2">
+                {NAV.map((item) => {
+                  const active = item.key === activeNav;
+                  return (
+                    <Link
+                      key={item.key}
+                      href={item.href}
+                      onClick={() => mobileNavRef.current?.removeAttribute("open")}
+                      className={`rounded-md px-3 py-2 font-inter text-[14px] font-medium leading-[21px] ${
+                        active
+                          ? "bg-black/5 text-warm-ink"
+                          : "text-warm-gray hover:bg-black/5 hover:text-warm-ink"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          </details>
           <Link
             href="/installers/dashboard/home"
             className="flex shrink-0 items-center gap-8"
