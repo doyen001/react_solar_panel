@@ -91,6 +91,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       toast.success(result?.message ?? "Signed in successfully.");
       const role = result?.user?.role;
       const isCustomerRole = role === "CUSTOMER";
+      const isAdminRole = role === "ADMIN";
 
       if (result?.user && typeof result.accessToken === "string") {
         if (isCustomerRole) {
@@ -121,7 +122,9 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       const from = searchParams.get("from");
       const defaultRoute = isCustomerRole
         ? "/customers/dashboard"
-        : "/installers/dashboard/home";
+        : isAdminRole
+          ? "/master/dashboard"
+          : "/installers/dashboard/home";
       const safeFrom = from
         ? isCustomerRole
           ? from.startsWith("/customers") && !from.startsWith("/customers/auth")
