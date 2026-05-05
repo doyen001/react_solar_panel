@@ -47,6 +47,13 @@ type SessionFetch = (
   init?: RequestInit,
 ) => Promise<Response>;
 
+/** `true` when `useRealtimeChat` will send via WebSocket (else HTTP POST). */
+export function isChatWebSocketSendReady(
+  ws: WebSocket | null,
+): ws is WebSocket {
+  return ws != null && ws.readyState === 1; // WebSocket.OPEN
+}
+
 function peerLabel(p: ChatPeer) {
   const n = `${p.firstName} ${p.lastName}`.trim();
   return n || p.email;
@@ -362,7 +369,7 @@ export function useRealtimeChat(
       if (!trimmed || !conversationId || !userId) return;
 
       const ws = wsRef.current;
-      if (ws && ws.readyState === WebSocket.OPEN) {
+      if (isChatWebSocketSendReady(ws)) {
         ws.send(
           JSON.stringify({
             type: "send",
