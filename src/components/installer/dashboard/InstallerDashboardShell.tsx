@@ -2,27 +2,20 @@
 
 import classNames from "classnames";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { InstallerHeader } from "@/components/installer/dashboard/InstallerHeader";
 import { InstallerShortcutRail } from "@/components/installer/dashboard/InstallerShortcutRail";
 import Icon from "@/components/ui/Icons";
+import { usePollingResource } from "@/hooks/usePollingResource";
+import {
+  fetchInstallerCustomers,
+  type InstallerCustomerSummary,
+} from "@/lib/installers/customers";
 
 type HomeCustomer = {
   id: string;
   initials: string;
   name: string;
-};
-
-type CustomerApiItem = {
-  id: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-};
-
-type PaginatedApiResponse<T> = {
-  success?: boolean;
-  data?: T[];
 };
 
 const DEFAULT_CUSTOMERS: HomeCustomer[] = [
@@ -37,7 +30,7 @@ function toInitials(firstName?: string | null, lastName?: string | null) {
   return "NA";
 }
 
-function toName(customer: CustomerApiItem) {
+function toName(customer: InstallerCustomerSummary) {
   const fullName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
   if (fullName) return fullName;
   return customer.email?.trim() || "Unnamed Customer";
@@ -59,18 +52,14 @@ export function InstallerDashboardShell({
   );
   const [customerSearch, setCustomerSearch] = useState("");
 
-  useEffect(() => {
-    let mounted = true;
-
-    const loadCustomers = async () => {
+  const loadCustomers = useCallback(
+    async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
       try {
-        const response = await fetch("/api/installers/customers?limit=100", {
-          cache: "no-store",
-        });
-        if (!response.ok) return;
-        const json = (await response.json()) as PaginatedApiResponse<CustomerApiItem>;
-        const rows = Array.isArray(json.data) ? json.data : [];
-        if (!rows.length || !mounted) return;
+        const rows = await fetchInstallerCustomers(
+          { limit: 100 },
+          { signal: opts?.signal },
+        );
+        if (!rows.length) return;
         const mapped = rows.map((row) => ({
           id: row.id,
           name: toName(row),
@@ -80,16 +69,22 @@ export function InstallerDashboardShell({
         setSelectedId((prev) =>
           mapped.some((item) => item.id === prev) ? prev : mapped[0].id,
         );
-      } catch {
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
         // Keep safe fallback list when API is unavailable.
       }
-    };
+    },
+    [],
+  );
 
-    void loadCustomers();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  usePollingResource(
+    useCallback(
+      async (signal) => {
+        await loadCustomers({ silent: true, signal });
+      },
+      [loadCustomers],
+    ),
+  );
 
   const filteredCustomers = useMemo(() => {
     const q = customerSearch.trim().toLowerCase();

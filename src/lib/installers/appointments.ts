@@ -74,9 +74,11 @@ function buildAppointmentsUrl(params: ListAppointmentsParams = {}) {
 
 export async function fetchInstallerAppointments(
   params: ListAppointmentsParams = {},
+  init?: RequestInit,
 ): Promise<InstallerAppointment[]> {
   const res = await fetchWithInstallerSession(buildAppointmentsUrl(params), {
     cache: "no-store",
+    ...init,
   });
   const json = (await res.json()) as ApiEnvelope<InstallerAppointment[]>;
   if (!res.ok) {

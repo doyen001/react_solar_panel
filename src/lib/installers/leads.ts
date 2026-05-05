@@ -100,9 +100,11 @@ export function buildLeadsListUrl(params: {
 
 export async function fetchInstallerLeads(
   params: Parameters<typeof buildLeadsListUrl>[0],
+  init?: RequestInit,
 ): Promise<LeadListResult> {
   const res = await fetchWithInstallerSession(buildLeadsListUrl(params), {
     cache: "no-store",
+    ...init,
   });
   const json = (await res.json()) as ApiEnvelope<InstallerLeadSummary[]>;
   if (!res.ok) {

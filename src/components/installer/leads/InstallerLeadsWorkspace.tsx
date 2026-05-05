@@ -3,6 +3,7 @@
 import classNames from "classnames";
 import { formatDistanceToNow } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePollingResource } from "@/hooks/usePollingResource";
 import {
   assignInstallerLead,
   fetchAssignableUsersForLeads,
@@ -79,40 +80,60 @@ export function InstallerLeadsWorkspace() {
   const [saving, setSaving] = useState(false);
   const [assigning, setAssigning] = useState(false);
 
-  const refreshList = useCallback(async () => {
-    setListLoading(true);
-    setListError(null);
-    try {
-      const result = await fetchInstallerLeads({
-        page,
-        limit: PAGE_SIZE,
-        status: statusFilter || undefined,
-        search: searchDebounced || undefined,
-        assignedToId: isAdmin ? assignedToFilter || undefined : undefined,
-      });
-      setList(result.leads);
-      setListMeta(
-        result.meta
-          ? {
-              page: result.meta.page,
-              limit: result.meta.limit,
-              total: result.meta.total,
-              totalPages: result.meta.totalPages,
-            }
-          : null,
-      );
-    } catch (e) {
-      setListError(e instanceof Error ? e.message : "Could not load leads");
-      setList([]);
-      setListMeta(null);
-    } finally {
-      setListLoading(false);
-    }
-  }, [page, statusFilter, searchDebounced, assignedToFilter, isAdmin]);
+  const refreshList = useCallback(
+    async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
+      const silent = opts?.silent ?? false;
+      if (!silent) {
+        setListLoading(true);
+      }
+      setListError(null);
+      try {
+        const result = await fetchInstallerLeads(
+          {
+            page,
+            limit: PAGE_SIZE,
+            status: statusFilter || undefined,
+            search: searchDebounced || undefined,
+            assignedToId: isAdmin ? assignedToFilter || undefined : undefined,
+          },
+          { signal: opts?.signal },
+        );
+        setList(result.leads);
+        setListMeta(
+          result.meta
+            ? {
+                page: result.meta.page,
+                limit: result.meta.limit,
+                total: result.meta.total,
+                totalPages: result.meta.totalPages,
+              }
+            : null,
+        );
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setListError(e instanceof Error ? e.message : "Could not load leads");
+        setList([]);
+        setListMeta(null);
+      } finally {
+        if (!silent) setListLoading(false);
+      }
+    },
+    [page, statusFilter, searchDebounced, assignedToFilter, isAdmin],
+  );
 
   useEffect(() => {
     void refreshList();
   }, [refreshList]);
+
+  usePollingResource(
+    useCallback(
+      async (signal) => {
+        await refreshList({ silent: true, signal });
+      },
+      [refreshList],
+    ),
+    { skipInitialTick: true },
+  );
 
   useEffect(() => {
     if (!selectedId || listLoading) return;

@@ -3,7 +3,7 @@
 import classNames from "classnames";
 import { format, getDay, startOfWeek } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { View } from "react-big-calendar";
 import {
   Calendar,
@@ -18,6 +18,7 @@ import {
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
 import Icon from "@/components/ui/Icons";
+import { usePollingResource } from "@/hooks/usePollingResource";
 import {
   createInstallerAppointment,
   deleteInstallerAppointment,
@@ -27,6 +28,10 @@ import {
   type InstallerAppointmentStatus,
   updateInstallerAppointment,
 } from "@/lib/installers/appointments";
+import {
+  fetchInstallerCustomers,
+  type InstallerCustomerSummary,
+} from "@/lib/installers/customers";
 import { fetchInstallerLeads, type InstallerLeadSummary } from "@/lib/installers/leads";
 import {
   INSTALLER_SCHEDULE_DEFAULTS,
@@ -54,19 +59,7 @@ type CalendarAppointmentEvent = Event & {
   customerName?: string;
 };
 
-type CustomerApiItem = {
-  id: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-};
-
-type PaginatedApiResponse<T> = {
-  success?: boolean;
-  data?: T[];
-};
-
-function customerDisplayName(customer: CustomerApiItem) {
+function customerDisplayName(customer: InstallerCustomerSummary) {
   const full = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
   if (full) return full;
   return customer.email?.trim() || "Unnamed customer";
@@ -158,7 +151,7 @@ export function InstallerScheduleCalendar() {
   const [date, setDate] = useState(new Date());
   const [appointments, setAppointments] = useState<InstallerAppointment[]>([]);
   const [leads, setLeads] = useState<InstallerLeadSummary[]>([]);
-  const [customers, setCustomers] = useState<CustomerApiItem[]>([]);
+  const [customers, setCustomers] = useState<InstallerCustomerSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -177,39 +170,69 @@ export function InstallerScheduleCalendar() {
     notes: "",
   });
 
-  async function loadScheduleData() {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [liveAppointments, liveLeads, customersResponse] = await Promise.all([
-        fetchInstallerAppointments({
-          page: INSTALLER_SCHEDULE_DEFAULTS.appointmentsPage,
-          limit: INSTALLER_SCHEDULE_DEFAULTS.appointmentsLimit,
-        }),
-        fetchInstallerLeads({ page: 1, limit: 100 }),
-        fetch("/api/installers/customers?limit=100", { cache: "no-store" }),
-      ]);
-      let liveCustomers: CustomerApiItem[] = [];
-      if (customersResponse.ok) {
-        const customerJson =
-          (await customersResponse.json()) as PaginatedApiResponse<CustomerApiItem>;
-        liveCustomers = Array.isArray(customerJson.data) ? customerJson.data : [];
+  const loadScheduleData = useCallback(
+    async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
+      const silent = opts?.silent ?? false;
+      const signal = opts?.signal;
+      if (!silent) {
+        setIsLoading(true);
       }
-      setAppointments(liveAppointments);
-      setLeads(liveLeads.leads);
-      setCustomers(liveCustomers);
-    } catch (loadError) {
-      const message =
-        loadError instanceof Error ? loadError.message : "Failed to load schedule";
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+      setError(null);
+      try {
+        const [liveAppointments, liveLeads] = await Promise.all([
+          fetchInstallerAppointments(
+            {
+              page: INSTALLER_SCHEDULE_DEFAULTS.appointmentsPage,
+              limit: INSTALLER_SCHEDULE_DEFAULTS.appointmentsLimit,
+            },
+            { signal },
+          ),
+          fetchInstallerLeads({ page: 1, limit: 100 }, { signal }),
+        ]);
+        let liveCustomers: InstallerCustomerSummary[] = [];
+        try {
+          liveCustomers = await fetchInstallerCustomers(
+            { limit: 100 },
+            { signal },
+          );
+        } catch {
+          liveCustomers = [];
+        }
+        setAppointments(liveAppointments);
+        setLeads(liveLeads.leads);
+        setCustomers(liveCustomers);
+      } catch (loadError) {
+        if (
+          loadError instanceof DOMException &&
+          loadError.name === "AbortError"
+        ) {
+          return;
+        }
+        const message =
+          loadError instanceof Error
+            ? loadError.message
+            : "Failed to load schedule";
+        setError(message);
+      } finally {
+        if (!silent) setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     void loadScheduleData();
-  }, []);
+  }, [loadScheduleData]);
+
+  usePollingResource(
+    useCallback(
+      async (signal) => {
+        await loadScheduleData({ silent: true, signal });
+      },
+      [loadScheduleData],
+    ),
+    { skipInitialTick: true },
+  );
 
   const selectedAppointment = useMemo(
     () => appointments.find((a) => a.id === selectedAppointmentId) ?? null,
