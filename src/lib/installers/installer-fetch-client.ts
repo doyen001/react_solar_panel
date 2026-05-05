@@ -23,8 +23,9 @@ function logoutClientAndRedirect() {
     const path = `${window.location.pathname}${window.location.search}`;
     const url = new URL("/installers/auth", window.location.origin);
     if (
-      path.startsWith("/installers") &&
-      !path.startsWith("/installers/auth")
+      (path.startsWith("/installers") &&
+        !path.startsWith("/installers/auth")) ||
+      path.startsWith("/master")
     ) {
       url.searchParams.set("from", path);
     }

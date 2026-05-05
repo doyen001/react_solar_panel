@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DashboardNotificationBell } from "@/components/dashboard/DashboardNotificationBell";
 import Icon from "@/components/ui/Icons";
+import { usePortalLogout } from "@/hooks/usePortalLogout";
 
 const NAV = [
   { href: "/installers/dashboard/home", label: "Home", key: "home" },
@@ -49,6 +50,8 @@ export function InstallerHeader({
 }: Props) {
   const pathname = usePathname();
   const activeNav = resolveActiveNav(pathname, activeNavProp);
+  const { logout, pending } = usePortalLogout("installer");
+
   return (
     <header className="sticky top-0 z-30 shrink-0 border-b border-warm-border bg-cream-50">
       <div className="flex h-[52px] items-center justify-between gap-3 px-4 md:px-5">
@@ -118,6 +121,14 @@ export function InstallerHeader({
             <Icon name="Search" className="size-[18px] text-warm-gray" />
           </button>
           <DashboardNotificationBell mode="installer" />
+          <button
+            type="button"
+            onClick={() => void logout()}
+            disabled={pending}
+            className="font-inter rounded-md px-2 py-1 text-[13px] font-medium text-warm-gray hover:text-warm-ink disabled:opacity-50"
+          >
+            Log out
+          </button>
           <div className="flex size-8 items-center justify-center rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber font-inter text-[11px] font-semibold leading-4 tracking-[0.06em] text-warm-black">
             {userInitials}
           </div>

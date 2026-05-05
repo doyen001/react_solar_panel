@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DashboardNotificationBell } from "@/components/dashboard/DashboardNotificationBell";
 import Icon from "@/components/ui/Icons";
+import { usePortalLogout } from "@/hooks/usePortalLogout";
 import {
   MASTER_DASHBOARD_NAV,
   MASTER_DASHBOARD_TITLE,
@@ -18,6 +19,8 @@ export function MasterDashboardHeader({
   activeNavId = "overview",
   userInitials = "AD",
 }: Props) {
+  const { logout, pending } = usePortalLogout("installer");
+
   return (
     <header className="master-header-bg master-header-border sticky top-0 z-30 shrink-0 border-b">
       <div
@@ -93,6 +96,14 @@ export function MasterDashboardHeader({
             bellButtonClassName="relative flex size-8 items-center justify-center rounded-full text-gray-1 hover:bg-white/10"
             bellIconClassName="size-[18px] text-gray-1"
           />
+          <button
+            type="button"
+            onClick={() => void logout()}
+            disabled={pending}
+            className="font-[family-name:var(--font-inter)] rounded-md px-2 py-1 text-[13px] font-medium text-gray-1 hover:text-white disabled:opacity-50"
+          >
+            Log out
+          </button>
           <div
             className="master-avatar-gradient flex size-8 items-center justify-center rounded-full font-[family-name:var(--font-inter)] text-[11px] font-semibold leading-[16.5px] tracking-wide text-warm-black"
             aria-hidden

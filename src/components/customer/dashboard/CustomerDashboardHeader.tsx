@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { DashboardNotificationBell } from "@/components/dashboard/DashboardNotificationBell";
+import { usePortalLogout } from "@/hooks/usePortalLogout";
 import Icon from "../../ui/Icons";
 
 const NAV = [
@@ -29,6 +30,8 @@ export function CustomerDashboardHeader({
   activeNav = "dashboard",
   headerAccessory,
 }: Props) {
+  const { logout, pending } = usePortalLogout("customer");
+
   return (
     <header className="sticky top-0 z-40 border-b border-warm-border bg-cream-50">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 lg:px-5">
@@ -102,6 +105,14 @@ export function CustomerDashboardHeader({
             <Icon name="Search" className="size-[18px] text-warm-gray" />
           </button>
           <DashboardNotificationBell mode="customer" />
+          <button
+            type="button"
+            onClick={() => void logout()}
+            disabled={pending}
+            className="font-inter rounded-md px-2 py-1 text-[13px] font-medium text-warm-gray hover:text-warm-ink disabled:opacity-50"
+          >
+            Log out
+          </button>
           <CustomerAvatar firstName={firstName} lastName={lastName} size="md" />
         </div>
       </div>
