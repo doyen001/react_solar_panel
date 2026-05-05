@@ -77,7 +77,7 @@ export function InstallerDashboardShell({
     [],
   );
 
-  usePollingResource(
+  const { refetchNow: refetchCustomers } = usePollingResource(
     useCallback(
       async (signal) => {
         await loadCustomers({ silent: true, signal });
@@ -124,9 +124,19 @@ export function InstallerDashboardShell({
           )}
         >
           <div className="border-b border-warm-border px-3 py-4">
-            <p className="font-inter text-[15px] font-semibold text-white">
-              Customers
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-inter text-[15px] font-semibold text-white">
+                Customers
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchCustomers()}
+                className="shrink-0 rounded-md border border-white/30 bg-navy-900/50 px-2 py-1 font-dm-sans text-[10px] font-semibold text-cream-50 shadow-sm hover:bg-navy-900/70"
+                aria-label="Refresh customer list"
+              >
+                Refresh
+              </button>
+            </div>
             <div className="mt-3 flex items-center gap-2 rounded-lg border border-warm-border bg-cream-50 px-3 py-2">
               <span
                 className="pointer-events-none inline-flex shrink-0 text-warm-gray"

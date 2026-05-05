@@ -250,13 +250,26 @@ export function InstallerLeadsWorkspace() {
       aria-label="Leads"
     >
       <div className="border-b border-warm-border bg-cream-50 px-4 py-3 md:px-5">
-        <h2 className="font-inter text-base font-bold uppercase tracking-wide text-warm-ink">
-          Leads
-        </h2>
-        <p className="mt-1 font-dm-sans text-xs text-warm-gray">
-          Filter and manage assigned leads. Changes sync to the server after you
-          save.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="font-inter text-base font-bold uppercase tracking-wide text-warm-ink">
+              Leads
+            </h2>
+            <p className="mt-1 font-dm-sans text-xs text-warm-gray">
+              Filter and manage assigned leads. Changes sync to the server
+              after you save.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void refreshList()}
+            disabled={listLoading}
+            className="shrink-0 rounded-md border border-warm-border bg-white px-2 py-1 font-dm-sans text-[10px] font-semibold text-navy-800 shadow-sm hover:bg-cream-50 disabled:opacity-50"
+            aria-label="Refresh leads list"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4 border-b border-warm-border bg-white px-4 py-3 md:flex-row md:flex-wrap md:items-end md:gap-3 md:px-5">
