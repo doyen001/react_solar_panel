@@ -42,11 +42,19 @@ export async function backendAuthedFetch(
     headers.set("Content-Type", "application/json");
   }
 
-  return fetch(buildBackendUrl(backendBaseUrl, path), {
-    ...init,
-    headers,
-    cache: "no-store",
-  });
+  try {
+    return await fetch(buildBackendUrl(backendBaseUrl, path), {
+      ...init,
+      headers,
+      cache: "no-store",
+    });
+  } catch {
+    // Most common in local dev when the Express backend is down/restarting (ECONNRESET).
+    return NextResponse.json(
+      { message: "Unable to reach the backend service." },
+      { status: 502 },
+    );
+  }
 }
 
 /** Pass JSON body through from Route Handlers to the Express API. */
