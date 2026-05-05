@@ -9,25 +9,15 @@ export type PortalLogoutKind = "customer" | "installer";
 
 function redirectAfterCustomerLogout() {
   if (typeof window === "undefined") return;
-  const path = `${window.location.pathname}${window.location.search}`;
-  const url = new URL("/customers/auth", window.location.origin);
-  if (path.startsWith("/customers") && !path.startsWith("/customers/auth")) {
-    url.searchParams.set("from", path);
-  }
-  window.location.assign(url.toString());
+  const url = new URL("/", window.location.origin);
+  // Use replace so "Back" doesn't land on protected pages after logout.
+  window.location.replace(url.toString());
 }
 
 function redirectAfterInstallerLogout() {
   if (typeof window === "undefined") return;
-  const path = `${window.location.pathname}${window.location.search}`;
-  const url = new URL("/installers/auth", window.location.origin);
-  if (
-    (path.startsWith("/installers") && !path.startsWith("/installers/auth")) ||
-    path.startsWith("/master")
-  ) {
-    url.searchParams.set("from", path);
-  }
-  window.location.assign(url.toString());
+  const url = new URL("/", window.location.origin);
+  window.location.replace(url.toString());
 }
 
 /**
