@@ -18,7 +18,7 @@ import {
   type SignInFormData,
   type SignUpFormData,
 } from "@/lib/validations/auth";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/lib/store/hooks";
 import {
@@ -36,7 +36,6 @@ import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 type Mode = "signin" | "signup";
 
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
@@ -55,6 +54,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
     try {
       const response = await fetch("/api/customers/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -134,8 +134,8 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
             ? from
             : defaultRoute
         : defaultRoute;
-      router.push(safeFrom);
-      router.refresh();
+      /** Hard navigation so httpOnly session cookies are stored before the next document / RSC request. */
+      window.location.assign(safeFrom);
     } catch {
       toast.error("Unable to reach the login service. Please try again.");
     }

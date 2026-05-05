@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Suspense, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { AuthCard } from "@/components/ui/auth/AuthCard";
 import { AuthDivider } from "@/components/ui/auth/AuthDivider";
@@ -33,7 +33,6 @@ import { DesignTopBar } from "@/components/modules/DesignTopBar";
 type Mode = "signin" | "signup";
 
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
@@ -52,6 +51,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
     try {
       const response = await fetch("/api/installers/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -131,8 +131,8 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
             ? from
             : defaultRoute
         : defaultRoute;
-      router.push(safeFrom);
-      router.refresh();
+      /** Hard navigation so httpOnly session cookies are stored before the next document / RSC request. */
+      window.location.assign(safeFrom);
     } catch {
       toast.error("Unable to reach the login service. Please try again.");
     }
