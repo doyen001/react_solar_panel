@@ -95,9 +95,19 @@ export function PipelineTeamAndActivity() {
           <h3 className="font-inter text-[12px] font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
             Recent Activity
           </h3>
-          <span className="font-dm-sans text-[10px] font-medium leading-[15px] text-warm-gray/70">
-            Newest first
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isLoading}
+              className="rounded-md border border-warm-border bg-white px-2 py-1 font-dm-sans text-[10px] font-semibold text-navy-800 shadow-sm hover:bg-cream-50 disabled:opacity-50"
+            >
+              Refresh
+            </button>
+            <span className="font-dm-sans text-[10px] font-medium leading-[15px] text-warm-gray/70">
+              Newest first
+            </span>
+          </div>
         </div>
 
         {isLoading ? (

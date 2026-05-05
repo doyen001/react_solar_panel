@@ -36,6 +36,9 @@ export type InstallerActivityEvent = {
 export async function fetchInstallerActivityDashboard(params: {
   page?: number;
   limit?: number;
+  /** ISO 8601; returns events with createdAt strictly after this time. */
+  since?: string;
+  signal?: AbortSignal;
 }): Promise<{
   events: InstallerActivityEvent[];
   meta?: {
@@ -49,9 +52,10 @@ export async function fetchInstallerActivityDashboard(params: {
   sp.set("dashboard", "true");
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(params.limit ?? 20));
+  if (params.since) sp.set("since", params.since);
   const res = await fetchWithInstallerSession(
     `/api/installers/activity?${sp.toString()}`,
-    { cache: "no-store" },
+    { cache: "no-store", signal: params.signal },
   );
   const json = (await res.json()) as ApiEnvelope<InstallerActivityEvent[]>;
   if (!res.ok) {
