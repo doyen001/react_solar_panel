@@ -40,11 +40,12 @@ export function useInstallerNotificationSocket(options: {
     let stopped = false;
     let ws: WebSocket | null = null;
     let consecutiveFailures = 0;
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    /** Browser timers are numeric handles; Node typings overload `setTimeout` as `Timeout`. */
+    let reconnectTimer: number | null = null;
 
     const clearReconnectTimer = () => {
       if (reconnectTimer != null) {
-        clearTimeout(reconnectTimer);
+        window.clearTimeout(reconnectTimer);
         reconnectTimer = null;
       }
     };
