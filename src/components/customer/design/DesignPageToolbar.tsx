@@ -43,7 +43,7 @@ export function DesignPageToolbar() {
           className="size-3 shrink-0 opacity-90"
           unoptimized
         />
-        Master Dashboard
+        Distributor Dashboard
       </button>
     </div>
   );

@@ -31,6 +31,7 @@ export function CustomerDashboardHeader({
   headerAccessory,
 }: Props) {
   const { logout, pending } = usePortalLogout("customer");
+  const title = `${firstName?.trim() || "Customer"} Dashboard`;
 
   return (
     <header className="sticky top-0 z-40 border-b border-warm-border bg-cream-50">
@@ -49,7 +50,7 @@ export function CustomerDashboardHeader({
               className="font-inter text-[13px] font-bold leading-[19.5px] tracking-[0.3px] text-warm-ink"
               style={{ fontFeatureSettings: '"liga" 1' }}
             >
-              My Solar Portal
+              {title}
             </span>
           </Link>
           <div

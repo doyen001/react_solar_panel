@@ -73,7 +73,7 @@ export function MasterDashboardHeader({
           />
           <nav
             className="hidden min-w-0 items-center gap-5 overflow-x-auto md:flex"
-            aria-label="Master dashboard"
+            aria-label="Distributor dashboard"
           >
             {MASTER_DASHBOARD_NAV.map((item) => {
               const active = item.id === activeNavId;

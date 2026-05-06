@@ -114,7 +114,7 @@ export const DESIGNS_SOLAR_PANEL_STEP = {
 } as const;
 
 /** Master dashboard (Figma Final Designs 3:11526) */
-export const MASTER_DASHBOARD_TITLE = "Master Dashboard" as const;
+export const MASTER_DASHBOARD_TITLE = "Distributor Dashboard" as const;
 
 export const MASTER_DASHBOARD_NAV = [
   { id: "overview", label: "Overview", href: "/master/dashboard" },

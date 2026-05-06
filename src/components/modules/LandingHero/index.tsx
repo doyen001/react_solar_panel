@@ -91,7 +91,14 @@ export function Header() {
                   className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
                   onClick={() => router.push("/installers/auth")}
                 >
-                  Installer / Master login
+                  Installer login
+                </button>
+                <button
+                  type="button"
+                  className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
+                  onClick={() => router.push("/installers/auth")}
+                >
+                  Distributor login
                 </button>
               </div>
             </details>
