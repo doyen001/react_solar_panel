@@ -3,7 +3,7 @@
 import classNames from "classnames";
 import { format, getDay, startOfWeek } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { View } from "react-big-calendar";
 import {
   Calendar,
@@ -164,6 +164,7 @@ export function InstallerScheduleCalendar() {
   );
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
+  const formSectionRef = useRef<HTMLElement | null>(null);
   const [formState, setFormState] = useState({
     title: "",
     startAt: "",
@@ -267,6 +268,24 @@ export function InstallerScheduleCalendar() {
     [appointments],
   );
 
+  useEffect(() => {
+    if (!isFormOpen) return;
+    formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [isFormOpen, formMode]);
+
+  function scrollToFormSection() {
+    // When opening via click handlers, we may need to wait a tick for the form
+    // section to mount before scrolling.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        formSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    });
+  }
+
   function openCreateFormWithRange(start: Date, end: Date) {
     setFormMode("create");
     setFormState({
@@ -279,6 +298,7 @@ export function InstallerScheduleCalendar() {
       notes: "",
     });
     setIsFormOpen(true);
+    scrollToFormSection();
   }
 
   function openEditForm(appointment: InstallerAppointment) {
@@ -294,6 +314,7 @@ export function InstallerScheduleCalendar() {
       notes: appointment.notes ?? "",
     });
     setIsFormOpen(true);
+    scrollToFormSection();
   }
 
   function onSelectSlot(slot: SlotInfo) {
@@ -309,8 +330,8 @@ export function InstallerScheduleCalendar() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    if (!formState.leadId && !formState.customerId) {
-      setError("Select a lead or customer before saving.");
+    if (!formState.customerId) {
+      setError("Select a customer before saving.");
       return;
     }
     if (!formState.startAt || !formState.endAt) {
@@ -330,8 +351,8 @@ export function InstallerScheduleCalendar() {
           startAt: fromDateTimeInputValue(formState.startAt),
           endAt: fromDateTimeInputValue(formState.endAt),
           status: formState.status,
-          leadId: formState.leadId || undefined,
-          customerId: formState.customerId || undefined,
+          ...(formState.leadId ? { leadId: formState.leadId } : {}),
+          customerId: formState.customerId,
           notes: formState.notes.trim() || undefined,
         });
       } else if (selectedAppointmentId) {
@@ -427,7 +448,10 @@ export function InstallerScheduleCalendar() {
       </section>
 
       {isFormOpen ? (
-        <section className="rounded-xl border border-warm-border bg-cream-50 p-4 shadow-sm">
+        <section
+          ref={formSectionRef}
+          className="rounded-xl border border-warm-border bg-cream-50 p-4 shadow-sm"
+        >
           <h3 className="font-inter text-sm font-semibold text-warm-ink">
             {formMode === "create" ? "Create appointment" : "Update appointment"}
           </h3>
@@ -505,7 +529,7 @@ export function InstallerScheduleCalendar() {
             </label>
             <label className="flex flex-col gap-1">
               <span className="font-inter text-xs text-warm-gray">
-                Customer (optional)
+                Customer
               </span>
               <select
                 value={formState.customerId}
