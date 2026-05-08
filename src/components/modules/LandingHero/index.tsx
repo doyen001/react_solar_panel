@@ -17,21 +17,9 @@ const navItems = [
   { label: "Contact", link: "/contact-us" },
 ];
 
-function authPathForCurrentSite(pathname: string): string {
-  return pathname.startsWith("/customers")
-    ? "/customers/auth"
-    : "/installers/auth";
-}
-
-function isCustomerContext(pathname: string): boolean {
-  // Landing ("/") can't infer intent; treat explicit /customers as customer context.
-  return pathname.startsWith("/customers");
-}
-
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const customerContext = isCustomerContext(pathname);
   return (
     <header className="fixed top-0 z-30 w-full bg-white/75 backdrop-blur-md">
       <div className="mx-auto flex h-20 w-full max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -96,7 +84,7 @@ export function Header() {
                 <button
                   type="button"
                   className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
-                  onClick={() => router.push("/installers/auth")}
+                  onClick={() => router.push("/installers/auth?portal=distributor")}
                 >
                   Distributor login
                 </button>
@@ -124,14 +112,37 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <button
-            type="button"
-            aria-label="Account"
-            className="inline-flex size-9 items-center justify-center rounded-full text-slate-900 transition hover:bg-slate-900/10"
-            onClick={() => router.push(customerContext ? "/customers/auth" : "/installers/auth")}
-          >
-            <Image src={userIcon} alt="Account" width={16} height={16} />
-          </button>
+          <details className="relative">
+            <summary
+              aria-label="Account"
+              className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-full text-slate-900 transition hover:bg-slate-900/10 marker:content-['']"
+            >
+              <Image src={userIcon} alt="Account" width={16} height={16} />
+            </summary>
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl">
+              <button
+                type="button"
+                className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
+                onClick={() => router.push("/customers/auth?portal=customer")}
+              >
+                Customer login
+              </button>
+              <button
+                type="button"
+                className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
+                onClick={() => router.push("/installers/auth?portal=installer")}
+              >
+                Installer login
+              </button>
+              <button
+                type="button"
+                className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
+                onClick={() => router.push("/installers/auth?portal=distributor")}
+              >
+                Distributor login
+              </button>
+            </div>
+          </details>
 
           <details className="relative">
           <summary className="cursor-pointer rounded-md border border-slate-400/40 px-3 py-2 text-xs font-semibold text-slate-900 marker:content-['']">
