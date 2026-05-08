@@ -48,7 +48,7 @@ export function DesignsHeroFooter({
 
             <button
               type="button"
-              onClick={onNext}
+              onClick={fillPercent === 100 ? () => {window.location.href = "/installers/auth"} : onNext}
               className={`inline-flex min-h-12 min-w-[157px] items-center justify-center gap-[14px] rounded-xl font-source-sans text-[18px] font-semibold uppercase leading-6 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-95 ${fillPercent === 100 ? "text-white bg-design-accent-cyan" : "text-black bg-design-next"} ${
                 showNext ? "" : "invisible pointer-events-none"
               }`}

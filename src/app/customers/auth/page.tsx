@@ -35,8 +35,16 @@ import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
 
+function getAccountLabel(params: ReturnType<typeof useSearchParams>) {
+  const raw = params.get("portal")?.toLowerCase();
+  if (raw === "installer") return "installer";
+  if (raw === "distributor") return "distributor";
+  return "customer";
+}
+
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const searchParams = useSearchParams();
+  const accountLabel = getAccountLabel(searchParams);
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -154,7 +162,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
               Welcome Back
             </p>
             <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-70)">
-              Sign in to your account
+              Sign in to your {accountLabel} account
             </p>
           </div>
           <div>

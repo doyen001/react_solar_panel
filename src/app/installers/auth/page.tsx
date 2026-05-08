@@ -32,8 +32,15 @@ import { DesignTopBar } from "@/components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
 
+function getAccountLabel(params: ReturnType<typeof useSearchParams>) {
+  const raw = params.get("portal")?.toLowerCase();
+  if (raw === "distributor") return "distributor";
+  return "installer";
+}
+
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const searchParams = useSearchParams();
+  const accountLabel = getAccountLabel(searchParams);
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -151,7 +158,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
               Welcome Back
             </p>
             <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-70)">
-              Sign in to your installer account
+              Sign in to your {accountLabel} account
             </p>
           </div>
           <div>
@@ -233,6 +240,8 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 }
 
 function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
+  const searchParams = useSearchParams();
+  const accountLabel = getAccountLabel(searchParams);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -306,7 +315,7 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       >
         <div className="flex flex-col gap-[4px] pr-[64px]">
           <p className="font-source-sans text-[24px] font-extrabold leading-[36px] tracking-[0.5px] text-auth-title">
-            Create installer account
+            Create {accountLabel} account
           </p>
           <p className="font-source-sans text-[14px] font-bold leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-70)">
             Fill in your details to get started

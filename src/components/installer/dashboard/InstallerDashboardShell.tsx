@@ -271,6 +271,9 @@ export function InstallerDashboardShell({
                 className="inline-flex items-center justify-center gap-[10px] self-start overflow-hidden rounded-[6px] bg-linear-to-r from-yellow-lemon to-orange-amber px-4 py-[9px] font-dm-sans text-[12.146px] font-bold uppercase tracking-[0.4417px] text-warm-black transition-opacity hover:opacity-95 lg:self-auto"
                 style={{ fontVariationSettings: "'opsz' 14" }}
                 data-node-id="3:5380"
+                onClick={() => {
+                  window.location.href = "/designs";
+                }}
               >
                 <Icon
                   name="UserPlus"
