@@ -1910,3 +1910,76 @@ export const INSTALLER_SCHEDULE_DEFAULTS = {
   createDurationMs: 60 * 60 * 1000,
   calendarHeightPx: 620,
 } as const;
+
+/** Landing footer columns — labels + routes */
+export type LandingFooterLink = {
+  label: string;
+  href: string;
+};
+
+export type LandingFooterColumn = {
+  title: string;
+  items: LandingFooterLink[];
+};
+
+export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
+  {
+    title: "Products",
+    items: [
+      { label: "EP2000", href: "#" },
+      { label: "AC500", href: "#" },
+      { label: "AC300", href: "#" },
+      { label: "Solar Panels", href: "#" },
+      { label: "Accessories", href: "#" },
+    ],
+  },
+  {
+    title: "Support",
+    items: [
+      { label: "FAQs", href: "#" },
+      { label: "Warranty", href: "#" },
+      { label: "Contact Us", href: "/contact-us" },
+      { label: "User Manual", href: "#" },
+      { label: "Firmware", href: "/firmware" },
+    ],
+  },
+  {
+    title: "Company",
+    items: [
+      { label: "About Us", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Press", href: "#" },
+      { label: "Partners", href: "#" },
+      { label: "Blog", href: "#" },
+    ],
+  },
+  {
+    title: "Legal",
+    items: [
+      { label: "Privacy Policy", href: "#" },
+      { label: "Terms of Service", href: "#" },
+      { label: "Cookie Policy", href: "#" },
+    ],
+  },
+];
+
+/** Shared hero-style CTA block (footer + firmware page) */
+export const LANDING_ENERGY_CTA = {
+  title: "Ready to Take Control of Your Energy?",
+  description:
+    "Join thousands of homeowners already saving with EasyLink Solar and BLUETTI products.",
+  primary: { label: "Get Your Quote", href: "/designs" },
+  secondary: { label: "Contact Sales", href: "/contact-us" },
+} as const;
+
+/** Public firmware information page (`/firmware`) */
+export const FIRMWARE_PAGE = {
+  title: "Firmware",
+  paragraphs: [
+    "We continuously work with our manufacturing partners to ensure that your solar system operates efficiently and reliably.",
+    "System updates and improvements are managed by the respective manufacturers and are designed to enhance performance, safety, and overall system efficiency.",
+    "Most updates are carried out automatically or during routine maintenance, and do not require any action from the user.",
+    "Each product may also have its own data sheet and documentation, which will be provided at the time of installation for your reference.",
+    "For any update-related queries or assistance, please contact our support team or refer to the respective manufacturer's website.",
+  ],
+} as const;
