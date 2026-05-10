@@ -47,7 +47,7 @@ function UserManualBlockView({ block }: { block: UserManualBlock }) {
 export function UserManualPageSection() {
   return (
     <section>
-      <div className="pt-30 md:pt-36">
+      <div className="pb-12 pt-30 sm:pb-14 md:pt-36 lg:pb-16">
         <h1 className="mb-10 text-center font-source-sans text-4xl font-bold leading-tight tracking-tight text-user-manual-title md:mb-12 lg:text-5xl">
           {USER_MANUAL_PAGE.title}
         </h1>

@@ -16,7 +16,7 @@ export function ReadingTextDocumentSection({
 }: ReadingTextDocumentSectionProps) {
   return (
     <section>
-      <div className="pt-30 md:pt-36">
+      <div className="pb-12 pt-30 sm:pb-14 md:pt-36 lg:pb-16">
         <h1
           className={`mb-10 text-center font-source-sans text-4xl font-bold leading-tight tracking-tight md:mb-12 lg:text-5xl ${titleClassName}`}
         >

@@ -7,8 +7,8 @@ export default function WarrantyPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen">
-        <ReadingColumnLayout backgroundClassName="min-h-screen bg-warranty-page-bg">
+      <main>
+        <ReadingColumnLayout backgroundClassName="bg-warranty-page-bg">
           <WarrantyPageSection />
         </ReadingColumnLayout>
       </main>

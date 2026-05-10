@@ -7,8 +7,8 @@ export default function UserManualPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen">
-        <ReadingColumnLayout backgroundClassName="min-h-screen bg-user-manual-page-bg">
+      <main>
+        <ReadingColumnLayout backgroundClassName="bg-user-manual-page-bg">
           <UserManualPageSection />
         </ReadingColumnLayout>
       </main>
