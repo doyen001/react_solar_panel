@@ -1939,7 +1939,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
       { label: "FAQs", href: "#" },
       { label: "Warranty", href: "#" },
       { label: "Contact Us", href: "/contact-us" },
-      { label: "User Manual", href: "#" },
+      { label: "User Manual", href: "/user-manual" },
       { label: "Firmware", href: "/firmware" },
     ],
   },
@@ -1970,6 +1970,46 @@ export const LANDING_ENERGY_CTA = {
     "Join thousands of homeowners already saving with EasyLink Solar and BLUETTI products.",
   primary: { label: "Get Your Quote", href: "/designs" },
   secondary: { label: "Contact Sales", href: "/contact-us" },
+} as const;
+
+/** Public User Manual page (`/user-manual`) */
+export type UserManualBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "list_intro"; text: string }
+  | { type: "bullet_list"; items: readonly string[] };
+
+export const USER_MANUAL_PAGE = {
+  title: "User Manual",
+  blocks: [
+    {
+      type: "paragraph",
+      text: "All systems are designed to operate automatically under normal conditions.",
+    },
+    {
+      type: "paragraph",
+      text: "Basic components include solar panels, inverters, battery packs (if applicable), and monitoring systems.",
+    },
+    {
+      type: "list_intro",
+      text: "For safe and efficient use:",
+    },
+    {
+      type: "bullet_list",
+      items: [
+        "Keep panels clean and free from dust or debris",
+        "Avoid any physical damage or obstruction to the system",
+        "Do not attempt to repair or modify any components",
+      ],
+    },
+    {
+      type: "paragraph",
+      text: "Each product comes with its own data sheet and documentation, which will be provided by the company at the time of installation.",
+    },
+    {
+      type: "paragraph",
+      text: "For detailed instructions and specifications, please refer to the respective manufacturer's manual or website.",
+    },
+  ],
 } as const;
 
 /** Public firmware information page (`/firmware`) */

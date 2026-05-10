@@ -274,6 +274,12 @@
   --color-master-ins-stage-visit-bg: #f5f0e8;
   --color-master-ins-stage-visit-text: #7c736a;
 
+  /* User Manual page (marketing — desktop + mobile specs) */
+  --color-user-manual-page-bg: #f4f9fd;
+  --color-user-manual-title: #2d3748;
+  --color-user-manual-body: #4a5568;
+  --color-user-manual-bullet: #4a5568;
+
   /* Firmware page & landing energy CTA (marketing) */
   --color-firmware-page-bg: #f2f9fc;
   --color-firmware-heading: #09234a;
