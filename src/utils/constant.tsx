@@ -1937,7 +1937,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
     title: "Support",
     items: [
       { label: "FAQs", href: "#" },
-      { label: "Warranty", href: "#" },
+      { label: "Warranty", href: "/warranty" },
       { label: "Contact Us", href: "/contact-us" },
       { label: "User Manual", href: "/user-manual" },
       { label: "Firmware", href: "/firmware" },
@@ -2009,6 +2009,16 @@ export const USER_MANUAL_PAGE = {
       type: "paragraph",
       text: "For detailed instructions and specifications, please refer to the respective manufacturer's manual or website.",
     },
+  ],
+} as const;
+
+/** Public Warranty page (`/warranty`) */
+export const WARRANTY_PAGE = {
+  title: "Warranty",
+  paragraphs: [
+    "All warranties are provided and covered by the respective manufacturers of the products supplied.",
+    "Customers are advised to refer to the manufacturer's warranty terms and conditions for detailed coverage.",
+    "For any warranty-related queries or claims, please contact the respective manufacturer directly or reach out to our support team for assistance in connecting with the concerned company.",
   ],
 } as const;
 

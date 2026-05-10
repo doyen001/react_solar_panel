@@ -280,6 +280,11 @@
   --color-user-manual-body: #4a5568;
   --color-user-manual-bullet: #4a5568;
 
+  /* Warranty page (marketing) */
+  --color-warranty-page-bg: #f2f9fc;
+  --color-warranty-heading: #09234a;
+  --color-warranty-body: #5f6c7b;
+
   /* Firmware page & landing energy CTA (marketing) */
   --color-firmware-page-bg: #f2f9fc;
   --color-firmware-heading: #09234a;
