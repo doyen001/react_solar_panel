@@ -41,11 +41,13 @@ export function FooterSection() {
               Your Local Solar Energy Partner
             </p>
             <p className="text-sm text-slate-600">
-              Authorised BLUETTI Distributor
+              Authorised{" "}
+              <span className="font-semibold text-sky-brand">BLUETTI</span>{" "}
+              Distributor
             </p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:gap-x-8 lg:grid-cols-4 lg:gap-y-8 lg:gap-x-10">
             {LANDING_FOOTER_COLUMNS.map((column) => (
               <div key={column.title}>
                 <h4 className="font-semibold text-slate-900">{column.title}</h4>
@@ -66,12 +68,18 @@ export function FooterSection() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-slate-200 pt-4 text-sm text-slate-500 sm:flex-row sm:items-center lg:px-6">
-          <p>© 2025 EasyLink Solar. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Cookies</a>
+        <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-200 pt-6 text-center text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:text-left lg:px-6">
+          <p className="leading-relaxed">© 2025 EasyLink Solar. All rights reserved.</p>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 sm:justify-end">
+            <a href="#" className="transition hover:text-slate-700">
+              Privacy
+            </a>
+            <a href="#" className="transition hover:text-slate-700">
+              Terms
+            </a>
+            <a href="#" className="transition hover:text-slate-700">
+              Cookies
+            </a>
           </div>
         </div>
       </div>

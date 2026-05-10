@@ -1948,7 +1948,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
     items: [
       { label: "About Us", href: "#" },
       { label: "Careers", href: "#" },
-      { label: "Press", href: "#" },
+      { label: "Projects", href: "#" },
       { label: "Partners", href: "#" },
       { label: "Blog", href: "#" },
     ],

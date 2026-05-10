@@ -6,7 +6,7 @@ export default function FirmwarePage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-firmware-page-bg -mb-20">
+      <main className="min-h-screen bg-firmware-page-bg">
         <FirmwarePageSection />
       </main>
       <FooterSection />
