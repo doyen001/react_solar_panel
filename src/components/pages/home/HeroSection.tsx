@@ -70,6 +70,9 @@ export function HeroSection() {
                       backgroundImage:
                         "linear-gradient(156deg, #5474eb 16%, #ff3c3c 100%)",
                     }}
+                    onClick={() => {
+                      window.location.href = "/designs";
+                    }}
                   >
                     <Image
                       src="/images/solarDesignLogo.png"

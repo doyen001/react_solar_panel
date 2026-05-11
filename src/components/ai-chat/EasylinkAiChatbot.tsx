@@ -2,8 +2,8 @@
 
 import classNames from "classnames";
 import { useEffect, useRef, useState } from "react";
-import Icon from "@/components/ui/Icons";
 import { ChatMessageMarkdown } from "@/components/messages/ChatMessageMarkdown";
+import Image from "next/image";
 
 type ChatRole = "user" | "assistant";
 
@@ -12,7 +12,7 @@ type ChatTurn = { role: ChatRole; content: string };
 const WELCOME: ChatTurn = {
   role: "assistant",
   content:
-    "Hi — I'm the EasyLink Solar assistant. Ask me about our platform, solar quotes, installers, or how we work.",
+    "Hi — I'm the EasyLink Solar AI. Ask me about our platform, solar quotes, installers, or how we work.",
 };
 
 export function EasylinkAiChatbot() {
@@ -119,10 +119,10 @@ export function EasylinkAiChatbot() {
         aria-label={open ? "Close EasyLink assistant" : "Open EasyLink assistant"}
         aria-expanded={open}
         className={classNames(
-          "fixed bottom-6 right-6 z-[100] flex size-14 items-center justify-center rounded-full shadow-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2",
+          "fixed bottom-6 right-6 z-[100] flex items-center justify-center transition",
           open
-            ? "bg-navy-800 text-white hover:bg-navy-900"
-            : "bg-brand-blue text-white hover:opacity-95",
+            ? "size-14 bg-navy-800 text-white hover:bg-navy-900 shadow-lg rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+            : "",
         )}
         onClick={() => setOpen((o) => !o)}
       >
@@ -131,7 +131,14 @@ export function EasylinkAiChatbot() {
             ×
           </span>
         ) : (
-          <Icon name="MessageSquare" className="size-7 text-white" />
+          <Image
+            src="/images/easyLinkAI.png"
+            alt="EasyLink AI"
+            unoptimized
+            width={80}
+            height={80}
+            className="rounded-full"
+          />
         )}
       </button>
 
@@ -144,10 +151,10 @@ export function EasylinkAiChatbot() {
         >
           <div className="border-b border-warm-border bg-navy-800 px-4 py-3">
             <p className="font-inter text-sm font-semibold text-white">
-              EasyLink assistant
+              EasyLink AI
             </p>
             <p className="font-inter mt-0.5 text-xs text-white/80">
-              Answers use our FAQ; not financial or legal advice.
+              Answers use our FAQ. Not financial or legal advice.
             </p>
           </div>
 

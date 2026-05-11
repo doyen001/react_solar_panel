@@ -18,7 +18,7 @@ export function BluettiAppCtaSection() {
 
   return (
     <section
-      className="padding-section-medium bg-white"
+      className="padding-section-medium bg-white border-b border-gray-7"
       aria-labelledby="bluetti-app-cta-heading"
     >
       <div className="container-large">

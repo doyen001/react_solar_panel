@@ -2263,7 +2263,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
   {
     title: "Products",
     items: [
-      { label: "EP2000", href: "#" },
+      { label: "EP2000", href: "/bluetti" },
       { label: "AC500", href: "#" },
       { label: "AC300", href: "#" },
       { label: "Solar Panels", href: "#" },

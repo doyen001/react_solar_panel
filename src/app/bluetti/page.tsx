@@ -27,7 +27,7 @@ export default function BluettiPage() {
         <BluettiBackupCinemaSection />
         <BluettiAppCtaSection />
       </main>
-      <FooterSection />
+      <FooterSection showReadyToControlCta={false} />
     </>
   );
 }

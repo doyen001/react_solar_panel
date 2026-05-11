@@ -3,29 +3,42 @@ import Link from "next/link";
 
 import { LANDING_FOOTER_COLUMNS } from "@/utils/constant";
 
-export function FooterSection() {
+export type FooterSectionProps = {
+  /** BLUETTI product page design goes straight from app CTA into the link columns. */
+  showReadyToControlCta?: boolean;
+};
+
+export function FooterSection({
+  showReadyToControlCta = true,
+}: FooterSectionProps) {
   return (
     <footer className="bg-gray-8 pb-6">
       <div className="mx-auto w-full px-4 pt-14 sm:px-6 lg:px-8">
-        <div className="mx-auto flex min-h-[280px] w-full max-w-[1224px] flex-col justify-center rounded-3xl border border-sky-100 bg-white px-6 py-10 text-center shadow-sm footer-card">
-          <h3 className="text-4xl font-bold tracking-tight text-slate-900">
-            Ready to Take Control of Your Energy?
-          </h3>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-600">
-            Join thousands of homeowners already saving with Easylink Solar and
-            BLUETTI products.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <button className="rounded-xl bg-linear-to-r from-fuchsia-500 to-red-400 px-7 py-3 text-sm font-semibold text-white">
-              Get Your Quote
-            </button>
-            <button className="rounded-xl border border-sky-300 px-7 py-3 text-sm font-semibold text-slate-900">
-              Contact Sales
-            </button>
+        {showReadyToControlCta ? (
+          <div className="mx-auto flex min-h-[280px] w-full max-w-[1224px] flex-col justify-center rounded-3xl border border-sky-100 bg-white px-6 py-10 text-center shadow-sm footer-card">
+            <h3 className="text-4xl font-bold tracking-tight text-slate-900">
+              Ready to Take Control of Your Energy?
+            </h3>
+            <p className="mx-auto mt-3 max-w-2xl text-slate-600">
+              Join thousands of homeowners already saving with Easylink Solar and
+              BLUETTI products.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <button className="rounded-xl bg-linear-to-r from-fuchsia-500 to-red-400 px-7 py-3 text-sm font-semibold text-white">
+                Get Your Quote
+              </button>
+              <button className="rounded-xl border border-sky-300 px-7 py-3 text-sm font-semibold text-slate-900">
+                Contact Sales
+              </button>
+            </div>
           </div>
-        </div>
+        ) : null}
 
-        <div className="mx-auto mt-12 grid max-w-[1226px] gap-10 lg:grid-cols-[1.3fr_3fr] lg:px-6">
+        <div
+          className={`mx-auto grid max-w-[1226px] gap-10 lg:grid-cols-[1.3fr_3fr] lg:px-6 ${
+            showReadyToControlCta ? "mt-12" : "mt-0"
+          }`}
+        >
           <div>
             <div className="flex items-center gap-2">
               <Image
@@ -42,7 +55,9 @@ export function FooterSection() {
             </p>
             <p className="text-sm text-slate-600">
               Authorised{" "}
-              <span className="font-semibold text-sky-brand">BLUETTI</span>{" "}
+              <Link href="/bluetti" className="transition hover:text-slate-700">
+                <span className="font-semibold text-sky-brand">BLUETTI</span>
+              </Link>{" "}
               Distributor
             </p>
           </div>
