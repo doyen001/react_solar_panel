@@ -5,17 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import searchIcon from "@/components/ui/Icons/search.svg";
 import userIcon from "@/components/ui/Icons/user.svg";
 import shopIcon from "@/components/ui/Icons/shop.svg";
-
-const navItems = [
-  { label: "Bluetti", link: "/bluetti" },
-  { label: "Products", link: "/products" },
-  { label: "Customers", link: "/customers" },
-  { label: "Installers", link: "/installers/landing" },
-  { label: "Designs", link: "/designs" },
-  { label: "Blog", link: "/blog" },
-  { label: "About Us", link: "/about-us" },
-  { label: "Contact", link: "/contact-us" },
-];
+import { LANDING_NAV_ITEMS } from "@/utils/constant";
 
 export function Header() {
   const pathname = usePathname();
@@ -39,7 +29,7 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-4 text-sm text-slate-800 lg:flex xl:gap-5">
-          {navItems.map((item, index) => (
+          {LANDING_NAV_ITEMS.map((item, index) => (
             <Link
               key={index}
               href={item.link}
@@ -150,7 +140,7 @@ export function Header() {
           </summary>
           <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 p-3 shadow-2xl">
             <div className="mb-2 flex flex-col gap-2">
-              {navItems.map((item, index) => (
+              {LANDING_NAV_ITEMS.map((item, index) => (
                 <Link
                   key={index}
                   href={item.link}

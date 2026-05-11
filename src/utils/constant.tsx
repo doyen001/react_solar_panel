@@ -1,3 +1,340 @@
+/** Landing site header navigation (`LandingHero` / `Header`) */
+export const LANDING_NAV_ITEMS = [
+  { label: "Bluetti", link: "/bluetti" },
+  { label: "Products", link: "/products" },
+  { label: "Customers", link: "/customers" },
+  { label: "Installers", link: "/installers/landing" },
+  { label: "Designs", link: "/designs" },
+  { label: "Blog", link: "/blog" },
+  { label: "About Us", link: "/about-us" },
+  { label: "Contact", link: "/contact-us" },
+] as const;
+
+/** Bluetti EP2000 product page — hero (`/bluetti`) */
+export const BLUETTI_EP2000_HERO = {
+  title: {
+    brand: "BLUETTI",
+    product: "Home Battery EP2000",
+  },
+  subtitle: "Power Your Whole Home On Sunshine",
+  backgroundImageSrc:
+    "/images/ep2000/69fed828eb99db6c54cd35d6_EP2000_BN-1_2.png",
+  backgroundImageAlt:
+    "Modern home at dusk with BLUETTI EP2000 home battery and rooftop solar panels",
+} as const;
+
+/** Bluetti EP2000 — product combo tabs (`/bluetti`) */
+export const BLUETTI_EP2000_COMBO_SECTION = {
+  heading: "Your Best Step toward Energy Independence",
+  subheading:
+    "Secure Your Battery Rebate Before It Ends (Install after 1st May 2026)",
+  comboLabel: "BLUETTI Home Battery — EP2000 Combos",
+  warrantyBadge: "10 year warranty",
+  note: {
+    title: "Note:",
+    items: [
+      "Prices after federal rebate, with basic installation included. Eligibility and rebate amounts may vary—confirm with your installer.",
+      "Price shown is for metro areas in Sydney (NSW), Brisbane (QLD), and Victoria (VIC). Regional pricing may differ.",
+      "Offer is valid for installation completed after 1 May 2026. For enquiries contact",
+    ],
+    email: "au@bluetti.com",
+    emailHref: "mailto:au@bluetti.com",
+  },
+  tabs: [
+    {
+      id: "22_1kwh" as const,
+      tabLabel: "22.1kWh",
+      batteryModules: 3,
+      priceLine: "A$12,900* (incl. GST) Installation Included",
+      specsLine: "20kW | 22.1kWh",
+      imageSrc:
+        "/images/ep2000/69fee5f674d0dbc73ac1a248_37451_2x_efee59fb-8810-43fb-b358-f422086bf8aa.webp",
+      imageAlt:
+        "BLUETTI EP2000 home battery stack with three B700 battery modules",
+      dimLastThreeHeavyAppliances: true,
+    },
+    {
+      id: "29_49kwh" as const,
+      tabLabel: "29.49kWh",
+      batteryModules: 4,
+      priceLine: "A$14,900* (incl. GST) Installation Included",
+      specsLine: "20kW | 29.49kWh",
+      imageSrc:
+        "/images/ep2000/69fee6e8c1734fecd47b9a7a_2x_4dec8179-4b1a-45b3-a965-153a88e92f02.webp",
+      imageAlt:
+        "BLUETTI EP2000 home battery stack with four B700 battery modules",
+      dimLastThreeHeavyAppliances: false,
+    },
+    {
+      id: "51_61kwh" as const,
+      tabLabel: "51.61kWh",
+      batteryModules: 7,
+      priceLine: "A$22,900* (incl. GST) Installation Included",
+      specsLine: "20kW | 51.61kWh",
+      imageSrc:
+        "/images/ep2000/69fee7571569da25f02d0be7_37451_2x_add44bc1-ec2e-4291-941d-654e1ed1fe68.webp",
+      imageAlt:
+        "BLUETTI EP2000 home battery stack with seven B700 battery modules",
+      dimLastThreeHeavyAppliances: false,
+    },
+  ],
+} as const;
+
+export const BLUETTI_EP2000_ESSENTIAL_APPLIANCES = [
+  { iconId: "lighting" as const, label: "Lighting" },
+  { iconId: "router" as const, label: "Wi-Fi Router" },
+  { iconId: "freezer" as const, label: "Freezer" },
+  { iconId: "television" as const, label: "Television" },
+  { iconId: "washer" as const, label: "Washer/Dryer" },
+  { iconId: "laptop" as const, label: "Laptop/Home PC" },
+] as const;
+
+export const BLUETTI_EP2000_HEAVY_APPLIANCES = [
+  { iconId: "air_conditioner" as const, label: "Air Conditioner" },
+  { iconId: "dishwasher" as const, label: "Dishwasher" },
+  { iconId: "electric_oven" as const, label: "Electric Oven" },
+  { iconId: "heat_pump" as const, label: "Heat Pump" },
+  { iconId: "pool_pump" as const, label: "Pool Pump" },
+  { iconId: "vehicle" as const, label: "Electric Vehicle" },
+] as const;
+
+/** Bluetti EP2000 — technology feature grid (`/bluetti`), text baked into images */
+export const BLUETTI_EP2000_TECH_PIONEER = {
+  heading: "Technology Pioneer in Clean Energy",
+  desktopRows: [
+    {
+      src: "/images/ep2000/69feeb2df6a1e8f116354f89_37420_2x-2.webp",
+      alt: "BLUETTI EP2000: 20kW three-phase output for whole-home power and 98% inverter efficiency",
+    },
+    {
+      src: "/images/ep2000/69feeb7b2311bfbc123c8fb5_37435_2x_2001628c-7deb-44c3-8d89-6fe4a35f5619.webp",
+      alt: "BLUETTI EP2000: up to 40kWp solar array support and Shade Boost technology",
+    },
+    {
+      src: "/images/ep2000/69feeb48fd693f54b1540a2f_37419_2x_7c64035d-bf03-4905-a232-8423cf4d1276.webp",
+      alt: "BLUETTI EP2000: efficient standby power, modular design up to 60kW and 154.8kWh, VPP ready",
+    },
+    {
+      src: "/images/ep2000/69feeb641e118e4eb7a5a107_37434_2x_e12f4b3c-2a85-4404-852f-633e031532d5.webp",
+      alt: "BLUETTI EP2000: ultra-quiet operation below 50dB, IP65 outdoor rating, and sub-10ms backup",
+    },
+  ],
+  mobileRows: [
+    {
+      src: "/images/ep2000/69feec6eeb334ce729440ced_37519_2x_f5acdfd9-5117-4960-ad5a-50b33dc9817c.webp",
+      alt: "BLUETTI EP2000: 20kW three-phase output — power your entire home",
+    },
+    {
+      src: "/images/ep2000/69feec551f30f5e609fadb19_37523_2x-1.webp",
+      alt: "BLUETTI EP2000: 40kWp solar array supported",
+    },
+    {
+      src: "/images/ep2000/69feec8883307ad80c2a1230_37520_2x_2c0ec4c0-e685-43bc-913b-2e394e005e4b.webp",
+      alt: "BLUETTI EP2000: Shade Boost — more energy from shaded panels",
+    },
+    {
+      src: "/images/ep2000/69feecaa8fd2a278ff9d6884_37426_2x_54024a50-1a85-42aa-a40a-1d46c23231ca.webp",
+      alt: "BLUETTI EP2000: 98% inverter efficiency and modular battery design",
+    },
+    {
+      src: "/images/ep2000/69feecc5b2ea42bf1e5beb41_37425_2x_747bb97f-1332-4e01-a592-551ccd2c13eb.webp",
+      alt: "BLUETTI EP2000: 65W standby energy savings and VPP readiness",
+    },
+    {
+      src: "/images/ep2000/69feecdc8dd451e8f6bf4587_37526_2x_75f661b6-1800-4649-b2be-4dfe95046005.webp",
+      alt: "BLUETTI EP2000: IP65 rated — dust-tight and water resistant",
+    },
+    {
+      src: "/images/ep2000/69feed100e255f57a0e86ed3_37427_2x_713cac96-5d1e-47f0-910a-bee3ae099e2a.webp",
+      alt: "BLUETTI EP2000: under 50dB quiet operation and seamless sub-10ms backup",
+    },
+  ],
+} as const;
+
+/** Bluetti EP2000 — 6-layer safety + Splide carousel (`/bluetti`) */
+export const BLUETTI_EP2000_SAFETY_SECTION = {
+  heading: "6-Layer Safety Protection",
+  description:
+    "6-Layer Safety Protection System covers cells to structure, with emergency vents and robust network security to safeguard your home and family.",
+  diagram: {
+    src: "/images/ep2000/69fefff76667255e36b85cd3_PNG_1_2x_2435104c-7b10-477b-b102-2a1bd3a8c473.webp",
+    alt: "BLUETTI EP2000 six-layer internal safety structure diagram",
+    width: 707,
+    height: 767,
+  },
+  slides: [
+    {
+      id: "cell-safety",
+      title: "Cell Safety",
+      wide: false,
+      imageSrc:
+        "/images/ep2000/69ff01d4ad19668aae64da9b_Cell_Safety_2x-3.webp",
+      imageAlt: "BLUETTI cell-level safety — battery cells on circuit board",
+    },
+    {
+      id: "pressure-valve",
+      title: "Pressure Valve",
+      wide: false,
+      imageSrc:
+        "/images/ep2000/69ff02563121bcbfbaad6c13_Pressure_Valve_2x-1.webp",
+      imageAlt: "BLUETTI EP2000 pressure relief valves with safety venting",
+    },
+    {
+      id: "pack-protection",
+      title: "Pack Protection",
+      wide: true,
+      imageSrc:
+        "/images/ep2000/69ff0270c09419d3996eab52_Pack_Protection_2x-1.webp",
+      imageAlt: "BLUETTI EP2000 modular pack protection and enclosure",
+    },
+    {
+      id: "pcs-guard",
+      title: "PCS Guard",
+      wide: false,
+      imageSrc:
+        "/images/ep2000/69ff02bd47e8898e51f79d09_PCS_Guard_2x-3.webp",
+      imageAlt: "BLUETTI PCS guard — power conversion system protection",
+    },
+    {
+      id: "hv800-control",
+      title: "HV800 Control",
+      wide: false,
+      imageSrc:
+        "/images/ep2000/69ff02dfc09419d3996eaf5d_HV800_Control_2x-1.webp",
+      imageAlt: "BLUETTI HV800 control module internal safety electronics",
+    },
+    {
+      id: "data-security",
+      title: "Data Security",
+      wide: true,
+      imageSrc:
+        "/images/ep2000/69ff03026a72a27cb976e3f1_Data_Security_2x-1.webp",
+      imageAlt: "BLUETTI network and data security for connected home backup",
+    },
+  ],
+} as const;
+
+/** Bluetti EP2000 — fullscreen cinematic video (`/bluetti`) */
+export const BLUETTI_EP2000_CINEMA_VIDEO = {
+  headingLine1: "Power Your Whole",
+  headingLine2: "Home On Sunshine",
+  ctaLabel: "Watch Video",
+  videoSrcMp4: "/videos/solarWall.mp4",
+  videoAriaLabel:
+    "Cinematic view of home energy and BLUETTI solar wall integration",
+} as const;
+
+/** Bluetti EP2000 — sun savings gradient band (`/bluetti`) */
+export const BLUETTI_EP2000_SUN_BILLS_SECTION = {
+  heading: "Let the Sun Slash Your Power Bills— Up to 90% Off",
+  bodyIntro:
+    "Imagine powering your entire home with clean, free energy from the sun. The EP2000 ESS makes it real - ",
+  bodyBold1:
+    "with massive solar input, powerful output, and flexible storage that can cut your reliance on the grid by up to 90%.",
+  bodyMid: " Pay way less on electricity, stay in full control, and ",
+  bodyBold2: "potentially recoup your investment in just 3.6 years!",
+  footnote: "* Results vary by household. For reference only.",
+} as const;
+
+/** Bluetti EP2000 — solar use case tabs + video (`/bluetti`) */
+export const BLUETTI_EP2000_USE_CASE_SECTION = {
+  heading: "Power Your Whole Home On Sunshine",
+  tabs: [
+    {
+      id: "maximise-solar" as const,
+      tabLabel: "Maximise Solar",
+      description:
+        "Store excess solar power during the day, then use it at night or on cloudy days. Watch your electricity bills shrink as your home runs mostly on your own sunshine.",
+      videoSrc: "/videos/homeHero.mp4",
+      videoAriaLabel:
+        "Animation of a modern home maximising daytime solar energy with EP2000 storage",
+    },
+    {
+      id: "home-backup" as const,
+      tabLabel: "Home Backup",
+      description:
+        "Storms, outages, or grid failures won't slow you down. EP2000 intelligently charges up beforehand and keeps your home running without a hitch.",
+      videoSrc: "/videos/homeBackupEp2000.mp4",
+      videoAriaLabel:
+        "Home backup scenario with EP2000 keeping lights on during an outage",
+    },
+    {
+      id: "tou-savings" as const,
+      tabLabel: "TOU Savings",
+      description:
+        "Charge when electricity is cheap, use stored power when rates soar — even without solar, you save.",
+      videoSrc: "/videos/TOUSavings.mp4",
+      videoAriaLabel:
+        "Time-of-use savings: charging when rates are low and powering the home from stored energy",
+    },
+    {
+      id: "off-grid-freedom" as const,
+      tabLabel: "Off-Grid Freedom",
+      description:
+        "Whether it's a remote farm, a weekend cabin, or a dream home far from the grid — EP2000 gives you quiet, reliable off-grid power without the noise or cost of a generator.",
+      videoSrc: "/videos/OffGridFreedom.mp4",
+      videoAriaLabel:
+        "Off-grid property powered quietly by BLUETTI EP2000 without a fuel generator",
+    },
+  ],
+} as const;
+
+/** Bluetti EP2000 — all-in-one lifestyle fullscreen band (`/bluetti`) */
+export const BLUETTI_EP2000_ALL_IN_ONE_SECTION = {
+  heading: "EP2000 All-in-One",
+  body:
+    "In 2024, 65% of Australia's energy still comes from fossil fuels — the goal is 18% by 2030. With rising prices and new incentives, now is the best time to go solar. EP2000 gives your home clean power, energy savings, and independence.",
+  footnote: "Data source: Clean Energy Wire.",
+  imageSrc:
+    "/images/ep2000/69ff13cfc1734fecd47dd71b_27540_2x_9ddad256-4ae7-4016-a0a0-556efc085f5b.webp",
+  imageAlt:
+    "BLUETTI EP2000 and battery stacks in a mountain valley setting at dusk",
+} as const;
+
+/** Bluetti EP2000 — second fullscreen video separator (`/bluetti`) */
+export const BLUETTI_EP2000_BACKUP_CINEMA_SECTION = {
+  heading: "Power Your Whole Home On Sunshine",
+  body:
+    "The EP2000 provides up to 20kW of power from a single unit*, and with 3 units in parallel, you can reach a powerful 60kW. Power everything from your electric vehicle and stove to all your household devices, achieving complete energy independence.",
+  footnote:
+    "* In off-grid mode without solar connection, EP2000 outputs 10.5kW (with 2 B700 batteries) or 15.5kW (with 3 B700 batteries). A full 20kW output requires 4 or more battery modules.",
+  videoSrcMp4: "/videos/backupEp2000.mp4",
+  videoAriaLabel:
+    "Cross-section of a solar-powered home at night with energy flowing to appliances and EV",
+} as const;
+
+/** Bluetti EP2000 — app CTA (video + copy + store badges) (`/bluetti`) */
+export const BLUETTI_EP2000_APP_CTA_SECTION = {
+  heading: "Smart Energy, Just a Tap Away",
+  videoSrcMp4: "/videos/ep2000CTA.mp4",
+  videoAriaLabel:
+    "Hand holding a phone with the BLUETTI energy app in front of a modern home at dusk",
+  bullets: [
+    {
+      label: "Energy Control",
+      body: "Manage your energy from anywhere with our simple app.",
+    },
+    {
+      label: "Real-Time Insights",
+      body: "See your energy production, storage, and usage instantly.",
+    },
+    {
+      label: "One-Tap Mode Switch",
+      body: "Quickly switch between Self-Consumption, Time of Use, Backup, or Custom modes.",
+    },
+    {
+      label: "Fast Updates",
+      body: "Enjoy new features quickly with OTA updates in just 5 minutes.",
+    },
+  ],
+  googlePlayBadgeSrc: "/images/ep2000/google-play-store.png",
+  googlePlayBadgeAlt: "Get it on Google Play",
+  appleBadgeAlt: "Download on the App Store",
+  /** Replace with your live App Store / Play listing URLs when available. */
+  appStoreHref: "#" as const,
+  playStoreHref: "#" as const,
+} as const;
+
 export type DesignsPropertyType = {
   id: "residential" | "commercial" | "apartments";
   label: string;

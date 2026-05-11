@@ -296,6 +296,76 @@
   --color-landing-cta-sales-border: #7dd3fc;
   --color-landing-cta-sales-text: #09234a;
 
+  /* Bluetti EP2000 marketing page hero */
+  --color-bluetti-hero-text: #ffffff;
+  --color-bluetti-hero-overlay-start: rgb(0 0 0 / 0.48);
+  --color-bluetti-hero-overlay-mid: rgb(0 0 0 / 0.36);
+  --color-bluetti-hero-overlay-end: rgb(0 0 0 / 0.5);
+
+  /* Bluetti EP2000 — product combo tabs section */
+  --color-bluetti-combo-bg: #ffffff;
+  --color-bluetti-combo-heading: #1d1d1f;
+  --color-bluetti-combo-body: #424245;
+  --color-bluetti-combo-label: #6e6e73;
+  --color-bluetti-combo-muted: #636366;
+  --color-bluetti-combo-tab-active: #2196f3;
+  --color-bluetti-combo-tab-shell: #f2f2f7;
+  --color-bluetti-combo-tab-idle-text: #3a3a3c;
+  --color-bluetti-combo-icon: #3a3a3c;
+  --color-bluetti-combo-grad-from: #0891b2;
+  --color-bluetti-combo-grad-to: #22d3ee;
+  --color-bluetti-combo-link: #2196f3;
+  --color-bluetti-combo-note: #636366;
+  --color-bluetti-combo-warranty: #c9972e;
+
+  /* Bluetti EP2000 — technology pioneer image grid */
+  --color-bluetti-tech-section-bg: #ffffff;
+  --color-bluetti-tech-heading-from: #2dd4bf;
+  --color-bluetti-tech-heading-to: #0ea5e9;
+
+  /* Bluetti EP2000 — 6-layer safety section */
+  --color-bluetti-safety-section-bg: #ffffff;
+  --color-bluetti-safety-heading-from: #2dd4bf;
+  --color-bluetti-safety-heading-to: #2563eb;
+  --color-bluetti-safety-body: #424245;
+  --color-bluetti-safety-card-title: #1d1d1f;
+  --color-bluetti-safety-pagination-idle: #d1d5db;
+  --color-bluetti-safety-pagination-active: #efad06;
+  --color-bluetti-safety-arrow-border: #e5e7eb;
+  --color-bluetti-safety-arrow-icon: #374151;
+  --color-bluetti-safety-arrow-surface: rgb(255 255 255 / 0.92);
+
+  /* Bluetti EP2000 — fullscreen cinema video section */
+  --color-bluetti-cinema-overlay: rgb(0 0 0 / 0.38);
+  --color-bluetti-cinema-heading: #ffffff;
+  --color-bluetti-cinema-cta-bg: #efad06;
+  --color-bluetti-cinema-cta-text: #0a0a0a;
+  --color-bluetti-cinema-bottom-accent: #efad06;
+
+  /* Bluetti EP2000 — backup / second fullscreen video separator */
+  --color-bluetti-backup-cinema-overlay: rgb(0 0 0 / 0.5);
+  --color-bluetti-backup-cinema-heading: #ffffff;
+  --color-bluetti-backup-cinema-body: #ffffff;
+  /* Design ref #fff9 — light gray footnote (8-digit hex ≈ 60% white on dark) */
+  --color-bluetti-backup-cinema-footnote: #ffffff99;
+
+  /* Bluetti EP2000 — app CTA (Smart Energy) */
+  --color-bluetti-app-cta-heading: #0f172a;
+  --color-bluetti-app-cta-body: #334155;
+  --color-bluetti-app-cta-shell-border: #e2e8f0;
+  --color-bluetti-app-cta-shell-shadow: rgb(15 23 42 / 0.06);
+
+  /* Bluetti EP2000 — sun / power bills gradient section */
+  --color-bluetti-sun-bills-text: #161616;
+  --color-bluetti-sun-bills-footnote: rgb(22 22 22 / 0.78);
+
+  /* Bluetti EP2000 — all-in-one fullscreen lifestyle band */
+  --color-bluetti-allin-one-text: #ffffff;
+  --color-bluetti-allin-one-footnote: rgb(255 255 255 / 0.78);
+  --color-bluetti-allin-one-overlay-top: rgb(0 0 0 / 0.58);
+  --color-bluetti-allin-one-overlay-mid: rgb(0 0 0 / 0.22);
+  --color-bluetti-allin-one-overlay-end: transparent;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-source-sans: var(--font-source-sans);
@@ -339,6 +409,489 @@ body {
 
 button {
   cursor: pointer;
+}
+
+.bluetti-hero-overlay {
+  background: linear-gradient(
+    180deg,
+    var(--color-bluetti-hero-overlay-start) 0%,
+    var(--color-bluetti-hero-overlay-mid) 44%,
+    var(--color-bluetti-hero-overlay-end) 100%
+  );
+}
+
+.bluetti-hero-title {
+  margin: 0;
+  max-width: 22rem;
+  font-family: var(--font-outfit), Arial, Helvetica, sans-serif;
+  font-size: clamp(2.125rem, 5.4vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.042em;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .bluetti-hero-title {
+    max-width: 56rem;
+    letter-spacing: -0.038em;
+  }
+}
+
+.bluetti-hero-title-brand {
+  text-transform: uppercase;
+}
+
+.bluetti-hero-subtitle {
+  margin: 1rem 0 0;
+  max-width: 36rem;
+  font-family: var(--font-source-sans), Arial, Helvetica, sans-serif;
+  font-size: clamp(1.0625rem, 2vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.018em;
+  text-align: center;
+}
+
+.container-large {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1400px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-large {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-large {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.padding-section {
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .padding-section {
+    padding-bottom: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .padding-section {
+    padding-bottom: 5rem;
+  }
+}
+
+.padding-section-medium {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .padding-section-medium {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .padding-section-medium {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+
+.bluetti-combo-gradient-text {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-bluetti-combo-grad-from) 0%,
+    var(--color-bluetti-combo-grad-to) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bluetti-combo-price-text {
+  margin: 0;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1.375rem, 2.8vw, 2rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+
+.bluetti-combo-specs-text {
+  margin: 0;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
+.bluetti-tech-pioneer-heading {
+  margin: 0 auto;
+  max-width: 48rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-align: center;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-bluetti-tech-heading-from) 0%,
+    var(--color-bluetti-tech-heading-to) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bluetti-safety-heading {
+  margin: 0;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-bluetti-safety-heading-from) 0%,
+    var(--color-bluetti-safety-heading-to) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Splide — EP2000 safety carousel (layout + brand pagination / arrows) */
+.bluetti-safety-splide.splide {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0 0.75rem;
+}
+
+.bluetti-safety-splide.splide .splide__track {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.bluetti-safety-splide.splide .splide__pagination {
+  position: static !important;
+  inset: auto !important;
+  grid-column: 1;
+  grid-row: 2;
+  justify-content: flex-start !important;
+  margin: 1.25rem 0 0 !important;
+  padding: 0 !important;
+  gap: 0.35rem;
+}
+
+.bluetti-safety-splide.splide .splide__pagination__page {
+  width: 8px;
+  height: 8px;
+  margin: 0 !important;
+  border-radius: 9999px;
+  background: var(--color-bluetti-safety-pagination-idle) !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.bluetti-safety-splide.splide .splide__pagination__page.is-active {
+  background: var(--color-bluetti-safety-pagination-active) !important;
+  transform: none !important;
+}
+
+.bluetti-safety-splide.splide .splide__arrows {
+  position: static !important;
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  align-self: center;
+}
+
+.bluetti-safety-splide.splide .splide__arrow {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-bluetti-safety-arrow-border);
+  background: var(--color-bluetti-safety-arrow-surface);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+  opacity: 1 !important;
+}
+
+.bluetti-safety-splide.splide .splide__arrow:hover:not(:disabled) {
+  opacity: 1 !important;
+  background: #ffffff;
+}
+
+.bluetti-safety-splide.splide .splide__arrow:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed;
+}
+
+.bluetti-safety-splide.splide .splide__arrow svg {
+  fill: var(--color-bluetti-safety-arrow-icon);
+}
+
+.bluetti-safety-splide.splide .splide__slide img {
+  border-radius: 1rem;
+}
+
+.bluetti-safety-slide--normal {
+  width: min(72vw, 260px);
+}
+
+@media (min-width: 640px) {
+  .bluetti-safety-slide--normal {
+    width: 280px;
+  }
+}
+
+.bluetti-safety-slide--wide {
+  width: min(92vw, 520px);
+}
+
+@media (min-width: 640px) {
+  .bluetti-safety-slide--wide {
+    width: 560px;
+  }
+}
+
+.bluetti-cinema-heading {
+  margin: 0;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1.875rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: var(--color-bluetti-cinema-heading);
+}
+
+.background-secondary-gradient {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 100%
+  );
+}
+
+.bluetti-sun-bills-heading {
+  margin: 0 auto;
+  max-width: 22rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(2.125rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: var(--color-bluetti-sun-bills-text);
+}
+
+@media (min-width: 640px) {
+  .bluetti-sun-bills-heading {
+    max-width: 48rem;
+  }
+}
+
+.bluetti-sun-bills-body {
+  margin: 1.75rem auto 0;
+  max-width: 46rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1rem, 2.1vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.65;
+  text-align: center;
+  color: var(--color-bluetti-sun-bills-text);
+}
+
+.bluetti-sun-bills-body strong {
+  font-weight: 700;
+}
+
+.bluetti-sun-bills-footnote {
+  margin: 1.25rem auto 0;
+  max-width: 46rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-bluetti-sun-bills-footnote);
+}
+
+.bluetti-allin-one-overlay {
+  background: linear-gradient(
+    180deg,
+    var(--color-bluetti-allin-one-overlay-top) 0%,
+    var(--color-bluetti-allin-one-overlay-mid) 42%,
+    var(--color-bluetti-allin-one-overlay-end) 78%
+  );
+}
+
+.bluetti-allin-one-heading {
+  margin: 0 auto;
+  max-width: 22rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: var(--color-bluetti-allin-one-text);
+}
+
+@media (min-width: 640px) {
+  .bluetti-allin-one-heading {
+    max-width: 60rem;
+  }
+}
+
+.bluetti-allin-one-body {
+  margin: 1.25rem auto 0;
+  max-width: 40rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1rem, 2vw, 1.1875rem);
+  font-weight: 400;
+  line-height: 1.65;
+  text-align: center;
+  color: var(--color-bluetti-allin-one-text);
+}
+
+@media (min-width: 768px) {
+  .bluetti-allin-one-body {
+    max-width: 60rem;
+  }
+}
+
+.bluetti-allin-one-footnote {
+  margin: 1rem auto 0;
+  max-width: 46rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-bluetti-allin-one-footnote);
+}
+
+.bluetti-backup-cinema-heading {
+  margin: 0 auto;
+  max-width: 40rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1.5rem, 5vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: var(--color-bluetti-backup-cinema-heading);
+}
+
+@media (min-width: 640px) {
+  .bluetti-backup-cinema-heading {
+    max-width: 70rem;
+  }
+}
+
+.bluetti-backup-cinema-body {
+  margin: 1.5rem auto 0;
+  max-width: 60rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1rem, 2.1vw, 1.1875rem);
+  font-weight: 400;
+  line-height: 1.65;
+  text-align: center;
+  color: var(--color-bluetti-backup-cinema-body);
+}
+
+.bluetti-backup-cinema-footnote {
+  margin: 1.25rem auto 0;
+  max-width: 50rem;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  text-align: center;
+  color: var(--color-bluetti-backup-cinema-footnote);
+}
+
+@media (min-width: 640px) {
+  .bluetti-backup-cinema-footnote {
+    font-size: 0.875rem;
+  }
+}
+
+.bluetti-app-cta-heading {
+  margin: 0;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--color-bluetti-app-cta-heading);
+}
+
+.bluetti-app-cta-list {
+  margin: 1.5rem 0 0;
+  padding-left: 1.125rem;
+  list-style-type: disc;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: clamp(0.9375rem, 1.6vw, 1.0625rem);
+  line-height: 1.6;
+  color: var(--color-bluetti-app-cta-body);
+}
+
+.bluetti-app-cta-list li {
+  margin-top: 0.75rem;
+}
+
+.bluetti-app-cta-list li:first-child {
+  margin-top: 0;
+}
+
+.bluetti-app-cta-list strong {
+  font-weight: 700;
+  color: var(--color-bluetti-app-cta-heading);
+}
+
+.bluetti-app-cta-card {
+  box-shadow: 0 16px 48px var(--color-bluetti-app-cta-shell-shadow);
+}
+
+/* Row spacing only — use Tailwind `flex flex-col` / `hidden lg:flex` on the
+   element so `display` is not overridden here (would break responsive hide). */
+.ep2000-image-grid {
+  gap: var(--bluetti-tech-grid-gap, 0.5rem);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .ep2000-image-grid {
+    gap: var(--bluetti-tech-grid-gap-md, 0.625rem);
+  }
 }
 
 .footer-card {

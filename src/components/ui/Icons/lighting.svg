@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="none" viewBox="0 0 48 48" class="lg:size-10 size-[30px]">
+  <path fill="#f1f2f3" stroke="#0f172a" stroke-width="1.5" d="M22.479 4.07a1 1 0 0 1 1.414 0l3.172 3.173a1 1 0 0 1 0 1.414l-4.025 4.025a1 1 0 0 0-.275.52l-1.175 6.156a1 1 0 0 1-1.69.52l-8.642-8.643a1 1 0 0 1 .52-1.69l6.156-1.174a1 1 0 0 0 .52-.275z"></path>
+  <path stroke="#0f172a" d="m13.183 13.16 4.793 4.793a3.013 3.013 0 0 1-4.26 0l-.534-.533a3.013 3.013 0 0 1 0-4.26Z"></path>
+  <path stroke="#0f172a" stroke-linecap="round" stroke-width="1.5" d="M24.85 11.47 35.72 22.224m-6.127 15.87 6.858-11.978"></path>
+  <circle cx="37.392" cy="24" r="2.278" stroke="#0f172a" stroke-width="1.5"></circle>
+  <path stroke="#0f172a" stroke-width="1.5" d="M17.617 43.834a5.74 5.74 0 0 1 5.738-5.738h10.577a5.74 5.74 0 0 1 5.738 5.738.17.17 0 0 1-.169.169H17.786a.17.17 0 0 1-.169-.17Z"></path>
+  <path stroke="#dde0e6" stroke-linecap="round" d="m11.909 19.227-1.614 1.614M10.534 17.361l-2.204.59M13.774 20.601l-.59 2.205"></path>
+</svg>
