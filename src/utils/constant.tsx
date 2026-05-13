@@ -2370,3 +2370,55 @@ export const FIRMWARE_PAGE = {
     "For any update-related queries or assistance, please contact our support team or refer to the respective manufacturer's website.",
   ],
 } as const;
+
+/** Customer portal — Solar Maintenance AMC wizard (`/customers/solar-maintenance`, Figma 1676:378) */
+export const SOLAR_MAINTENANCE_CONTRACT = {
+  pageTitle: "Solar and Battery Annual Maintenance Contract",
+  pageSubtitle: "Create New Agreement",
+  steps: [
+    { id: 1 as const, label: "Step 1: Details", tone: "active" as const },
+    { id: 2 as const, label: "Step 2: Services", tone: "idle" as const },
+    { id: 3 as const, label: "Step 3: Signatures", tone: "idle" as const },
+  ],
+  agreementDetailsLabel: "Agreement Details:",
+  placeholders: {
+    companyName: "Company Name",
+    contractNumber: "e.g. AMC-2024-001",
+    equipmentSize: "e.g. 10 kW",
+    equipmentQty: "Qty",
+    installationAddress: "Enter address",
+    clientName: "Client Name",
+    abn: "XX XXX XXX XXX",
+    clientCompanyName: "Client Company Name",
+  },
+  labels: {
+    contractNumber: "Contract Number:",
+    equipmentCovered: "Equipment Covered:",
+    installationLocation: "Installation Location:",
+    client: "Client:",
+    abn: "ABN/ACN:",
+    date: "Date",
+    companyNameRight: "Company Name:",
+  },
+  equipmentColumnHeaders: ["Type", "Size", "Qty", "Date Installed"] as const,
+  equipmentRows: [
+    { id: "panels" as const, typeLabel: "Panels" },
+    { id: "inverter" as const, typeLabel: "Inverter" },
+    { id: "battery" as const, typeLabel: "Battery" },
+    { id: "accessories" as const, typeLabel: "Accessories" },
+  ],
+  buttons: {
+    saveDraft: "Save Draft",
+    continue: "Continue",
+  },
+} as const;
+
+/** Marketing `/customers` — Solar Maintenance teaser section */
+export const SOLAR_MAINTENANCE_CUSTOMER_SECTION = {
+  eyebrow: "Care & performance",
+  title: "Solar Maintenance",
+  body:
+    "Keep your panels, inverter, and battery performing year after year with an annual maintenance agreement you can manage from your customer dashboard.",
+  ctaLabel: "Open maintenance agreement",
+  ctaHref: "/customers/solar-maintenance",
+} as const;

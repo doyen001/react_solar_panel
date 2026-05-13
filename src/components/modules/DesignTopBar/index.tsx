@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "../../ui/Icons";
 
@@ -13,6 +13,7 @@ const LANGUAGES: { value: Lang; label: string; flag: string }[] = [
 
 export function DesignTopBar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [language, setLanguage] = useState<Lang>("en-uk");
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -32,14 +33,15 @@ export function DesignTopBar() {
   }, [open]);
 
   const selected = LANGUAGES.find((l) => l.value === language) ?? LANGUAGES[0];
+  const isDesignPage = pathname === "/customers/design";
 
   return (
     <div className="pt-[26px] flex w-[min(1284px,calc(100%-148px))] items-start justify-between mx-auto">
       <Image
-        src="/images/home/solar-design-logo.png"
+        src={isDesignPage ? "/images/home/solar-design-logo.png" : "/images/home/solar-maintenance-logo.png"}
         alt="EasyLink Solar"
-        width={66}
-        height={66}
+        width={ isDesignPage ? 66 : 80}
+        height={ isDesignPage ? 66 : 80}
         className="opacity-90 cursor-pointer"
         onClick={() => router.push("/")}
       />

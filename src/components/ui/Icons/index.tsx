@@ -110,6 +110,10 @@ const ChevronDown = createDynamicSvgIcon(
 const BulletDot = createDynamicSvgIcon(
   () => import("./bullet-dot.svg?component"),
 );
+const Globe = createDynamicSvgIcon(() => import("./globe.svg?component"));
+const MaintCalendar = createDynamicSvgIcon(
+  () => import("./maint-calendar.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -170,7 +174,9 @@ export type IconType =
   | "ExternalLink"
   | "Funnel"
   | "ChevronDown"
-  | "BulletDot";
+  | "BulletDot"
+  | "Globe"
+  | "MaintCalendar";
 
 type IconProps = {
   name: IconType | undefined;
@@ -244,6 +250,8 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     Funnel,
     ChevronDown,
     BulletDot,
+    Globe,
+    MaintCalendar,
   };
 
   const CurrentIcon = icons[name];

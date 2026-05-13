@@ -11,6 +11,11 @@ import Icon from "../../ui/Icons";
 const NAV = [
   { href: "/customers/dashboard", label: "Dashboard", key: "dashboard" },
   { href: "/customers/design", label: "My Design", key: "designs" },
+  {
+    href: "/customers/solar-maintenance",
+    label: "Solar Maintenance",
+    key: "maintenance",
+  },
   { href: "/customers/messages", label: "Messages", key: "messages" },
   { href: "/customers/products", label: "Products", key: "products" },
   { href: "/customers/profile", label: "Profile", key: "profile" },
@@ -19,7 +24,13 @@ const NAV = [
 type Props = {
   firstName?: string | null;
   lastName?: string | null;
-  activeNav?: "dashboard" | "designs" | "profile" | "products" | "messages";
+  activeNav?:
+    | "dashboard"
+    | "designs"
+    | "maintenance"
+    | "profile"
+    | "products"
+    | "messages";
   /** Extra controls (e.g. My Design toolbar) shown before search / notifications. */
   headerAccessory?: ReactNode;
 };
@@ -67,6 +78,7 @@ export function CustomerDashboardHeader({
             const active =
               (item.key === "dashboard" && activeNav === "dashboard") ||
               (item.key === "designs" && activeNav === "designs") ||
+              (item.key === "maintenance" && activeNav === "maintenance") ||
               (item.key === "profile" && activeNav === "profile") ||
               (item.key === "products" && activeNav === "products") ||
               (item.key === "messages" && activeNav === "messages");

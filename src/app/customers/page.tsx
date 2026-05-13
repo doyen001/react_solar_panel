@@ -10,6 +10,7 @@ import { TechnologySection } from "@/components/pages/home/TechnologySection";
 import { VideoShowcaseSection } from "@/components/pages/home/VideoShowcaseSection";
 import { CustomerHeroSection } from "../../components/pages/customer/HeroSection";
 import { CustomerPlatformSection } from "../../components/pages/customer/PlatformSection";
+import { SolarMaintenanceCustomerSection } from "../../components/pages/customer/SolarMaintenanceCustomerSection";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       <main className="overflow-x-hidden bg-white">
         <CustomerHeroSection />
         <CustomerPlatformSection />
+        <SolarMaintenanceCustomerSection />
         <ProductsSection />
         <SpecialDealsSection />
         <BluettiProductsSection />
