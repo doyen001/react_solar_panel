@@ -14,6 +14,7 @@ export type InstallerProductSummary = {
   basePrice: number;
   imageUrl?: string | null;
   active?: boolean | null;
+  specs?: Record<string, unknown> | null;
 };
 
 type ApiEnvelope<T> = {
@@ -99,7 +100,9 @@ export function useInstallerProductsList(
     page?: number;
     limit?: number;
     category?: string;
+    brand?: string;
     search?: string;
+    active?: boolean;
     enabled?: boolean;
     pollIntervalMs?: number;
   } = {},
@@ -108,7 +111,9 @@ export function useInstallerProductsList(
     page = 1,
     limit = 50,
     category,
+    brand,
     search,
+    active,
     enabled = true,
     pollIntervalMs,
   } = params;
@@ -127,7 +132,7 @@ export function useInstallerProductsList(
       setError(null);
       try {
         const result = await fetchInstallerProducts(
-          { page, limit, category, search },
+          { page, limit, category, brand, search, active },
           { signal: opts?.signal },
         );
         setProducts(result.products);
@@ -141,7 +146,7 @@ export function useInstallerProductsList(
         if (!silent) setLoading(false);
       }
     },
-    [page, limit, category, search],
+    [page, limit, category, brand, search, active],
   );
 
   useEffect(() => {
