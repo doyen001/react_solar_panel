@@ -12,6 +12,7 @@ import {
   CUSTOMER_REFRESH_COOKIE,
   REFRESH_COOKIE_MAX_AGE_SEC,
 } from "@/lib/auth/customer-cookies";
+import { checkPortalRole } from "@/lib/auth/portal-role";
 
 const LOGIN_PATH = "/auth/login";
 
@@ -131,6 +132,23 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { message: "Unexpected response from login service." },
       { status: 502 },
+    );
+  }
+
+  // Role/portal gate: this proxy only accepts CUSTOMER accounts.
+  // We do NOT set any auth cookies if the user picked the wrong portal.
+  const roleCheck = checkPortalRole("customer", data.user?.role);
+  if (!roleCheck.ok) {
+    return NextResponse.json(
+      {
+        message: roleCheck.message,
+        portalMismatch: {
+          portal: roleCheck.portalLabel,
+          role: roleCheck.role,
+          suggested: roleCheck.suggested,
+        },
+      },
+      { status: roleCheck.status },
     );
   }
 

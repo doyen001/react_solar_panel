@@ -22,29 +22,25 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/lib/store/hooks";
 import {
-  clearUser,
   setCustomerSession,
   setUser,
   type CustomerUser,
 } from "@/lib/store/customerAuthSlice";
-import {
-  clearInstallerUser,
-  setInstallerSession,
-} from "@/lib/store/installerAuthSlice";
 import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
 
-function getAccountLabel(params: ReturnType<typeof useSearchParams>) {
-  const raw = params.get("portal")?.toLowerCase();
-  if (raw === "installer") return "installer";
-  if (raw === "distributor") return "distributor";
-  return "customer";
+const CUSTOMER_HOME = "/customers/dashboard";
+
+function safeCustomerFrom(from: string | null): string {
+  if (!from) return CUSTOMER_HOME;
+  if (!from.startsWith("/customers")) return CUSTOMER_HOME;
+  if (from.startsWith("/customers/auth")) return CUSTOMER_HOME;
+  return from;
 }
 
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const searchParams = useSearchParams();
-  const accountLabel = getAccountLabel(searchParams);
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -67,7 +63,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, portal: "customer" }),
       });
 
       const result = (await response.json().catch(() => null)) as {
@@ -75,6 +71,11 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
         user?: CustomerUser;
         accessToken?: string;
         fieldErrors?: Partial<Record<keyof SignInFormData, string[]>>;
+        portalMismatch?: {
+          portal: string;
+          role: string;
+          suggested: { key: string; label: string; url: string } | null;
+        };
       } | null;
 
       if (!response.ok) {
@@ -90,60 +91,43 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           }
         }
 
-        toast.error(
-          result?.message ?? "Unable to sign you in. Please try again.",
-        );
+        const mismatch = result?.portalMismatch;
+        if (mismatch?.suggested) {
+          toast.error(
+            (result?.message ??
+              `Your account cannot sign in via the ${mismatch.portal} login portal.`) +
+              ` Click here to go to the ${mismatch.suggested.label} login.`,
+            {
+              autoClose: 8000,
+              onClick: () => {
+                window.location.assign(mismatch.suggested!.url);
+              },
+            },
+          );
+        } else {
+          toast.error(
+            result?.message ?? "Unable to sign you in. Please try again.",
+          );
+        }
         return;
       }
 
       toast.success(result?.message ?? "Signed in successfully.");
-      const role = result?.user?.role;
-      const isCustomerRole = role === "CUSTOMER";
-      const isAdminRole = role === "ADMIN";
 
       if (result?.user && typeof result.accessToken === "string") {
-        if (isCustomerRole) {
-          dispatch(clearInstallerUser());
-          dispatch(
-            setCustomerSession({
-              user: result.user,
-              accessToken: result.accessToken,
-            }),
-          );
-        } else {
-          dispatch(clearUser());
-          dispatch(
-            setInstallerSession({
-              user: result.user,
-              accessToken: result.accessToken,
-            }),
-          );
-        }
+        dispatch(
+          setCustomerSession({
+            user: result.user,
+            accessToken: result.accessToken,
+          }),
+        );
       } else if (result?.user) {
-        if (isCustomerRole) {
-          dispatch(clearInstallerUser());
-          dispatch(setUser(result.user));
-        } else {
-          dispatch(clearUser());
-        }
+        dispatch(setUser(result.user));
       }
-      const from = searchParams.get("from");
-      const defaultRoute = isCustomerRole
-        ? "/customers/dashboard"
-        : isAdminRole
-          ? "/master/dashboard"
-          : "/installers/dashboard/home";
-      const safeFrom = from
-        ? isCustomerRole
-          ? from.startsWith("/customers") && !from.startsWith("/customers/auth")
-            ? from
-            : defaultRoute
-          : from.startsWith("/installers") || from.startsWith("/master")
-            ? from
-            : defaultRoute
-        : defaultRoute;
+
+      const target = safeCustomerFrom(searchParams.get("from"));
       /** Hard navigation so httpOnly session cookies are stored before the next document / RSC request. */
-      window.location.assign(safeFrom);
+      window.location.assign(target);
     } catch {
       toast.error("Unable to reach the login service. Please try again.");
     }
@@ -162,7 +146,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
               Welcome Back
             </p>
             <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-70)">
-              Sign in to your {accountLabel} account
+              Sign in to your customer account
             </p>
           </div>
           <div>

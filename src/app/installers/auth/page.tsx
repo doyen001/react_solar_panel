@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
@@ -22,25 +22,25 @@ import {
 } from "@/lib/validations/auth";
 import { useAppDispatch } from "@/lib/store/hooks";
 import {
-  clearInstallerUser,
   setInstallerSession,
   setInstallerUser,
   type InstallerUser,
 } from "@/lib/store/installerAuthSlice";
-import { clearUser, setCustomerSession } from "@/lib/store/customerAuthSlice";
 import { DesignTopBar } from "@/components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
 
-function getAccountLabel(params: ReturnType<typeof useSearchParams>) {
-  const raw = params.get("portal")?.toLowerCase();
-  if (raw === "distributor") return "distributor";
-  return "installer";
+const INSTALLER_HOME = "/installers/dashboard/home";
+
+function safeInstallerFrom(from: string | null): string {
+  if (!from) return INSTALLER_HOME;
+  if (!from.startsWith("/installers")) return INSTALLER_HOME;
+  if (from.startsWith("/installers/auth")) return INSTALLER_HOME;
+  return from;
 }
 
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const searchParams = useSearchParams();
-  const accountLabel = getAccountLabel(searchParams);
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -63,7 +63,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, portal: "installer" }),
       });
 
       const result = (await response.json().catch(() => null)) as {
@@ -71,6 +71,11 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
         user?: InstallerUser;
         accessToken?: string;
         fieldErrors?: Partial<Record<keyof SignInFormData, string[]>>;
+        portalMismatch?: {
+          portal: string;
+          role: string;
+          suggested: { key: string; label: string; url: string } | null;
+        };
       } | null;
 
       if (!response.ok) {
@@ -86,60 +91,43 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           }
         }
 
-        toast.error(
-          result?.message ?? "Unable to sign you in. Please try again.",
-        );
+        const mismatch = result?.portalMismatch;
+        if (mismatch?.suggested) {
+          toast.error(
+            (result?.message ??
+              `Your account cannot sign in via the ${mismatch.portal} login portal.`) +
+              ` Click here to go to the ${mismatch.suggested.label} login.`,
+            {
+              autoClose: 8000,
+              onClick: () => {
+                window.location.assign(mismatch.suggested!.url);
+              },
+            },
+          );
+        } else {
+          toast.error(
+            result?.message ?? "Unable to sign you in. Please try again.",
+          );
+        }
         return;
       }
 
       toast.success(result?.message ?? "Signed in successfully.");
-      const role = result?.user?.role;
-      const isCustomerRole = role === "CUSTOMER";
-      const isAdminRole = role === "ADMIN";
 
       if (result?.user && typeof result.accessToken === "string") {
-        if (isCustomerRole) {
-          dispatch(clearInstallerUser());
-          dispatch(
-            setCustomerSession({
-              user: result.user,
-              accessToken: result.accessToken,
-            }),
-          );
-        } else {
-          dispatch(clearUser());
-          dispatch(
-            setInstallerSession({
-              user: result.user,
-              accessToken: result.accessToken,
-            }),
-          );
-        }
+        dispatch(
+          setInstallerSession({
+            user: result.user,
+            accessToken: result.accessToken,
+          }),
+        );
       } else if (result?.user) {
-        if (isCustomerRole) {
-          dispatch(clearInstallerUser());
-        } else {
-          dispatch(clearUser());
-          dispatch(setInstallerUser(result.user));
-        }
+        dispatch(setInstallerUser(result.user));
       }
-      const from = searchParams.get("from");
-      const defaultRoute = isCustomerRole
-        ? "/customers/dashboard"
-        : isAdminRole
-          ? "/master/dashboard"
-          : "/installers/dashboard/home";
-      const safeFrom = from
-        ? isCustomerRole
-          ? from.startsWith("/customers") && !from.startsWith("/customers/auth")
-            ? from
-            : defaultRoute
-          : from.startsWith("/installers") || from.startsWith("/master")
-            ? from
-            : defaultRoute
-        : defaultRoute;
+
+      const target = safeInstallerFrom(searchParams.get("from"));
       /** Hard navigation so httpOnly session cookies are stored before the next document / RSC request. */
-      window.location.assign(safeFrom);
+      window.location.assign(target);
     } catch {
       toast.error("Unable to reach the login service. Please try again.");
     }
@@ -158,7 +146,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
               Welcome Back
             </p>
             <p className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-70)">
-              Sign in to your {accountLabel} account
+              Sign in to your installer account
             </p>
           </div>
           <div>
@@ -240,8 +228,6 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 }
 
 function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
-  const searchParams = useSearchParams();
-  const accountLabel = getAccountLabel(searchParams);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -315,7 +301,7 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       >
         <div className="flex flex-col gap-[4px] pr-[64px]">
           <p className="font-source-sans text-[24px] font-extrabold leading-[36px] tracking-[0.5px] text-auth-title">
-            Create {accountLabel} account
+            Create installer account
           </p>
           <p className="font-source-sans text-[14px] font-bold leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-70)">
             Fill in your details to get started
@@ -394,6 +380,22 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   );
 }
 
+/** Bounces legacy `/installers/auth?portal=...` links to their new homes. */
+function LegacyPortalRedirectGuard() {
+  const params = useSearchParams();
+  useEffect(() => {
+    const raw = params.get("portal")?.toLowerCase();
+    if (raw === "distributor") {
+      window.location.replace("/master/auth");
+    } else if (raw === "master" || raw === "admin") {
+      window.location.replace("/admin/auth");
+    } else if (raw === "customer") {
+      window.location.replace("/customers/auth");
+    }
+  }, [params]);
+  return null;
+}
+
 export default function InstallerAuthPage() {
   const [mode, setMode] = useState<Mode>("signin");
 
@@ -426,6 +428,7 @@ export default function InstallerAuthPage() {
               </div>
             }
           >
+            <LegacyPortalRedirectGuard />
             {mode === "signin" ? (
               <SignInForm onSwitchMode={() => setMode("signup")} />
             ) : (

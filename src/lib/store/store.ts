@@ -12,6 +12,12 @@ import installerAuthReducer, {
   setInstallerSession,
   setInstallerUser,
 } from "./installerAuthSlice";
+import adminAuthReducer, {
+  clearAdminUser,
+  ADMIN_AUTH_STORAGE_KEY,
+  setAdminSession,
+  setAdminUser,
+} from "./adminAuthSlice";
 
 const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) => {
   const result = next(action);
@@ -52,16 +58,38 @@ const installerAuthPersistenceMiddleware: Middleware =
     return result;
   };
 
+const adminAuthPersistenceMiddleware: Middleware =
+  () => (next) => (action) => {
+    const result = next(action);
+    if (typeof window === "undefined") return result;
+    if (setAdminSession.match(action)) {
+      sessionStorage.setItem(
+        ADMIN_AUTH_STORAGE_KEY,
+        JSON.stringify(action.payload),
+      );
+    } else if (setAdminUser.match(action)) {
+      sessionStorage.setItem(
+        ADMIN_AUTH_STORAGE_KEY,
+        JSON.stringify({ user: action.payload, accessToken: null }),
+      );
+    } else if (clearAdminUser.match(action)) {
+      sessionStorage.removeItem(ADMIN_AUTH_STORAGE_KEY);
+    }
+    return result;
+  };
+
 export const store = configureStore({
   reducer: {
     customerAuth: customerAuthReducer,
     installerAuth: installerAuthReducer,
+    adminAuth: adminAuthReducer,
     designProposal: designProposalReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       customerAuthPersistenceMiddleware,
       installerAuthPersistenceMiddleware,
+      adminAuthPersistenceMiddleware,
     ),
 });
 

@@ -14,6 +14,12 @@ import {
   setInstallerUser,
   type InstallerUser,
 } from "@/lib/store/installerAuthSlice";
+import {
+  ADMIN_AUTH_STORAGE_KEY,
+  setAdminSession,
+  setAdminUser,
+  type AdminUser,
+} from "@/lib/store/adminAuthSlice";
 import { store } from "@/lib/store/store";
 
 function isCustomerUser(value: unknown): value is CustomerUser {
@@ -58,6 +64,18 @@ function isInstallerSession(
   );
 }
 
+function isAdminUser(value: unknown): value is AdminUser {
+  return isCustomerUser(value);
+}
+
+function isAdminSession(
+  value: unknown,
+): value is { user: AdminUser; accessToken: string } {
+  if (!value || typeof value !== "object") return false;
+  const o = value as Record<string, unknown>;
+  return isAdminUser(o.user) && typeof o.accessToken === "string";
+}
+
 export function ReduxProvider({ children }: { children: React.ReactNode }) {
   const hydrated = useRef(false);
 
@@ -94,6 +112,22 @@ export function ReduxProvider({ children }: { children: React.ReactNode }) {
       }
     } catch {
       sessionStorage.removeItem(INSTALLER_AUTH_STORAGE_KEY);
+    }
+
+    try {
+      const rawAdmin = sessionStorage.getItem(ADMIN_AUTH_STORAGE_KEY);
+      if (rawAdmin) {
+        const parsed: unknown = JSON.parse(rawAdmin);
+        if (isAdminSession(parsed)) {
+          store.dispatch(setAdminSession(parsed));
+        } else if (isAdminUser(parsed)) {
+          store.dispatch(setAdminUser(parsed));
+        } else {
+          sessionStorage.removeItem(ADMIN_AUTH_STORAGE_KEY);
+        }
+      }
+    } catch {
+      sessionStorage.removeItem(ADMIN_AUTH_STORAGE_KEY);
     }
   }, []);
 

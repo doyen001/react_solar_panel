@@ -20,7 +20,7 @@ export function MasterDashboardHeader({
   activeNavId = "overview",
   userInitials = "AD",
 }: Props) {
-  const { logout, pending } = usePortalLogout("installer");
+  const { logout, pending } = usePortalLogout("admin");
   const mobileNavRef = useRef<HTMLDetailsElement>(null);
 
   return (

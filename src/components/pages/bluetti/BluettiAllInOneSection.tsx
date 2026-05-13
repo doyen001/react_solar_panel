@@ -16,7 +16,7 @@ export function BluettiAllInOneSection() {
         fill
         priority={false}
         sizes="100vw"
-        className="object-center"
+        className="object-cover object-center"
       />
       <div
         className="bluetti-allin-one-overlay pointer-events-none absolute inset-0 z-1"
