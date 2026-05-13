@@ -6,6 +6,7 @@ import customerAuthReducer, {
   setUser,
 } from "./customerAuthSlice";
 import designProposalReducer from "./designProposalSlice";
+import solarMaintenanceContractReducer from "./solarMaintenanceContractSlice";
 import installerAuthReducer, {
   clearInstallerUser,
   INSTALLER_AUTH_STORAGE_KEY,
@@ -84,6 +85,7 @@ export const store = configureStore({
     installerAuth: installerAuthReducer,
     adminAuth: adminAuthReducer,
     designProposal: designProposalReducer,
+    solarMaintenanceContract: solarMaintenanceContractReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(

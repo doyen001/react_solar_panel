@@ -8,6 +8,8 @@ type Props = {
   isoValue: string;
   onIsoChange: (iso: string) => void;
   ariaLabel?: string;
+  /** Extra classes on the outer shell (e.g. wizard step 3 styling) */
+  className?: string;
 };
 
 function isoToDisplay(iso: string): string {
@@ -21,6 +23,7 @@ export function SolarMaintDateField({
   isoValue,
   onIsoChange,
   ariaLabel,
+  className = "",
 }: Props) {
   const pickerRef = useRef<HTMLInputElement>(null);
   const display = isoToDisplay(isoValue);
@@ -36,7 +39,9 @@ export function SolarMaintDateField({
   };
 
   return (
-    <div className="relative flex h-[42px] w-full min-w-0 items-center rounded-lg border border-sm-panel-border bg-sm-input-bg px-3 font-inter text-sm leading-5 tracking-[-0.154px] text-sm-heading">
+    <div
+      className={`relative flex h-[42px] w-full min-w-0 items-center rounded-lg border border-sm-panel-border bg-sm-input-bg px-3 font-inter text-sm leading-5 tracking-[-0.154px] text-sm-heading ${className}`}
+    >
       <input
         type="text"
         readOnly

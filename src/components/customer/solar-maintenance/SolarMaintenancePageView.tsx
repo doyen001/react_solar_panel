@@ -1,6 +1,6 @@
 "use client";
 
-import { SolarMaintenanceContractCard } from "@/components/customer/solar-maintenance/SolarMaintenanceContractCard";
+import { SolarMaintenanceWizard } from "@/components/customer/solar-maintenance/SolarMaintenanceWizard";
 import { DesignTopBar } from "@/components/modules/DesignTopBar";
 
 export function SolarMaintenancePageView() {
@@ -13,7 +13,7 @@ export function SolarMaintenancePageView() {
       </div>
       <div className="relative z-10 flex flex-1 flex-col px-4 pb-12 pt-4 sm:px-8">
         <div className="flex flex-1 justify-center sm:mt-8">
-          <SolarMaintenanceContractCard />
+          <SolarMaintenanceWizard />
         </div>
       </div>
     </div>

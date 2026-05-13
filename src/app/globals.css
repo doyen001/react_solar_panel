@@ -383,6 +383,29 @@
   --color-sm-help-icon: #ffde0b;
   --color-sm-card-shadow: rgb(0 0 0 / 0.25);
 
+  /* Solar Maintenance wizard steps 2–3 (Figma 1676:558, 1676:648) */
+  --color-sm-wizard-nav-blue: #155dfc;
+  --color-sm-wizard-nav-blue-soft: #51a2ff;
+  --color-sm-wizard-slate-100: #f1f5f9;
+  --color-sm-wizard-slate-200: #e2e8f0;
+  --color-sm-wizard-slate-300: #cad5e2;
+  --color-sm-wizard-slate-400: #90a1b9;
+  --color-sm-wizard-slate-500: #62748e;
+  --color-sm-wizard-slate-600: #45556c;
+  --color-sm-wizard-checkbox-blue: #3061ef;
+  --color-sm-wizard-surface-5: rgb(255 255 255 / 0.05);
+  --color-sm-wizard-surface-10: rgb(255 255 255 / 0.1);
+  --color-sm-wizard-step-idle-pill: rgb(255 255 255 / 0.1);
+  --color-sm-wizard-step-idle-num: #90a1b9;
+  --color-sm-wizard-header-border: rgb(255 255 255 / 0.1);
+  --color-sm-wizard-card-v2-bg: rgb(15 23 43 / 0.8);
+  --color-sm-wizard-card-v2-border: rgb(255 255 255 / 0.1);
+  --color-sm-wizard-combobox-border: #e2e8f0;
+  --color-sm-wizard-btn-ghost-border: rgb(255 255 255 / 0.2);
+  --color-sm-wizard-dropzone-bg: rgb(43 127 255 / 0.1);
+  --color-sm-wizard-dropzone-border: rgb(81 162 255 / 0.4);
+  --color-sm-wizard-combo-shadow: rgb(0 0 0 / 0.1);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-source-sans: var(--font-source-sans);
@@ -458,6 +481,20 @@ body {
 
 .solar-maint-card-shadow {
   box-shadow: 0 25px 50px -12px var(--color-sm-card-shadow);
+}
+
+.solar-maint-wizard-card-v2 {
+  border-radius: 18px;
+  border: 1px solid var(--color-sm-wizard-card-v2-border);
+  background-color: var(--color-sm-wizard-card-v2-bg);
+  box-shadow: 0 25px 50px -12px var(--color-sm-card-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.solar-maint-wizard-combobox-shadow {
+  box-shadow:
+    0 1px 3px 0 var(--color-sm-wizard-combo-shadow),
+    0 1px 2px -1px var(--color-sm-wizard-combo-shadow);
 }
 
 .contact-input {

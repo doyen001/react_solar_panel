@@ -107,6 +107,10 @@ const Funnel = createDynamicSvgIcon(() => import("./funnel.svg?component"));
 const ChevronDown = createDynamicSvgIcon(
   () => import("./chevron-down.svg?component"),
 );
+const ChevronLeft = createDynamicSvgIcon(
+  () => import("./chevron-left.svg?component"),
+);
+const X = createDynamicSvgIcon(() => import("./x.svg?component"));
 const BulletDot = createDynamicSvgIcon(
   () => import("./bullet-dot.svg?component"),
 );
@@ -174,6 +178,8 @@ export type IconType =
   | "ExternalLink"
   | "Funnel"
   | "ChevronDown"
+  | "ChevronLeft"
+  | "X"
   | "BulletDot"
   | "Globe"
   | "MaintCalendar";
@@ -249,6 +255,8 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     ExternalLink,
     Funnel,
     ChevronDown,
+    ChevronLeft,
+    X,
     BulletDot,
     Globe,
     MaintCalendar,

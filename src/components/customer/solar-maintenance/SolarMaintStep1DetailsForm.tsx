@@ -1,55 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { SolarMaintDateField } from "@/components/customer/solar-maintenance/SolarMaintDateField";
+import { SolarMaintFieldBlock } from "@/components/customer/solar-maintenance/SolarMaintFieldBlock";
 import { SolarMaintFormField } from "@/components/customer/solar-maintenance/SolarMaintFormField";
 import { SolarMaintenanceStepper } from "@/components/customer/solar-maintenance/SolarMaintenanceStepper";
+import {
+  mergeSolarMaintenanceContract,
+  markSolarMaintenanceDraftSaved,
+  selectSolarMaintenanceContract,
+  setSolarMaintenanceStep,
+} from "@/lib/store/solarMaintenanceContractSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { SOLAR_MAINTENANCE_CONTRACT } from "@/utils/constant";
+import type { SolarMaintenanceEquipmentId } from "@/lib/store/solarMaintenanceContractSlice";
 
-type EquipmentId =
-  (typeof SOLAR_MAINTENANCE_CONTRACT.equipmentRows)[number]["id"];
-
-type EquipmentRow = {
-  size: string;
-  qty: string;
-  installedIso: string;
-};
-
-function emptyEquipment(): Record<EquipmentId, EquipmentRow> {
-  return {
-    panels: { size: "", qty: "", installedIso: "" },
-    inverter: { size: "", qty: "", installedIso: "" },
-    battery: { size: "", qty: "", installedIso: "" },
-    accessories: { size: "", qty: "", installedIso: "" },
-  };
-}
-
-export function SolarMaintenanceContractCard() {
+export function SolarMaintStep1DetailsForm() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { details } = useAppSelector(selectSolarMaintenanceContract);
   const copy = SOLAR_MAINTENANCE_CONTRACT;
 
-  const [companyName, setCompanyName] = useState("");
-  const [agreementDateIso, setAgreementDateIso] = useState("");
-  const [contractNumber, setContractNumber] = useState("");
-  const [equipment, setEquipment] = useState(emptyEquipment);
-  const [installationAddress, setInstallationAddress] = useState("");
-  const [clientName, setClientName] = useState("");
-  const [abn, setAbn] = useState("");
-  const [clientDateIso, setClientDateIso] = useState("");
-  const [secondClientDateIso, setSecondClientDateIso] = useState("");
-  const [clientCompany, setClientCompany] = useState("");
-
-  const patchEquipment = (id: EquipmentId, patch: Partial<EquipmentRow>) => {
-    setEquipment((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], ...patch },
-    }));
+  const patchEquipment = (
+    id: SolarMaintenanceEquipmentId,
+    patch: Partial<(typeof details.equipment)[typeof id]>,
+  ) => {
+    dispatch(
+      mergeSolarMaintenanceContract({
+        details: { equipment: { [id]: patch } },
+      }),
+    );
   };
 
   return (
-    <section
-      className="solar-maint-card-shadow w-full max-w-[1024px] rounded-[18px] border border-sm-panel-border bg-sm-card-surface p-8 backdrop-blur-xs"
-      aria-labelledby="solar-maint-title"
-    >
+    <>
       <SolarMaintenanceStepper currentStepId={1} />
 
       <div className="mt-6 flex flex-col gap-[7px]">
@@ -66,29 +50,47 @@ export function SolarMaintenanceContractCard() {
 
       <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-6">
-          <FieldBlock label={copy.agreementDetailsLabel}>
+          <SolarMaintFieldBlock label={copy.agreementDetailsLabel}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <SolarMaintFormField
                 placeholder={copy.placeholders.companyName}
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
+                value={details.companyName}
+                onChange={(e) =>
+                  dispatch(
+                    mergeSolarMaintenanceContract({
+                      details: { companyName: e.target.value },
+                    }),
+                  )
+                }
                 autoComplete="organization"
               />
               <SolarMaintDateField
-                isoValue={agreementDateIso}
-                onIsoChange={setAgreementDateIso}
+                isoValue={details.agreementDateIso}
+                onIsoChange={(iso) =>
+                  dispatch(
+                    mergeSolarMaintenanceContract({
+                      details: { agreementDateIso: iso },
+                    }),
+                  )
+                }
                 ariaLabel="Agreement date"
               />
             </div>
-          </FieldBlock>
+          </SolarMaintFieldBlock>
 
-          <FieldBlock label={copy.labels.contractNumber}>
+          <SolarMaintFieldBlock label={copy.labels.contractNumber}>
             <SolarMaintFormField
               placeholder={copy.placeholders.contractNumber}
-              value={contractNumber}
-              onChange={(e) => setContractNumber(e.target.value)}
+              value={details.contractNumber}
+              onChange={(e) =>
+                dispatch(
+                  mergeSolarMaintenanceContract({
+                    details: { contractNumber: e.target.value },
+                  }),
+                )
+              }
             />
-          </FieldBlock>
+          </SolarMaintFieldBlock>
 
           <div className="flex flex-col gap-3">
             <p className="font-inter text-sm font-semibold leading-5 tracking-[-0.154px] text-sm-heading">
@@ -105,7 +107,7 @@ export function SolarMaintenanceContractCard() {
               ))}
             </div>
             {copy.equipmentRows.map((row) => {
-              const rowData = equipment[row.id];
+              const rowData = details.equipment[row.id];
               return (
                 <div
                   key={row.id}
@@ -139,91 +141,115 @@ export function SolarMaintenanceContractCard() {
             })}
           </div>
 
-          <FieldBlock label={copy.labels.installationLocation}>
+          <SolarMaintFieldBlock label={copy.labels.installationLocation}>
             <SolarMaintFormField
               placeholder={copy.placeholders.installationAddress}
-              value={installationAddress}
-              onChange={(e) => setInstallationAddress(e.target.value)}
+              value={details.installationAddress}
+              onChange={(e) =>
+                dispatch(
+                  mergeSolarMaintenanceContract({
+                    details: { installationAddress: e.target.value },
+                  }),
+                )
+              }
             />
-          </FieldBlock>
+          </SolarMaintFieldBlock>
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <FieldBlock label={copy.labels.client}>
+          <SolarMaintFieldBlock label={copy.labels.client}>
             <SolarMaintFormField
               placeholder={copy.placeholders.clientName}
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
+              value={details.clientName}
+              onChange={(e) =>
+                dispatch(
+                  mergeSolarMaintenanceContract({
+                    details: { clientName: e.target.value },
+                  }),
+                )
+              }
               autoComplete="name"
             />
-          </FieldBlock>
+          </SolarMaintFieldBlock>
 
-          <FieldBlock label={copy.labels.abn}>
+          <SolarMaintFieldBlock label={copy.labels.abn}>
             <SolarMaintFormField
               placeholder={copy.placeholders.abn}
-              value={abn}
-              onChange={(e) => setAbn(e.target.value)}
+              value={details.abn}
+              onChange={(e) =>
+                dispatch(
+                  mergeSolarMaintenanceContract({
+                    details: { abn: e.target.value },
+                  }),
+                )
+              }
             />
-          </FieldBlock>
+          </SolarMaintFieldBlock>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FieldBlock label={copy.labels.date}>
+            <SolarMaintFieldBlock label={copy.labels.date}>
               <SolarMaintDateField
-                isoValue={clientDateIso}
-                onIsoChange={setClientDateIso}
+                isoValue={details.clientDateIso}
+                onIsoChange={(iso) =>
+                  dispatch(
+                    mergeSolarMaintenanceContract({
+                      details: { clientDateIso: iso },
+                    }),
+                  )
+                }
                 ariaLabel="Client primary date"
               />
-            </FieldBlock>
-            <FieldBlock label={copy.labels.date}>
+            </SolarMaintFieldBlock>
+            <SolarMaintFieldBlock label={copy.labels.date}>
               <SolarMaintDateField
-                isoValue={secondClientDateIso}
-                onIsoChange={setSecondClientDateIso}
+                isoValue={details.secondClientDateIso}
+                onIsoChange={(iso) =>
+                  dispatch(
+                    mergeSolarMaintenanceContract({
+                      details: { secondClientDateIso: iso },
+                    }),
+                  )
+                }
                 ariaLabel="Client secondary date"
               />
-            </FieldBlock>
+            </SolarMaintFieldBlock>
           </div>
 
-          <FieldBlock label={copy.labels.companyNameRight}>
+          <SolarMaintFieldBlock label={copy.labels.companyNameRight}>
             <SolarMaintFormField
               placeholder={copy.placeholders.clientCompanyName}
-              value={clientCompany}
-              onChange={(e) => setClientCompany(e.target.value)}
+              value={details.clientCompany}
+              onChange={(e) =>
+                dispatch(
+                  mergeSolarMaintenanceContract({
+                    details: { clientCompany: e.target.value },
+                  }),
+                )
+              }
             />
-          </FieldBlock>
+          </SolarMaintFieldBlock>
         </div>
       </div>
 
       <footer className="mt-8 flex flex-col gap-3 border-t border-sm-panel-border pt-6 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
+          onClick={() => {
+            dispatch(markSolarMaintenanceDraftSaved());
+            router.push("/customers/dashboard");
+          }}
           className="inline-flex h-10 items-center justify-center rounded-lg border border-sm-panel-border px-5 font-inter text-sm font-medium leading-5 tracking-[-0.154px] text-sm-heading hover:bg-sm-input-bg"
         >
           {copy.buttons.saveDraft}
         </button>
         <button
           type="button"
+          onClick={() => dispatch(setSolarMaintenanceStep(2))}
           className="inline-flex h-10 min-w-[117px] items-center justify-center rounded-full bg-sm-accent px-6 font-inter text-sm font-semibold leading-5 tracking-[-0.154px] text-sm-button-label hover:brightness-110"
         >
           {copy.buttons.continue}
         </button>
       </footer>
-    </section>
-  );
-}
-
-function FieldBlock({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="font-inter text-sm font-semibold leading-5 tracking-[-0.154px] text-sm-heading">
-        {label}
-      </p>
-      {children}
-    </div>
+    </>
   );
 }

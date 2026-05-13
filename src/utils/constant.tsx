@@ -2413,6 +2413,75 @@ export const SOLAR_MAINTENANCE_CONTRACT = {
   },
 } as const;
 
+/** Solar Maintenance wizard — Step 2 Services (Figma 1676:558) */
+export const SOLAR_MAINTENANCE_STEP2 = {
+  subtitle: "Configure Services",
+  contractTermLabel: "Contract Term:",
+  initialTermSubLabel: "Initial Term",
+  initialTermOptions: [
+    { value: "12" as const, label: "12 month" },
+    { value: "24" as const, label: "24 month" },
+    { value: "36" as const, label: "36 month" },
+  ],
+  scheduledVisitsLabel: "Scheduled Annual Visits:",
+  visitOptions: [
+    { id: "visual" as const, label: "Visual/Structural Inspection" },
+    { id: "electrical" as const, label: "Electrical Testing" },
+    { id: "battery" as const, label: "Battery Maintenance" },
+    { id: "panelWash" as const, label: "Panel Wash and Clean Up" },
+  ],
+  cleaningLabel: "Cleaning Services",
+  cleaningOptions: [
+    {
+      value: "soft" as const,
+      label: "Soft brushes, eco-friendly detergents, low pressure water",
+    },
+    {
+      value: "standard" as const,
+      label: "Standard pressure wash and biodegradable cleaner",
+    },
+    {
+      value: "premium" as const,
+      label: "Premium deep clean with de-ionised rinse",
+    },
+  ],
+  serviceNotesLabel: "Service Notes",
+  serviceNotesPlaceholder: "Specify Additional Services",
+} as const;
+
+/** Solar Maintenance wizard — Step 3 Signatures (Figma 1676:648) */
+export const SOLAR_MAINTENANCE_STEP3 = {
+  subtitle: "Sign and Finalize",
+  providerNameLabel: "Provider Name",
+  providerNamePlaceholder: "Provider Name",
+  providerSignatureLabel: "Signature",
+  providerSignaturePlaceholder: "Type to sign",
+  uploadSignatureHint: "Upload signature image",
+  providerDateLabel: "Date",
+  clientSignatureLabel: "Client Signature",
+  clientDateLabel: "Client Date",
+  exhibitsLabel: "Exhibits/Attachments",
+  exhibitUploadRowLabel: "Upload Files",
+  exhibitUploadButton: "Upload Files",
+  exhibitChecklist: [
+    { id: "systemInventory" as const, label: "System Inventory/Photos" },
+    {
+      id: "maintenanceChecklist" as const,
+      label: "Maintenance Checklist/Report Template",
+    },
+    { id: "insuranceCertificates" as const, label: "Insurance Certificates" },
+    { id: "pricingSchedule" as const, label: "Pricing Schedule" },
+  ],
+  buttons: {
+    saveDraft: "Save Draft",
+    generateContract: "Generate Contract",
+  },
+  wizardNav: {
+    backAria: "Previous step",
+    closeAria: "Close and return to dashboard",
+  },
+} as const;
+
 /** Marketing `/customers` — Solar Maintenance teaser section */
 export const SOLAR_MAINTENANCE_CUSTOMER_SECTION = {
   eyebrow: "Care & performance",
