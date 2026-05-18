@@ -63,9 +63,12 @@ function isRowEmpty(values: Partial<Record<CustomerImportApiField, string>>): bo
 type HeaderMatch = {
   columnKeys: (CustomerImportColumnKey | null)[];
   matchedCount: number;
+  rowIndex: number;
 };
 
-function scoreHeaderRow(cells: unknown[]): HeaderMatch | null {
+function scoreHeaderRow(
+  cells: unknown[],
+): Omit<HeaderMatch, "rowIndex"> | null {
   const columnKeys = cells.map((cell) =>
     resolveCustomerImportHeader(cellToString(cell)),
   );
@@ -87,7 +90,7 @@ function scoreHeaderRow(cells: unknown[]): HeaderMatch | null {
 
 function findHeaderRow(aoa: unknown[][]): HeaderMatch | null {
   const limit = Math.min(HEADER_SCAN_MAX_ROWS, aoa.length);
-  let best: (HeaderMatch & { rowIndex: number }) | null = null;
+  let best: HeaderMatch | null = null;
 
   for (let rowIndex = 0; rowIndex < limit; rowIndex += 1) {
     const row = aoa[rowIndex];
