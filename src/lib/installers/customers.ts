@@ -47,3 +47,51 @@ export async function fetchInstallerCustomers(
   }
   return Array.isArray(json.data) ? json.data : [];
 }
+
+export type CustomerImportRowInput = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  address?: string;
+};
+
+export type CustomerImportRowResult = {
+  rowNumber: number;
+  status: "created" | "skipped" | "failed";
+  email?: string;
+  message?: string;
+  customerId?: string;
+};
+
+export type CustomerImportResult = {
+  created: number;
+  skipped: number;
+  failed: number;
+  rows: CustomerImportRowResult[];
+};
+
+export async function importInstallerCustomers(
+  rows: CustomerImportRowInput[],
+  options: { dryRun?: boolean } = {},
+): Promise<CustomerImportResult> {
+  const res = await fetchWithInstallerSession(
+    "/api/installers/customers/import",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rows,
+        dryRun: options.dryRun ?? false,
+      }),
+    },
+  );
+  const json = (await res.json()) as ApiEnvelope<CustomerImportResult>;
+  if (!res.ok) {
+    throw new Error(json.message || "Import failed");
+  }
+  if (!json.data) {
+    throw new Error(json.message || "Import failed");
+  }
+  return json.data;
+}
