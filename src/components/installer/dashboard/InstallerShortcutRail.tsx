@@ -6,6 +6,10 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import Icon from "@/components/ui/Icons";
+import {
+  InstallerCustomerImportModal,
+  type CustomerImportSource,
+} from "@/components/installer/customer-import/InstallerCustomerImportModal";
 import { INSTALLER_HOME_PROFILE } from "@/components/installer/home-dashboard/installerHomeMock";
 import {
   IconCheckSquare,
@@ -65,18 +69,26 @@ function ShortcutRailCard({
   chip,
   label,
   href,
+  onClick,
+  disabled,
+  title,
 }: {
   tall?: boolean;
   chip: React.ReactNode;
   label: React.ReactNode;
   /** When set, renders Next.js Link instead of `<button>` (appointment → schedule page). */
   href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  title?: string;
 }) {
   const cls = classNames(
     "flex w-full flex-col items-center rounded-[11.042px] border-[1.157px] border-warm-border bg-cream-50 px-[1.157px] pb-[9.892px] pt-[9.982px]",
     tall ? "min-h-[84.457px]" : "h-[72.032px]",
     "gap-[4.413px]",
     href && "text-left no-underline transition-opacity hover:opacity-95",
+    onClick && !disabled && "transition-opacity hover:opacity-95",
+    disabled && "cursor-not-allowed opacity-50",
   );
 
   const body = (
@@ -95,7 +107,13 @@ function ShortcutRailCard({
   }
 
   return (
-    <button type="button" className={cls}>
+    <button
+      type="button"
+      className={cls}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      title={title}
+    >
       {body}
     </button>
   );
@@ -395,11 +413,12 @@ function ShortcutRailSolarDesignButton({ onPress }: { onPress: () => void }) {
   );
 }
 
-function ShortcutRailUploadButton() {
+function ShortcutRailUploadButton({ onPress }: { onPress: () => void }) {
   return (
     <button
       type="button"
-      className="flex h-[72.032px] w-full flex-col items-center justify-center rounded-[11.042px] border-[1.157px] border-warm-border px-[1.157px] pb-[9.892px] pt-[9.982px]"
+      onClick={onPress}
+      className="flex h-[72.032px] w-full flex-col items-center justify-center rounded-[11.042px] border-[1.157px] border-warm-border px-[1.157px] pb-[9.892px] pt-[9.982px] transition-opacity hover:opacity-95"
       style={{
         backgroundImage:
           "linear-gradient(108.71390978018913deg, rgb(32, 148, 243) 0%, rgb(23, 207, 207) 100%)",
@@ -429,8 +448,22 @@ function ShortcutRailUploadButton() {
   );
 }
 
-export function InstallerShortcutRail() {
+export type InstallerShortcutRailProps = {
+  onCustomersImported?: () => void;
+};
+
+export function InstallerShortcutRail({
+  onCustomersImported,
+}: InstallerShortcutRailProps = {}) {
   const [solarDesignerModalOpen, setSolarDesignerModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importSource, setImportSource] =
+    useState<CustomerImportSource>("file");
+
+  const openImportModal = (source: CustomerImportSource) => {
+    setImportSource(source);
+    setImportModalOpen(true);
+  };
 
   return (
     <aside
@@ -441,6 +474,12 @@ export function InstallerShortcutRail() {
       <SolarDesignerAutoFetchModal
         open={solarDesignerModalOpen}
         onClose={() => setSolarDesignerModalOpen(false)}
+      />
+      <InstallerCustomerImportModal
+        open={importModalOpen}
+        source={importSource}
+        onClose={() => setImportModalOpen(false)}
+        onImported={onCustomersImported}
       />
       <nav className="flex flex-col gap-[7px] px-2">
         <ShortcutRailSolarDesignButton
@@ -524,6 +563,7 @@ export function InstallerShortcutRail() {
             </ShortcutRailBrandChip>
           }
           label="Excel"
+          onClick={() => openImportModal("excel")}
         />
         <ShortcutRailCard
           tall
@@ -538,6 +578,7 @@ export function InstallerShortcutRail() {
               <span className="block">Sheets</span>
             </>
           }
+          onClick={() => openImportModal("sheets")}
         />
         <ShortcutRailCard
           chip={
@@ -546,8 +587,10 @@ export function InstallerShortcutRail() {
             </ShortcutRailBrandChip>
           }
           label="Word"
+          disabled
+          title="Coming soon"
         />
-        <ShortcutRailUploadButton />
+        <ShortcutRailUploadButton onPress={() => openImportModal("file")} />
       </nav>
     </aside>
   );

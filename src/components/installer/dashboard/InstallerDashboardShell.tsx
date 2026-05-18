@@ -287,7 +287,7 @@ export function InstallerDashboardShell({
           {children}
         </main>
 
-        <InstallerShortcutRail />
+        <InstallerShortcutRail onCustomersImported={refetchCustomers} />
       </div>
     </div>
   );
