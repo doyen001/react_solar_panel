@@ -127,6 +127,24 @@ const BlogCardFile = createDynamicSvgIcon(
 const BlogCardArrow = createDynamicSvgIcon(
   () => import("./blog-card-arrow.svg?component"),
 );
+const BlogDetailQuote = createDynamicSvgIcon(
+  () => import("./blog-detail-quote.svg?component"),
+);
+const BlogDetailViewAllArrow = createDynamicSvgIcon(
+  () => import("./blog-detail-view-all-arrow.svg?component"),
+);
+const BlogDetailShareLink = createDynamicSvgIcon(
+  () => import("./blog-detail-share-link.svg?component"),
+);
+const BlogDetailShareLinkedin = createDynamicSvgIcon(
+  () => import("./blog-detail-share-linkedin.svg?component"),
+);
+const BlogDetailShareX = createDynamicSvgIcon(
+  () => import("./blog-detail-share-x.svg?component"),
+);
+const BlogDetailShareFacebook = createDynamicSvgIcon(
+  () => import("./blog-detail-share-facebook.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -194,7 +212,13 @@ export type IconType =
   | "MaintCalendar"
   | "BlogCategoryDots"
   | "BlogCardFile"
-  | "BlogCardArrow";
+  | "BlogCardArrow"
+  | "BlogDetailQuote"
+  | "BlogDetailViewAllArrow"
+  | "BlogDetailShareLink"
+  | "BlogDetailShareLinkedin"
+  | "BlogDetailShareX"
+  | "BlogDetailShareFacebook";
 
 type IconProps = {
   name: IconType | undefined;
@@ -275,6 +299,12 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     BlogCategoryDots,
     BlogCardFile,
     BlogCardArrow,
+    BlogDetailQuote,
+    BlogDetailViewAllArrow,
+    BlogDetailShareLink,
+    BlogDetailShareLinkedin,
+    BlogDetailShareX,
+    BlogDetailShareFacebook,
   };
 
   const CurrentIcon = icons[name];

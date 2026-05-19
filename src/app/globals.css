@@ -310,6 +310,37 @@
   --color-blog-card-avatar-fallback: #364153;
   --color-blog-card-thumbnail-placeholder: #d9d9d9;
 
+  /* Blog inner / detail page (Figma Final Designs 1:4551) */
+  --color-blog-detail-page-bg: #0f1729;
+  --color-blog-detail-hero-bg: #101729;
+  --color-blog-detail-breadcrumb: #90a1b9;
+  --color-blog-detail-breadcrumb-active: #ffffff;
+  --color-blog-detail-category-text: #05afd1;
+  --color-blog-detail-category-bg: rgb(5 175 209 / 0.1);
+  --color-blog-detail-category-border: rgb(5 175 209 / 0.2);
+  --color-blog-detail-meta: #90a1b9;
+  --color-blog-detail-title: #ffffff;
+  --color-blog-detail-attribution-border: #05afd1;
+  --color-blog-detail-attribution-name: #ffffff;
+  --color-blog-detail-attribution-role: #90a1b9;
+  --color-blog-detail-body: #f6f6f6;
+  --color-blog-detail-image-border: rgb(255 255 255 / 0.1);
+  --color-blog-detail-grad-from: #ffef62;
+  --color-blog-detail-grad-to: #f78d00;
+  --color-blog-detail-grad-border: rgb(255 255 255 / 0.05);
+  --color-blog-detail-grad-text: #030303;
+  --color-blog-detail-accent: #05afd1;
+  --color-blog-detail-quote-accent-bar-from: #05afd1;
+  --color-blog-detail-quote-accent-bar-to: #2094f3;
+  --color-blog-detail-divider: rgb(255 255 255 / 0.38);
+  --color-blog-detail-ends-label: #ffffff;
+  --color-blog-detail-share-bg: rgb(18 18 18 / 0.05);
+  --color-blog-detail-share-icon: #f6f6f6;
+  --color-blog-detail-related-bg: #f2f9fc;
+  --color-blog-detail-related-title: #f6f6f6;
+  --color-blog-detail-related-subtitle: #f2f9fc;
+  --color-blog-detail-related-link: #05afd1;
+
   /* Firmware page & landing energy CTA (marketing) */
   --color-firmware-page-bg: #f2f9fc;
   --color-firmware-heading: #09234a;
@@ -1054,6 +1085,24 @@ button {
     var(--color-blog-card-shell-to) 100%
   );
   box-shadow: 0 25.609px 51.218px -12.292px rgb(0 0 0 / 0.25);
+}
+
+/* Blog inner — gradient quote / leader cards (Figma 1:4551) */
+.blog-detail-gradient-card {
+  background: linear-gradient(
+    to right,
+    var(--color-blog-detail-grad-from),
+    var(--color-blog-detail-grad-to)
+  );
+  border: 1.048px solid var(--color-blog-detail-grad-border);
+}
+
+.blog-detail-featured-quote-accent {
+  background: linear-gradient(
+    to bottom,
+    var(--color-blog-detail-quote-accent-bar-from),
+    var(--color-blog-detail-quote-accent-bar-to)
+  );
 }
 
 .pink-gradient-border {
