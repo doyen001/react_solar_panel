@@ -285,6 +285,61 @@
   --color-warranty-heading: #09234a;
   --color-warranty-body: #5f6c7b;
 
+  /* About Us page (Figma Final Designs 1:4957) */
+  --color-about-hero-badge-text: #ffde0b;
+  --color-about-hero-badge-bg: rgb(255 222 11 / 0.2);
+  --color-about-hero-badge-border: rgb(255 222 11 / 0.3);
+  --color-about-hero-title: #ffffff;
+  --color-about-hero-subtitle: #ffffff;
+  --color-about-hero-feature-title: #0f1729;
+  --color-about-hero-feature-subtitle: rgb(15 23 41 / 0.6);
+  --color-about-hero-feature-surface: rgb(248 250 252 / 0.6);
+  --color-about-hero-feature-border: rgb(200 211 223 / 0.5);
+  --color-about-hero-cta-primary-text: #f0f9ff;
+  --color-about-hero-cta-secondary-text: #1cb0e2;
+  --color-about-hero-cta-secondary-border: rgb(2 132 197 / 0.78);
+  --color-about-hero-cta-secondary-bg: rgb(255 255 255 / 0.73);
+  --color-about-hero-dot-active: #efad06;
+  --color-about-hero-dot-idle: rgb(255 255 255 / 0.3);
+  --color-about-mission-card-bg: rgb(255 255 0 / 0.65);
+  --color-about-mission-card-title: #191919;
+  --color-about-mission-card-body: #0c0c0c;
+  --color-about-timeline-surface-from: #ffef62;
+  --color-about-timeline-surface-to: #f78d00;
+  --color-about-timeline-line-from: #00b0f0;
+  --color-about-timeline-line-via: #ff0000;
+  --color-about-timeline-line-to: #7030a0;
+  --color-about-timeline-card-border: #00b0f0;
+  --color-about-timeline-card-from: #ffef62;
+  --color-about-timeline-card-to: #f78d00;
+  --color-about-timeline-text: #000000;
+  --color-about-timeline-badge-border: #f4f4f4;
+  --color-about-process-overlay: rgb(0 0 0 / 0.2);
+  --color-about-process-title-card-bg: rgb(255 255 255 / 0.1);
+  --color-about-process-title-card-border: rgb(255 255 255 / 0.2);
+  --color-about-process-panel-bg: rgb(255 255 255 / 0.1);
+  --color-about-process-step-border: rgb(207 207 207 / 0.65);
+  --color-about-process-text: #ffffff;
+  --color-about-values-card-bg-a: rgb(96 135 222 / 0.1);
+  --color-about-values-card-bg-b-from: rgb(2 20 62 / 0.4);
+  --color-about-values-card-bg-b-to: rgb(0 0 0 / 0.2);
+  --color-about-values-text: #ffffff;
+  --color-about-portfolio-grad-from: #2094f3;
+  --color-about-portfolio-grad-to: #17cfcf;
+  --color-about-portfolio-heading: #f4f4f4;
+  --color-about-portfolio-subtitle: #f4f4f4;
+  --color-about-portfolio-card-shell: rgb(255 255 255 / 0.8);
+  --color-about-portfolio-card-body-bg: #111111;
+  --color-about-portfolio-card-title: #ffffff;
+  --color-about-portfolio-card-excerpt: #888888;
+  --color-about-portfolio-card-divider: #222222;
+  --color-about-portfolio-card-author: #ffffff;
+  --color-about-portfolio-card-category: rgb(255 255 255 / 0.8);
+  --color-about-portfolio-card-date-bg: rgb(0 0 0 / 0.6);
+  --color-about-portfolio-card-date-text: #ffffff;
+  --color-about-portfolio-card-avatar-fallback: #364153;
+  --color-about-portfolio-card-arrow: #ffffff;
+
   /* Blog page (Figma Final Designs 1:4095) */
   --color-blog-hero-grad-from: #f78d00;
   --color-blog-hero-grad-to: #ffef62;
@@ -1065,6 +1120,65 @@ button {
     rgba(2, 132, 197, 0) 50%,
     rgba(2, 132, 197, 0.05) 100%
   );
+}
+
+/* About Us — hero CTA gradient (Figma 1:4958) */
+.about-us-hero-cta-primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-blue) 0%,
+    var(--color-brand-teal) 100%
+  );
+  box-shadow: 0 0 20px rgb(32 148 243 / 0.3);
+}
+
+.about-us-hero-icon-well {
+  background: linear-gradient(
+    135deg,
+    var(--color-gold) 0%,
+    color-mix(in srgb, var(--color-gold) 80%, transparent) 100%
+  );
+}
+
+/* About Us — timeline (Figma 1:5155) */
+.about-us-timeline-surface {
+  background: linear-gradient(
+    to right,
+    var(--color-about-timeline-surface-from),
+    var(--color-about-timeline-surface-to)
+  );
+}
+
+.about-us-timeline-line {
+  background: linear-gradient(
+    to bottom,
+    var(--color-about-timeline-line-from) 0%,
+    var(--color-about-timeline-line-via) 47.597%,
+    var(--color-about-timeline-line-to) 100%
+  );
+}
+
+.about-us-timeline-card {
+  background: linear-gradient(
+    to right,
+    var(--color-about-timeline-card-from),
+    var(--color-about-timeline-card-to)
+  );
+  border: 3px solid var(--color-about-timeline-card-border);
+}
+
+/* About Us — portfolio band (Figma 1:5291) */
+.about-us-portfolio-surface {
+  background: linear-gradient(
+    100.786deg,
+    var(--color-about-portfolio-grad-from) 0%,
+    var(--color-about-portfolio-grad-to) 100%
+  );
+}
+
+.about-us-portfolio-card-shell {
+  background: var(--color-about-portfolio-card-shell);
+  box-shadow: 0 25.609px 51.218px -12.292px rgb(0 0 0 / 0.25);
 }
 
 /* Blog listing — hero + card surfaces (Figma 1:4095) */

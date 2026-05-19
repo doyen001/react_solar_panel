@@ -2283,7 +2283,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
   {
     title: "Company",
     items: [
-      { label: "About Us", href: "#" },
+      { label: "About Us", href: "/about-us" },
       { label: "Careers", href: "#" },
       { label: "Projects", href: "#" },
       { label: "Partners", href: "#" },
@@ -2856,6 +2856,339 @@ export const SOLAR_MAINTENANCE_STEP3 = {
     closeAria: "Close and return to dashboard",
   },
 } as const;
+
+/** About Us page (`/about-us`, Figma Final Designs 1:4957) */
+export const ABOUT_US_PAGE = {
+  hero: {
+    badge: "About Us",
+    title: "Advanced Solar Panels for Modern Homes",
+    subtitle:
+      "Discover our range of high-performance solar panels designed to maximize efficiency and reliability for your solar energy system.",
+    primaryCta: { label: "View Catalog", href: "/products" },
+    secondaryCta: { label: "Get a Quote", href: "/contact-us" },
+    slides: [
+      {
+        src: "/images/ep2000/69fed828eb99db6c54cd35d6_EP2000_BN-1_2.png",
+        alt: "BLUETTI home battery and rooftop solar on a modern residence",
+      },
+      {
+        src: "/images/about-us/mission-bg.png",
+        alt: "Modern home with rooftop solar panels and electric vehicle charging",
+      },
+      {
+        src: "/images/about-us/portfolio-thumb.png",
+        alt: "Residential solar panel installation on a contemporary home",
+      },
+    ],
+    features: [
+      {
+        iconId: "AboutUsHeroSun" as const,
+        title: "Solar Generation",
+        subtitle: "Harness the sun",
+      },
+      {
+        iconId: "AboutUsHeroBolt" as const,
+        title: "Smart Storage",
+        subtitle: "EP760 & EP2000",
+      },
+      {
+        iconId: "AboutUsHeroHome" as const,
+        title: "Home Power",
+        subtitle: "24/7 backup",
+      },
+      {
+        iconId: "AboutUsHeroEv" as const,
+        title: "EV Ready",
+        subtitle: "Charge overnight",
+      },
+      {
+        iconId: "AboutUsHeroShield" as const,
+        title: "Dual Core Safety Guard",
+        subtitle: "Advanced protection",
+      },
+    ],
+  },
+  mission: {
+    vidoSrc: "/videos/aboutMission.mp4",
+    videoAriaLabel:
+      "Modern Australian home with rooftop solar and an electric vehicle",
+    cards: [
+      {
+        title: "Our Mission",
+        paragraphs: [
+          "Making solar energy accessible and transparent for every Australian household through AI-powered solutions.",
+          "Connecting customers with certified installers and premium equipment. Delivering instant, accurate quotes with 95% roof analysis precision.",
+        ],
+      },
+      {
+        title: "Why Choose Us",
+        paragraphs: [
+          "AI-driven platform with satellite imagery and machine learning technology.",
+          "Consistent 5-star reviews and CEC-approved equipment.",
+          "Transparent, no-pressure service with verified CEC Accrediated installer network.",
+          "If you would like to remove your Energy Bills for good.",
+        ],
+      },
+    ],
+  },
+  timeline: {
+    events: [
+      {
+        id: "founding",
+        side: "left" as const,
+        bullets: [
+          { highlight: true, text: "Founding 2016" },
+          {
+            text: "Founded in Sydney, Australia as a solar solutions provider",
+          },
+          {
+            text: "Vision to make solar accessible for every Australian household",
+          },
+          {
+            text: "Connecting customers, installers, and vendors seamlessly",
+          },
+          { text: "Servicing Sydney Customers since 2016." },
+          {
+            text: "Consistent Excellent Installation and Customer Service Reviews.",
+          },
+        ],
+      },
+      {
+        id: "platform",
+        side: "right" as const,
+        bullets: [
+          { text: "Platform Launch & AI Integration" },
+          { text: "AI-driven quoting system using satellite imagery" },
+          { text: "95% accurate roof analysis with machine learning" },
+        ],
+        badges: [
+          { label: "95% accuracy", emphasis: false },
+          { label: "2025 Integration", emphasis: false },
+        ],
+      },
+      {
+        id: "growth",
+        side: "left" as const,
+        title: "User Growth & Quote Generation",
+        bullets: [
+          {
+            text: "Surpassed 1,000+ personalized solar quotes nationwide",
+          },
+          {
+            text: "High-Return On Investment options for every customer segment.",
+          },
+        ],
+        badges: [
+          { label: "Certified", suffix: "Network", emphasis: true },
+          { label: "VPP", suffix: "Coming", emphasis: true },
+        ],
+      },
+      {
+        id: "excellence",
+        side: "right" as const,
+        title: "Customer Excellence",
+        sections: [
+          {
+            subtitle: "Ecosystem Expansion",
+            bullets: [
+              { text: "Verified network of certified solar installers" },
+              { text: "Integrated CRM tools and marketing support" },
+            ],
+          },
+          {
+            bullets: [
+              {
+                text: "Consistent 5-star customer reviews and satisfaction",
+              },
+              { text: "Transparent, no-pressure service approach" },
+            ],
+          },
+        ],
+        badges: [
+          { label: "5", suffix: "Rating", showStar: true, emphasis: true },
+          {
+            label: "CEC Approved",
+            suffix: "Equipment",
+            emphasis: true,
+          },
+        ],
+      },
+    ],
+  },
+  process: {
+    backgroundImageSrc: "/images/about-us/mission-bg.png",
+    backgroundImageAlt: "Solar network visualization background",
+    title: "Our Customer First Solar Process",
+    steps: [
+      {
+        title: "We Start by Truly Listening",
+        body: "We begin every journey by actively listening to you — understanding your unique expectations, energy needs, household or business usage patterns, and any pain points with your current setup. This ensures we capture what matters most to you.",
+      },
+      {
+        title: "Defining Shared Goals Together",
+        body: "From there, we clearly define shared objectives and collaboratively design a tailored solar (and battery, if applicable) solution. We present realistic, transparent options that perfectly align with your budget, energy goals, roof suitability, and desired long-term outcomes — no high-pressure sales, just honest recommendations.",
+      },
+      {
+        title: "Building Trust from Day One",
+        body: "Our transparent, consultative approach establishes immediate trust and a genuine sense of shared responsibility. We're committed to achieving the best possible results for you, every step of the way.",
+      },
+      {
+        title: "Backed by a Trusted Nationwide Network",
+        body: "We partner exclusively with a nationwide network of fully accredited installers (accredited under the recognised Australian standards for solar quality and competence, previously managed by the Clean Energy Council and now by Solar Accreditation Australia). Every installer shares our strict customer-first ethos and core values of integrity, safety, and excellence.",
+      },
+      {
+        title: "Delivering Outstanding Results",
+        body: "The outcome? High-performing solar systems that consistently deliver maximum value, enhanced comfort, significant long-term energy savings, and reliable performance. Our satisfied customers frequently become enthusiastic advocates, referring family, friends, and their networks with confidence.",
+      },
+    ],
+  },
+  values: {
+    backgroundImageSrc: "/images/about-us/values-bg.png",
+    backgroundImageAlt: "Abstract connected energy network background",
+    title: "Our Values",
+    items: [
+      { label: "Trusted Advisor", variant: "a" as const },
+      { label: "Customer Focus", variant: "b" as const },
+      {
+        label: ["Customer", "Centric", "Excellence"],
+        variant: "a" as const,
+      },
+      { label: ["Customer", "Satisfaction"], variant: "b" as const },
+      { label: "Value Creation", variant: "a" as const },
+      { label: "Quality", variant: "b" as const },
+      { label: ["Price", "Transparency"], variant: "a" as const },
+      { label: "Innovation", variant: "b" as const },
+      { label: "Collaboration", variant: "a" as const },
+      { label: "Team Efficiency", variant: "b" as const },
+    ],
+  },
+  portfolio: {
+    title: "Site Portfolio",
+    subtitle: "More news from the renewable energy sector",
+    items: [
+      {
+        id: "innovative-solar",
+        title: "Innovative Solar Technology",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "Emily Johnson",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "Emily Johnson",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Rooftop solar installation on a residential property",
+      },
+      {
+        id: "sustainable-energy",
+        title: "Sustainable Energy Solutions",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "Michael Smith",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "Michael Smith",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Sustainable energy system on a suburban home",
+      },
+      {
+        id: "solar-trends",
+        title: "Solar Energy Trends",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "Sarah Lee",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "Sarah Lee",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Solar array installation in progress",
+      },
+      {
+        id: "urban-solar",
+        title: "Solar Innovations for Urban Spaces",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "Jessica Martinez",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "Jessica Martinez",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Urban rooftop solar project",
+      },
+      {
+        id: "economic-growth",
+        title: "Solar Energy and Economic Growth",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "David Thompson",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "David Thompson",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Commercial solar deployment",
+      },
+      {
+        id: "efficient-future",
+        title: "Building an Efficient Solar Future",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "Linda Chen",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "Linda Chen",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Efficient solar system on a new build home",
+      },
+      {
+        id: "solar-storage",
+        title: "The Future of Solar Storage",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "Brian Adams",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "Brian Adams",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Home battery and solar combination",
+      },
+      {
+        id: "smart-homes",
+        title: "Integrating Solar into Smart Homes",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "Karen White",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "Karen White",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Smart home with integrated solar controls",
+      },
+      {
+        id: "policy-adoption",
+        title: "The Role of Policy in Solar Adoption",
+        excerpt:
+          "Exploring the latest advancements in solar panel technology that enhance efficiency and reduce costs for consumers.",
+        category: "Installation",
+        date: "16 Sep",
+        authorName: "James Wilson",
+        authorAvatarSrc: "/images/about-us/avatar.jpg",
+        authorAvatarAlt: "James Wilson",
+        imageSrc: "/images/about-us/portfolio-thumb.png",
+        imageAlt: "Policy-driven residential solar rollout",
+      },
+    ],
+  },
+} as const;
+
+export type AboutUsPortfolioItem =
+  (typeof ABOUT_US_PAGE.portfolio.items)[number];
 
 /** Marketing `/customers` — Solar Maintenance teaser section */
 export const SOLAR_MAINTENANCE_CUSTOMER_SECTION = {

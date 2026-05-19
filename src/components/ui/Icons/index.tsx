@@ -145,6 +145,27 @@ const BlogDetailShareX = createDynamicSvgIcon(
 const BlogDetailShareFacebook = createDynamicSvgIcon(
   () => import("./blog-detail-share-facebook.svg?component"),
 );
+const AboutUsStar = createDynamicSvgIcon(
+  () => import("./about-us-star.svg?component"),
+);
+const AboutUsHeroSun = createDynamicSvgIcon(
+  () => import("./hero-feature-sun.svg?component"),
+);
+const AboutUsHeroBolt = createDynamicSvgIcon(
+  () => import("./hero-feature-bolt.svg?component"),
+);
+const AboutUsHeroHome = createDynamicSvgIcon(
+  () => import("./hero-feature-home.svg?component"),
+);
+const AboutUsHeroEv = createDynamicSvgIcon(
+  () => import("./hero-feature-ev.svg?component"),
+);
+const AboutUsHeroShield = createDynamicSvgIcon(
+  () => import("./hero-feature-shield.svg?component"),
+);
+const AboutUsPortfolioCategory = createDynamicSvgIcon(
+  () => import("./about-us-portfolio-category.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -218,7 +239,14 @@ export type IconType =
   | "BlogDetailShareLink"
   | "BlogDetailShareLinkedin"
   | "BlogDetailShareX"
-  | "BlogDetailShareFacebook";
+  | "BlogDetailShareFacebook"
+  | "AboutUsStar"
+  | "AboutUsHeroSun"
+  | "AboutUsHeroBolt"
+  | "AboutUsHeroHome"
+  | "AboutUsHeroEv"
+  | "AboutUsHeroShield"
+  | "AboutUsPortfolioCategory";
 
 type IconProps = {
   name: IconType | undefined;
@@ -305,6 +333,13 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     BlogDetailShareLinkedin,
     BlogDetailShareX,
     BlogDetailShareFacebook,
+    AboutUsStar,
+    AboutUsHeroSun,
+    AboutUsHeroBolt,
+    AboutUsHeroHome,
+    AboutUsHeroEv,
+    AboutUsHeroShield,
+    AboutUsPortfolioCategory,
   };
 
   const CurrentIcon = icons[name];
