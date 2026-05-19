@@ -118,6 +118,15 @@ const Globe = createDynamicSvgIcon(() => import("./globe.svg?component"));
 const MaintCalendar = createDynamicSvgIcon(
   () => import("./maint-calendar.svg?component"),
 );
+const BlogCategoryDots = createDynamicSvgIcon(
+  () => import("./blog-category-dots.svg?component"),
+);
+const BlogCardFile = createDynamicSvgIcon(
+  () => import("./blog-card-file.svg?component"),
+);
+const BlogCardArrow = createDynamicSvgIcon(
+  () => import("./blog-card-arrow.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -182,7 +191,10 @@ export type IconType =
   | "X"
   | "BulletDot"
   | "Globe"
-  | "MaintCalendar";
+  | "MaintCalendar"
+  | "BlogCategoryDots"
+  | "BlogCardFile"
+  | "BlogCardArrow";
 
 type IconProps = {
   name: IconType | undefined;
@@ -260,6 +272,9 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     BulletDot,
     Globe,
     MaintCalendar,
+    BlogCategoryDots,
+    BlogCardFile,
+    BlogCardArrow,
   };
 
   const CurrentIcon = icons[name];

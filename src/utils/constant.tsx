@@ -2287,7 +2287,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
       { label: "Careers", href: "#" },
       { label: "Projects", href: "#" },
       { label: "Partners", href: "#" },
-      { label: "Blog", href: "#" },
+      { label: "Blog", href: "/blog" },
     ],
   },
   {
@@ -2356,6 +2356,199 @@ export const WARRANTY_PAGE = {
     "All warranties are provided and covered by the respective manufacturers of the products supplied.",
     "Customers are advised to refer to the manufacturer's warranty terms and conditions for detailed coverage.",
     "For any warranty-related queries or claims, please contact the respective manufacturer directly or reach out to our support team for assistance in connecting with the concerned company.",
+  ],
+} as const;
+
+/** Public Blog listing page (`/blog`, Figma Final Designs 1:4095) */
+export type BlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  dateLabel: string;
+  authorName: string;
+  authorAvatarSrc: string;
+  authorAvatarAlt: string;
+  heroImageSrc: string;
+  heroImageAlt: string;
+  thumbnailImageSrc: string;
+  thumbnailImageAlt: string;
+  href: string;
+};
+
+/** Shared hero backdrop for blog cards (Figma 1:4222 top panel) */
+export const BLOG_CARD_HERO_IMAGE = {
+  src: "/images/home/blog-card-bg.png",
+  alt: "Solar grid graphic background",
+} as const;
+
+export const BLOG_PAGE = {
+  hero: {
+    title: "Our Blog",
+    subtitle:
+      "Latest news, technologies, and guides from the world of renewable energy.",
+  },
+  posts: [
+    {
+      id: "blog-1",
+      slug: "maximizing-solar-output-1",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "16 Sep",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc: "/images/home/solar-panel-design.png",
+      thumbnailImageAlt: "Solar panels on a residential rooftop at sunset",
+      href: "#",
+    },
+    {
+      id: "blog-2",
+      slug: "maximizing-solar-output-2",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "12 Sep",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc: "/images/home/solar-panel-design-2.png",
+      thumbnailImageAlt: "Technician inspecting solar array installation",
+      href: "#",
+    },
+    {
+      id: "blog-3",
+      slug: "maximizing-solar-output-3",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "05 Sep",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc: "/images/home/solar-panel-design-3.png",
+      thumbnailImageAlt: "Home battery and inverter system in a utility room",
+      href: "#",
+    },
+    {
+      id: "blog-4",
+      slug: "maximizing-solar-output-4",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "28 Aug",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc:
+        "/images/ep2000/69fed828eb99db6c54cd35d6_EP2000_BN-1_2.png",
+      thumbnailImageAlt: "Modern home with rooftop solar and battery storage",
+      href: "#",
+    },
+    {
+      id: "blog-5",
+      slug: "maximizing-solar-output-5",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "21 Aug",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc:
+        "/images/ep2000/69fee5f674d0dbc73ac1a248_37451_2x_efee59fb-8810-43fb-b358-f422086bf8aa.webp",
+      thumbnailImageAlt: "BLUETTI home battery stack beside solar equipment",
+      href: "#",
+    },
+    {
+      id: "blog-6",
+      slug: "maximizing-solar-output-6",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "14 Aug",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc:
+        "/images/ep2000/69fee6e8c1734fecd47b9a7a_2x_4dec8179-4b1a-45b3-a965-153a88e92f02.webp",
+      thumbnailImageAlt: "Expanded battery modules for whole-home backup",
+      href: "#",
+    },
+    {
+      id: "blog-7",
+      slug: "maximizing-solar-output-7",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "07 Aug",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc:
+        "/images/ep2000/69feeb2df6a1e8f116354f89_37420_2x-2.webp",
+      thumbnailImageAlt: "Whole-home power system with high inverter efficiency",
+      href: "#",
+    },
+    {
+      id: "blog-8",
+      slug: "maximizing-solar-output-8",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "31 Jul",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc:
+        "/images/ep2000/69feeb7b2311bfbc123c8fb5_37435_2x_2001628c-7deb-44c3-8d89-6fe4a35f5619.webp",
+      thumbnailImageAlt: "Large solar array supported by home energy storage",
+      href: "#",
+    },
+    {
+      id: "blog-9",
+      slug: "maximizing-solar-output-9",
+      title: "Maximizing Solar Output",
+      excerpt:
+        "Key strategies for positioning and maintaining your solar panels to ensure peak energy production year-round.",
+      category: "Installation",
+      dateLabel: "24 Jul",
+      authorName: "Charlie Baker",
+      authorAvatarSrc: "/images/logo.webp",
+      authorAvatarAlt: "Charlie Baker",
+      heroImageSrc: BLOG_CARD_HERO_IMAGE.src,
+      heroImageAlt: BLOG_CARD_HERO_IMAGE.alt,
+      thumbnailImageSrc:
+        "/images/ep2000/69feeb48fd693f54b1540a2f_37419_2x_7c64035d-bf03-4905-a232-8423cf4d1276.webp",
+      thumbnailImageAlt: "Energy independence setup with modular battery design",
+      href: "#",
+    },
   ],
 } as const;
 

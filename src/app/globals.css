@@ -285,6 +285,31 @@
   --color-warranty-heading: #09234a;
   --color-warranty-body: #5f6c7b;
 
+  /* Blog page (Figma Final Designs 1:4095) */
+  --color-blog-hero-grad-from: #f78d00;
+  --color-blog-hero-grad-to: #ffef62;
+  --color-blog-hero-title: #ffffff;
+  --color-blog-hero-subtitle: #ffffff;
+  /* Blog post card (Figma 1:4222) */
+  --color-blog-card-shell-from: #00b0f0;
+  --color-blog-card-shell-via: #ff0000;
+  --color-blog-card-shell-to: #7030a0;
+  --color-blog-card-body-bg: #111111;
+  --color-blog-card-title: #ffffff;
+  --color-blog-card-excerpt: #888888;
+  --color-blog-card-divider: #222222;
+  --color-blog-card-category-text: rgb(255 255 255 / 0.8);
+  --color-blog-card-meta-dot: rgb(255 255 255 / 0.4);
+  --color-blog-card-date-bg: rgb(0 0 0 / 0.6);
+  --color-blog-card-date-text: #ffffff;
+  --color-blog-card-author: #ffffff;
+  --color-blog-card-arrow: #ffffff;
+  --color-blog-card-thumbnail-backdrop: rgb(19 19 19 / 0.45);
+  --color-blog-card-thumbnail-border: #1f6696;
+  --color-blog-card-thumbnail-border-inner: #1e6896;
+  --color-blog-card-avatar-fallback: #364153;
+  --color-blog-card-thumbnail-placeholder: #d9d9d9;
+
   /* Firmware page & landing energy CTA (marketing) */
   --color-firmware-page-bg: #f2f9fc;
   --color-firmware-heading: #09234a;
@@ -1009,6 +1034,26 @@ button {
     rgba(2, 132, 197, 0) 50%,
     rgba(2, 132, 197, 0.05) 100%
   );
+}
+
+/* Blog listing — hero + card surfaces (Figma 1:4095) */
+.blog-page-surface {
+  background: linear-gradient(
+    118deg,
+    var(--color-blog-hero-grad-to) 0%,
+    var(--color-blog-hero-grad-from) 58%,
+    var(--color-blog-hero-grad-from) 100%
+  );
+}
+
+.blog-post-card-shell {
+  background: linear-gradient(
+    180deg,
+    var(--color-blog-card-shell-from) 0%,
+    var(--color-blog-card-shell-via) 47.597%,
+    var(--color-blog-card-shell-to) 100%
+  );
+  box-shadow: 0 25.609px 51.218px -12.292px rgb(0 0 0 / 0.25);
 }
 
 .pink-gradient-border {
