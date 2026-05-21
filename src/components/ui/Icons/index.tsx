@@ -166,6 +166,21 @@ const AboutUsHeroShield = createDynamicSvgIcon(
 const AboutUsPortfolioCategory = createDynamicSvgIcon(
   () => import("./about-us-portfolio-category.svg?component"),
 );
+const FaqCategoryGeneral = createDynamicSvgIcon(
+  () => import("./faq-category-general.svg?component"),
+);
+const FaqCategoryInstallation = createDynamicSvgIcon(
+  () => import("./faq-category-installation.svg?component"),
+);
+const FaqCategoryRebates = createDynamicSvgIcon(
+  () => import("./faq-category-rebates.svg?component"),
+);
+const FaqCategoryProducts = createDynamicSvgIcon(
+  () => import("./faq-category-products.svg?component"),
+);
+const FaqDownload = createDynamicSvgIcon(
+  () => import("./faq-download.svg?component"),
+);
 export type IconType =
   | "Search"
   | "CheckCircle"
@@ -246,7 +261,12 @@ export type IconType =
   | "AboutUsHeroHome"
   | "AboutUsHeroEv"
   | "AboutUsHeroShield"
-  | "AboutUsPortfolioCategory";
+  | "AboutUsPortfolioCategory"
+  | "FaqCategoryGeneral"
+  | "FaqCategoryInstallation"
+  | "FaqCategoryRebates"
+  | "FaqCategoryProducts"
+  | "FaqDownload";
 
 type IconProps = {
   name: IconType | undefined;
@@ -340,6 +360,11 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     AboutUsHeroEv,
     AboutUsHeroShield,
     AboutUsPortfolioCategory,
+    FaqCategoryGeneral,
+    FaqCategoryInstallation,
+    FaqCategoryRebates,
+    FaqCategoryProducts,
+    FaqDownload,
   };
 
   const CurrentIcon = icons[name];

@@ -2330,7 +2330,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
   {
     title: "Support",
     items: [
-      { label: "FAQs", href: "#" },
+      { label: "FAQs", href: "/faqs" },
       { label: "Warranty", href: "/warranty" },
       { label: "Contact Us", href: "/contact-us" },
       { label: "User Manual", href: "/user-manual" },
@@ -3282,6 +3282,192 @@ export const ABOUT_US_PAGE = {
 
 export type AboutUsPortfolioItem =
   (typeof ABOUT_US_PAGE.portfolio.items)[number];
+
+/** Public FAQs page (`/faqs`, Figma Final Designs 1:5645) */
+export type FaqCategoryId =
+  | "general"
+  | "installation"
+  | "rebates"
+  | "products";
+
+export type FaqItemVariant = "gold" | "blue";
+
+export type FaqItem = {
+  id: string;
+  categoryId: FaqCategoryId;
+  question: string;
+  answer: string;
+  variant: FaqItemVariant;
+};
+
+export const FAQS_PAGE = {
+  hero: {
+    badge: "Support Center",
+    title: "How can we help you?",
+    subtitle:
+      "Find answers to common questions about solar energy, installation, pricing, and our services.",
+    searchPlaceholder: "Search for answers...",
+    heroImageSrc: "/images/faqs-hero.png",
+    heroImageAlt: "Solar-powered EV charging hub at sunrise",
+  },
+  content: {
+    backgroundImageSrc: "/images/faqs-bg.png",
+    titleBanner: "Frequently Asked Questions",
+    downloadLabel: "Download All FAQ",
+    downloadHref: "/data/easylink-solar-faq.pdf",
+  },
+  categories: [
+    {
+      id: "general" as const,
+      label: "General Questions",
+      iconId: "FaqCategoryGeneral" as const,
+    },
+    {
+      id: "installation" as const,
+      label: "Installation & Process",
+      iconId: "FaqCategoryInstallation" as const,
+    },
+    {
+      id: "rebates" as const,
+      label: "Rebates & Finances",
+      iconId: "FaqCategoryRebates" as const,
+    },
+    {
+      id: "products" as const,
+      label: "Products & Battery",
+      iconId: "FaqCategoryProducts" as const,
+    },
+  ],
+  items: [
+    {
+      id: "ai-accuracy",
+      categoryId: "general",
+      question: "How will Easylink Solar improve AI accuracy and speed?",
+      answer:
+        "Our AI quoting engine uses satellite imagery and machine learning to analyse roof geometry, shading, and orientation. Continuous model updates and installer feedback loops improve quote accuracy toward 95% while reducing turnaround from days to minutes.",
+      variant: "gold",
+    },
+    {
+      id: "real-time-savings",
+      categoryId: "general",
+      question: "Will customers be able to track real-time solar savings?",
+      answer:
+        "Yes. The Easylink customer dashboard connects to your inverter and battery data so you can monitor generation, consumption, export, and estimated savings in near real time once your system is commissioned.",
+      variant: "blue",
+    },
+    {
+      id: "quote-process",
+      categoryId: "general",
+      question: "How does the online solar quote process work?",
+      answer:
+        "Enter your address, confirm roof details on the satellite map, choose your energy goals, and receive a tailored system recommendation with transparent pricing. A certified installer can then validate the design on site.",
+      variant: "gold",
+    },
+    {
+      id: "service-areas",
+      categoryId: "general",
+      question: "Which areas does Easylink Solar currently service?",
+      answer:
+        "We partner with certified installers across major Australian metro and regional markets. Enter your postcode during quoting to confirm installer availability in your area.",
+      variant: "blue",
+    },
+    {
+      id: "install-timeline",
+      categoryId: "installation",
+      question: "How long does a typical residential installation take?",
+      answer:
+        "Most single-phase residential installs are completed in one to two days once approvals and equipment are confirmed. Larger battery-backup systems may require an additional day for commissioning and testing.",
+      variant: "gold",
+    },
+    {
+      id: "install-requirements",
+      categoryId: "installation",
+      question: "What do I need to prepare before installation day?",
+      answer:
+        "Ensure clear roof access, an available switchboard location for the inverter, and someone on site to approve final placement. Your installer will confirm any structural or electrical prerequisites during the pre-install visit.",
+      variant: "blue",
+    },
+    {
+      id: "grid-connection",
+      categoryId: "installation",
+      question: "Who handles grid connection and meter upgrades?",
+      answer:
+        "Your installer coordinates distributor applications, meter programming, and compliance documentation. Timelines vary by network provider, and we keep you updated at each milestone.",
+      variant: "gold",
+    },
+    {
+      id: "stc-rebates",
+      categoryId: "rebates",
+      question: "Are government STC rebates included in my quote?",
+      answer:
+        "Eligible small-scale technology certificates are factored into your quote as an upfront discount where applicable. Final STC value depends on system size and the certificate price at contract signing.",
+      variant: "blue",
+    },
+    {
+      id: "finance-options",
+      categoryId: "rebates",
+      question: "What finance and payment options are available?",
+      answer:
+        "We support upfront purchase, green loans through partner lenders, and staged payment plans on selected packages. Your quote summary outlines all options before you commit.",
+      variant: "gold",
+    },
+    {
+      id: "payback-period",
+      categoryId: "rebates",
+      question: "What is the typical payback period for a home solar system?",
+      answer:
+        "Payback depends on system size, self-consumption, feed-in tariffs, and local sunlight. Many customers see strong returns within four to seven years, with higher savings when paired with battery storage.",
+      variant: "blue",
+    },
+    {
+      id: "bluetti-battery",
+      categoryId: "products",
+      question: "Which BLUETTI battery systems pair best with rooftop solar?",
+      answer:
+        "BLUETTI AC500 and AC300 modular stacks integrate with compatible hybrid inverters for whole-home backup. Your quote recommends capacity based on essential loads and overnight usage patterns.",
+      variant: "gold",
+    },
+    {
+      id: "battery-backup",
+      categoryId: "products",
+      question: "Can I add a battery to an existing solar installation?",
+      answer:
+        "In most cases, yes. A site assessment confirms inverter compatibility, switchboard capacity, and whether a hybrid upgrade or AC-coupled battery is the best fit for your home.",
+      variant: "blue",
+    },
+    {
+      id: "panel-warranty",
+      categoryId: "products",
+      question: "What warranty coverage comes with panels and inverters?",
+      answer:
+        "Product warranties are provided by manufacturers and vary by brand. Panels commonly include 25-year performance coverage; inverters and batteries typically carry 5–10 year warranties. See our Warranty page for claim guidance.",
+      variant: "gold",
+    },
+    {
+      id: "maintenance",
+      categoryId: "products",
+      question: "How often should solar panels be maintained?",
+      answer:
+        "Annual inspections help maintain output and safety. Easylink customers can enrol in a maintenance agreement for scheduled checks, cleaning recommendations, and performance reporting from the dashboard.",
+      variant: "blue",
+    },
+  ],
+  supportCta: {
+    title: "Still have questions?",
+    description:
+      "Can't find the answer you're looking for? Our friendly team is here to help you with your solar journey.",
+    primary: {
+      label: "Contact Support",
+      href: "/contact-us",
+      iconId: "MessageSquare" as const,
+    },
+    secondary: {
+      label: "1300 SOLAR LINK",
+      href: "tel:1300765275",
+      iconId: "Phone" as const,
+    },
+  },
+} as const;
 
 /** Marketing `/customers` — Solar Maintenance teaser section */
 export const SOLAR_MAINTENANCE_CUSTOMER_SECTION = {

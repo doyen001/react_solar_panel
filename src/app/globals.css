@@ -410,6 +410,36 @@
   --color-blog-detail-related-subtitle: #f2f9fc;
   --color-blog-detail-related-link: #05afd1;
 
+  /* FAQs page (Figma Final Designs 1:5645) */
+  --color-faqs-page-bg: #0f1729;
+  --color-faqs-hero-badge-text: #ffc105;
+  --color-faqs-hero-badge-bg: rgb(5 175 209 / 0.47);
+  --color-faqs-hero-badge-border: #05afd1;
+  --color-faqs-hero-title: #ffffff;
+  --color-faqs-hero-subtitle: #ffffff;
+  --color-faqs-search-bg: #1a202c;
+  --color-faqs-search-border: rgb(255 255 255 / 0.1);
+  --color-faqs-search-placeholder: #62748e;
+  --color-faqs-category-label: #ffffff;
+  --color-faqs-category-active-bg: #05afd1;
+  --color-faqs-category-text: #ffffff;
+  --color-faqs-title-banner-border: #00b0f0;
+  --color-faqs-title-banner-text: #0f1729;
+  --color-faqs-item-gold-text: #111c27;
+  --color-faqs-item-blue-text: #ffffff;
+  --color-faqs-download-text: #ffffff;
+  --color-faqs-support-title: #0f1729;
+  --color-faqs-support-body: #0f1729;
+  --color-faqs-support-primary-text: #f0f9ff;
+  --color-faqs-support-secondary-text: #0f1729;
+  --color-faqs-support-secondary-border: rgb(2 132 197 / 0.6);
+  --color-faqs-item-gold-from: #ffef62;
+  --color-faqs-item-gold-to: #f78d00;
+  --color-faqs-item-blue-from: #5474eb;
+  --color-faqs-item-blue-via: #ed8080;
+  --color-faqs-item-blue-to: #00bcff;
+  --color-faqs-bg-pattern-opacity: 0.24;
+
   /* Firmware page & landing energy CTA (marketing) */
   --color-firmware-page-bg: #f2f9fc;
   --color-firmware-heading: #09234a;
@@ -1133,6 +1163,77 @@ button {
     rgba(2, 132, 197, 0.1) 0%,
     rgba(2, 132, 197, 0) 50%,
     rgba(2, 132, 197, 0.05) 100%
+  );
+}
+
+/* FAQs page (Figma 1:5645) */
+.faqs-hero-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0),
+    rgb(0 0 0 / 0.8)
+  );
+}
+
+.faqs-item-gradient-gold {
+  background: linear-gradient(
+    to right,
+    var(--color-faqs-item-gold-from),
+    var(--color-faqs-item-gold-to)
+  );
+}
+
+.faqs-item-gradient-blue {
+  background: linear-gradient(
+    to right,
+    var(--color-faqs-item-blue-from) 0%,
+    var(--color-faqs-item-blue-via) 52.965%,
+    var(--color-faqs-item-blue-to) 100%
+  );
+}
+
+.faqs-title-banner {
+  background: linear-gradient(
+    to right,
+    var(--color-faqs-item-gold-from),
+    var(--color-faqs-item-gold-to)
+  );
+  border: 3px solid var(--color-faqs-title-banner-border);
+}
+
+.faqs-category-active {
+  background: var(--color-faqs-category-active-bg);
+  box-shadow:
+    0 10px 7.5px rgb(5 175 209 / 0.2),
+    0 4px 3px rgb(5 175 209 / 0.2);
+}
+
+.faqs-download-btn {
+  background: linear-gradient(
+    142.337deg,
+    var(--color-brand-blue) 0%,
+    var(--color-brand-teal) 100%
+  );
+  box-shadow:
+    0 10px 7.5px rgb(5 175 209 / 0.2),
+    0 4px 3px rgb(5 175 209 / 0.2);
+}
+
+.faqs-support-primary-btn {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-blue) 0%,
+    var(--color-brand-teal) 100%
+  );
+  box-shadow: 0 0 20px rgb(32 148 243 / 0.3);
+}
+
+.faqs-support-cta-card {
+  background: linear-gradient(
+    162.609deg,
+    rgb(2 132 197 / 0.1) 0%,
+    rgb(2 132 197 / 0) 50%,
+    rgb(2 132 197 / 0.05) 100%
   );
 }
 
