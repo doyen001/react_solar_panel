@@ -301,6 +301,20 @@
   --color-about-hero-cta-secondary-bg: rgb(255 255 255 / 0.73);
   --color-about-hero-dot-active: #efad06;
   --color-about-hero-dot-idle: rgb(255 255 255 / 0.3);
+
+  /* Home page hero (Figma Final Designs 1782:622) */
+  --color-home-hero-title: #ffffff;
+  --color-home-hero-subtitle: #ffffff;
+  --color-home-hero-stat-divider: #67b5dc;
+  --color-home-hero-overlay-from: rgb(222 217 217 / 0);
+  --color-home-hero-overlay-to: #fdce22;
+  --color-home-hero-cta-primary-border: #b0b0b0;
+  --color-home-hero-cta-secondary-text: #1cb0e2;
+  --color-home-hero-cta-secondary-border: rgb(2 132 197 / 0.6);
+  --color-home-hero-dot-idle: rgb(15 23 41 / 0.3);
+  --color-home-hero-nav-surface: rgb(248 250 252 / 0.1);
+  --color-home-hero-nav-border: rgb(200 211 223 / 0.5);
+
   --color-about-mission-card-bg: rgb(255 255 0 / 0.65);
   --color-about-mission-card-title: #191919;
   --color-about-mission-card-body: #0c0c0c;
@@ -1137,6 +1151,43 @@ button {
     135deg,
     var(--color-gold) 0%,
     color-mix(in srgb, var(--color-gold) 80%, transparent) 100%
+  );
+}
+
+/* Home — hero (Figma 1782:622) */
+.home-hero-gradient-overlay {
+  background: linear-gradient(
+    180.82deg,
+    var(--color-home-hero-overlay-from) 12.076%,
+    var(--color-home-hero-overlay-to) 97.314%
+  );
+}
+
+.home-hero-brand-text {
+  background: linear-gradient(
+    134.375deg,
+    var(--color-brand-blue) 0%,
+    var(--color-brand-teal) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.home-hero-solar-design-cta {
+  background: linear-gradient(
+    155.94deg,
+    var(--color-auth-outline) 16.143%,
+    var(--color-coral) 99.619%
+  );
+  box-shadow: 0 0 20px rgb(220 220 220 / 0.3);
+}
+
+.home-hero-dot-active {
+  background: linear-gradient(
+    105.443deg,
+    var(--color-brand-blue) 0%,
+    var(--color-brand-teal) 100%
   );
 }
 

@@ -16,16 +16,22 @@ export type VideoSliderSlide =
       priority?: boolean;
     };
 
-export function VideoSlider({
-  slides,
-  children,
-  overlayClassName,
-}: {
+type VideoSliderProps = {
   slides: VideoSliderSlide[];
   children?: React.ReactNode;
   /** Merged onto the overlay wrapper (e.g. less top padding when there is no hero title). */
   overlayClassName?: string;
-}) {
+  dotsVariant?: "horizontal-bottom" | "vertical-right";
+  navButtonClassName?: string;
+};
+
+export function VideoSlider({
+  slides,
+  children,
+  overlayClassName,
+  dotsVariant = "horizontal-bottom",
+  navButtonClassName,
+}: VideoSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -93,31 +99,52 @@ export function VideoSlider({
           overlayClassName,
         )}
       >
-        <div className="flex flex-col gap-4">
-          {children}
+        {dotsVariant === "horizontal-bottom" ? (
+          <div className="flex flex-col gap-4">
+            {children}
 
-          {/* Dot indicators */}
-          <div className="flex items-center justify-center gap-2">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goToSlide(i)}
-                className={`size-3 rounded-full transition-colors ${
-                  i === currentSlide
-                    ? "bg-gold"
-                    : "bg-slate-ink/30"
-                }`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
+            <div className="flex items-center justify-center gap-2">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToSlide(i)}
+                  className={`size-3 rounded-full transition-colors ${
+                    i === currentSlide ? "bg-gold" : "bg-slate-ink/30"
+                  }`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          children
+        )}
       </div>
+
+      {dotsVariant === "vertical-right" ? (
+        <div className="absolute right-4 bottom-1/6 z-3 flex -translate-y-1/2 flex-col gap-2 sm:right-[42px]">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToSlide(i)}
+              className={`size-3 rounded-full transition-colors ${
+                i === currentSlide
+                  ? "home-hero-dot-active"
+                  : "bg-home-hero-dot-idle"
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      ) : null}
 
       {/* Navigation arrows */}
       <button
         onClick={() => goToSlide(currentSlide - 1)}
-        className="absolute left-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-7/50 bg-surface-50/60 backdrop-blur-[15px] transition-colors hover:bg-surface-50/80 sm:left-[19px] sm:size-[54px]"
+        className={classNames(
+          "absolute left-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-7/50 bg-surface-50/60 backdrop-blur-[15px] transition-colors hover:bg-surface-50/80 sm:left-[19px] sm:size-[54px]",
+          navButtonClassName,
+        )}
         aria-label="Previous slide"
       >
         <svg
@@ -136,7 +163,10 @@ export function VideoSlider({
       </button>
       <button
         onClick={() => goToSlide(currentSlide + 1)}
-        className="absolute right-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-7/50 bg-surface-50/60 backdrop-blur-[15px] transition-colors hover:bg-surface-50/80 sm:right-[19px] sm:size-[54px]"
+        className={classNames(
+          "absolute right-3 top-1/2 z-3 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-7/50 bg-surface-50/60 backdrop-blur-[15px] transition-colors hover:bg-surface-50/80 sm:right-[19px] sm:size-[54px]",
+          navButtonClassName,
+        )}
         aria-label="Next slide"
       >
         <svg

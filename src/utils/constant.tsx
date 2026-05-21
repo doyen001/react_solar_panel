@@ -8,6 +8,65 @@ export const LANDING_NAV_ITEMS = [
   { label: "About Us", link: "/about-us" },
 ] as const;
 
+/** Home page — hero (`/`, Figma Final Designs 1782:622) */
+export const HOME_PAGE = {
+  hero: {
+    title: {
+      line1: "Power Your Home with Premium",
+      brand: "BLUETTI",
+      line2: "Energy Storage",
+    },
+    subtitle:
+      "Easylink Solar installations by Solar Accreditation Australia Accredited Professional Installers.",
+    primaryCta: { label: "Solar Design", href: "/designs" },
+    secondaryCta: { label: "Explore Products", href: "/products" },
+    stats: [
+      { value: "11,000+", label: "quotes created" },
+      { value: "500+", label: "certified installers" },
+    ],
+    slides: [
+      { type: "video" as const, src: "/videos/homeHero.mp4" },
+      {
+        type: "image" as const,
+        src: "/images/home/hero-slide-2.png",
+        alt: "Solar installation",
+      },
+      {
+        type: "image" as const,
+        src: "/images/home/hero-slide-3.png",
+        alt: "Solar installation",
+      },
+    ],
+    features: [
+      {
+        iconId: "AboutUsHeroSun" as const,
+        title: "Solar Generation",
+        subtitle: "Harness the sun",
+      },
+      {
+        iconId: "AboutUsHeroBolt" as const,
+        title: "Smart Storage",
+        subtitle: "EP760 & EP2000",
+      },
+      {
+        iconId: "AboutUsHeroHome" as const,
+        title: "Home Power",
+        subtitle: "24/7 backup",
+      },
+      {
+        iconId: "AboutUsHeroEv" as const,
+        title: "EV Ready",
+        subtitle: "Charge overnight",
+      },
+      {
+        iconId: "AboutUsHeroShield" as const,
+        title: "Dual Core Safety Guard",
+        subtitle: "Advanced protection",
+      },
+    ],
+  },
+} as const;
+
 /** Bluetti EP2000 product page — hero (`/bluetti`) */
 export const BLUETTI_EP2000_HERO = {
   title: {
