@@ -1,5 +1,6 @@
 import { AboutUsPortfolioCard } from "@/components/pages/about-us/AboutUsPortfolioCard";
 import { ABOUT_US_PAGE } from "@/utils/constant";
+import { BlogPostCard } from "../blog/BlogPostCard";
 
 export function AboutUsPortfolioSection() {
   const rows = [
@@ -27,7 +28,7 @@ export function AboutUsPortfolioSection() {
               className="grid grid-cols-1 justify-items-center gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-5"
             >
               {row.map((item) => (
-                <AboutUsPortfolioCard key={item.id} item={item} />
+                <BlogPostCard key={item.id} post={item} />
               ))}
             </div>
           ))}

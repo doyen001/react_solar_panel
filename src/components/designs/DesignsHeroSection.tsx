@@ -265,7 +265,7 @@ export function DesignsHeroSection({
       <DesignTopBar />
       <div className="flex items-center flex-1">
         {activeScreen === "start" ? (
-          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col gap-[29px] px-4 pt-24 sm:px-8 sm:pt-28 lg:px-[81px] lg:pt-[155px]">
+          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col gap-[29px] px-4 pt-8 sm:px-8 lg:px-[81px]">
             <div className="flex w-full max-w-[1283px] flex-col items-stretch gap-5 lg:flex-row">
               <DesignsSavingsPromoCard className="lg:w-[629px]" />
               <DesignsHeroImagePanel className="lg:w-[634px]" />

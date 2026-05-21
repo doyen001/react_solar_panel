@@ -81,13 +81,13 @@ export function BluettiProductsSection() {
               className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(17,28,39,0.12)]"
             >
               {/* Image area */}
-              <div className="relative flex aspect-square items-center justify-center bg-linear-to-br from-cream-200 to-cream-400 p-8">
+              <div className="relative flex aspect-square items-center justify-center bg-linear-to-br from-cream-200 to-cream-400">
                 <Image
                   src={p.image}
                   alt={p.name}
-                  width={260}
-                  height={260}
+                  fill
                   className="object-contain"
+                  sizes="100%"
                 />
               </div>
               {/* Info */}

@@ -25,8 +25,8 @@ export function BlogPostCardVisual({ post }: Props) {
 
 function BlogPostCardThumbnail({ post }: Props) {
   return (
-    <div className="absolute left-[calc(50%+0.6px)] top-[calc(50%+2.34px)] flex size-[140.056px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[26.26px] border-[1.629px] border-blog-card-thumbnail-border bg-blog-card-thumbnail-backdrop">
-      <div className="relative size-[120.903px] overflow-hidden rounded-[16.967px] border-[0.729px] border-blog-card-thumbnail-border-inner bg-blog-card-thumbnail-placeholder">
+    <div className="absolute pt-7 flex size-full items-center justify-center rounded-[26.26px] border-[1.629px] border-blog-card-thumbnail-border">
+      <div className="relative size-[180px] overflow-hidden rounded-[16.967px] border-[0.729px] border-blog-card-thumbnail-border-inner bg-blog-card-thumbnail-placeholder">
         <Image
           src={post.thumbnailImageSrc}
           alt={post.thumbnailImageAlt}

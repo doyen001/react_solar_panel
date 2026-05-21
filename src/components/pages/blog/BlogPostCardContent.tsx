@@ -17,7 +17,7 @@ export function BlogPostCardContent({ post }: Props) {
 function BlogPostCardContentInner({ post }: Props) {
   return (
     <div className="mx-auto flex w-full max-w-[349.583px] flex-col gap-[15.562px] px-[22px] pb-6 pt-[40.2px]">
-      <h2 className="font-source-sans text-[23.941px] font-bold leading-normal tracking-[-1.1971px] text-blog-card-title">
+      <h2 className="font-source-sans text-[23.941px] font-bold leading-normal tracking-[-1.1971px] text-blog-card-title truncate">
         {post.title}
       </h2>
       <div className="flex flex-col gap-[26.335px]">
