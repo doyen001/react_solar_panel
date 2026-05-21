@@ -1,4 +1,3 @@
-import { AboutUsPortfolioCard } from "@/components/pages/about-us/AboutUsPortfolioCard";
 import { ABOUT_US_PAGE } from "@/utils/constant";
 import { BlogPostCard } from "../blog/BlogPostCard";
 
