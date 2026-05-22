@@ -14,34 +14,12 @@ export function AcrossAustraliaSection() {
         {/* Map */}
         <div className="relative w-full max-w-[519px] shrink-0">
           <Image
-            src="/images/home/australia-map.png"
+            src="/aus-map.svg"
             alt="Australia coverage map"
             width={519}
             height={519}
             className="h-auto w-full"
           />
-          {/* <Image
-            src="/images/home/australia-map-overlay.png"
-            alt=""
-            width={519}
-            height={519}
-            className="absolute inset-0 h-full w-full"
-          /> */}
-          {/* Legend */}
-          <div className="absolute bottom-5 left-1.5 rounded-[10px] border border-faint bg-gray-1/90 p-3 shadow-sm">
-            <div className="flex items-center gap-2">
-              <span className="size-2.5 rounded-full border border-white bg-flame shadow-sm" />
-              <span className="font-[family-name:var(--font-source-sans)] text-xs font-medium text-deep">
-                Solar Site Hub
-              </span>
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-primary" />
-              <span className="font-[family-name:var(--font-source-sans)] text-xs font-medium text-deep">
-                Installer Location
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Content */}
