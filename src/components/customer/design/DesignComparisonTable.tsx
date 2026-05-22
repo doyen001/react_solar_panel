@@ -1,3 +1,4 @@
+import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import { COMPARISON_DESIGNS, COMPARISON_ROWS } from "./designConstants";
 
 export function DesignComparisonTable() {
@@ -5,16 +6,12 @@ export function DesignComparisonTable() {
   const colIdx = selectedIndex >= 0 ? selectedIndex : 0;
 
   return (
-    <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent py-2.5 pl-[18px] pr-4">
-        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
-          Compare All Designs
-        </h2>
-      </div>
+    <section className="customer-cream-card-bg customer-cream-card-border overflow-hidden rounded-[10px] border">
+      <CustomerSectionHeader variant="cream" title="Compare All Designs" />
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-warm-border">
+            <tr className="border-b customer-cream-card-border">
               <th className="sticky left-0 z-10 bg-cream-50 px-4 py-2.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray">
                 Feature
               </th>

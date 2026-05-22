@@ -16,31 +16,22 @@ export function DashboardWelcomeBanner({
   nextStep,
 }: Props) {
   return (
-    <section
-      className="flex w-full flex-col gap-4 rounded-xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6"
-      style={{
-        backgroundImage:
-          "linear-gradient(176.69deg, rgb(255, 239, 98) 0%, rgb(247, 141, 0) 50%, rgb(232, 114, 10) 100%)",
-      }}
-    >
+    <section className="customer-welcome-banner flex w-full flex-col gap-4 rounded-[14px] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6">
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-warm-black/15 text-warm-black">
           <Icon name="Sun" className="size-6 text-warm-black" />
         </div>
         <div className="min-w-0">
-          <h1 className="font-inter text-xl font-bold leading-[30px] text-warm-black">
+          <h1 className="font-inter text-xl font-bold leading-[30px] tracking-[-0.45px] text-warm-black">
             Welcome back, {firstName}!
           </h1>
-          <p
-            className="mt-0.5 font-dm-sans text-xs font-medium leading-[18px] text-warm-black/65"
-            style={{ fontVariationSettings: "'opsz' 14" }}
-          >
+          <p className="mt-0.5 font-inter text-xs font-normal leading-[18px] text-warm-black/65">
             Your solar journey is {journeyPercent}% complete
           </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-start gap-4 sm:justify-end md:gap-6">
+      <div className="flex flex-wrap items-start gap-4 sm:justify-end md:gap-10">
         <StatBlock label="Selected System" value={systemKw} />
         <StatBlock label="Est. Savings" value={savingsYr} />
         <StatBlock label="Next Step" value={nextStep} />
@@ -52,16 +43,10 @@ export function DashboardWelcomeBanner({
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-[88px] text-center sm:text-left">
-      <p
-        className="font-dm-sans text-[10px] font-normal uppercase leading-[15px] tracking-[0.5px] text-warm-black/55"
-        style={{ fontVariationSettings: "'opsz' 9" }}
-      >
+      <p className="font-inter text-[10px] font-normal uppercase leading-[15px] tracking-[1.12px] text-warm-black/55">
         {label}
       </p>
-      <p
-        className="mt-1 font-dm-sans text-sm font-bold leading-[21px] text-warm-black"
-        style={{ fontVariationSettings: "'opsz' 14" }}
-      >
+      <p className="mt-1 font-inter text-sm font-bold leading-[21px] tracking-[-0.15px] text-warm-black">
         {value}
       </p>
     </div>

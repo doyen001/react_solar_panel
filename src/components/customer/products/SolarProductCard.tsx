@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { productsAssets } from "./productsAssets";
 import type { SolarProduct } from "./types";
+import Icon from "@/components/ui/Icons";
 
 type Props = {
   product: SolarProduct;
@@ -20,7 +21,7 @@ export function SolarProductCard({
   const catLabel = product.category.toUpperCase();
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
+    <article className="customer-cream-card-bg customer-cream-card-border flex flex-col overflow-hidden rounded-[10px] border">
       <div className="relative h-20 w-full shrink-0 overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <Image
@@ -61,13 +62,10 @@ export function SolarProductCard({
           onClick={onToggleFavorite}
           className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-white/80 hover:bg-white"
         >
-          <Image
-            src={productsAssets.heart}
-            alt=""
-            width={14}
-            height={14}
-            className={favorited ? "opacity-100" : "opacity-70"}
-            unoptimized
+          <Icon
+            name="ProductHeart"
+            className={`size-4 shrink-0 text-black ${favorited ? "opacity-100" : "opacity-70"}`}
+            aria-hidden
           />
         </button>
       </div>
@@ -87,12 +85,10 @@ export function SolarProductCard({
         </h3>
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           <div className="flex items-center gap-0.5">
-            <Image
-              src={productsAssets.star}
-              alt=""
-              width={12}
-              height={12}
-              unoptimized
+            <Icon
+              name="AboutUsStar"
+              className="size-4 shrink-0 text-orange-amber mb-0.5"
+              aria-hidden
             />
             <span
               className="font-dm-sans text-[10px] font-semibold leading-[15px] text-warm-ink"
@@ -122,14 +118,12 @@ export function SolarProductCard({
                 "linear-gradient(121.47deg, rgb(32, 148, 243) 0%, rgb(23, 207, 207) 100%)",
             }}
           >
-            <Image
-              src={productsAssets.cart}
-              alt=""
-              width={12}
-              height={12}
-              unoptimized
+            <Icon
+              name="ProductCart"
+              className="size-4 shrink-0 text-white"
+              aria-hidden
             />
-            Add
+            <span className="mt-0.5">Add</span>
           </button>
         </div>
       </div>

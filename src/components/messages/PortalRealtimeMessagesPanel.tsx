@@ -55,7 +55,7 @@ export function PortalRealtimeMessagesPanel({
 
   if (chat.loadState === "loading") {
     return (
-      <div className="rounded-[10px] border border-warm-border bg-cream-50 px-4 py-8 text-center font-dm-sans text-sm text-warm-gray">
+      <div className="customer-cream-card-bg customer-cream-card-border rounded-[10px] border px-4 py-8 text-center font-dm-sans text-sm text-warm-gray">
         Loading messages…
       </div>
     );
@@ -63,7 +63,7 @@ export function PortalRealtimeMessagesPanel({
 
   if (chat.loadState === "error") {
     return (
-      <div className="rounded-[10px] border border-warm-border bg-cream-50 px-4 py-8 text-center font-dm-sans text-sm text-red-600">
+      <div className="customer-cream-card-bg customer-cream-card-border rounded-[10px] border px-4 py-8 text-center font-dm-sans text-sm text-red-600">
         {chat.loadError ?? "Could not load messages."}
       </div>
     );
@@ -71,7 +71,7 @@ export function PortalRealtimeMessagesPanel({
 
   if (chat.contacts.length === 0) {
     return (
-      <div className="rounded-[10px] border border-warm-border bg-cream-50 px-4 py-8 text-center font-dm-sans text-sm text-warm-gray">
+      <div className="customer-cream-card-bg customer-cream-card-border rounded-[10px] border px-4 py-8 text-center font-dm-sans text-sm text-warm-gray">
         {emptyHint}
       </div>
     );
@@ -87,7 +87,7 @@ export function PortalRealtimeMessagesPanel({
         onSelect={chat.setActivePeerId}
       />
 
-      <section className="flex h-[min(28rem,calc(100vh-14rem))] min-h-[16rem] flex-1 flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 md:h-[28rem]">
+      <section className="customer-cream-card-bg customer-cream-card-border flex h-[min(28rem,calc(100vh-14rem))] min-h-[16rem] flex-1 flex-col overflow-hidden rounded-[10px] border md:h-[28rem]">
         <ChatThreadHeader
           title={threadHeading}
           online={chat.wsState === "open"}
@@ -133,7 +133,7 @@ export function PortalRealtimeMessagesPanel({
           </div>
         </div>
 
-        <div className="shrink-0 border-t border-warm-border px-4 pb-4 pt-3">
+        <div className="shrink-0 border-t customer-cream-card-border px-4 pb-4 pt-3">
           <MessageRichComposer
             channel={channel}
             onChannelChange={setChannel}

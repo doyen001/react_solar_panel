@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { EquipmentCardData } from "./designConstants";
+import Icon from "@/components/ui/Icons";
 
 type Props = {
   card: EquipmentCardData;
@@ -10,13 +10,10 @@ export function EquipmentCard({ card }: Props) {
     <div className="flex min-h-[150px] flex-col gap-3 rounded-[10px] border border-warm-border bg-gradient-to-r from-yellow-lemon to-orange-amber p-3.5">
       <div className="flex items-center gap-2">
         <div className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-navy-800/16 bg-linear-to-b from-yellow-lemon to-orange-amber">
-          <Image
-            src={card.iconSrc}
-            alt=""
-            width={14}
-            height={14}
-            className="size-3.5"
-            unoptimized
+          <Icon
+            name={card.iconName}
+            className="size-4 shrink-0 text-black"
+            aria-hidden
           />
         </div>
         <h3 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">

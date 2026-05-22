@@ -1,24 +1,24 @@
 import Image from "next/image";
+import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import { designAssets } from "./designAssets";
+import Icon from "@/components/ui/Icons";
 
 export function ReferralProgramCard() {
   return (
-    <section className="flex flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex items-center gap-2 border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent py-2.5 pl-[18px] pr-4">
-        <Image
-          src={designAssets.gift}
-          alt=""
-          width={16}
-          height={16}
-          className="size-4 shrink-0"
-          unoptimized
-        />
-        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
-          Referral Program
-        </h2>
-      </div>
+    <section className="customer-panel-bg customer-panel-border-dark flex flex-col overflow-hidden rounded-[10px] border">
+      <CustomerSectionHeader
+        variant="dark"
+        title="Referral Program"
+        icon={
+          <Icon
+            name="MyDesignGift"
+            className="size-4 shrink-0 text-white"
+            aria-hidden
+          />
+        }
+      />
       <div className="flex flex-col gap-3 p-4">
-        <div className="rounded-[10px] bg-linear-to-b from-navy-800 to-blue-slate px-4 py-4 text-center">
+        <div className="customer-avatar-gradient rounded-[10px] px-4 py-4 text-center">
           <p className="font-inter text-xl font-bold leading-[30px] text-white">
             $500
           </p>
@@ -30,7 +30,7 @@ export function ReferralProgramCard() {
           </p>
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="rounded-lg border border-warm-border bg-white px-2 py-3 text-center">
+          <div className="rounded-lg border customer-cream-card-border bg-cream-50 px-2 py-3 text-center">
             <p className="font-inter text-lg font-bold leading-[27px] text-warm-ink">
               2
             </p>
@@ -41,7 +41,7 @@ export function ReferralProgramCard() {
               Referrals Sent
             </p>
           </div>
-          <div className="rounded-lg border border-warm-border bg-white px-2 py-3 text-center">
+          <div className="rounded-lg border customer-cream-card-border bg-cream-50 px-2 py-3 text-center">
             <p className="font-inter text-lg font-bold leading-[27px] text-success">
               1
             </p>
@@ -52,7 +52,7 @@ export function ReferralProgramCard() {
               Converted
             </p>
           </div>
-          <div className="rounded-lg border border-warm-border bg-white px-2 py-3 text-center">
+          <div className="rounded-lg border customer-cream-card-border bg-cream-50 px-2 py-3 text-center">
             <p className="font-inter text-lg font-bold leading-[27px] text-orange-amber">
               $500
             </p>
@@ -66,15 +66,13 @@ export function ReferralProgramCard() {
         </div>
         <button
           type="button"
-          className="flex h-[34px] w-full items-center justify-center gap-2 rounded-lg bg-linear-to-b from-yellow-lemon to-orange-amber font-dm-sans text-[11px] font-bold text-warm-black"
+          className="customer-gradient-accent-v flex h-[34px] w-full items-center justify-center gap-2 rounded-lg font-dm-sans text-[11px] font-bold text-warm-black"
           style={{ fontVariationSettings: "'opsz' 14" }}
         >
-          <Image
-            src={designAssets.share3}
-            alt=""
-            width={14}
-            height={14}
-            unoptimized
+          <Icon
+            name="BlogDetailShareLink"
+            className="size-4 shrink-0"
+            aria-hidden
           />
           Refer a Friend
         </button>

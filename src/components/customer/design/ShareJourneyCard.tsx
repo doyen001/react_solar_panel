@@ -2,32 +2,34 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import { designAssets } from "./designAssets";
+import Icon, { IconType } from "@/components/ui/Icons";
 
 const SOCIAL = [
   {
     label: "Facebook",
     bg: "bg-blue-tint",
     color: "text-facebook",
-    icon: designAssets.socialFacebook,
+    icon: "BlogDetailShareFacebook" as IconType,
   },
   {
     label: "Twitter",
     bg: "bg-sky-wash",
     color: "text-twitter",
-    icon: designAssets.socialTwitter,
+    icon: "BlogDetailShareX" as IconType,
   },
   {
     label: "LinkedIn",
     bg: "bg-blue-tint",
     color: "text-linkedin",
-    icon: designAssets.socialLinkedIn,
+    icon: "BlogDetailShareLinkedin" as IconType,
   },
   {
     label: "Email",
     bg: "bg-blush",
     color: "text-google-red",
-    icon: designAssets.socialEmail,
+    icon: "Mail" as IconType,
   },
 ] as const;
 
@@ -49,23 +51,21 @@ export function ShareJourneyCard({ shareUrl }: Props) {
   };
 
   return (
-    <section className="flex flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex items-center gap-2 border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent py-2.5 pl-[18px] pr-4">
-        <Image
-          src={designAssets.share2}
-          alt=""
-          width={16}
-          height={16}
-          className="size-4 shrink-0"
-          unoptimized
-        />
-        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
-          Share Your Solar Journey
-        </h2>
-      </div>
+    <section className="customer-panel-bg customer-panel-border-dark flex flex-col overflow-hidden rounded-[10px] border">
+      <CustomerSectionHeader
+        variant="dark"
+        title="Share Your Solar Journey"
+        icon={
+          <Icon
+            name="BlogDetailShareLink"
+            className="size-4 shrink-0 text-white"
+            aria-hidden
+          />
+        }
+      />
       <div className="flex flex-col gap-4 p-4">
         <p
-          className="font-dm-sans text-xs font-normal leading-[18px] text-warm-gray"
+          className="font-dm-sans text-xs font-normal leading-[18px] customer-text-subtle"
           style={{ fontVariationSettings: "'opsz' 9" }}
         >
           Tell friends and family about your solar upgrade and help them save
@@ -78,13 +78,10 @@ export function ShareJourneyCard({ shareUrl }: Props) {
               type="button"
               className={`flex h-10 items-center justify-center gap-2 rounded-lg ${s.bg} ${s.color}`}
             >
-              <Image
-                src={s.icon}
-                alt=""
-                width={16}
-                height={16}
-                className="size-4 shrink-0"
-                unoptimized
+              <Icon
+                name={s.icon}
+                className={`size-4 shrink-0 ${s.color}`}
+                aria-hidden
               />
               <span
                 className="font-dm-sans text-[10px] font-semibold leading-[15px]"
@@ -96,7 +93,7 @@ export function ShareJourneyCard({ shareUrl }: Props) {
           ))}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-          <div className="min-h-[34px] flex-1 overflow-hidden rounded-lg border border-warm-border bg-white px-3 py-2">
+          <div className="min-h-[34px] flex-1 overflow-hidden rounded-lg border customer-cream-card-border bg-cream-50 px-3 py-2">
             <p
               className="truncate font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
               style={{ fontVariationSettings: "'opsz' 9" }}
@@ -110,12 +107,10 @@ export function ShareJourneyCard({ shareUrl }: Props) {
             className="inline-flex h-[34px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy-800 px-4 font-dm-sans text-[11px] font-semibold text-white sm:min-w-[102px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
-            <Image
-              src={designAssets.copy}
-              alt=""
-              width={12}
-              height={12}
-              unoptimized
+            <Icon
+              name="Copy"
+              className="size-4 shrink-0 text-white"
+              aria-hidden
             />
             {copied ? "Copied" : "Copy Link"}
           </button>

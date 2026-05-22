@@ -1,3 +1,4 @@
+import { IconType } from "@/components/ui/Icons";
 import { designAssets } from "./designAssets";
 
 export type SpecLine = { label: string; value: string };
@@ -5,7 +6,7 @@ export type SpecLine = { label: string; value: string };
 export type EquipmentCardData = {
   id: string;
   title: string;
-  iconSrc: string;
+  iconName: IconType | undefined;
   rows: SpecLine[];
 };
 
@@ -32,7 +33,7 @@ export const EQUIPMENT_CARDS: EquipmentCardData[] = [
   {
     id: "panels",
     title: "Solar Panels",
-    iconSrc: designAssets.cardIconPanels,
+    iconName: "MyDesignSun",
     rows: [
       { label: "Model", value: "Jinko Tiger Neo" },
       { label: "Watts", value: "415W" },
@@ -43,7 +44,7 @@ export const EQUIPMENT_CARDS: EquipmentCardData[] = [
   {
     id: "battery",
     title: "Battery",
-    iconSrc: designAssets.cardIconBattery,
+    iconName: "MyDesignsBattery",
     rows: [
       { label: "Model", value: "N/A" },
       { label: "Capacity", value: "—" },
@@ -53,7 +54,7 @@ export const EQUIPMENT_CARDS: EquipmentCardData[] = [
   {
     id: "inverter",
     title: "Inverter",
-    iconSrc: designAssets.cardIconInverter,
+    iconName: "MyDesignsInverter",
     rows: [
       { label: "Model", value: "Fronius Primo 5.0" },
       { label: "Type", value: "String" },
@@ -63,7 +64,7 @@ export const EQUIPMENT_CARDS: EquipmentCardData[] = [
   {
     id: "site",
     title: "Site Details",
-    iconSrc: designAssets.cardIconSite,
+    iconName: "LocationPin",
     rows: [
       { label: "Roof", value: "Tile" },
       { label: "Phase", value: "Single" },

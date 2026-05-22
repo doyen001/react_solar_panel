@@ -1,10 +1,12 @@
 import Image from "next/image";
+import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import {
   PERFORMANCE_ESTIMATES,
   SELECTED_DESIGN_SPECS,
 } from "./designConstants";
 import { designAssets } from "./designAssets";
 import { DesignSpecRow } from "./DesignSpecRow";
+import Icon from "@/components/ui/Icons";
 
 type Props = {
   title: string;
@@ -18,25 +20,23 @@ export function SelectedDesignPanel({
   savingsLabel,
 }: Props) {
   return (
-    <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex flex-col gap-3 border-b border-warm-border/60 bg-linear-to-b from-amber-hot/15 to-transparent pl-4 sm:flex-row sm:items-center sm:justify-between sm:pl-[18px] sm:pr-4">
-        <div className="flex items-center gap-2 border-l-2 border-yellow-lemon py-2.5 pl-4">
-          <Image
-            src={designAssets.sunHeader}
-            alt=""
-            width={16}
-            height={16}
-            className="size-4 shrink-0"
-            unoptimized
+    <section className="customer-card-bg customer-cream-card-border overflow-hidden rounded-[10px] border">
+      <CustomerSectionHeader
+        variant="dark"
+        title={title}
+        icon={
+          <Icon
+            name="MyDesignSun"
+            className="size-4 shrink-0 text-white"
+            aria-hidden
           />
-          <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
-            {title}
-          </h2>
-        </div>
-        <span className="mb-2 shrink-0 self-start rounded-full bg-mint-soft px-2.5 py-0.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-success sm:mb-0 sm:self-center">
-          Approved
-        </span>
-      </div>
+        }
+        action={
+          <span className="rounded-full bg-mint-soft px-2.5 py-0.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-success">
+            Approved
+          </span>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-5 p-4 lg:grid-cols-3 lg:gap-6">
         <div className="flex min-w-0 flex-col gap-2">
@@ -54,15 +54,13 @@ export function SelectedDesignPanel({
             <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5">
               <button
                 type="button"
-                className="inline-flex h-7 items-center gap-1.5 rounded-md border border-warm-border bg-white/90 px-2.5 font-dm-sans text-[10px] font-semibold text-warm-ink shadow-sm backdrop-blur-sm"
+                className="inline-flex h-7 items-center gap-1.5 rounded-md border customer-cream-card-border bg-cream-50/90 px-2.5 font-dm-sans text-[10px] font-semibold text-warm-ink shadow-sm backdrop-blur-sm"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                <Image
-                  src={designAssets.eye}
-                  alt=""
-                  width={12}
-                  height={12}
-                  unoptimized
+                <Icon
+                  name="Eye"
+                  className="size-4 shrink-0"
+                  aria-hidden
                 />
                 View PDF
               </button>
@@ -71,12 +69,10 @@ export function SelectedDesignPanel({
                 className="inline-flex h-7 items-center gap-1.5 rounded-md bg-navy-800 px-2.5 font-dm-sans text-[10px] font-semibold text-white shadow-sm"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                <Image
-                  src={designAssets.download}
-                  alt=""
-                  width={12}
-                  height={12}
-                  unoptimized
+                <Icon
+                  name="Download"
+                  className="size-4 shrink-0 text-white"
+                  aria-hidden
                 />
                 Download PDF
               </button>
@@ -84,7 +80,7 @@ export function SelectedDesignPanel({
           </div>
           <div className="flex flex-col gap-1.5 pl-1">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
-              <span className="inline-flex items-center gap-1.5 font-dm-sans font-medium leading-[15px] text-warm-gray">
+              <span className="inline-flex items-center gap-1.5 font-dm-sans font-medium leading-[15px] customer-text-subtle">
                 <span
                   className="size-2 shrink-0 rounded-full bg-leaf"
                   aria-hidden
@@ -92,7 +88,7 @@ export function SelectedDesignPanel({
                 Design Approved
               </span>
               <span
-                className="font-dm-sans font-normal leading-[15px] text-warm-gray/60"
+                className="font-dm-sans font-normal leading-[15px] customer-text-muted"
                 style={{ fontVariationSettings: "'opsz' 9" }}
               >
                 Last updated: {lastUpdated}
@@ -112,7 +108,7 @@ export function SelectedDesignPanel({
         </div>
 
         <div className="min-w-0">
-          <h3 className="font-inter text-[11px] font-semibold leading-[16.5px] text-warm-ink">
+          <h3 className="font-inter text-[11px] font-semibold leading-[16.5px] customer-text-on-dark">
             Design Specifications
           </h3>
           <div className="mt-2 flex flex-col">
@@ -121,13 +117,14 @@ export function SelectedDesignPanel({
                 key={row.label}
                 label={row.label}
                 value={row.value}
+                variant="dark"
               />
             ))}
           </div>
         </div>
 
         <div className="min-w-0">
-          <h3 className="font-inter text-[11px] font-semibold leading-[16.5px] text-warm-ink">
+          <h3 className="font-inter text-[11px] font-semibold leading-[16.5px] customer-text-on-dark">
             Performance Estimates
           </h3>
           <div className="mt-2 flex flex-col">
@@ -136,6 +133,7 @@ export function SelectedDesignPanel({
                 key={row.label}
                 label={row.label}
                 value={row.value}
+                variant="dark"
               />
             ))}
           </div>

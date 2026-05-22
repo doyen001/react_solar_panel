@@ -9,7 +9,7 @@ export default function CustomerMessagesPage() {
   const user = useAppSelector((s) => s.customerAuth.user);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="customer-page-bg flex min-h-screen flex-col">
       <CustomerDashboardHeader
         firstName={user?.firstName}
         lastName={user?.lastName}

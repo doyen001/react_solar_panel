@@ -3,5 +3,5 @@ export default function CustomersLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return <div className="min-h-screen font-dm-sans antialiased">{children}</div>;
 }

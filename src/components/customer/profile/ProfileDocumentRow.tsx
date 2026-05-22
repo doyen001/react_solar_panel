@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { profileAssets } from "./profileAssets";
+import Icon from "@/components/ui/Icons";
 
 type Props = {
   name: string;
@@ -10,13 +9,10 @@ type Props = {
 export function ProfileDocumentRow({ name, sizeLabel, onDownload }: Props) {
   return (
     <div className="flex items-center gap-2">
-      <Image
-        src={profileAssets.fileText}
-        alt=""
-        width={14}
-        height={14}
-        className="size-3.5 shrink-0"
-        unoptimized
+      <Icon
+        name="FileText"
+        className="size-3.5 shrink-0 text-warm-gray"
+        aria-hidden
       />
       <p
         className="min-w-0 flex-1 truncate font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-ink"
@@ -36,12 +32,10 @@ export function ProfileDocumentRow({ name, sizeLabel, onDownload }: Props) {
         onClick={onDownload}
         className="flex size-5 shrink-0 items-center justify-center rounded hover:bg-black/5"
       >
-        <Image
-          src={profileAssets.download}
-          alt=""
-          width={12}
-          height={12}
-          unoptimized
+        <Icon
+          name="Download"
+          className="size-3 shrink-0 text-warm-gray mb-1"
+          aria-hidden
         />
       </button>
     </div>

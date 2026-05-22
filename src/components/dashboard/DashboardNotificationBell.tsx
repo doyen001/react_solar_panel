@@ -110,7 +110,7 @@ const DEFAULT_PREVIEW =
 export function DashboardNotificationBell({
   mode,
   bellButtonClassName,
-  bellIconClassName = "size-[18px] text-warm-gray",
+  bellIconClassName = "size-[18px] customer-nav-muted",
   previewMessage = DEFAULT_PREVIEW,
 }: DashboardNotificationBellProps) {
   const reactId = useId();
@@ -194,7 +194,7 @@ export function DashboardNotificationBell({
   }, [live, refetch]);
 
   const defaultBell =
-    "relative flex size-8 items-center justify-center rounded-full hover:bg-black/5";
+    "relative flex size-8 items-center justify-center rounded-full hover:bg-white/5 customer-text-on-dark";
 
   return (
     <div className="relative" ref={rootRef}>

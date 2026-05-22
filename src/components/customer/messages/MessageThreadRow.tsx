@@ -48,7 +48,7 @@ export function MessageThreadRow({
           className={`rounded-[10px] px-3 py-2 ${
             outgoing
               ? "bg-navy-800 text-white"
-              : "bg-cream-150 text-warm-ink"
+              : "customer-bubble-incoming text-warm-ink"
           }`}
         >
           <div

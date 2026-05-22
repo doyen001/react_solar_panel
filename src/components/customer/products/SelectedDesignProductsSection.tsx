@@ -1,6 +1,8 @@
 import Image from "next/image";
+import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import type { DesignSummaryItem } from "./types";
 import { productsAssets } from "./productsAssets";
+import Icon from "@/components/ui/Icons";
 
 type Props = {
   items: DesignSummaryItem[];
@@ -8,35 +10,29 @@ type Props = {
 
 export function SelectedDesignProductsSection({ items }: Props) {
   return (
-    <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50">
-      <div className="flex min-h-[42px] items-center gap-2 border-l-2 border-yellow-lemon bg-linear-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4">
-        <Image
-          src={productsAssets.checkCircle}
-          alt=""
-          width={16}
-          height={16}
-          className="size-4 shrink-0"
-          unoptimized
-        />
-        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
-          Products in Your Selected Design
-        </h2>
-      </div>
+    <section className="customer-cream-card-bg customer-cream-card-border overflow-hidden rounded-[10px] border">
+      <CustomerSectionHeader
+        variant="cream"
+        title="Products in Your Selected Design"
+        icon={
+          <Icon
+            name="CheckCircle"
+            className="size-4 shrink-0 text-success"
+            aria-hidden
+          />
+        }
+      />
       <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex min-h-[68px] items-center gap-3 rounded-lg border border-warm-border bg-white px-3 py-2"
+            className="flex min-h-[68px] items-center gap-3 rounded-lg border customer-cream-card-border bg-white px-3 py-2"
           >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-b from-yellow-lemon to-orange-amber">
-              <Image
-                src={
-                  item.icon === "sun" ? productsAssets.sun : productsAssets.cpu
-                }
-                alt=""
-                width={16}
-                height={16}
-                unoptimized
+            <div className="customer-gradient-accent-v flex size-8 shrink-0 items-center justify-center rounded-lg">
+              <Icon
+                name={item.icon === "sun" ? "MyDesignSun" : "MyDesignsInverter"}
+                className="size-4 shrink-0 text-black"
+                aria-hidden
               />
             </div>
             <div className="min-w-0 flex-1">

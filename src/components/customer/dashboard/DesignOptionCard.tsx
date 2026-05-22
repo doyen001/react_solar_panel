@@ -15,14 +15,14 @@ export function DesignOptionCard({ option, selected, onSelect }: Props) {
     <button
       type="button"
       onClick={onSelect}
-      className={`group w-full overflow-hidden rounded-[10px] text-left transition-[box-shadow,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-amber focus-visible:ring-offset-2 ${
+      className={`group w-full overflow-hidden rounded-[14px] text-left transition-[box-shadow,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-amber focus-visible:ring-offset-2 focus-visible:ring-offset-customer-page-bg ${
         selected
           ? "border-[3px] border-orange-amber"
-          : "border border-warm-border hover:border-stone-warm"
+          : "customer-card-border border hover:border-customer-border-strong"
       }`}
     >
-      <div className="relative bg-cream-100">
-        <div className="relative aspect-[436/80] w-full opacity-80">
+      <div className="relative bg-customer-design-image-bg">
+        <div className="relative aspect-[436/80] w-full">
           <Image
             src={option.imageSrc}
             alt=""
@@ -33,66 +33,46 @@ export function DesignOptionCard({ option, selected, onSelect }: Props) {
           />
         </div>
         {selected ? (
-          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber px-2 py-0.5 pl-2 text-warm-black">
+          <div className="customer-gradient-accent-h absolute right-2 top-2 flex items-center gap-1 rounded-full px-2 py-0.5 pl-2 text-warm-black">
             <Icon name="CheckCircle" className="size-3 text-warm-black" />
-            <span
-              className="font-dm-sans text-[8px] font-bold uppercase leading-3 tracking-[0.3px] text-warm-black"
-              style={{ fontVariationSettings: "'opsz' 14" }}
-            >
+            <span className="font-inter text-[9px] font-bold uppercase leading-3 tracking-[0.62px] text-warm-black">
               Selected
             </span>
           </div>
         ) : null}
       </div>
 
-      <div className="bg-gradient-to-r from-yellow-lemon to-orange-amber px-3 pb-3 pt-3">
+      <div className="customer-gradient-accent-h px-4 pb-3 pt-3">
         <div className="flex items-start justify-between gap-2">
-          <p
-            className="font-dm-sans text-xs font-semibold leading-[18px] text-warm-ink"
-            style={{ fontVariationSettings: "'opsz' 14" }}
-          >
+          <p className="font-inter text-sm font-semibold leading-[21px] tracking-[-0.15px] text-warm-ink">
             {option.title}
           </p>
           {option.badge === "approved" ? (
-            <span className="shrink-0 rounded-full bg-mint-soft px-2 py-0.5 font-dm-sans text-[7px] font-bold uppercase leading-[10.5px] tracking-[0.3px] text-success">
+            <span className="shrink-0 rounded-full bg-mint-soft px-2 py-0.5 font-inter text-[8px] font-bold uppercase leading-3 tracking-[0.61px] text-success">
               Approved
             </span>
           ) : (
-            <span className="shrink-0 rounded-full bg-cream-150 px-2 py-0.5 font-dm-sans text-[7px] font-bold uppercase leading-[10.5px] tracking-[0.3px] text-warm-gray">
+            <span className="customer-draft-badge shrink-0 rounded-full px-2 py-0.5 font-inter text-[8px] font-bold uppercase leading-3 tracking-[0.61px]">
               Draft
             </span>
           )}
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray">
-          <span style={{ fontVariationSettings: "'opsz' 9" }}>{option.kw}</span>
-          <span>·</span>
-          <span style={{ fontVariationSettings: "'opsz' 9" }}>
-            {option.panels}
-          </span>
-          <span>·</span>
-          <span
-            className="font-semibold text-warm-ink"
-            style={{ fontVariationSettings: "'opsz' 14" }}
-          >
-            {option.price}
-          </span>
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-inter text-[11px] font-normal leading-[16.5px] tracking-[0.06px] text-customer-card-spec-text">
+          <span>{option.kw}</span>
+          <span className="opacity-50">·</span>
+          <span>{option.panels}</span>
+          <span className="opacity-50">·</span>
+          <span className="font-semibold text-warm-black">{option.price}</span>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[9px] leading-[13.5px] text-warm-gray">
-          <span style={{ fontVariationSettings: "'opsz' 9" }}>
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] leading-[15px] tracking-[0.12px] text-customer-card-spec-text">
+          <span>
             Savings:{" "}
-            <span
-              className="font-bold text-success"
-              style={{ fontVariationSettings: "'opsz' 14" }}
-            >
-              {option.savingsPerYr}
-            </span>
+            <span className="font-bold text-success">{option.savingsPerYr}</span>
           </span>
-          <span>·</span>
-          <span style={{ fontVariationSettings: "'opsz' 9" }}>
-            Output: {option.outputKwh}
-          </span>
+          <span className="opacity-50">·</span>
+          <span>Output: {option.outputKwh}</span>
         </div>
       </div>
     </button>

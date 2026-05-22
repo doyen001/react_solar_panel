@@ -105,6 +105,36 @@
   --color-amber-soft: #f0c775;
   --color-neutral-mist: #f3f3f3;
 
+  /* Customer portal (Figma Final Designs 1725:*) */
+  --color-customer-page-bg: #0a1628;
+  --color-customer-header-bg: #081f43;
+  --color-customer-card-bg: #0f2240;
+  --color-customer-panel-bg: #081f43;
+  --color-customer-panel-alt: #0d2140;
+  --color-customer-design-image-bg: #0c2244;
+  --color-customer-border: rgb(255 255 255 / 0.08);
+  --color-customer-border-strong: rgb(255 255 255 / 0.12);
+  --color-customer-border-accent: rgb(255 239 98 / 0.25);
+  --color-customer-border-dark: #1c3152;
+  --color-customer-nav-active: #ffef62;
+  --color-customer-nav-muted: #6b84a0;
+  --color-customer-text-muted: #6b84a0;
+  --color-customer-text-subtle: #c8d5e0;
+  --color-customer-text-faint: rgb(154 176 204 / 0.5);
+  --color-customer-header-divider: rgb(255 255 255 / 0.12);
+  --color-customer-draft-badge-bg: #2a3a55;
+  --color-customer-draft-badge-text: #9ab0cc;
+  --color-customer-card-spec-text: #3a322a;
+  --color-customer-notification-badge: #fb2c36;
+  --color-customer-icon-tint-navy: rgb(9 35 74 / 0.1);
+  --color-customer-icon-tint-orange: rgb(247 141 0 / 0.1);
+  --color-customer-icon-tint-green: rgb(22 163 74 / 0.8);
+  --color-customer-section-banner-from: rgb(245 159 10 / 0.15);
+  --color-customer-bubble-incoming: #f5f0e8;
+  --color-customer-online-badge-bg: rgb(32 148 243 / 0.1);
+  --color-customer-online-badge-border: rgb(32 148 243 / 0.2);
+  --color-customer-equipment-header: #e4d75d;
+
   /* Lead marketplace (Figma Final Designs 3:2206) */
   --color-lead-marketplace-page-bg: var(--color-neutral-mist);
   --color-lead-marketplace-badge-teal: #00a9ce;
@@ -1497,6 +1527,146 @@ button {
   );
   padding-left: 18px;
   padding-right: 4px;
+}
+
+/* Customer portal — semantic color utilities (use with className) */
+.customer-page-bg {
+  background-color: var(--color-customer-page-bg);
+}
+.customer-header-bg {
+  background-color: var(--color-customer-header-bg);
+}
+.customer-header-border {
+  border-color: var(--color-customer-border);
+}
+.customer-card-bg {
+  background-color: var(--color-customer-card-bg);
+}
+.customer-card-border {
+  border-color: var(--color-customer-border);
+}
+.customer-panel-bg {
+  background-color: var(--color-customer-panel-bg);
+}
+.customer-panel-border {
+  border-color: var(--color-customer-border);
+}
+.customer-panel-border-accent {
+  border-color: var(--color-customer-border-accent);
+}
+.customer-panel-border-dark {
+  border-color: var(--color-customer-border-dark);
+}
+.customer-cream-card-bg {
+  background-color: var(--color-cream-50);
+}
+.customer-cream-card-border {
+  border-color: var(--color-warm-border);
+}
+.customer-nav-active {
+  color: var(--color-customer-nav-active);
+}
+.customer-nav-muted {
+  color: var(--color-customer-nav-muted);
+}
+.customer-nav-underline {
+  background: linear-gradient(
+    90deg,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 100%
+  );
+}
+.customer-text-muted {
+  color: var(--color-customer-text-muted);
+}
+.customer-text-subtle {
+  color: var(--color-customer-text-subtle);
+}
+.customer-text-faint {
+  color: var(--color-customer-text-faint);
+}
+.customer-text-on-dark {
+  color: var(--color-gray-1);
+}
+.customer-header-divider {
+  background-color: var(--color-customer-header-divider);
+}
+.customer-section-header-dark {
+  border-left: 2px solid var(--color-yellow-lemon);
+  background: linear-gradient(
+    to right,
+    var(--color-customer-section-banner-from) 0%,
+    transparent 100%
+  );
+}
+.customer-section-header-cream {
+  border-left: 2px solid var(--color-yellow-lemon);
+  background: linear-gradient(
+    to bottom,
+    var(--color-customer-section-banner-from) 0%,
+    transparent 100%
+  );
+}
+.customer-welcome-banner {
+  background: linear-gradient(
+    176.69deg,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 50%,
+    #e8720a 100%
+  );
+}
+.customer-gradient-accent-h {
+  background: linear-gradient(
+    90deg,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 100%
+  );
+}
+.customer-gradient-accent-v {
+  background: linear-gradient(
+    to bottom,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 100%
+  );
+}
+.customer-kpi-icon-navy {
+  background-color: var(--color-customer-icon-tint-navy);
+}
+.customer-kpi-icon-orange {
+  background-color: var(--color-customer-icon-tint-orange);
+}
+.customer-kpi-icon-green {
+  background-color: var(--color-customer-icon-tint-green);
+}
+.customer-avatar-gradient {
+  background: linear-gradient(
+    to bottom,
+    var(--color-navy-800) 0%,
+    var(--color-blue-slate) 100%
+  );
+}
+.customer-draft-badge {
+  background-color: var(--color-customer-draft-badge-bg);
+  color: var(--color-customer-draft-badge-text);
+}
+.customer-bubble-incoming {
+  background-color: var(--color-customer-bubble-incoming);
+}
+.customer-online-badge {
+  background-color: var(--color-customer-online-badge-bg);
+  border-color: var(--color-customer-online-badge-border);
+  color: var(--color-brand-blue);
+}
+.customer-chip-active {
+  background: linear-gradient(
+    to bottom,
+    var(--color-yellow-lemon) 0%,
+    var(--color-orange-amber) 100%
+  );
+  color: var(--color-warm-black);
+}
+.customer-notification-badge {
+  background-color: var(--color-customer-notification-badge);
 }
 
 /* Master dashboard — semantic color utilities (use with className) */

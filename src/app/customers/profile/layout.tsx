@@ -3,7 +3,5 @@ export default function CustomerProfileLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className="min-h-screen font-dm-sans antialiased">{children}</div>
-  );
+  return children;
 }

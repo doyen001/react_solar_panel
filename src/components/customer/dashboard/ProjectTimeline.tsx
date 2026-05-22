@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import type { TimelineStep } from "./types";
 import Icon from "../../ui/Icons";
 
@@ -8,7 +9,7 @@ type Props = {
   title?: string;
   /** Index of the current / in-progress step (0-based). Steps before are completed; after are upcoming. */
   activeStepIndex: number;
-  steps: Omit<TimelineStep, "state">[];
+  steps: readonly Omit<TimelineStep, "state">[];
   /** Footer slot (e.g. installer card). */
   footer?: ReactNode;
 };
@@ -30,12 +31,8 @@ export function ProjectTimeline({
   }));
 
   return (
-    <section className="flex min-h-[min(533px,80vh)] flex-col overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 lg:min-h-[520px]">
-      <div className="border-l-2 border-yellow-lemon bg-linear-to-b from-amber-hot/15 to-transparent pl-[18px] pr-4 py-2.5">
-        <h2 className="font-inter text-xs font-bold uppercase leading-[18px] tracking-[0.3px] text-warm-ink">
-          {title}
-        </h2>
-      </div>
+    <section className="customer-panel-bg customer-panel-border flex min-h-[min(533px,80vh)] flex-col overflow-hidden rounded-[14px] border lg:min-h-[520px]">
+      <CustomerSectionHeader variant="dark" title={title} />
 
       <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-4">
         <ol className="flex flex-col">
@@ -50,7 +47,7 @@ export function ProjectTimeline({
                   {!isLast ? (
                     <div
                       className={`mt-0.5 w-0.5 flex-1 min-h-[48px] rounded-full ${
-                        segmentGreen ? "bg-success" : "bg-warm-border"
+                        segmentGreen ? "bg-success" : "bg-customer-border-strong"
                       }`}
                       aria-hidden
                     />
@@ -60,15 +57,15 @@ export function ProjectTimeline({
                   <p
                     className={`font-dm-sans text-xs font-medium leading-[18px] ${
                       step.state === "completed"
-                        ? "text-warm-ink"
-                        : "text-warm-gray"
+                        ? "customer-text-on-dark"
+                        : "customer-text-muted"
                     }`}
                     style={{ fontVariationSettings: "'opsz' 14" }}
                   >
                     {step.title}
                   </p>
                   <p
-                    className="mt-1.5 font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray"
+                    className="mt-1.5 font-dm-sans text-[10px] font-normal leading-[15px] customer-text-muted"
                     style={{ fontVariationSettings: "'opsz' 9" }}
                   >
                     {step.dateLabel ?? "—"}
@@ -95,8 +92,8 @@ function TimelineDot({ state }: { state: TimelineStep["state"] }) {
 
   return (
     <div
-      className={`size-5 shrink-0 rounded-full border border-warm-border bg-white ${
-        state === "current" ? "ring-1 ring-warm-border" : ""
+      className={`size-5 shrink-0 rounded-full border customer-card-border bg-customer-card-bg ${
+        state === "current" ? "ring-1 ring-customer-border-strong" : ""
       }`}
       aria-hidden
     />

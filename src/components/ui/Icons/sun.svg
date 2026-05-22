@@ -1,13 +1,18 @@
-<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 23.995 23.995" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Sun">
-<path id="Vector" d="M11.9975 15.9967C14.2062 15.9967 15.9967 14.2062 15.9967 11.9975C15.9967 9.78882 14.2062 7.99833 11.9975 7.99833C9.78882 7.99833 7.99833 9.78882 7.99833 11.9975C7.99833 14.2062 9.78882 15.9967 11.9975 15.9967Z" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_2" d="M11.9975 1.99958V3.99958" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_3" d="M11.9975 19.9958V21.9958" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_4" d="M4.92897 4.92897L6.33897 6.33897" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_5" d="M17.6563 17.6563L19.0663 19.0663" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_6" d="M1.99958 11.9975H3.99958" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_7" d="M19.9958 11.9975H21.9958" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_8" d="M6.33897 17.6563L4.92897 19.0663" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
-<path id="Vector_9" d="M19.0663 4.92897L17.6563 6.33897" stroke="currentColor" stroke-width="1.99958" stroke-linecap="round" stroke-linejoin="round"/>
+<svg width="100%" height="100%" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1725_657)">
+<path d="M7.99242 10.6567C9.46386 10.6567 10.6567 9.46386 10.6567 7.99242C10.6567 6.52097 9.46386 5.32812 7.99242 5.32812C6.52097 5.32812 5.32812 6.52097 5.32812 7.99242C5.32812 9.46386 6.52097 10.6567 7.99242 10.6567Z" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M7.99219 1.33203V2.66418" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M7.99219 13.3203V14.6525" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3.2832 3.28516L4.22237 4.22432" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M11.7637 11.7617L12.7028 12.7009" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1.33203 7.99219H2.66418" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M13.3223 7.99219H14.6544" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M4.22237 11.7617L3.2832 12.7009" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12.7028 3.28516L11.7637 4.22432" stroke="currentColor" stroke-width="1.33215" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
+<defs>
+<clipPath id="clip0_1725_657">
+<rect width="15.9857" height="15.9857" fill="currentColor"/>
+</clipPath>
+</defs>
 </svg>

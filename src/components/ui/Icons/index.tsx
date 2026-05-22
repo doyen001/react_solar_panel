@@ -18,6 +18,7 @@ const Search = createDynamicSvgIcon(() => import("./search.svg?component"));
 const CheckCircle = createDynamicSvgIcon(
   () => import("./check-circle.svg?component"),
 );
+const Shield = createDynamicSvgIcon(() => import("./shield.svg?component"));
 const Bell = createDynamicSvgIcon(() => import("./bell.svg?component"));
 const Sun = createDynamicSvgIcon(() => import("./sun.svg?component"));
 const Check = createDynamicSvgIcon(() => import("./check.svg?component"));
@@ -39,8 +40,12 @@ const User = createDynamicSvgIcon(() => import("./user.svg?component"));
 const Lock = createDynamicSvgIcon(() => import("./lock.svg?component"));
 const Phone = createDynamicSvgIcon(() => import("./phone.svg?component"));
 const Mail = createDynamicSvgIcon(() => import("./mail.svg?component"));
+const Copy = createDynamicSvgIcon(() => import("./copy.svg?component"));
 const Pin = createDynamicSvgIcon(() => import("./pin.svg?component"));
 const Eye = createDynamicSvgIcon(() => import("./eye.svg?component"));
+const ProductCart = createDynamicSvgIcon(() => import("./product-cart.svg?component"));
+const MyDesignsBattery = createDynamicSvgIcon(() => import("./my-designs-battery.svg?component"));
+const MyDesignsInverter = createDynamicSvgIcon(() => import("./my-designs-inverter.svg?component"));
 const Link = createDynamicSvgIcon(() => import("./link.svg?component"));
 const Image = createDynamicSvgIcon(() => import("./image.svg?component"));
 const Emoji = createDynamicSvgIcon(() => import("./emoji.svg?component"));
@@ -181,10 +186,23 @@ const FaqCategoryProducts = createDynamicSvgIcon(
 const FaqDownload = createDynamicSvgIcon(
   () => import("./faq-download.svg?component"),
 );
+const MyDesignSun = createDynamicSvgIcon(
+  () => import("./sun.svg?component"),
+);
+const MyDesignGift = createDynamicSvgIcon(
+  () => import("./my-designs-gift.svg?component"),
+);
+const ProductHeart = createDynamicSvgIcon(
+  () => import("./product-heart.svg?component"),
+);
 export type IconType =
   | "Search"
+  | "Shield"
+  | "ProductHeart"
   | "CheckCircle"
   | "Bell"
+  | "Copy"
+  | "ProductCart"
   | "Sun"
   | "Check"
   | "MessageSquare"
@@ -266,7 +284,11 @@ export type IconType =
   | "FaqCategoryInstallation"
   | "FaqCategoryRebates"
   | "FaqCategoryProducts"
-  | "FaqDownload";
+  | "FaqDownload"
+  | "MyDesignSun"
+  | "MyDesignsBattery"
+  | "MyDesignsInverter"
+  | "MyDesignGift";
 
 type IconProps = {
   name: IconType | undefined;
@@ -328,6 +350,9 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     Package,
     Plus,
     Cpu,
+    Copy,
+    ProductHeart,
+    ProductCart,
     Battery,
     Wrench,
     Trash2,
@@ -365,6 +390,11 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     FaqCategoryRebates,
     FaqCategoryProducts,
     FaqDownload,
+    MyDesignSun,
+    MyDesignsBattery,
+    MyDesignsInverter,
+    MyDesignGift,
+    Shield,
   };
 
   const CurrentIcon = icons[name];

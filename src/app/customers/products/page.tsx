@@ -11,6 +11,7 @@ import {
   SOLAR_PRODUCTS,
 } from "@/components/customer/products/solarProductsData";
 import { useAppSelector } from "@/lib/store/hooks";
+import { CUSTOMER_PORTAL } from "@/utils/constant";
 
 export default function SolarProductsPage() {
   const user = useAppSelector((s) => s.customerAuth.user);
@@ -32,7 +33,7 @@ export default function SolarProductsPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="customer-page-bg flex min-h-screen flex-col">
       <CustomerDashboardHeader
         firstName={user?.firstName}
         lastName={user?.lastName}
@@ -42,14 +43,14 @@ export default function SolarProductsPage() {
       <main className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-4 px-4 py-5 md:gap-5 md:px-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div>
-            <h1 className="font-inter text-lg font-bold leading-[27px] text-warm-ink">
-              Solar Products
+            <h1 className="font-inter text-lg font-bold leading-[27px] customer-text-on-dark">
+              {CUSTOMER_PORTAL.products.title}
             </h1>
             <p
-              className="mt-0.5 font-dm-sans text-xs font-normal leading-[18px] text-warm-gray"
+              className="mt-0.5 font-dm-sans text-xs font-normal leading-[18px] customer-text-muted"
               style={{ fontVariationSettings: "'opsz' 9" }}
             >
-              Browse our range of certified solar equipment
+              {CUSTOMER_PORTAL.products.subtitle}
             </p>
           </div>
           <CategoryFilterChips value={filter} onChange={setFilter} />

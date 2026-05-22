@@ -12,6 +12,7 @@ import { ProfileEntityRow } from "@/components/customer/profile/ProfileEntityRow
 import { profileAssets } from "@/components/customer/profile/profileAssets";
 import { StatusBadge } from "@/components/customer/profile/StatusBadge";
 import { useAppSelector } from "@/lib/store/hooks";
+import Icon from "@/components/ui/Icons";
 
 export default function CustomerProfilePage() {
   const user = useAppSelector((s) => s.customerAuth.user);
@@ -38,24 +39,22 @@ export default function CustomerProfilePage() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream-100">
+    <div className="flex min-h-screen flex-col">
       <CustomerDashboardHeader
         firstName={user?.firstName}
         lastName={user?.lastName}
         activeNav="profile"
       />
 
-      <main className="flex-1 bg-navy-900 px-4 py-5 md:px-5">
+      <main className="customer-panel-bg flex-1 px-4 py-5 md:px-5">
         <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:items-start">
           <CustomerPanelCard
             title="My Profile"
             icon={
-              <Image
-                src={profileAssets.user}
-                alt=""
-                width={16}
-                height={16}
-                unoptimized
+              <Icon
+                name="User"
+                className="size-4 shrink-0 text-black"
+                aria-hidden
               />
             }
             headerAction={
@@ -64,12 +63,10 @@ export default function CustomerProfilePage() {
                 className="flex items-center gap-1 font-dm-sans text-[10px] font-semibold leading-[15px] text-orange-amber"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                <Image
-                  src={profileAssets.pencil}
-                  alt=""
-                  width={12}
-                  height={12}
-                  unoptimized
+                <Icon
+                  name="Pencil"
+                  className="size-3 shrink-0"
+                  aria-hidden
                 />
                 Edit
               </button>
@@ -97,12 +94,10 @@ export default function CustomerProfilePage() {
             <div className="mt-4 flex flex-col gap-3">
               <ProfileContactField
                 icon={
-                  <Image
-                    src={profileAssets.fieldEmail}
-                    alt=""
-                    width={12}
-                    height={12}
-                    unoptimized
+                  <Icon
+                    name="Mail"
+                    className="size-3 shrink-0 text-warm-gray"
+                    aria-hidden
                   />
                 }
                 label="Email"
@@ -110,12 +105,10 @@ export default function CustomerProfilePage() {
               />
               <ProfileContactField
                 icon={
-                  <Image
-                    src={profileAssets.fieldPhone}
-                    alt=""
-                    width={12}
-                    height={12}
-                    unoptimized
+                  <Icon
+                    name="Phone"
+                    className="size-3 shrink-0 text-warm-gray"
+                    aria-hidden
                   />
                 }
                 label="Phone"
@@ -123,12 +116,10 @@ export default function CustomerProfilePage() {
               />
               <ProfileContactField
                 icon={
-                  <Image
-                    src={profileAssets.fieldAddress}
-                    alt=""
-                    width={12}
-                    height={12}
-                    unoptimized
+                  <Icon
+                    name="Mail"
+                    className="size-3 shrink-0 text-warm-gray"
+                    aria-hidden
                   />
                 }
                 label="Address"
@@ -140,12 +131,10 @@ export default function CustomerProfilePage() {
           <CustomerPanelCard
             title="Account Details"
             icon={
-              <Image
-                src={profileAssets.shield}
-                alt=""
-                width={16}
-                height={16}
-                unoptimized
+              <Icon
+                name="Shield"
+                className="size-4 shrink-0 text-black"
+                aria-hidden
               />
             }
           >
@@ -198,7 +187,7 @@ export default function CustomerProfilePage() {
               </div>
             </div>
 
-            <div className="mt-4 border-t border-warm-border pt-4">
+            <div className="mt-4 border-t customer-cream-card-border pt-4">
               <p
                 className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray"
                 style={{ fontVariationSettings: "'opsz' 9" }}
@@ -214,7 +203,7 @@ export default function CustomerProfilePage() {
               </div>
             </div>
 
-            <div className="mt-4 border-t border-warm-border pt-4">
+            <div className="mt-4 border-t customer-cream-card-border pt-4">
               <p
                 className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray"
                 style={{ fontVariationSettings: "'opsz' 9" }}
@@ -235,12 +224,10 @@ export default function CustomerProfilePage() {
           <CustomerPanelCard
             title="Preferences"
             icon={
-              <Image
-                src={profileAssets.bell}
-                alt=""
-                width={16}
-                height={16}
-                unoptimized
+              <Icon
+                name="Bell"
+                className="size-4 shrink-0 text-black"
+                aria-hidden
               />
             }
           >
@@ -285,7 +272,7 @@ export default function CustomerProfilePage() {
               />
             </div>
 
-            <div className="mt-4 border-t border-warm-border pt-4">
+            <div className="mt-4 border-t customer-cream-card-border pt-4">
               <p
                 className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray"
                 style={{ fontVariationSettings: "'opsz' 9" }}

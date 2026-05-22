@@ -3469,6 +3469,137 @@ export const FAQS_PAGE = {
   },
 } as const;
 
+/** Customer portal — shared nav & page copy (Figma Final Designs 1725:*) */
+export type CustomerPortalNavKey =
+  | "dashboard"
+  | "designs"
+  | "maintenance"
+  | "messages"
+  | "products"
+  | "profile";
+
+export const CUSTOMER_PORTAL = {
+  title: "My Solar Portal",
+  nav: [
+    { href: "/customers/dashboard", label: "Dashboard", key: "dashboard" as const },
+    { href: "/customers/design", label: "My Design", key: "designs" as const },
+    {
+      href: "/customers/solar-maintenance",
+      label: "Solar Maintenance",
+      key: "maintenance" as const,
+    },
+    { href: "/customers/messages", label: "Messages", key: "messages" as const },
+    { href: "/customers/products", label: "Products", key: "products" as const },
+    { href: "/customers/profile", label: "Profile", key: "profile" as const },
+  ],
+  dashboard: {
+    welcome: {
+      journeyPercent: 67,
+      systemKw: "6.6 kW",
+      savingsYr: "$1,840/yr",
+      nextStep: "Installation",
+    },
+    kpis: [
+      {
+        id: "system-size",
+        label: "System Size",
+        value: "6.6 kW",
+        sublabel: "16 panels",
+        icon: "Light" as const,
+        iconTintClass: "customer-kpi-icon-navy",
+      },
+      {
+        id: "annual-output",
+        label: "Annual Output",
+        value: "9,636 kWh",
+        sublabel: "projected",
+        icon: "LightCheck" as const,
+        iconTintClass: "customer-kpi-icon-orange",
+      },
+      {
+        id: "est-savings",
+        label: "Est. Savings",
+        value: "$1,840/yr",
+        sublabel: "per year",
+        icon: "Dollar" as const,
+        iconTintClass: "customer-kpi-icon-green",
+      },
+      {
+        id: "total-price",
+        label: "Total Price",
+        value: "$8,500",
+        sublabel: "inc. installation",
+        icon: "Shop" as const,
+        iconTintClass: "customer-kpi-icon-navy",
+      },
+    ],
+    designOptions: [
+      {
+        id: "a",
+        title: "Design A – Standard",
+        badge: "approved" as const,
+        kw: "6.6 kW",
+        panels: "16 panels",
+        price: "$8,500",
+        savingsPerYr: "$1,840/yr",
+        outputKwh: "9,636 kWh",
+        imageSrc: "/images/home/customer-designA.jpg",
+      },
+      {
+        id: "b",
+        title: "Design B – Premium",
+        badge: "draft" as const,
+        kw: "10.0 kW",
+        panels: "24 panels",
+        price: "$18,200",
+        savingsPerYr: "$2,950/yr",
+        outputKwh: "14,600 kWh",
+        imageSrc: "/images/home/customer-designB.jpg",
+      },
+      {
+        id: "c",
+        title: "Design C – Battery Add-on",
+        badge: "draft" as const,
+        kw: "6.6 kW",
+        panels: "16 panels",
+        price: "$19,800",
+        savingsPerYr: "$2,580/yr",
+        outputKwh: "9,636 kWh",
+        imageSrc: "/images/home/customer-designA.jpg",
+      },
+      {
+        id: "d",
+        title: "Design D – Max Output",
+        badge: "draft" as const,
+        kw: "13.2 kW",
+        panels: "32 panels",
+        price: "$28,500",
+        savingsPerYr: "$3,740/yr",
+        outputKwh: "19,272 kWh",
+        imageSrc: "/images/home/customer-designB.jpg",
+      },
+    ],
+    timelineSteps: [
+      { id: "t1", title: "Lead Created", dateLabel: "15 Jan 2026" },
+      { id: "t2", title: "Site Visit Completed", dateLabel: "22 Jan 2026" },
+      { id: "t3", title: "Design Approved", dateLabel: "28 Jan 2026" },
+      { id: "t4", title: "Deposit Paid", dateLabel: "5 Feb 2026" },
+      { id: "t5", title: "Installation Scheduled", dateLabel: "12 Mar 2026" },
+      { id: "t6", title: "System Live", dateLabel: null },
+    ],
+    defaultTimelineActiveIndex: 4,
+    installer: {
+      initials: "SM",
+      companyName: "SolarMax Pro",
+      subtitle: "Verified Partner",
+    },
+  },
+  products: {
+    title: "Solar Products",
+    subtitle: "Browse our range of certified solar equipment",
+  },
+} as const;
+
 /** Marketing `/customers` — Solar Maintenance teaser section */
 export const SOLAR_MAINTENANCE_CUSTOMER_SECTION = {
   eyebrow: "Care & performance",
