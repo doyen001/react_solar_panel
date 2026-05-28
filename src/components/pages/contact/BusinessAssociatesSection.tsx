@@ -26,7 +26,8 @@ export function BusinessAssociatesSection() {
               {Array.from({ length: 15 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="h-14 w-[146px] rounded-2xl border border-white/15 bg-white/8"
+                  className="rounded-2xl border border-white/15 bg-white/8"
+                  style={{ aspectRatio: "148/76" }}
                 />
               ))}
             </div>

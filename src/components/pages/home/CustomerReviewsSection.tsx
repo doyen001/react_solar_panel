@@ -11,7 +11,7 @@ const reviews = [
     name: "Sameer Rai",
     title: "Product Head",
     avatar: "/images/home/review-avatar.png",
-    photo: "/images/home/review-person.png",
+    videoSrc: "/videos/EvanYangSolar.mp4",
   },
   {
     logo: "/images/home/review-logo.svg",
@@ -20,7 +20,7 @@ const reviews = [
     name: "Sarah Chen",
     title: "Homeowner",
     avatar: "/images/home/review-avatar.png",
-    photo: "/images/home/review-person.png",
+    videoSrc: "/videos/HemantTidkeVideo.mp4",
   },
   {
     logo: "/images/home/review-logo.svg",
@@ -29,7 +29,7 @@ const reviews = [
     name: "Michael Torres",
     title: "Business Owner",
     avatar: "/images/home/review-avatar.png",
-    photo: "/images/home/review-person.png",
+    videoSrc: "/videos/AndrewKeshwanSolar.mp4",
   },
 ];
 
@@ -72,12 +72,16 @@ export function CustomerReviewsSection() {
             <div className="flex flex-col gap-8 p-8 sm:p-10 lg:flex-row lg:gap-[59px]">
               {/* Photo */}
               <div className="relative mx-auto h-[280px] w-[280px] shrink-0 overflow-hidden rounded-xl sm:h-[332px] sm:w-[338px] lg:mx-0">
-                <Image
-                  src={review.photo}
-                  alt={review.name}
-                  fill
-                  className="object-cover"
-                />
+              <video
+                className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+                autoPlay
+                muted
+                playsInline
+                preload="metadata"
+                aria-label={review.videoSrc}
+              >
+                <source src={review.videoSrc} type="video/mp4" />
+              </video>
                 {/* Play button overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Image

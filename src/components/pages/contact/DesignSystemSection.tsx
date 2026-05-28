@@ -15,7 +15,7 @@ export function DesignSystemSection() {
             />
           </div>
           <div className="relative z-10 flex min-h-[450px] max-w-7xl mx-auto items-center">
-            <div>
+            <div className="flex flex-col items-center">
               <h3 className="max-w-xl text-4xl font-bold tracking-tight text-white">
                 Design your system
               </h3>
