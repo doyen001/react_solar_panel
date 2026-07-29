@@ -2,11 +2,15 @@
 
 import { useMemo } from "react";
 import CanvasJSReact from "@canvasjs/react-charts";
-import { STC_PIPELINE } from "../pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 const { CanvasJSChart } = CanvasJSReact;
 
-export function StcColumnChartClient() {
+export function StcColumnChartClient({
+  columns,
+}: {
+  columns: InstallerPipelineAnalytics["stcPipeline"]["columns"];
+}) {
   const options = useMemo(
     () => ({
       animationEnabled: true,
@@ -38,7 +42,7 @@ export function StcColumnChartClient() {
           indexLabelFontFamily: "var(--font-inter), sans-serif",
           indexLabelFontColor: "#2a2622",
           indexLabelFontWeight: "bold",
-          dataPoints: STC_PIPELINE.columns.map((c) => ({
+          dataPoints: columns.map((c) => ({
             label: c.label,
             y: c.valueK,
             valueLabel: c.valueLabel,
@@ -47,7 +51,7 @@ export function StcColumnChartClient() {
         },
       ],
     }),
-    [],
+    [columns],
   );
 
   return (

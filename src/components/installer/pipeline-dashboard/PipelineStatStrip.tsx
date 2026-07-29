@@ -1,16 +1,20 @@
 "use client";
 
-import { STAT_STRIP } from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 /**
  * Figma node `3:10389`: single rounded bar, cream fill, warm dividers,
  * DM Sans 9px / 12px — not separate floating cards.
  */
-export function PipelineStatStrip() {
+export function PipelineStatStrip({
+  items,
+}: {
+  items: InstallerPipelineAnalytics["statStrip"];
+}) {
   return (
     <div className="overflow-x-auto rounded-[10px] border border-warm-border bg-cream-50 [-webkit-overflow-scrolling:touch]">
       <div className="flex min-w-[min(100%,720px)] divide-x divide-warm-border lg:min-w-0">
-        {STAT_STRIP.map((s) => (
+        {items.map((s) => (
           <div
             key={s.label}
             className="flex min-h-[46px] min-w-0 flex-1 flex-col items-center justify-center px-2 py-[7px] text-center sm:px-3"

@@ -1,17 +1,21 @@
 "use client";
 
 import Icon from "@/components/ui/Icons";
-import { TITLE } from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
-export function PipelineDashboardTitleBar() {
+export function PipelineDashboardTitleBar({
+  title,
+}: {
+  title: InstallerPipelineAnalytics["title"];
+}) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
       <div>
         <h1 className="font-inter text-[28px] font-bold leading-9 tracking-tight text-warm-ink md:text-[36px] md:leading-[36px]">
-          {TITLE.headline}
+          {title.headline}
         </h1>
         <p className="mt-2 font-inter text-[14px] leading-5 text-warm-gray md:text-[15px] md:leading-5">
-          {TITLE.subtitle}
+          {title.subtitle}
         </p>
       </div>
       <div className="flex flex-wrap gap-2 md:justify-end">

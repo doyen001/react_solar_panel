@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/ui/Icons";
-import { INSTALLER_HOME_SOLAR_DESIGN } from "./installerHomeMock";
+import type { InstallerCustomerDesign } from "@/lib/installers/designs";
 
 /** Figma node 3:8616 — rooftop preview asset (expires on MCP host after ~7 days). */
 export const INSTALLER_SOLAR_DESIGN_PREVIEW_URL =
@@ -37,8 +37,164 @@ function SolarSpecRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function InstallerHomeSolarDesignCard() {
-  const sd = INSTALLER_HOME_SOLAR_DESIGN;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function numberFromRecord(value: unknown, key: string) {
+  if (!isRecord(value)) return undefined;
+  const raw = value[key];
+  return typeof raw === "number" && Number.isFinite(raw) ? raw : undefined;
+}
+
+function formatNumber(value?: number | null, maximumFractionDigits = 0) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return new Intl.NumberFormat("en-AU", { maximumFractionDigits }).format(
+    value,
+  );
+}
+
+function formatCurrency(value?: number | null) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return new Intl.NumberFormat("en-AU", {
+    style: "currency",
+    currency: "AUD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatDateLabel(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Last updated: -";
+  return `Last updated: ${date.toLocaleDateString("en-AU", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })}`;
+}
+
+function formatDateValue(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("en-AU", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function statusLabel(status: InstallerCustomerDesign["status"]) {
+  return status;
+}
+
+function dbValue(value?: string | number | null) {
+  if (typeof value === "number") return formatNumber(value, 1);
+  return value?.trim() || "-";
+}
+
+function buildSolarDesignRows(design?: InstallerCustomerDesign | null) {
+  if (!design) {
+    return {
+      designSpecs: [
+        { label: "Design Title", value: "-" },
+        { label: "Address", value: "-" },
+        { label: "Panel Count", value: "-" },
+        { label: "Roof Area", value: "-" },
+        { label: "Annual Sunlight", value: "-" },
+      ],
+      performance: [
+        { label: "Annual Output", value: "-" },
+        { label: "Estimated Savings", value: "-" },
+        { label: "Design Status", value: "-" },
+        { label: "Created At", value: "-" },
+        { label: "Updated At", value: "-" },
+      ],
+      footer: {
+        status: "No design selected",
+        updated: "Last updated: -",
+        savings: "Estimated savings: -",
+      },
+    };
+  }
+
+  const yearlyEnergy =
+    numberFromRecord(design.solarData, "yearlyEnergyDcKwh") ??
+    numberFromRecord(design.solarData, "annualOutputKwh");
+
+  const estimatedSavings = formatCurrency(design.estimatedSavings);
+
+  return {
+    designSpecs: [
+      {
+        label: "Design Title",
+        value: dbValue(design.title),
+      },
+      {
+        label: "Address",
+        value: dbValue(design.address),
+      },
+      {
+        label: "Panel Count",
+        value: formatNumber(design.panelCount),
+      },
+      {
+        label: "Roof Area",
+        value:
+          typeof design.roofArea === "number"
+            ? `${formatNumber(design.roofArea, 1)} m2`
+            : "-",
+      },
+      {
+        label: "Annual Sunlight",
+        value:
+          typeof design.annualSunlight === "number"
+            ? `${formatNumber(design.annualSunlight, 0)} hrs`
+            : "-",
+      },
+    ],
+    performance: [
+      {
+        label: "Annual Output",
+        value:
+          typeof yearlyEnergy === "number"
+            ? `${formatNumber(yearlyEnergy, 0)} kWh`
+            : "-",
+      },
+      {
+        label: "Estimated Savings",
+        value: formatCurrency(design.estimatedSavings),
+      },
+      {
+        label: "Design Status",
+        value: statusLabel(design.status),
+      },
+      {
+        label: "Created At",
+        value: formatDateValue(design.createdAt),
+      },
+      {
+        label: "Updated At",
+        value: formatDateValue(design.updatedAt),
+      },
+    ],
+    footer: {
+      status: statusLabel(design.status),
+      updated: formatDateLabel(design.updatedAt),
+      savings:
+        estimatedSavings === "-"
+          ? "Estimated savings: -"
+          : `Estimated savings: ${estimatedSavings}/yr`,
+    },
+  };
+}
+
+export function InstallerHomeSolarDesignCard({
+  design,
+}: {
+  design?: InstallerCustomerDesign | null;
+}) {
+  const sd = buildSolarDesignRows(design);
 
   return (
     <section

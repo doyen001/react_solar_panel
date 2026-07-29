@@ -1,8 +1,12 @@
 "use client";
 
-import { OVERVIEW_KPIS } from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
-export function PipelineOverviewBanner() {
+export function PipelineOverviewBanner({
+  kpis,
+}: {
+  kpis: InstallerPipelineAnalytics["overviewKpis"];
+}) {
   return (
     <section
       className="rounded-lg p-4 shadow-md md:p-5"
@@ -39,7 +43,7 @@ export function PipelineOverviewBanner() {
         </div>
 
         <div className="flex flex-wrap items-center gap-6 lg:gap-8 xl:gap-10">
-          {OVERVIEW_KPIS.map((k) => (
+          {kpis.map((k) => (
             <div key={k.label} className="flex items-center gap-3">
               <div>
                 <p className="font-inter text-[11px] font-medium uppercase leading-[15px] tracking-wide text-warm-black/65">

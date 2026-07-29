@@ -1,7 +1,7 @@
 "use client";
 
 import { useInstallerActivityFeed } from "@/lib/installers/useInstallerActivityFeed";
-import { TEAM_ROWS } from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 import {
   activityActorInitials,
   activityActorName,
@@ -11,7 +11,11 @@ import {
   type ActivityTone,
 } from "./activityFeedDisplay";
 
-export function PipelineTeamAndActivity() {
+export function PipelineTeamAndActivity({
+  teamRows,
+}: {
+  teamRows: InstallerPipelineAnalytics["teamRows"];
+}) {
   const { events, isLoading, error, refetch } = useInstallerActivityFeed({
     limit: 20,
   });
@@ -46,7 +50,7 @@ export function PipelineTeamAndActivity() {
               </tr>
             </thead>
             <tbody>
-              {TEAM_ROWS.map((row) => (
+              {teamRows.map((row) => (
                 <tr
                   key={row.rank}
                   className="border-b border-warm-border last:border-0"

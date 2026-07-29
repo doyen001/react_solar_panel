@@ -1,27 +1,49 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
 import type { FilterValue } from "@/components/customer/products/CategoryFilterChips";
 import { CategoryFilterChips } from "@/components/customer/products/CategoryFilterChips";
 import { SelectedDesignProductsSection } from "@/components/customer/products/SelectedDesignProductsSection";
 import { SolarProductCard } from "@/components/customer/products/SolarProductCard";
+import type { SolarProduct } from "@/components/customer/products/types";
 import {
-  SELECTED_DESIGN_PRODUCTS,
-  SOLAR_PRODUCTS,
-} from "@/components/customer/products/solarProductsData";
+  fetchPublicProducts,
+  selectedDesignProductsFromCatalog,
+} from "@/lib/public/products";
 import { useAppSelector } from "@/lib/store/hooks";
 import { CUSTOMER_PORTAL } from "@/utils/constant";
 
 export default function SolarProductsPage() {
   const user = useAppSelector((s) => s.customerAuth.user);
+  const [products, setProducts] = useState<SolarProduct[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterValue>("all");
   const [favorites, setFavorites] = useState<Set<string>>(() => new Set());
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchPublicProducts()
+      .then((items) => {
+        if (!cancelled) setProducts(items);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load products");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    if (filter === "all") return SOLAR_PRODUCTS;
-    return SOLAR_PRODUCTS.filter((p) => p.category === filter);
-  }, [filter]);
+    if (filter === "all") return products;
+    return products.filter((p) => p.category === filter);
+  }, [filter, products]);
+
+  const selectedDesignProducts = useMemo(
+    () => selectedDesignProductsFromCatalog(products),
+    [products],
+  );
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) => {
@@ -56,19 +78,25 @@ export default function SolarProductsPage() {
           <CategoryFilterChips value={filter} onChange={setFilter} />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {filteredProducts.map((product) => (
-            <SolarProductCard
-              key={product.id}
-              product={product}
-              favorited={favorites.has(product.id)}
-              onToggleFavorite={() => toggleFavorite(product.id)}
-              onAdd={() => {}}
-            />
-          ))}
-        </div>
+        {error ? (
+          <div className="customer-cream-card-bg customer-cream-card-border rounded-[10px] border p-6 text-sm text-warm-ink">
+            {error}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {filteredProducts.map((product) => (
+              <SolarProductCard
+                key={product.id}
+                product={product}
+                favorited={favorites.has(product.id)}
+                onToggleFavorite={() => toggleFavorite(product.id)}
+                onAdd={() => {}}
+              />
+            ))}
+          </div>
+        )}
 
-        <SelectedDesignProductsSection items={SELECTED_DESIGN_PRODUCTS} />
+        <SelectedDesignProductsSection items={selectedDesignProducts} />
       </main>
     </div>
   );

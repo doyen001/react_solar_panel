@@ -2,11 +2,10 @@
 
 import { useMemo } from "react";
 import CanvasJSReact from "@canvasjs/react-charts";
-import { OPERATIONAL } from "../pipelineDashboardMock";
 
 const { CanvasJSChart } = CanvasJSReact;
 
-export function WeeklyInstallBarClient() {
+export function WeeklyInstallBarClient({ values }: { values: number[] }) {
   const options = useMemo(() => {
     const labels = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8"];
     return {
@@ -39,14 +38,14 @@ export function WeeklyInstallBarClient() {
           color: "#f59f0a",
           cornerRadius: 3,
           bevelEnabled: false,
-          dataPoints: OPERATIONAL.weeklyInstalls.map((y, i) => ({
+          dataPoints: values.map((y, i) => ({
             label: labels[i],
             y,
           })),
         },
       ],
     };
-  }, []);
+  }, [values]);
 
   return (
     <div className="h-[120px] w-full [&_.canvasjs-chart-credit]:hidden">

@@ -5,6 +5,8 @@ export type InstallerCustomerSummary = {
   firstName?: string | null;
   lastName?: string | null;
   email?: string | null;
+  phone?: string | null;
+  address?: string | null;
 };
 
 type ApiEnvelope<T> = {
@@ -46,6 +48,24 @@ export async function fetchInstallerCustomers(
     throw new Error(json.message || "Failed to load customers");
   }
   return Array.isArray(json.data) ? json.data : [];
+}
+
+export async function fetchInstallerCustomer(
+  id: string,
+  init?: RequestInit,
+): Promise<InstallerCustomerSummary> {
+  const res = await fetchWithInstallerSession(`/api/installers/customers/${id}`, {
+    cache: "no-store",
+    ...init,
+  });
+  const json = (await res.json()) as ApiEnvelope<InstallerCustomerSummary>;
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to load customer");
+  }
+  if (!json.data) {
+    throw new Error(json.message || "Customer not found");
+  }
+  return json.data;
 }
 
 export type CustomerImportRowInput = {

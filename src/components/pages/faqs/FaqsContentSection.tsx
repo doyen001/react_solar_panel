@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Icon from "@/components/ui/Icons";
 import type { FaqCategoryId, FaqItem } from "@/utils/constant";
 import { FAQS_PAGE } from "@/utils/constant";
+import { fetchPublicFaqs, type FaqCategory } from "@/lib/public/faqs";
 
 import { FaqsAccordionItem } from "./FaqsAccordionItem";
 import { FaqsCategoryNav } from "./FaqsCategoryNav";
@@ -37,14 +38,34 @@ type FaqsContentSectionProps = {
 };
 
 export function FaqsContentSection({ searchQuery }: FaqsContentSectionProps) {
+  const [categories, setCategories] = useState<FaqCategory[]>([]);
+  const [items, setItems] = useState<FaqItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [activeCategoryId, setActiveCategoryId] = useState<
     FaqCategoryId | "all"
-  >(FAQS_PAGE.categories[0]?.id ?? "general");
+  >("general");
   const [openItemId, setOpenItemId] = useState<string | null>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchPublicFaqs()
+      .then((result) => {
+        if (cancelled) return;
+        setCategories(result.categories);
+        setItems(result.items);
+        setActiveCategoryId(result.categories[0]?.id ?? "general");
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load FAQs");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filteredItems = useMemo(
-    () => filterFaqs(FAQS_PAGE.items, activeCategoryId, searchQuery),
-    [activeCategoryId, searchQuery],
+    () => filterFaqs(items, activeCategoryId, searchQuery),
+    [activeCategoryId, items, searchQuery],
   );
 
   return (
@@ -62,6 +83,7 @@ export function FaqsContentSection({ searchQuery }: FaqsContentSectionProps) {
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-[61px]">
           <div className="hidden lg:block">
             <FaqsCategoryNav
+              categories={categories}
               activeCategoryId={activeCategoryId}
               onSelect={(categoryId) => {
                 setActiveCategoryId(categoryId);
@@ -79,7 +101,7 @@ export function FaqsContentSection({ searchQuery }: FaqsContentSectionProps) {
 
         <div className="mt-6 lg:hidden">
           <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {FAQS_PAGE.categories.map((category) => {
+            {categories.map((category) => {
               const isActive = activeCategoryId === category.id;
 
               return (
@@ -108,7 +130,13 @@ export function FaqsContentSection({ searchQuery }: FaqsContentSectionProps) {
         </div>
 
         <div className="mt-10 flex flex-col gap-7 lg:mt-[60px] lg:gap-[28px]">
-          {filteredItems.length > 0 ? (
+          {error ? (
+            <div className="rounded-2xl border border-white/10 bg-slate-ink/60 px-6 py-10 text-center">
+              <p className="font-inter text-base leading-relaxed text-gray-1">
+                {error}
+              </p>
+            </div>
+          ) : filteredItems.length > 0 ? (
             filteredItems.map((item) => (
               <FaqsAccordionItem
                 key={item.id}

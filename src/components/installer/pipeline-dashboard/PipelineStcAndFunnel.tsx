@@ -2,11 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { SalesFunnelBars } from "./charts/SalesFunnelBars";
-import {
-  FUNNEL_STAGES,
-  SALES_FUNNEL_HEADER,
-  STC_PIPELINE,
-} from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 const StcColumnChartClient = dynamic(
   () =>
@@ -22,7 +18,15 @@ const StcColumnChartClient = dynamic(
 const ROW_GAP = "gap-[6px]";
 const ROW_H = "h-[30px]";
 
-export function PipelineStcAndFunnel() {
+export function PipelineStcAndFunnel({
+  stcPipeline,
+  salesFunnelHeader,
+  funnelStages,
+}: {
+  stcPipeline: InstallerPipelineAnalytics["stcPipeline"];
+  salesFunnelHeader: InstallerPipelineAnalytics["salesFunnelHeader"];
+  funnelStages: InstallerPipelineAnalytics["funnelStages"];
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 shadow-sm">
@@ -32,16 +36,16 @@ export function PipelineStcAndFunnel() {
           </h3>
           <div className="flex flex-wrap items-baseline gap-2 text-right">
             <span className="font-dm-sans text-[14px] font-bold leading-[21px] text-warm-ink">
-              {STC_PIPELINE.badge}
+              {stcPipeline.badge}
             </span>
             <span className="font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray">
-              {STC_PIPELINE.sub}
+              {stcPipeline.sub}
             </span>
           </div>
         </div>
         <div className="space-y-3 p-4">
           <div className="flex flex-wrap items-center gap-2">
-            {STC_PIPELINE.columns.map((c) => (
+            {stcPipeline.columns.map((c) => (
               <div
                 key={`pill-${c.label}`}
                 className="flex h-[25px] items-center gap-1.5 rounded-full border border-warm-border bg-cream-150 px-[11px]"
@@ -59,7 +63,7 @@ export function PipelineStcAndFunnel() {
               </div>
             ))}
           </div>
-          <StcColumnChartClient />
+          <StcColumnChartClient columns={stcPipeline.columns} />
         </div>
       </section>
 
@@ -70,7 +74,7 @@ export function PipelineStcAndFunnel() {
           </h3>
           <div className="flex shrink-0 items-center gap-2">
             <span className="font-dm-sans text-[12px] font-bold leading-[18px] text-success">
-              {SALES_FUNNEL_HEADER.leadToInstallPct} close rate
+              {salesFunnelHeader.leadToInstallPct} close rate
             </span>
           </div>
         </div>
@@ -79,7 +83,7 @@ export function PipelineStcAndFunnel() {
           <div
             className={`flex w-[90px] shrink-0 flex-col justify-center ${ROW_GAP} md:w-[96px]`}
           >
-            {FUNNEL_STAGES.map((stage) => (
+            {funnelStages.map((stage) => (
               <div
                 key={stage.label}
                 className={`flex ${ROW_H} items-start justify-end pt-[7px]`}
@@ -92,7 +96,7 @@ export function PipelineStcAndFunnel() {
           </div>
 
           <div className="min-h-[210px] min-w-0 flex-1">
-            <SalesFunnelBars />
+            <SalesFunnelBars stages={funnelStages} />
           </div>
         </div>
       </section>

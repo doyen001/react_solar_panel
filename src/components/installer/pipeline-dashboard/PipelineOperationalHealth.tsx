@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { BUSINESS_HEALTH, OPERATIONAL } from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 const WeeklyInstallBarClient = dynamic(
   () =>
@@ -18,7 +18,13 @@ const WeeklyInstallBarClient = dynamic(
 
 type CashFlowTone = "success" | "amber" | "danger";
 
-export function PipelineOperationalHealth() {
+export function PipelineOperationalHealth({
+  operational,
+  businessHealth,
+}: {
+  operational: InstallerPipelineAnalytics["operational"];
+  businessHealth: InstallerPipelineAnalytics["businessHealth"];
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <div className="space-y-4">
@@ -35,18 +41,18 @@ export function PipelineOperationalHealth() {
                 Pipeline Coverage Ratio
               </p>
               <p className="font-inter text-[20px] font-bold leading-[27px] text-warm-ink">
-                {OPERATIONAL.forecastRatio}
+                {operational.forecastRatio}
               </p>
             </div>
             <div className="h-[10px] overflow-hidden rounded-full bg-cream-300">
               <div
                 className="h-full rounded-full bg-linear-to-r from-yellow-lemon to-orange-amber"
-                style={{ width: `${OPERATIONAL.forecastCoveragePct}%` }}
+                style={{ width: `${operational.forecastCoveragePct}%` }}
               />
             </div>
             <div className="flex justify-end">
               <span className="font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray">
-                {OPERATIONAL.forecastTarget}
+                {operational.forecastTarget}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -61,10 +67,10 @@ export function PipelineOperationalHealth() {
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="font-inter text-[20px] font-bold leading-[30px] text-warm-ink">
-                    {OPERATIONAL.winRate}
+                    {operational.winRate}
                   </p>
                   <span className="font-dm-sans text-[10px] font-semibold leading-[15px] text-success">
-                    ↗ {OPERATIONAL.winRateDelta}
+                    ↗ {operational.winRateDelta}
                   </span>
                 </div>
               </div>
@@ -79,10 +85,10 @@ export function PipelineOperationalHealth() {
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="font-inter text-[20px] font-bold leading-[30px] text-warm-ink">
-                    {OPERATIONAL.variance}
+                    {operational.variance}
                   </p>
                   <span className="font-dm-sans text-[10px] font-semibold leading-[15px] text-success">
-                    ↘ {OPERATIONAL.varianceDelta}
+                    ↘ {operational.varianceDelta}
                   </span>
                 </div>
               </div>
@@ -101,29 +107,29 @@ export function PipelineOperationalHealth() {
             <div className="grid grid-cols-2 gap-2">
               <InstallMetricCard
                 label="Avg. Install Time"
-                value={OPERATIONAL.installTime}
-                delta={OPERATIONAL.installTimeDelta}
+                value={operational.installTime}
+                delta={operational.installTimeDelta}
               />
               <InstallMetricCard
                 label="First-Time Fix Rate"
-                value={OPERATIONAL.firstFix}
-                delta={OPERATIONAL.firstFixDelta}
+                value={operational.firstFix}
+                delta={operational.firstFixDelta}
               />
               <InstallMetricCard
                 label="Rework Rate"
-                value={OPERATIONAL.rework}
-                delta={OPERATIONAL.reworkDelta}
+                value={operational.rework}
+                delta={operational.reworkDelta}
               />
               <InstallMetricCard
                 label="Crew Utilisation"
-                value={OPERATIONAL.crewUtilisation}
-                delta={OPERATIONAL.crewUtilisationDelta}
+                value={operational.crewUtilisation}
+                delta={operational.crewUtilisationDelta}
               />
             </div>
             <p className="font-dm-sans text-[10px] font-normal uppercase tracking-[0.3px] text-warm-gray">
               Weekly Install Trend
             </p>
-            <WeeklyInstallBarClient />
+            <WeeklyInstallBarClient values={operational.weeklyInstalls} />
           </div>
         </section>
       </div>
@@ -147,20 +153,20 @@ export function PipelineOperationalHealth() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-inter text-[40px] font-bold leading-[28px] text-warm-ink">
-                      {BUSINESS_HEALTH.nps}
+                      {businessHealth.nps}
                     </span>
                     <span className="font-dm-sans text-[11px] font-normal uppercase tracking-[0.3px] text-warm-gray">
-                      {BUSINESS_HEALTH.npsLabel}
+                      {businessHealth.npsLabel}
                     </span>
                   </div>
                   <p className="mt-1 font-dm-sans text-[11px] font-normal leading-[16px] text-warm-gray">
-                    {BUSINESS_HEALTH.industryAvg}
+                    {businessHealth.industryAvg}
                   </p>
                 </div>
               </div>
               <p className="font-dm-sans text-[24px] font-semibold leading-[18px] text-success">
                 ↗{" "}
-                <span className="text-[12px]">{BUSINESS_HEALTH.npsDelta}</span>
+                <span className="text-[12px]">{businessHealth.npsDelta}</span>
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -170,10 +176,10 @@ export function PipelineOperationalHealth() {
                 </p>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="font-inter text-[20px] font-bold leading-[30px] text-warm-ink">
-                    {BUSINESS_HEALTH.csat}
+                    {businessHealth.csat}
                   </p>
                   <span className="font-dm-sans text-[10px] font-semibold leading-[15px] text-success">
-                    ↗ {BUSINESS_HEALTH.csatDelta}
+                    ↗ {businessHealth.csatDelta}
                   </span>
                 </div>
               </div>
@@ -183,10 +189,10 @@ export function PipelineOperationalHealth() {
                 </p>
                 <div className="mt-1 flex items-end gap-2">
                   <p className="font-inter text-[20px] font-bold leading-[30px] text-warm-ink">
-                    {BUSINESS_HEALTH.reviews}
+                    {businessHealth.reviews}
                   </p>
                   <span className="pb-0.5 font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray">
-                    {BUSINESS_HEALTH.reviewsSuffix}
+                    {businessHealth.reviewsSuffix}
                   </span>
                 </div>
               </div>
@@ -202,7 +208,7 @@ export function PipelineOperationalHealth() {
             </h3>
           </div>
           <div className="space-y-3 p-4">
-            {BUSINESS_HEALTH.cashFlowRows.map((row) => (
+            {businessHealth.cashFlowRows.map((row) => (
               <CashFlowRow
                 key={row.label}
                 icon={row.icon}
@@ -221,14 +227,14 @@ export function PipelineOperationalHealth() {
                 <div className="mt-1 flex items-end justify-between gap-2">
                   <div className="flex items-end gap-1">
                     <p className="font-inter text-[20px] font-bold leading-[30px] text-warm-ink">
-                      {BUSINESS_HEALTH.dso}
+                      {businessHealth.dso}
                     </p>
                     <span className="pb-0.5 font-dm-sans text-[10px] font-normal leading-[15px] text-warm-gray">
-                      {BUSINESS_HEALTH.dsoUnit}
+                      {businessHealth.dsoUnit}
                     </span>
                   </div>
                   <span className="font-dm-sans text-[10px] font-semibold leading-[15px] text-success">
-                    ↘ {BUSINESS_HEALTH.dsoDelta}
+                    ↘ {businessHealth.dsoDelta}
                   </span>
                 </div>
               </div>
@@ -238,10 +244,10 @@ export function PipelineOperationalHealth() {
                 </p>
                 <div className="mt-1 flex items-end justify-between gap-2">
                   <p className="font-inter text-[20px] font-bold leading-[30px] text-warm-ink">
-                    {BUSINESS_HEALTH.deposit}
+                    {businessHealth.deposit}
                   </p>
                   <span className="font-dm-sans text-[10px] font-semibold leading-[15px] text-success">
-                    ↗ {BUSINESS_HEALTH.depositDelta}
+                    ↗ {businessHealth.depositDelta}
                   </span>
                 </div>
               </div>

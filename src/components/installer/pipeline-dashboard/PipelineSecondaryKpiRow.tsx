@@ -1,12 +1,16 @@
 "use client";
 
 import Icon, { IconType } from "@/components/ui/Icons";
-import { SECONDARY_KPIS } from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
-export function PipelineSecondaryKpiRow() {
+export function PipelineSecondaryKpiRow({
+  kpis,
+}: {
+  kpis: InstallerPipelineAnalytics["secondaryKpis"];
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      {SECONDARY_KPIS.map((item) => (
+      {kpis.map((item) => (
         <div
           key={item.title}
           className="flex items-start gap-3 rounded-lg border border-warm-border bg-white px-4 py-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"

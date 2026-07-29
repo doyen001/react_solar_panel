@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Icon from "@/components/ui/Icons";
-import type { PrimaryKpi } from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 const SparklineChartClient = dynamic(
   () =>
@@ -15,7 +15,11 @@ const SparklineChartClient = dynamic(
   },
 );
 
-export function PipelineKpiSparklineGrid({ kpis }: { kpis: PrimaryKpi[] }) {
+export function PipelineKpiSparklineGrid({
+  kpis,
+}: {
+  kpis: InstallerPipelineAnalytics["primaryKpis"];
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       {kpis.map((k) => (
@@ -33,7 +37,7 @@ export function PipelineKpiSparklineGrid({ kpis }: { kpis: PrimaryKpi[] }) {
               </p>
             </div>
             <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-cream-150 text-warm-gray">
-              <Icon name={k?.icon || "Light"} className="size-4" style={{ color: k.sparkColor }} />
+              <Icon name={(k?.icon || "Light") as never} className="size-4" style={{ color: k.sparkColor }} />
             </span>
           </div>
           <div className="mt-4 flex items-end justify-between gap-3">

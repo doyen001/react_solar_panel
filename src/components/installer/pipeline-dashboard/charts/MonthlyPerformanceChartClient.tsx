@@ -2,24 +2,19 @@
 
 import { useMemo } from "react";
 import CanvasJSReact from "@canvasjs/react-charts";
-import type { MonthlyMetricMode } from "../pipelineDashboardMock";
-import {
-  MONTHLY_INSTALLS,
-  MONTHLY_PROFIT,
-  MONTHLY_REVENUE,
-  MONTHS_SHORT,
-} from "../pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 const { CanvasJSChart } = CanvasJSReact;
 
 type Props = {
-  mode: MonthlyMetricMode;
+  mode: "revenue" | "profit" | "installs";
+  data: InstallerPipelineAnalytics["monthlyPerformance"];
 };
 
 const AXIS = "#7c736a";
 const GRID = "#ede8de";
 
-export function MonthlyPerformanceChartClient({ mode }: Props) {
+export function MonthlyPerformanceChartClient({ mode, data: chartData }: Props) {
   const options = useMemo(() => {
     const axisBase = {
       axisX: {
@@ -57,9 +52,9 @@ export function MonthlyPerformanceChartClient({ mode }: Props) {
             type: "column",
             color: "#0369a1",
             cornerRadius: 4,
-            dataPoints: MONTHS_SHORT.map((label, i) => ({
+            dataPoints: chartData.months.map((label, i) => ({
               label,
-              y: MONTHLY_INSTALLS[i],
+              y: chartData.installs[i] ?? 0,
             })),
           },
         ],
@@ -86,9 +81,9 @@ export function MonthlyPerformanceChartClient({ mode }: Props) {
             lineThickness: 2,
             markerSize: 0,
             toolTipContent: "{label}: ${y}",
-            dataPoints: MONTHS_SHORT.map((label, i) => ({
+            dataPoints: chartData.months.map((label, i) => ({
               label,
-              y: MONTHLY_PROFIT[i],
+              y: chartData.profit[i] ?? 0,
             })),
           },
         ],
@@ -121,14 +116,14 @@ export function MonthlyPerformanceChartClient({ mode }: Props) {
           lineThickness: 2,
           markerSize: 0,
           toolTipContent: "{label}: ${y}",
-          dataPoints: MONTHS_SHORT.map((label, i) => ({
+          dataPoints: chartData.months.map((label, i) => ({
             label,
-            y: MONTHLY_REVENUE[i],
+            y: chartData.revenue[i] ?? 0,
           })),
         },
       ],
     };
-  }, [mode]);
+  }, [chartData.installs, chartData.months, chartData.profit, chartData.revenue, mode]);
 
   return (
     <div className="min-h-[260px] w-full [&_.canvasjs-chart-credit]:hidden">

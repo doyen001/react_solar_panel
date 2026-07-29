@@ -1,24 +1,14 @@
 import { BlogDetailArticleSection } from "@/components/pages/blog/detail/BlogDetailArticleSection";
 import { BlogDetailHeroSection } from "@/components/pages/blog/detail/BlogDetailHeroSection";
 import { BlogDetailRelatedPostsSection } from "@/components/pages/blog/detail/BlogDetailRelatedPostsSection";
-import {
-  getBlogDetailContent,
-  getRelatedBlogPosts,
-} from "@/utils/constant";
+import type { BlogDetailContent, BlogPost } from "@/utils/constant";
 
 type Props = {
-  blogId: string;
+  content: BlogDetailContent;
+  relatedPosts: readonly BlogPost[];
 };
 
-export function BlogDetailPageSection({ blogId }: Props) {
-  const content = getBlogDetailContent(blogId);
-
-  if (!content) {
-    return null;
-  }
-
-  const relatedPosts = getRelatedBlogPosts(blogId);
-
+export function BlogDetailPageSection({ content, relatedPosts }: Props) {
   return (
     <>
       <BlogDetailHeroSection content={content} />

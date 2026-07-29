@@ -1,7 +1,9 @@
 "use client";
 
 import classNames from "classnames";
+import { useEffect, useMemo, useState } from "react";
 import type { InstallerDashboardSubTab } from "@/components/installer/dashboard/InstallerDashboardShell";
+import type { InstallerDashboardShellContext } from "@/components/installer/dashboard/InstallerDashboardShell";
 import { InstallerDashboardShell } from "@/components/installer/dashboard/InstallerDashboardShell";
 import {
   IconCheckSquare,
@@ -9,6 +11,15 @@ import {
   IconPanelTag,
 } from "@/components/installer/dashboard/installerDashboardIcons";
 import Icon from "@/components/ui/Icons";
+import {
+  fetchInstallerCustomer,
+  type InstallerCustomerSummary,
+} from "@/lib/installers/customers";
+import {
+  fetchInstallerDesigns,
+  type InstallerCustomerDesign,
+  type InstallerDesignProduct,
+} from "@/lib/installers/designs";
 import {
   INSTALLER_HOME_CHANNELS,
   INSTALLER_HOME_EQUIPMENT,
@@ -222,6 +233,150 @@ const PIPELINE_PHASE_ACTIVE_BG =
 const PIPELINE_PHASE_INACTIVE_BG =
   "linear-gradient(90deg, rgba(78, 78, 78, 0.83) 0%, rgba(78, 78, 78, 0.83) 100%), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%)";
 
+type InstallerHomeProfile = typeof INSTALLER_HOME_PROFILE;
+type InstallerHomeEquipment = typeof INSTALLER_HOME_EQUIPMENT;
+type InstallerHomeFinance = typeof INSTALLER_HOME_FINANCE;
+
+function formatCurrency(value?: number | null) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return new Intl.NumberFormat("en-AU", {
+    style: "currency",
+    currency: "AUD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatNumber(value?: number | null, suffix = "") {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return `${new Intl.NumberFormat("en-AU", {
+    maximumFractionDigits: 1,
+  }).format(value)}${suffix}`;
+}
+
+function customerName(customer?: InstallerCustomerSummary | null) {
+  const fullName =
+    `${customer?.firstName ?? ""} ${customer?.lastName ?? ""}`.trim();
+  return fullName || customer?.email || "Selected Customer";
+}
+
+function designProductsTotal(design?: InstallerCustomerDesign | null) {
+  return (
+    design?.products?.reduce((total, item) => total + (item.totalPrice ?? 0), 0) ??
+    0
+  );
+}
+
+function productByCategory(
+  design: InstallerCustomerDesign | null,
+  category: string,
+): InstallerDesignProduct | undefined {
+  return design?.products?.find((item) =>
+    item.product?.category.toLowerCase().includes(category),
+  );
+}
+
+function productName(item?: InstallerDesignProduct) {
+  if (!item?.product) return "Not selected";
+  return item.product.brand
+    ? `${item.product.brand} ${item.product.name}`
+    : item.product.name;
+}
+
+function systemSizeKw(design?: InstallerCustomerDesign | null) {
+  if (!design?.panelCount) return undefined;
+  const panel = productByCategory(design, "panel");
+  const wattage = panel?.product?.wattage ?? 412;
+  return (design.panelCount * wattage) / 1000;
+}
+
+function buildProfile(
+  customer: InstallerCustomerSummary | null,
+  design: InstallerCustomerDesign | null,
+): InstallerHomeProfile {
+  const salePrice = design?.estimatedSavings
+    ? design.estimatedSavings * 8
+    : designProductsTotal(design);
+  const equipmentCost = designProductsTotal(design);
+
+  return {
+    name: customerName(customer),
+    ref: customer?.id ? `REF #${customer.id.slice(0, 8).toUpperCase()}` : "-",
+    phone: customer?.phone || "-",
+    email: customer?.email || "-",
+    type: "Individual",
+    salePrice: formatCurrency(salePrice),
+    profit: formatCurrency(Math.max(0, salePrice - equipmentCost)),
+  };
+}
+
+function buildEquipment(
+  design: InstallerCustomerDesign | null,
+): InstallerHomeEquipment {
+  const panel = productByCategory(design, "panel");
+  const inverter = productByCategory(design, "inverter");
+  const battery = productByCategory(design, "battery");
+  const kw = systemSizeKw(design);
+
+  return {
+    solar: [
+      { label: "System Size", value: kw ? `${kw.toFixed(1)} kW` : "-" },
+      { label: "Panel Name", value: productName(panel) },
+      { label: "Model", value: panel?.product?.sku || "-" },
+      {
+        label: "Panel Watts",
+        value: panel?.product?.wattage ? `${panel.product.wattage}W` : "-",
+      },
+      { label: "Qty", value: String(design?.panelCount ?? panel?.quantity ?? "-") },
+    ],
+    battery: [
+      { label: "Battery Model", value: productName(battery) },
+      {
+        label: "Type",
+        value: battery ? "Lithium-ion" : "Not selected",
+      },
+      { label: "Size", value: battery ? `${battery.quantity} unit` : "-" },
+      { label: "CEC Approved", value: battery ? "Yes" : "-" },
+    ],
+    equipment: [
+      { label: "Inverter", value: productName(inverter) },
+      { label: "Optimizer", value: "N/A" },
+      { label: "Monitoring", value: "Included" },
+    ],
+    site: [
+      { label: "Address", value: design?.address || "-" },
+      { label: "Roof Area", value: formatNumber(design?.roofArea, " m2") },
+      {
+        label: "Annual Sunlight",
+        value: formatNumber(design?.annualSunlight, " hrs"),
+      },
+      { label: "Design Status", value: design?.status.replace("_", " ") || "-" },
+    ],
+  };
+}
+
+function buildFinance(
+  design: InstallerCustomerDesign | null,
+): InstallerHomeFinance {
+  const equipmentCost = designProductsTotal(design);
+  const salePrice = design?.estimatedSavings
+    ? design.estimatedSavings * 8
+    : equipmentCost;
+  const installerCost = equipmentCost ? equipmentCost * 0.75 : undefined;
+
+  return [
+    { label: "STC Panel", value: design?.panelCount ? `${design.panelCount} panels` : "-" },
+    {
+      label: "STC BESS",
+      value: productByCategory(design, "battery") ? "Included" : "Not selected",
+    },
+    { label: "Payment Type", value: "Finance" },
+    { label: "Payment Status", value: design?.lead?.status || design?.status || "-" },
+    { label: "Installer Cost", value: formatCurrency(installerCost) },
+    { label: "Equipment Cost", value: formatCurrency(equipmentCost) },
+    { label: "Sale Price", value: formatCurrency(salePrice) },
+  ].slice(0, INSTALLER_HOME_FINANCE.length) as InstallerHomeFinance;
+}
+
 function PipelinePhaseStrip({
   phases,
   activeIndex,
@@ -274,11 +429,105 @@ export function InstallerHomeDashboard({
 }) {
   return (
     <InstallerDashboardShell activeSubTab={activeSubTab}>
-      {activeSubTab === "pipeline" ? (
-        <InstallerHomePipelineStatus />
-      ) : (
-        <>
-          <InstallerHomeSolarDesignCard />
+      {({ selectedCustomerId, selectedCustomer }) =>
+        activeSubTab === "pipeline" ? (
+          <InstallerHomePipelineStatus />
+        ) : (
+          <InstallerHomeDetail
+            selectedCustomerId={selectedCustomerId}
+            selectedCustomer={selectedCustomer}
+          />
+        )
+      }
+    </InstallerDashboardShell>
+  );
+}
+
+function InstallerHomeDetail({
+  selectedCustomerId,
+  selectedCustomer,
+}: InstallerDashboardShellContext) {
+  const [customer, setCustomer] = useState<InstallerCustomerSummary | null>(
+    null,
+  );
+  const [design, setDesign] = useState<InstallerCustomerDesign | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedCustomerId || selectedCustomerId.startsWith("fallback-")) {
+      setCustomer(null);
+      setDesign(null);
+      setError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+
+    Promise.all([
+      fetchInstallerCustomer(selectedCustomerId, {
+        signal: controller.signal,
+      }),
+      fetchInstallerDesigns(
+        {
+          customerId: selectedCustomerId,
+          customerEmail: selectedCustomer?.email,
+          limit: 1,
+        },
+        { signal: controller.signal },
+      ),
+    ])
+      .then(([customerData, designs]) => {
+        setCustomer(customerData);
+        setDesign(designs[0] ?? null);
+      })
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setError(e instanceof Error ? e.message : "Failed to load customer");
+        setCustomer(null);
+        setDesign(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [selectedCustomer?.email, selectedCustomerId]);
+
+  const customerForDisplay = useMemo<InstallerCustomerSummary | null>(() => {
+    if (customer) return customer;
+    if (!selectedCustomer) return null;
+    const [firstName, ...lastNameParts] = selectedCustomer.name.split(" ");
+    return {
+      id: selectedCustomer.id,
+      firstName,
+      lastName: lastNameParts.join(" "),
+      email: selectedCustomer.email,
+    };
+  }, [customer, selectedCustomer]);
+
+  const profile = useMemo(
+    () => buildProfile(customerForDisplay, design),
+    [customerForDisplay, design],
+  );
+  const equipment = useMemo(() => buildEquipment(design), [design]);
+  const finance = useMemo(() => buildFinance(design), [design]);
+
+  return (
+    <>
+      {loading || error || !design ? (
+        <div className="mb-3 rounded-lg border border-warm-border bg-cream-50 px-4 py-3 font-dm-sans text-sm text-warm-gray">
+          {loading
+            ? "Loading selected customer solar design..."
+            : error
+              ? error
+              : "No solar design found for the selected customer."}
+        </div>
+      ) : null}
+
+      <InstallerHomeSolarDesignCard design={design} />
 
           {/* Equipment cards */}
           <section className="mt-5">
@@ -286,22 +535,22 @@ export function InstallerHomeDashboard({
               <EquipmentCard
                 title="Solar System"
                 icon={<Icon name="Sun" className="text-warm-ink" />}
-                rows={INSTALLER_HOME_EQUIPMENT.solar}
+                rows={equipment.solar}
               />
               <EquipmentCard
                 title="Battery System"
                 icon={<IconBattery className="text-warm-ink" />}
-                rows={INSTALLER_HOME_EQUIPMENT.battery}
+                rows={equipment.battery}
               />
               <EquipmentCard
                 title="Equipment"
                 icon={<IconCpu className="text-warm-ink" />}
-                rows={INSTALLER_HOME_EQUIPMENT.equipment}
+                rows={equipment.equipment}
               />
               <EquipmentCard
                 title="Site Details"
                 icon={<Icon name="LocationPin" className="text-warm-ink" />}
-                rows={INSTALLER_HOME_EQUIPMENT.site}
+                rows={equipment.site}
               />
             </div>
 
@@ -329,10 +578,10 @@ export function InstallerHomeDashboard({
                 </div>
                 <div className="min-w-0 pt-[2px]">
                   <h2 className="font-inter text-[19.875px] font-bold leading-[29.81px] text-warm-black">
-                    {INSTALLER_HOME_PROFILE.name}
+                    {profile.name}
                   </h2>
                   <p className="font-dm-sans text-[13.25px] font-medium leading-[19.875px] text-warm-black/70">
-                    {INSTALLER_HOME_PROFILE.ref}
+                    {profile.ref}
                   </p>
                 </div>
               </div>
@@ -341,28 +590,28 @@ export function InstallerHomeDashboard({
                 <ProfileDetailField
                   icon={<Icon name="Phone" className="text-warm-black" />}
                   label="Phone"
-                  value={INSTALLER_HOME_PROFILE.phone}
+                  value={profile.phone}
                 />
                 <ProfileDetailField
                   icon={<Icon name="Mail" className="text-warm-black" />}
                   label="Email"
-                  value={INSTALLER_HOME_PROFILE.email}
+                  value={profile.email}
                   className="min-w-0 max-w-[min(100%,280px)]"
                 />
                 <ProfileDetailField
                   icon={<IconBuilding className="text-warm-black" />}
                   label="Type"
-                  value={INSTALLER_HOME_PROFILE.type}
+                  value={profile.type}
                 />
                 <ProfileDetailField
                   icon={<Icon name="Dollar" className="text-warm-black" />}
                   label="Sale Price"
-                  value={INSTALLER_HOME_PROFILE.salePrice}
+                  value={profile.salePrice}
                 />
                 <ProfileDetailField
                   icon={<Icon name="Dollar" className="text-warm-black" />}
                   label="Profit"
-                  value={INSTALLER_HOME_PROFILE.profit}
+                  value={profile.profit}
                 />
               </div>
 
@@ -398,7 +647,7 @@ export function InstallerHomeDashboard({
 
           {/* Finance strip */}
           <section className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-warm-border bg-warm-border md:grid-cols-3 xl:grid-cols-6">
-            {INSTALLER_HOME_FINANCE.map((cell) => (
+            {finance.map((cell) => (
               <div
                 key={cell.label}
                 className="bg-white px-3 py-3 text-center md:py-4"
@@ -558,9 +807,7 @@ export function InstallerHomeDashboard({
 
             <InstallerHomeTagsPanel />
           </div>
-        </>
-      )}
-    </InstallerDashboardShell>
+    </>
   );
 }
 

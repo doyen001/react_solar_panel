@@ -1,15 +1,20 @@
 "use client";
 
-import {
-  LEAD_SOURCE_SUMMARY,
-  LEAD_MIX_PCTS,
-  LEAD_SOURCES,
-  REGIONAL_ROWS,
-} from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 const MIX_COLORS = ["#09234a", "#304566", "#f78d00", "#ffbf47", "#dfd5c3"];
 
-export function PipelineRegionalAndLead() {
+export function PipelineRegionalAndLead({
+  regionalRows,
+  leadSources,
+  leadMixPcts,
+  leadSourceSummary,
+}: {
+  regionalRows: InstallerPipelineAnalytics["regionalRows"];
+  leadSources: InstallerPipelineAnalytics["leadSources"];
+  leadMixPcts: InstallerPipelineAnalytics["leadMixPcts"];
+  leadSourceSummary: InstallerPipelineAnalytics["leadSourceSummary"];
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="overflow-hidden rounded-[10px] border border-warm-border bg-cream-50 shadow-sm">
@@ -33,11 +38,11 @@ export function PipelineRegionalAndLead() {
           </div>
         </div>
         <div>
-          {REGIONAL_ROWS.map((r, i) => (
+          {regionalRows.map((r, i) => (
             <div
               key={r.region}
               className={`flex h-12 items-center gap-3 px-4 md:px-4 ${
-                i !== REGIONAL_ROWS.length - 1 ? "border-b border-warm-border" : ""
+                i !== regionalRows.length - 1 ? "border-b border-warm-border" : ""
               }`}
             >
               <div className="min-w-0 flex-1">
@@ -81,12 +86,12 @@ export function PipelineRegionalAndLead() {
             Lead Source Performance
           </h3>
           <span className="font-dm-sans text-[13px] font-bold leading-[19.5px] text-warm-ink">
-            {LEAD_SOURCE_SUMMARY.totalLeads}
+            {leadSourceSummary.totalLeads}
           </span>
         </div>
         <div className="space-y-4 px-4 pb-4 pt-4 md:px-4 md:pb-5 md:pt-4">
           <div className="flex h-[10px] overflow-hidden rounded-full">
-            {LEAD_MIX_PCTS.map((pct, i) => (
+            {leadMixPcts.map((pct, i) => (
               <div
                 key={i}
                 style={{
@@ -98,7 +103,7 @@ export function PipelineRegionalAndLead() {
             ))}
           </div>
           <div className="space-y-2.5">
-            {LEAD_SOURCES.map((s) => (
+            {leadSources.map((s) => (
               <div key={s.source} className="flex items-center gap-3">
                 <span
                   className="size-2 shrink-0 rounded-full"

@@ -2,11 +2,10 @@
 
 import classNames from "classnames";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { InstallerHeader } from "@/components/installer/dashboard/InstallerHeader";
 import { InstallerShortcutRail } from "@/components/installer/dashboard/InstallerShortcutRail";
 import Icon from "@/components/ui/Icons";
-import { usePollingResource } from "@/hooks/usePollingResource";
 import {
   fetchInstallerCustomers,
   type InstallerCustomerSummary,
@@ -16,6 +15,12 @@ type HomeCustomer = {
   id: string;
   initials: string;
   name: string;
+  email?: string | null;
+};
+
+export type InstallerDashboardShellContext = {
+  selectedCustomerId: string;
+  selectedCustomer: HomeCustomer | null;
 };
 
 const DEFAULT_CUSTOMERS: HomeCustomer[] = [
@@ -43,7 +48,9 @@ export function InstallerDashboardShell({
   children,
 }: {
   activeSubTab: InstallerDashboardSubTab;
-  children: React.ReactNode;
+  children:
+    | React.ReactNode
+    | ((context: InstallerDashboardShellContext) => React.ReactNode);
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [customers, setCustomers] = useState<HomeCustomer[]>(DEFAULT_CUSTOMERS);
@@ -64,6 +71,7 @@ export function InstallerDashboardShell({
           id: row.id,
           name: toName(row),
           initials: toInitials(row.firstName, row.lastName),
+          email: row.email,
         }));
         setCustomers(mapped);
         setSelectedId((prev) =>
@@ -77,14 +85,15 @@ export function InstallerDashboardShell({
     [],
   );
 
-  const { refetchNow: refetchCustomers } = usePollingResource(
-    useCallback(
-      async (signal) => {
-        await loadCustomers({ silent: true, signal });
-      },
-      [loadCustomers],
-    ),
-  );
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadCustomers({ signal: controller.signal });
+    return () => controller.abort();
+  }, [loadCustomers]);
+
+  const refetchCustomers = useCallback(() => {
+    void loadCustomers();
+  }, [loadCustomers]);
 
   const filteredCustomers = useMemo(() => {
     const q = customerSearch.trim().toLowerCase();
@@ -95,6 +104,11 @@ export function InstallerDashboardShell({
         c.initials.toLowerCase().includes(q),
     );
   }, [customerSearch, customers]);
+
+  const selectedCustomer = useMemo(
+    () => customers.find((customer) => customer.id === selectedId) ?? null,
+    [customers, selectedId],
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-50">
@@ -284,7 +298,9 @@ export function InstallerDashboardShell({
             </div>
           </div>
 
-          {children}
+          {typeof children === "function"
+            ? children({ selectedCustomerId: selectedId, selectedCustomer })
+            : children}
         </main>
 
         <InstallerShortcutRail onCustomersImported={refetchCustomers} />

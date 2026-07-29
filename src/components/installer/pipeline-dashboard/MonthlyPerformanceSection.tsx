@@ -2,10 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import {
-  MONTHLY_HEADLINE,
-  type MonthlyMetricMode,
-} from "./pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
 
 const MonthlyPerformanceChartClient = dynamic(
   () =>
@@ -20,13 +17,19 @@ const MonthlyPerformanceChartClient = dynamic(
   },
 );
 
+type MonthlyMetricMode = "revenue" | "profit" | "installs";
+
 const MODES: { key: MonthlyMetricMode; label: string }[] = [
   { key: "revenue", label: "Revenue" },
   { key: "profit", label: "Profit" },
   { key: "installs", label: "Installs" },
 ];
 
-export function MonthlyPerformanceSection() {
+export function MonthlyPerformanceSection({
+  data,
+}: {
+  data: InstallerPipelineAnalytics["monthlyPerformance"];
+}) {
   const [mode, setMode] = useState<MonthlyMetricMode>("revenue");
 
   return (
@@ -55,16 +58,16 @@ export function MonthlyPerformanceSection() {
       <div className="px-4 pb-2 pt-4 md:px-5">
         <div className="mb-4 flex flex-wrap items-baseline gap-3">
           <span className="font-inter text-[28px] font-bold leading-8 tracking-tight text-warm-ink md:text-[32px]">
-            {MONTHLY_HEADLINE.total}
+            {data.headline.total}
           </span>
           <span className="font-inter text-[14px] leading-5 text-warm-gray">
-            {MONTHLY_HEADLINE.sub}
+            {data.headline.sub}
           </span>
           <span className="font-inter text-[14px] font-semibold leading-5 text-success">
-            {MONTHLY_HEADLINE.yoy}
+            {data.headline.yoy}
           </span>
         </div>
-        <MonthlyPerformanceChartClient mode={mode} />
+        <MonthlyPerformanceChartClient mode={mode} data={data} />
       </div>
     </section>
   );

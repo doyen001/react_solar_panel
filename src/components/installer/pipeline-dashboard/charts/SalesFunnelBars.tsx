@@ -1,14 +1,20 @@
-import { FUNNEL_BAR_MAX, FUNNEL_STAGES } from "../pipelineDashboardMock";
+import type { InstallerPipelineAnalytics } from "@/lib/installers/analytics";
+
+const FUNNEL_BAR_MAX = 514.279;
 
 /**
  * Figma `3:10769` — centered horizontal funnel bars.
  * Implemented with HTML/CSS like the design (not CanvasJS): the trial build
  * watermarks the canvas and stackedBar mis-rendered as a single garbled stack.
  */
-export function SalesFunnelBars() {
+export function SalesFunnelBars({
+  stages,
+}: {
+  stages: InstallerPipelineAnalytics["funnelStages"];
+}) {
   return (
     <div className="flex w-full flex-col gap-[6px] py-0.5">
-      {FUNNEL_STAGES.map((stage) => (
+      {stages.map((stage) => (
         <div
           key={stage.label}
           className="flex h-[30px] w-full items-center"

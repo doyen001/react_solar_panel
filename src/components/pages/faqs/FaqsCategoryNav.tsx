@@ -2,14 +2,16 @@
 
 import Icon from "@/components/ui/Icons";
 import type { FaqCategoryId } from "@/utils/constant";
-import { FAQS_PAGE } from "@/utils/constant";
+import type { FaqCategory } from "@/lib/public/faqs";
 
 type FaqsCategoryNavProps = {
+  categories: FaqCategory[];
   activeCategoryId: FaqCategoryId | "all";
   onSelect: (categoryId: FaqCategoryId | "all") => void;
 };
 
 export function FaqsCategoryNav({
+  categories,
   activeCategoryId,
   onSelect,
 }: FaqsCategoryNavProps) {
@@ -22,7 +24,7 @@ export function FaqsCategoryNav({
         Categories
       </p>
       <ul className="flex flex-col">
-        {FAQS_PAGE.categories.map((category) => {
+        {categories.map((category) => {
           const isActive = activeCategoryId === category.id;
 
           return (
