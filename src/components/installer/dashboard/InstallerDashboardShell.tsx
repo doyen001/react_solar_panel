@@ -43,6 +43,9 @@ function toName(customer: InstallerCustomerSummary) {
 
 export type InstallerDashboardSubTab = "detail" | "pipeline" | "schedule";
 
+const CUSTOMER_LIST_SCROLL =
+  "min-h-0 flex-1 overflow-y-auto overscroll-y-contain [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.35)_rgba(255,255,255,0.06)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/30 hover:[&::-webkit-scrollbar-thumb]:bg-white/45";
+
 export function InstallerDashboardShell({
   activeSubTab,
   children,
@@ -111,13 +114,13 @@ export function InstallerDashboardShell({
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-50">
+    <div className="flex h-dvh flex-col overflow-hidden bg-surface-50">
       <InstallerHeader
         userInitials="ES"
         onMenuClick={() => setMobileMenuOpen(true)}
       />
 
-      <div className="relative mx-auto flex w-full flex-1">
+      <div className="relative mx-auto flex min-h-0 w-full flex-1 overflow-hidden">
         {mobileMenuOpen ? (
           <button
             type="button"
@@ -129,7 +132,7 @@ export function InstallerDashboardShell({
 
         <aside
           className={classNames(
-            "z-50 flex w-[247px] shrink-0 flex-col border-r border-warm-border bg-navy-800",
+            "z-50 flex h-full min-h-0 w-[247px] shrink-0 flex-col border-r border-warm-border bg-navy-800",
             "fixed inset-y-0 left-0 md:static md:z-0",
             "transform transition-transform duration-200 md:translate-x-0",
             mobileMenuOpen
@@ -137,7 +140,7 @@ export function InstallerDashboardShell({
               : "-translate-x-full md:translate-x-0",
           )}
         >
-          <div className="border-b border-warm-border px-3 py-4">
+          <div className="shrink-0 border-b border-warm-border px-3 py-4">
             <div className="flex items-center justify-between gap-2">
               <p className="font-inter text-[15px] font-semibold text-white">
                 Customers
@@ -169,7 +172,10 @@ export function InstallerDashboardShell({
               />
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <nav
+            className={CUSTOMER_LIST_SCROLL}
+            aria-label="Customer list"
+          >
             {filteredCustomers.map((c) => {
               const selected = c.id === selectedId;
               return (
@@ -181,23 +187,23 @@ export function InstallerDashboardShell({
                     setMobileMenuOpen(false);
                   }}
                   className={classNames(
-                    "flex w-full items-center gap-3 border-b border-warm-border/70 px-3 py-3 text-left transition-colors",
+                    "flex w-full min-w-0 items-center gap-3 px-3 py-3 text-left transition-colors text-white hover:text-secondary",
                     selected ? "bg-sky-wash/80" : "hover:bg-cream-50",
                   )}
                 >
-                  <div className="flex size-[31px] shrink-0 items-center justify-center rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber font-inter text-[11px] font-semibold text-warm-black">
+                  <div className="flex size-[31px] shrink-0 items-center justify-center rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber font-inter text-[11px] font-semibold">
                     {c.initials}
                   </div>
-                  <span className="truncate font-inter text-sm font-medium text-white">
+                  <span className="min-w-0 truncate font-inter text-sm font-medium">
                     {c.name}
                   </span>
                 </button>
               );
             })}
-          </div>
+          </nav>
         </aside>
 
-        <main className="min-w-0 flex-1 px-3 py-4 md:px-5 md:py-6 lg:px-6">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-4 md:px-5 md:py-6 lg:px-6">
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-2 lg:gap-3">
               <div
