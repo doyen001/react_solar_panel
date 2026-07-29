@@ -21,7 +21,6 @@ import {
   type InstallerDesignProduct,
 } from "@/lib/installers/designs";
 import {
-  INSTALLER_HOME_CHANNELS,
   INSTALLER_HOME_EQUIPMENT,
   INSTALLER_HOME_FINANCE,
   INSTALLER_HOME_PIPELINE_ACTIVE_PHASE_INDEX,
@@ -29,6 +28,7 @@ import {
   INSTALLER_HOME_PROFILE,
   INSTALLER_HOME_TAGS,
 } from "./installerHomeMock";
+import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
 
@@ -75,129 +75,6 @@ function IconBuilding({ className }: { className?: string }) {
       aria-hidden
     >
       <path d="M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18M6 22h15M10 10h4M10 14h4M10 6h4" />
-    </svg>
-  );
-}
-
-function IconSparkles({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M3 12h2M19 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-/** Figma 3:9024 — compose toolbar icons (~15.445px) */
-function IconComposeBold({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M8 5h6.5a3.5 3.5 0 010 7H8V5zm0 9h7a4 4 0 010 8H8v-8z" />
-    </svg>
-  );
-}
-
-function IconComposeItalic({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path strokeLinecap="round" d="M11 5l-4 14M19 5l-4 14" />
-    </svg>
-  );
-}
-
-function IconComposeLink({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-    </svg>
-  );
-}
-
-function IconComposeImage({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <circle cx="8.5" cy="10.5" r="1.5" />
-      <path d="M21 15l-6-6-4 4-3-3-4 4" />
-    </svg>
-  );
-}
-
-function IconComposeAttach({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-    </svg>
-  );
-}
-
-function IconComposeEmoji({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
-    </svg>
-  );
-}
-
-function IconComposeSend({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M2 21l21-9L2 3v7l15 4-15 4v7z" />
     </svg>
   );
 }
@@ -662,127 +539,7 @@ function InstallerHomeDetail({
             ))}
           </section>
 
-          {/* Communication — Figma 3:9024 */}
-          <section className="mt-6 overflow-hidden rounded-[11.042px] border-[1.157px] border-warm-border bg-cream-50">
-            <div className="flex min-h-[43.06px] items-center justify-between gap-4 border-l-[2.315px] border-yellow-lemon bg-linear-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[19.966px] pr-[17.65px]">
-              <span className="font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.3313px] text-warm-ink">
-                Customer Communication
-              </span>
-              <span
-                className="inline-flex h-[23.293px] shrink-0 items-center rounded-full border-[1.157px] border-brand-blue/20 bg-brand-blue/10 px-[11px] font-dm-sans text-[11.042px] font-semibold leading-[16.563px] text-brand-blue"
-                style={{ fontVariationSettings: "'opsz' 14" }}
-              >
-                Facebook
-              </span>
-            </div>
-
-            <div className="h-[110.409px] bg-cream-50" aria-hidden />
-
-            <div className="flex min-h-[40.275px] flex-wrap items-center gap-x-[8.825px] gap-y-2 px-[17.65px] py-[3.58px]">
-              <span
-                className="shrink-0 font-dm-sans text-[13.25px] font-normal leading-[19.875px] text-warm-gray"
-                style={{ fontVariationSettings: "'opsz' 9" }}
-              >
-                Compose:
-              </span>
-              <div className="flex flex-wrap items-center gap-[8.825px]">
-                {INSTALLER_HOME_CHANNELS.map((ch) =>
-                  ch === "AI Compose" ? (
-                    <button
-                      key={ch}
-                      type="button"
-                      className="inline-flex h-[27.037px] min-w-[117.227px] shrink-0 items-center justify-center gap-[8px] rounded-[8.833px] px-[13.24px] font-dm-sans text-[12.146px] font-semibold leading-[18.219px] text-white"
-                      style={{
-                        fontVariationSettings: "'opsz' 14",
-                        backgroundImage:
-                          "linear-gradient(168.2682496558474deg, rgb(32, 148, 243) 2.3594%, rgb(23, 207, 207) 97.641%)",
-                      }}
-                    >
-                      <IconSparkles className="size-[13.238px] shrink-0 text-white" />
-                      {ch}
-                    </button>
-                  ) : (
-                    <button
-                      key={ch}
-                      type="button"
-                      className="inline-flex h-[27.037px] shrink-0 items-center rounded-[8.833px] bg-cream-300 px-[13.25px] font-dm-sans text-[12.146px] font-semibold leading-[18.219px] text-brown-muted"
-                      style={{ fontVariationSettings: "'opsz' 14" }}
-                    >
-                      {ch}
-                    </button>
-                  ),
-                )}
-              </div>
-            </div>
-
-            <div className="px-[16.97px] pt-0 pb-0">
-              <label htmlFor="home-compose" className="sr-only">
-                Message
-              </label>
-              <textarea
-                id="home-compose"
-                rows={3}
-                placeholder="Type your message..."
-                className="min-h-[83.914px] w-full resize-none rounded-[8.833px] border-[1.157px] border-warm-border bg-white p-[13.25px] font-dm-sans text-[15.458px] leading-[23.188px] text-warm-ink placeholder:text-warm-gray/50 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
-                style={{ fontVariationSettings: "'opsz' 9" }}
-              />
-            </div>
-
-            <div className="flex min-h-[49.716px] flex-wrap items-center justify-between gap-3 border-t-[1.157px] border-warm-border px-[17.65px] py-[8px]">
-              <div className="flex items-center gap-[4.41px]">
-                {(
-                  [
-                    [IconComposeBold, "Bold"],
-                    [IconComposeItalic, "Italic"],
-                    [IconComposeLink, "Insert link"],
-                    [IconComposeImage, "Insert image"],
-                    [IconComposeAttach, "Attach file"],
-                    [IconComposeEmoji, "Emoji"],
-                  ] as const
-                ).map(([Cmp, label]) => (
-                  <button
-                    key={label}
-                    type="button"
-                    className="flex size-[24.288px] shrink-0 items-center justify-center rounded-[4.417px] text-warm-gray hover:bg-black/4"
-                    aria-label={label}
-                  >
-                    <Cmp className="size-[15.445px]" />
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-[8.825px]">
-                <span
-                  className="font-dm-sans text-[12.146px] font-normal leading-[18.219px] text-warm-gray"
-                  style={{ fontVariationSettings: "'opsz' 9" }}
-                >
-                  0 words
-                </span>
-                <button
-                  type="button"
-                  className="inline-flex h-[30.907px] min-w-[84.855px] shrink-0 items-center gap-[7px] rounded-[8.833px] pl-[17.65px] pr-[14px] font-dm-sans text-[12.146px] font-semibold leading-[18.219px] text-white"
-                  style={{
-                    fontVariationSettings: "'opsz' 14",
-                    backgroundImage:
-                      "linear-gradient(161.84255433686087deg, rgb(32, 148, 243) 2.3594%, rgb(23, 207, 207) 97.641%)",
-                  }}
-                >
-                  <IconComposeSend className="size-[13.238px] shrink-0 text-white" />
-                  Send
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex h-[30.907px] min-w-[84.565px] shrink-0 items-center gap-[7px] rounded-[8.833px] border-[1.157px] border-warm-border bg-white pl-[13.24px] pr-[14px] font-dm-sans text-[12.146px] font-medium leading-[18.219px] text-warm-ink"
-                  style={{ fontVariationSettings: "'opsz' 14" }}
-                >
-                  <Icon
-                    name="Phone"
-                    className="size-[13.238px] text-warm-gray"
-                  />
-                  Phone
-                </button>
-              </div>
-            </div>
-          </section>
+          <InstallerHomeCustomerCommunication customerId={selectedCustomerId} />
 
           {/* Bottom panels */}
           <div className="mt-6 space-y-6 pb-10">

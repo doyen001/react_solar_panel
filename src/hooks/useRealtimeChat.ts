@@ -83,6 +83,7 @@ export function useRealtimeChat(
   portal: Portal,
   sessionFetch: SessionFetch,
   user: { id: string; role: string } | null,
+  preferredPeerId?: string | null,
 ) {
   const api = portal === "customer" ? "/api/customers" : "/api/installers";
   const role = user?.role ?? "";
@@ -159,11 +160,11 @@ export function useRealtimeChat(
       setConversations(convResolved);
 
       setActivePeerId((current) => {
+        if (preferredPeerId) {
+          return preferredPeerId;
+        }
         if (peersResolved.length === 0) return null;
-        if (
-          current &&
-          peersResolved.some((p: ChatPeer) => p.id === current)
-        ) {
+        if (current && peersResolved.some((p: ChatPeer) => p.id === current)) {
           return current;
         }
         return peersResolved[0].id;
@@ -174,11 +175,17 @@ export function useRealtimeChat(
       setLoadState("error");
       setLoadError(e instanceof Error ? e.message : "Failed to load messaging.");
     }
-  }, [api, sessionFetch, userId]);
+  }, [api, preferredPeerId, sessionFetch, userId]);
 
   useEffect(() => {
     void bootstrap();
   }, [bootstrap]);
+
+  useEffect(() => {
+    if (preferredPeerId) {
+      setActivePeerId(preferredPeerId);
+    }
+  }, [preferredPeerId]);
 
   useEffect(() => {
     if (!activePeerId || conversationId || loadState !== "ready") return;
