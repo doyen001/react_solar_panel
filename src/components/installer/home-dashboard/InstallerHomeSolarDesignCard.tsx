@@ -26,11 +26,14 @@ function ExternalLinkGlyph({ className }: { className?: string }) {
 
 function SolarSpecRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex min-h-[19.875px] items-center justify-between gap-3 font-dm-sans">
-      <span className="text-[13.25px] leading-[19.875px] text-warm-gray">
+    <div className="flex min-h-[19.875px] min-w-0 items-center justify-between gap-3 font-dm-sans">
+      <span className="shrink-0 text-[13.25px] leading-[19.875px] text-warm-gray">
         {label}
       </span>
-      <span className="shrink-0 text-right text-[13.25px] font-medium leading-[19.875px] text-warm-ink">
+      <span
+        className="min-w-0 truncate text-right text-[13.25px] font-medium leading-[19.875px] text-warm-ink"
+        title={value}
+      >
         {value}
       </span>
     </div>
@@ -238,7 +241,7 @@ export function InstallerHomeSolarDesignCard({
           <h4 className="font-inter text-[12.146px] font-semibold leading-[18.22px] text-warm-ink">
             Design Specifications
           </h4>
-          <div className="flex flex-col gap-[4.413px]">
+          <div className="flex min-w-0 flex-col gap-[4.413px] overflow-hidden">
             {sd.designSpecs.map((row) => (
               <SolarSpecRow
                 key={row.label}
@@ -253,7 +256,7 @@ export function InstallerHomeSolarDesignCard({
           <h4 className="font-inter text-[12.146px] font-semibold leading-[18.22px] text-warm-ink">
             Performance Estimates
           </h4>
-          <div className="flex flex-col gap-[4.413px]">
+          <div className="flex min-w-0 flex-col gap-[4.413px] overflow-hidden">
             {sd.performance.map((row) => (
               <SolarSpecRow
                 key={row.label}
@@ -273,7 +276,10 @@ export function InstallerHomeSolarDesignCard({
               className="size-[8.83px] shrink-0 rounded-full bg-leaf"
               aria-hidden
             />
-            <span className="font-dm-sans text-[11px] font-medium leading-[16.56px] text-warm-gray">
+            <span
+              className="truncate font-dm-sans text-[11px] font-medium leading-[16.56px] text-warm-gray"
+              title={sd.footer.status}
+            >
               {sd.footer.status}
             </span>
           </span>
@@ -281,7 +287,10 @@ export function InstallerHomeSolarDesignCard({
             {sd.footer.updated}
           </span>
         </div>
-        <span className="bg-linear-to-br from-brand-blue to-brand-teal bg-clip-text font-dm-sans text-[11px] font-semibold leading-[16.56px] text-transparent">
+        <span
+          className="min-w-0 truncate bg-linear-to-br from-brand-blue to-brand-teal bg-clip-text font-dm-sans text-[11px] font-semibold leading-[16.56px] text-transparent"
+          title={sd.footer.savings}
+        >
           {sd.footer.savings}
         </span>
       </footer>

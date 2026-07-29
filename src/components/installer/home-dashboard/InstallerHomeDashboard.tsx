@@ -814,11 +814,14 @@ function InstallerHomeDetail({
 /** Figma node 3:8717 — equipment mini-card (Solar System reference). */
 function EquipmentSpecRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex min-h-[19.875px] items-start justify-between gap-2 font-dm-sans">
-      <span className="text-[13.25px] leading-[19.875px] text-warm-gray">
+    <div className="flex min-h-[19.875px] min-w-0 items-start justify-between gap-2 font-dm-sans">
+      <span className="shrink-0 text-[13.25px] leading-[19.875px] text-warm-gray">
         {label}
       </span>
-      <span className="shrink-0 text-right text-[13.25px] font-medium leading-[19.875px] text-warm-ink">
+      <span
+        className="min-w-0 truncate text-right text-[13.25px] font-medium leading-[19.875px] text-warm-ink"
+        title={value}
+      >
         {value}
       </span>
     </div>
@@ -836,7 +839,7 @@ function EquipmentCard({
 }) {
   return (
     <div
-      className="relative rounded-[11px] border-[1.157px] border-warm-border bg-cream-50 p-[13.24px]"
+      className="relative min-w-0 overflow-hidden rounded-[11px] border-[1.157px] border-warm-border bg-cream-50 p-[13.24px]"
       data-node-id="3:8717"
     >
       <div className="flex items-center gap-[8.825px] pr-[52px]">
