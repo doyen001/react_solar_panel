@@ -8,8 +8,8 @@ import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
 import {
   formatChatTimeLabel,
-  useRealtimeChat,
 } from "@/hooks/useRealtimeChat";
+import { useInstallerHomeConversation } from "@/hooks/useInstallerHomeConversation";
 import { fetchWithInstallerSession } from "@/lib/installers/installer-fetch-client";
 import { useAppSelector } from "@/lib/store/hooks";
 
@@ -43,8 +43,7 @@ export function InstallerHomeCustomerCommunication({ customerId }: Props) {
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
 
-  const chat = useRealtimeChat(
-    "installer",
+  const chat = useInstallerHomeConversation(
     fetchWithInstallerSession,
     user,
     selectedCustomerId,
@@ -52,13 +51,7 @@ export function InstallerHomeCustomerCommunication({ customerId }: Props) {
 
   const userDisplayName = useMemo(() => displayName(user), [user]);
 
-  const peerAvailable = useMemo(
-    () =>
-      selectedCustomerId
-        ? chat.contacts.some((contact) => contact.id === selectedCustomerId)
-        : false,
-    [chat.contacts, selectedCustomerId],
-  );
+  const peerAvailable = chat.peerAvailable;
 
   const threadEmptyMessage = useMemo(() => {
     if (!selectedCustomerId) {

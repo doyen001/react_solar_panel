@@ -66,10 +66,14 @@ export function InstallerDashboardShell({
     async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
       try {
         const rows = await fetchInstallerCustomers(
-          { limit: 100 },
+          { limit: 100, leadLinkedOnly: true },
           { signal: opts?.signal },
         );
-        if (!rows.length) return;
+        if (!rows.length) {
+          setCustomers(DEFAULT_CUSTOMERS);
+          setSelectedId(DEFAULT_CUSTOMERS[0]?.id ?? "fallback-1");
+          return;
+        }
         const mapped = rows.map((row) => ({
           id: row.id,
           name: toName(row),

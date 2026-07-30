@@ -19,11 +19,13 @@ export function buildInstallerCustomersUrl(params: {
   page?: number;
   limit?: number;
   search?: string;
+  leadLinkedOnly?: boolean;
 }) {
   const sp = new URLSearchParams();
   if (params.page != null) sp.set("page", String(params.page));
   if (params.limit != null) sp.set("limit", String(params.limit));
   if (params.search?.trim()) sp.set("search", params.search.trim());
+  if (params.leadLinkedOnly) sp.set("leadLinkedOnly", "true");
   const qs = sp.toString();
   return `/api/installers/customers${qs ? `?${qs}` : ""}`;
 }
@@ -33,6 +35,7 @@ export async function fetchInstallerCustomers(
     page?: number;
     limit?: number;
     search?: string;
+    leadLinkedOnly?: boolean;
   } = {},
   init?: RequestInit,
 ): Promise<InstallerCustomerSummary[]> {

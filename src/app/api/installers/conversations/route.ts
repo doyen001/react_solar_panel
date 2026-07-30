@@ -3,8 +3,10 @@ import {
   forwardBackendJson,
 } from "@/lib/server/backend-authed-fetch";
 
-export async function GET() {
-  const res = await backendAuthedFetch("installer", "/conversations");
+export async function GET(request: Request) {
+  const qs = new URL(request.url).searchParams.toString();
+  const path = `/conversations${qs ? `?${qs}` : ""}`;
+  const res = await backendAuthedFetch("installer", path);
   return forwardBackendJson(res);
 }
 
