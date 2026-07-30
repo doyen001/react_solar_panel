@@ -6,7 +6,6 @@ import type { InstallerDashboardSubTab } from "@/components/installer/dashboard/
 import type { InstallerDashboardShellContext } from "@/components/installer/dashboard/InstallerDashboardShell";
 import { InstallerDashboardShell } from "@/components/installer/dashboard/InstallerDashboardShell";
 import {
-  IconCheckSquare,
   IconPanelPlus,
   IconPanelTag,
 } from "@/components/installer/dashboard/installerDashboardIcons";
@@ -30,6 +29,7 @@ import {
 } from "./installerHomeMock";
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
 import { InstallerHomeNotesPanel } from "./InstallerHomeNotesPanel";
+import { InstallerHomeTasksPanel } from "./InstallerHomeTasksPanel";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
 
@@ -554,11 +554,9 @@ function InstallerHomeDetail({
               nodeId="3:9114"
               customerId={selectedCustomerId}
             />
-            <InstallerHomeAccentEmptyPanel
+            <InstallerHomeTasksPanel
               nodeId="3:9129"
-              icon={<IconCheckSquare />}
-              title="Tasks"
-              emptyMessage="No tasks assigned"
+              customerId={selectedCustomerId}
             />
 
             <InstallerHomeTagsPanel />
