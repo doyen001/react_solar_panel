@@ -23,10 +23,10 @@ import {
   INSTALLER_HOME_FINANCE,
   INSTALLER_HOME_PIPELINE_ACTIVE_PHASE_INDEX,
   INSTALLER_HOME_PIPELINE_PHASES,
-  INSTALLER_HOME_PROFILE,
 } from "./installerHomeMock";
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
 import { InstallerHomeCustomerPanels } from "./InstallerHomeCustomerPanels";
+import { InstallerHomeCustomerProfileStrip } from "./InstallerHomeCustomerProfileStrip";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
 
@@ -62,21 +62,6 @@ function IconCpu({ className }: { className?: string }) {
   );
 }
 
-function IconBuilding({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path d="M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18M6 22h15M10 10h4M10 14h4M10 6h4" />
-    </svg>
-  );
-}
-
 /** Figma 3:8986 — overlap layout is relative to 1166px-wide frame */
 const PIPELINE_BAR_REF_WIDTH = 1166;
 
@@ -108,7 +93,6 @@ const PIPELINE_PHASE_ACTIVE_BG =
 const PIPELINE_PHASE_INACTIVE_BG =
   "linear-gradient(90deg, rgba(78, 78, 78, 0.83) 0%, rgba(78, 78, 78, 0.83) 100%), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%)";
 
-type InstallerHomeProfile = typeof INSTALLER_HOME_PROFILE;
 type InstallerHomeEquipment = typeof INSTALLER_HOME_EQUIPMENT;
 type InstallerHomeFinance = typeof INSTALLER_HOME_FINANCE;
 
@@ -126,12 +110,6 @@ function formatNumber(value?: number | null, suffix = "") {
   return `${new Intl.NumberFormat("en-AU", {
     maximumFractionDigits: 1,
   }).format(value)}${suffix}`;
-}
-
-function customerName(customer?: InstallerCustomerSummary | null) {
-  const fullName =
-    `${customer?.firstName ?? ""} ${customer?.lastName ?? ""}`.trim();
-  return fullName || customer?.email || "Selected Customer";
 }
 
 function designProductsTotal(design?: InstallerCustomerDesign | null) {
@@ -162,26 +140,6 @@ function systemSizeKw(design?: InstallerCustomerDesign | null) {
   const panel = productByCategory(design, "panel");
   const wattage = panel?.product?.wattage ?? 412;
   return (design.panelCount * wattage) / 1000;
-}
-
-function buildProfile(
-  customer: InstallerCustomerSummary | null,
-  design: InstallerCustomerDesign | null,
-): InstallerHomeProfile {
-  const salePrice = design?.estimatedSavings
-    ? design.estimatedSavings * 8
-    : designProductsTotal(design);
-  const equipmentCost = designProductsTotal(design);
-
-  return {
-    name: customerName(customer),
-    ref: customer?.id ? `REF #${customer.id.slice(0, 8).toUpperCase()}` : "-",
-    phone: customer?.phone || "-",
-    email: customer?.email || "-",
-    type: "Individual",
-    salePrice: formatCurrency(salePrice),
-    profit: formatCurrency(Math.max(0, salePrice - equipmentCost)),
-  };
 }
 
 function buildEquipment(
@@ -383,10 +341,6 @@ function InstallerHomeDetail({
     };
   }, [customer, selectedCustomer]);
 
-  const profile = useMemo(
-    () => buildProfile(customerForDisplay, design),
-    [customerForDisplay, design],
-  );
   const equipment = useMemo(() => buildEquipment(design), [design]);
   const finance = useMemo(() => buildFinance(design), [design]);
 
@@ -438,76 +392,12 @@ function InstallerHomeDetail({
             </button>
           </section>
 
-          {/* Customer profile strip — Figma 3:8907 */}
-          <section
-            className="mt-6 overflow-hidden rounded-[11px] bg-linear-to-b from-yellow-lemon to-orange-amber px-[17px] py-[20px] md:px-[21px]"
-            data-node-id="3:8907"
-          >
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-[26.5px]">
-              <div className="flex shrink-0 items-start gap-[16.5px]">
-                <div className="flex size-[52.99px] shrink-0 items-center justify-center rounded-full bg-warm-black/20">
-                  <Icon
-                    name="User"
-                    className="size-[26.49px] text-warm-black"
-                  />
-                </div>
-                <div className="min-w-0 pt-[2px]">
-                  <h2 className="font-inter text-[19.875px] font-bold leading-[29.81px] text-warm-black">
-                    {profile.name}
-                  </h2>
-                  <p className="font-dm-sans text-[13.25px] font-medium leading-[19.875px] text-warm-black/70">
-                    {profile.ref}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[26.5px] gap-y-5">
-                <ProfileDetailField
-                  icon={<Icon name="Phone" className="text-warm-black" />}
-                  label="Phone"
-                  value={profile.phone}
-                />
-                <ProfileDetailField
-                  icon={<Icon name="Mail" className="text-warm-black" />}
-                  label="Email"
-                  value={profile.email}
-                  className="min-w-0 max-w-[min(100%,280px)]"
-                />
-                <ProfileDetailField
-                  icon={<IconBuilding className="text-warm-black" />}
-                  label="Type"
-                  value={profile.type}
-                />
-                <ProfileDetailField
-                  icon={<Icon name="Dollar" className="text-warm-black" />}
-                  label="Sale Price"
-                  value={profile.salePrice}
-                />
-                <ProfileDetailField
-                  icon={<Icon name="Dollar" className="text-warm-black" />}
-                  label="Profit"
-                  value={profile.profit}
-                />
-              </div>
-
-              <div className="flex shrink-0 items-center gap-[9.89px]">
-                <button
-                  type="button"
-                  className="inline-flex h-[30.907px] items-center gap-2 rounded-[8.833px] bg-warm-black/15 pl-[13.24px] pr-[14px] font-dm-sans text-[13.25px] font-semibold leading-[19.875px] text-warm-black hover:bg-warm-black/25"
-                >
-                  <Icon name="Pencil" className="size-[15.445px]" />
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex h-[30.907px] items-center gap-2 rounded-[8.833px] bg-linear-to-br from-brand-blue to-brand-teal pl-[13.24px] pr-[16px] font-dm-sans text-[13.25px] font-semibold leading-[19.875px] text-white hover:opacity-95"
-                >
-                  <ProfileUploadIcon className="size-[15.445px] shrink-0 text-white" />
-                  Upload
-                </button>
-              </div>
-            </div>
-          </section>
+          <InstallerHomeCustomerProfileStrip
+            customerId={selectedCustomerId}
+            customer={customerForDisplay}
+            design={design}
+            onCustomerUpdated={setCustomer}
+          />
 
           {/* Pipeline stage strip — Figma 3:8986 */}
           <nav
@@ -618,55 +508,6 @@ function EquipmentCard({
         ))}
       </div>
     </div>
-  );
-}
-
-/** Figma 3:8907 — icon + uppercase label + semibold value on gradient strip */
-function ProfileDetailField({
-  icon,
-  label,
-  value,
-  className,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={classNames(
-        "flex min-h-[36.44px] items-center gap-[8.825px]",
-        className,
-      )}
-    >
-      <span className="mt-0.5 shrink-0 text-warm-black [&_svg]:size-[17.651px]">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="font-dm-sans text-[11.042px] font-normal uppercase leading-[16.56px] tracking-[0.552px] text-warm-black/60">
-          {label}
-        </p>
-        <p className="font-dm-sans text-[13.25px] font-semibold leading-[19.875px] text-warm-black">
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ProfileUploadIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-    </svg>
   );
 }
 

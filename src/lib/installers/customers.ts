@@ -1,5 +1,20 @@
 import { fetchWithInstallerSession } from "@/lib/installers/installer-fetch-client";
 
+export const INSTALLER_CUSTOMER_TYPES = [
+  "Individual",
+  "Business",
+  "Trust",
+  "Company",
+] as const;
+
+export type InstallerCustomerType = (typeof INSTALLER_CUSTOMER_TYPES)[number];
+
+export type InstallerCustomerHomeProfile = {
+  customerType: InstallerCustomerType;
+  salePrice: number;
+  profit: number;
+};
+
 export type InstallerCustomerSummary = {
   id: string;
   firstName?: string | null;
@@ -7,6 +22,7 @@ export type InstallerCustomerSummary = {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  homeProfile?: InstallerCustomerHomeProfile | null;
 };
 
 type ApiEnvelope<T> = {
@@ -67,6 +83,38 @@ export async function fetchInstallerCustomer(
   }
   if (!json.data) {
     throw new Error(json.message || "Customer not found");
+  }
+  return json.data;
+}
+
+export type UpdateInstallerCustomerHomeProfileInput = {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email: string;
+  customerType: InstallerCustomerType;
+  salePrice: number;
+  profit: number;
+};
+
+export async function updateInstallerCustomerHomeProfile(
+  customerId: string,
+  input: UpdateInstallerCustomerHomeProfileInput,
+): Promise<InstallerCustomerSummary> {
+  const res = await fetchWithInstallerSession(
+    `/api/installers/customers/${customerId}/home-profile`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    },
+  );
+  const json = (await res.json()) as ApiEnvelope<InstallerCustomerSummary>;
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to update customer profile");
+  }
+  if (!json.data) {
+    throw new Error(json.message || "Failed to update customer profile");
   }
   return json.data;
 }
