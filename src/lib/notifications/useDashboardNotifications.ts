@@ -11,9 +11,12 @@ import type { DashboardNotificationItem } from "@/lib/notifications/types";
 import { fetchWithCustomerSession } from "@/lib/customers/customer-fetch-client";
 import { fetchWithInstallerSession } from "@/lib/installers/installer-fetch-client";
 
-/** Installer: WS push + HTTP fallback per Phase 4 (plan ~30s poll when WS unavailable). */
-const INSTALLER_POLL_MS = 30_000;
-const CUSTOMER_POLL_MS = 45_000;
+/** HTTP poll interval when installer WebSocket is unavailable. */
+const INSTALLER_FALLBACK_POLL_MS = 60_000;
+/** Customer portal has no WS yet — occasional sync while the tab is open. */
+const CUSTOMER_POLL_MS = 120_000;
+/** Refetch when opening the bell if the list is older than this. */
+const STALE_MS = 5 * 60_000;
 
 export type DashboardNotificationMode = "installer" | "customer";
 
@@ -43,12 +46,15 @@ export function useDashboardNotifications(
   const enabled = options?.enabled ?? true;
   const { apiBase, fetchSession } = modeConfig(mode);
   const pollMs =
-    mode === "installer" ? INSTALLER_POLL_MS : CUSTOMER_POLL_MS;
+    mode === "installer" ? INSTALLER_FALLBACK_POLL_MS : CUSTOMER_POLL_MS;
 
   const [items, setItems] = useState<DashboardNotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
+
+  const lastFetchedAtRef = useRef<number | null>(null);
+  const prevWsStateRef = useRef<string | null>(null);
 
   const mergePushRef = useRef<(item: DashboardNotificationItem) => void>(
     () => {},
@@ -63,7 +69,7 @@ export function useDashboardNotifications(
     setUnreadCount((c) => (item.readAt == null ? c + 1 : c));
   };
 
-  useInstallerNotificationSocket({
+  const { wsState } = useInstallerNotificationSocket({
     enabled: Boolean(enabled && mode === "installer"),
     onNotification: (item) => mergePushRef.current(item),
   });
@@ -81,6 +87,7 @@ export function useDashboardNotifications(
         );
         setItems(r.items);
         setUnreadCount(r.unreadCount);
+        lastFetchedAtRef.current = Date.now();
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong");
         if (!opts?.silent) {
@@ -94,12 +101,23 @@ export function useDashboardNotifications(
     [apiBase, enabled, fetchSession, limit],
   );
 
+  const refetchIfStale = useCallback(
+    async (maxAgeMs = STALE_MS) => {
+      const last = lastFetchedAtRef.current;
+      if (last == null || Date.now() - last > maxAgeMs) {
+        await load({ silent: true });
+      }
+    },
+    [load],
+  );
+
   useEffect(() => {
     if (!enabled) {
       setIsLoading(false);
       setItems([]);
       setUnreadCount(0);
       setError(null);
+      lastFetchedAtRef.current = null;
       return;
     }
     void load();
@@ -107,12 +125,33 @@ export function useDashboardNotifications(
 
   useEffect(() => {
     if (!enabled || !polling) return;
+
+    const shouldPollInstallerFallback =
+      mode === "installer" &&
+      wsState !== "open" &&
+      wsState !== "connecting";
+    const shouldPollCustomer = mode === "customer";
+
+    if (!shouldPollInstallerFallback && !shouldPollCustomer) return;
+
     const id = window.setInterval(
       () => void load({ silent: true }),
       pollMs,
     );
     return () => window.clearInterval(id);
-  }, [enabled, polling, load, pollMs]);
+  }, [enabled, load, mode, polling, pollMs, wsState]);
+
+  useEffect(() => {
+    if (!enabled || mode !== "installer") return;
+    const prev = prevWsStateRef.current;
+    if (prev !== "open" && wsState === "open") {
+      const last = lastFetchedAtRef.current;
+      if (last == null || Date.now() - last > 5_000) {
+        void load({ silent: true });
+      }
+    }
+    prevWsStateRef.current = wsState;
+  }, [enabled, load, mode, wsState]);
 
   const markRead = useCallback(
     async (id: string) => {
@@ -145,8 +184,7 @@ export function useDashboardNotifications(
       setUnreadCount(0);
       return next;
     });
-    void load({ silent: true });
-  }, [apiBase, enabled, fetchSession, load]);
+  }, [apiBase, enabled, fetchSession]);
 
   return {
     items,
@@ -154,6 +192,8 @@ export function useDashboardNotifications(
     isLoading,
     error,
     refetch: load,
+    refetchIfStale,
+    wsState: mode === "installer" ? wsState : null,
     markRead,
     markAllRead,
   };

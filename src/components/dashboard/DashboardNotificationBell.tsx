@@ -130,7 +130,7 @@ export function DashboardNotificationBell({
     unreadCount,
     isLoading,
     error,
-    refetch,
+    refetchIfStale,
     markRead,
     markAllRead,
   } = useDashboardNotifications(apiMode, {
@@ -188,10 +188,10 @@ export function DashboardNotificationBell({
   const togglePanel = useCallback(() => {
     setPanelOpen((open) => {
       const next = !open;
-      if (next && live) void refetch({ silent: true });
+      if (next && live) void refetchIfStale();
       return next;
     });
-  }, [live, refetch]);
+  }, [live, refetchIfStale]);
 
   const defaultBell =
     "relative flex size-8 items-center justify-center rounded-full hover:bg-white/5 customer-text-on-dark";
