@@ -29,6 +29,7 @@ import {
   INSTALLER_HOME_TAGS,
 } from "./installerHomeMock";
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
+import { InstallerHomeNotesPanel } from "./InstallerHomeNotesPanel";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
 
@@ -549,11 +550,9 @@ function InstallerHomeDetail({
               title="Appointment Schedule"
               emptyMessage="No upcoming appointments"
             />
-            <InstallerHomeAccentEmptyPanel
+            <InstallerHomeNotesPanel
               nodeId="3:9114"
-              icon={<Icon name="MessageSquare" />}
-              title="Notes"
-              emptyMessage="No notes added yet"
+              customerId={selectedCustomerId}
             />
             <InstallerHomeAccentEmptyPanel
               nodeId="3:9129"
