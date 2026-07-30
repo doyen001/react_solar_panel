@@ -88,19 +88,6 @@ export const INSTALLER_HOME_FINANCE = [
   { label: "Equipment Cost", value: "$5,300" },
 ];
 
-export const INSTALLER_HOME_TAGS = [
-  "New Lead",
-  "Qualified",
-  "Site Visit",
-  "Quote Sent",
-  "Approved",
-  "In Progress",
-  "Installed",
-  "Follow Up",
-  "VIP",
-  "Referral",
-];
-
 /** Installer home pipeline strip (Figma 3:8986): four horizontal segments */
 export const INSTALLER_HOME_PIPELINE_PHASES = [
   "Design and Permissions",

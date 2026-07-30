@@ -7,7 +7,6 @@ import type { InstallerDashboardShellContext } from "@/components/installer/dash
 import { InstallerDashboardShell } from "@/components/installer/dashboard/InstallerDashboardShell";
 import {
   IconPanelPlus,
-  IconPanelTag,
 } from "@/components/installer/dashboard/installerDashboardIcons";
 import Icon from "@/components/ui/Icons";
 import {
@@ -25,10 +24,10 @@ import {
   INSTALLER_HOME_PIPELINE_ACTIVE_PHASE_INDEX,
   INSTALLER_HOME_PIPELINE_PHASES,
   INSTALLER_HOME_PROFILE,
-  INSTALLER_HOME_TAGS,
 } from "./installerHomeMock";
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
 import { InstallerHomeNotesPanel } from "./InstallerHomeNotesPanel";
+import { InstallerHomeTagsPanel } from "./InstallerHomeTagsPanel";
 import { InstallerHomeTasksPanel } from "./InstallerHomeTasksPanel";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
@@ -559,7 +558,10 @@ function InstallerHomeDetail({
               customerId={selectedCustomerId}
             />
 
-            <InstallerHomeTagsPanel />
+            <InstallerHomeTagsPanel
+              nodeId="3:9144"
+              customerId={selectedCustomerId}
+            />
           </div>
     </>
   );
@@ -679,134 +681,6 @@ function ProfileUploadIcon({ className }: { className?: string }) {
     >
       <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
     </svg>
-  );
-}
-
-function IconTagDismiss({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      aria-hidden
-    >
-      <path d="M18 6L6 18M6 6l12 12" />
-    </svg>
-  );
-}
-
-type InstallerHomeTagVariant =
-  | "amberStrong"
-  | "golden"
-  | "amberSoft"
-  | "amberLight"
-  | "neutral";
-
-/** Matches Figma 3:9144 chip backgrounds & label ink per tag */
-const INSTALLER_HOME_TAG_VARIANT: Record<string, InstallerHomeTagVariant> = {
-  "New Lead": "amberStrong",
-  Qualified: "golden",
-  "Site Visit": "amberSoft",
-  "Quote Sent": "amberLight",
-  Approved: "neutral",
-  "In Progress": "amberStrong",
-  Installed: "golden",
-  "Follow Up": "amberSoft",
-  VIP: "amberLight",
-  Referral: "neutral",
-};
-
-const INSTALLER_HOME_TAG_VARIANT_CLASS: Record<
-  InstallerHomeTagVariant,
-  { shell: string; label: string }
-> = {
-  amberStrong: {
-    shell: "bg-[rgba(245,159,10,0.2)] border-[rgba(245,159,10,0.3)]",
-    label: "text-warm-black",
-  },
-  golden: {
-    shell: "bg-[rgba(238,166,43,0.2)] border-[rgba(238,166,43,0.3)]",
-    label: "text-warm-black",
-  },
-  amberSoft: {
-    shell: "bg-[rgba(240,199,117,0.3)] border-[rgba(240,199,117,0.5)]",
-    label: "text-warm-ink",
-  },
-  amberLight: {
-    shell: "bg-[rgba(245,159,10,0.15)] border-[rgba(245,159,10,0.2)]",
-    label: "text-warm-ink",
-  },
-  neutral: {
-    shell: "bg-cream-300 border-warm-border",
-    label: "text-brown-muted",
-  },
-};
-
-function InstallerHomeTagPill({ label }: { label: string }) {
-  const variant = INSTALLER_HOME_TAG_VARIANT[label] ?? "amberLight";
-  const { shell, label: labelTone } = INSTALLER_HOME_TAG_VARIANT_CLASS[variant];
-
-  return (
-    <div className="inline-flex h-[30.907px] items-stretch">
-      <span
-        className={classNames(
-          "inline-flex items-center rounded-l-full border-b-[1.157px] border-l-[1.157px] border-t-[1.157px] border-solid py-[1.157px] pl-[14.407px] pr-[13.25px] font-dm-sans text-[12.146px] font-semibold leading-[18.219px]",
-          shell,
-          labelTone,
-        )}
-        style={{ fontVariationSettings: "'opsz' 14" }}
-      >
-        {label}
-      </span>
-      <button
-        type="button"
-        className={classNames(
-          "inline-flex w-[26.494px] shrink-0 items-center justify-center rounded-r-full border-b-[1.157px] border-r-[1.157px] border-t-[1.157px] border-solid py-[1.157px] hover:opacity-80",
-          shell,
-          labelTone,
-        )}
-        aria-label={`Remove ${label}`}
-      >
-        <IconTagDismiss className="size-[13.238px]" />
-      </button>
-    </div>
-  );
-}
-
-/** Figma 3:9144 — Tags card with split pills */
-function InstallerHomeTagsPanel() {
-  return (
-    <section
-      className="overflow-hidden rounded-[11.042px] border-[1.157px] border-warm-border bg-cream-50"
-      data-node-id="3:9144"
-    >
-      <div className="flex h-[39.733px] items-center justify-between border-l-[2.315px] border-yellow-lemon bg-linear-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[17.65px] pr-[17.65px]">
-        <div className="flex min-w-0 items-center gap-[8.83px]">
-          <span className="shrink-0 text-warm-ink [&_svg]:size-[17.651px]">
-            <IconPanelTag />
-          </span>
-          <h3 className="truncate font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.3313px] text-warm-ink">
-            Tags
-          </h3>
-        </div>
-        <button
-          type="button"
-          className="inline-flex h-[24.288px] min-w-[61.453px] shrink-0 items-center gap-[8px] rounded-[6.625px] bg-linear-to-b from-yellow-lemon to-orange-amber px-[11.03px] font-dm-sans text-[9.938px] font-bold uppercase leading-[14.906px] tracking-[0.3313px] text-warm-black hover:opacity-95"
-          style={{ fontVariationSettings: "'opsz' 14" }}
-        >
-          <IconPanelPlus className="size-[13.238px] shrink-0" />
-          Add
-        </button>
-      </div>
-      <div className="flex min-h-[105.942px] flex-wrap gap-x-[8.825px] gap-y-[8.825px] px-[17.65px] py-[17.65px]">
-        {INSTALLER_HOME_TAGS.map((tag) => (
-          <InstallerHomeTagPill key={tag} label={tag} />
-        ))}
-      </div>
-    </section>
   );
 }
 
