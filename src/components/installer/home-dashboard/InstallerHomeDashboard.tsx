@@ -26,9 +26,7 @@ import {
   INSTALLER_HOME_PROFILE,
 } from "./installerHomeMock";
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
-import { InstallerHomeNotesPanel } from "./InstallerHomeNotesPanel";
-import { InstallerHomeTagsPanel } from "./InstallerHomeTagsPanel";
-import { InstallerHomeTasksPanel } from "./InstallerHomeTasksPanel";
+import { InstallerHomeCustomerPanels } from "./InstallerHomeCustomerPanels";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
 
@@ -549,19 +547,7 @@ function InstallerHomeDetail({
               title="Appointment Schedule"
               emptyMessage="No upcoming appointments"
             />
-            <InstallerHomeNotesPanel
-              nodeId="3:9114"
-              customerId={selectedCustomerId}
-            />
-            <InstallerHomeTasksPanel
-              nodeId="3:9129"
-              customerId={selectedCustomerId}
-            />
-
-            <InstallerHomeTagsPanel
-              nodeId="3:9144"
-              customerId={selectedCustomerId}
-            />
+            <InstallerHomeCustomerPanels customerId={selectedCustomerId} />
           </div>
     </>
   );

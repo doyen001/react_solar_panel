@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   IconCheckSquare,
@@ -10,7 +10,6 @@ import Icon from "@/components/ui/Icons";
 import {
   createInstallerTask,
   deleteInstallerTask,
-  fetchInstallerTasks,
   updateInstallerTask,
   type InstallerTask,
 } from "@/lib/installers/tasks";
@@ -18,6 +17,11 @@ import {
 type Props = {
   customerId: string | null;
   nodeId?: string;
+  tasks: InstallerTask[];
+  loading: boolean;
+  loadError: string | null;
+  onTaskUpsert: (task: InstallerTask) => void;
+  onTaskRemove: (id: string) => void;
 };
 
 type TaskFormState = {
@@ -188,43 +192,27 @@ function TaskFormModal({
   );
 }
 
-export function InstallerHomeTasksPanel({ customerId, nodeId }: Props) {
+export function InstallerHomeTasksPanel({
+  customerId,
+  nodeId,
+  tasks,
+  loading,
+  loadError,
+  onTaskUpsert,
+  onTaskRemove,
+}: Props) {
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
 
-  const [tasks, setTasks] = useState<InstallerTask[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editingTask, setEditingTask] = useState<InstallerTask | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadTasks = useCallback(async () => {
-    if (!selectedCustomerId) {
-      setTasks([]);
-      setLoadError(null);
-      return;
-    }
-
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const rows = await fetchInstallerTasks(selectedCustomerId);
-      setTasks(rows);
-    } catch (e) {
-      setTasks([]);
-      setLoadError(e instanceof Error ? e.message : "Failed to load tasks");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCustomerId]);
-
-  useEffect(() => {
-    void loadTasks();
-  }, [loadTasks]);
+  const displayError = actionError ?? loadError;
 
   const openCreateModal = () => {
     setModalMode("create");
@@ -253,21 +241,25 @@ export function InstallerHomeTasksPanel({ customerId, nodeId }: Props) {
     setSaving(true);
     setFormError(null);
     try {
+      let saved: InstallerTask;
       if (modalMode === "create") {
-        await createInstallerTask({
+        saved = await createInstallerTask({
           customerId: selectedCustomerId,
           title: values.title,
           content: values.content,
         });
       } else if (editingTask) {
-        await updateInstallerTask(editingTask.id, {
+        saved = await updateInstallerTask(editingTask.id, {
           title: values.title,
           content: values.content,
         });
+      } else {
+        return;
       }
+      onTaskUpsert(saved);
       setModalOpen(false);
       setEditingTask(null);
-      await loadTasks();
+      setActionError(null);
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Could not save task");
     } finally {
@@ -279,11 +271,12 @@ export function InstallerHomeTasksPanel({ customerId, nodeId }: Props) {
     if (!window.confirm(`Delete task "${task.title}"?`)) return;
 
     setDeletingId(task.id);
+    setActionError(null);
     try {
       await deleteInstallerTask(task.id);
-      await loadTasks();
+      onTaskRemove(task.id);
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : "Failed to delete task");
+      setActionError(e instanceof Error ? e.message : "Failed to delete task");
     } finally {
       setDeletingId(null);
     }
@@ -327,9 +320,9 @@ export function InstallerHomeTasksPanel({ customerId, nodeId }: Props) {
             <p className="py-4 text-center font-dm-sans text-[13.25px] text-warm-gray">
               Loading tasks…
             </p>
-          ) : loadError ? (
+          ) : displayError ? (
             <p className="py-4 text-center font-dm-sans text-[13.25px] text-red-600">
-              {loadError}
+              {displayError}
             </p>
           ) : tasks.length === 0 ? (
             <p className="py-4 text-center font-dm-sans text-[13.25px] text-warm-gray">

@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { IconPanelPlus } from "@/components/installer/dashboard/installerDashboardIcons";
 import Icon from "@/components/ui/Icons";
 import {
   createInstallerNote,
   deleteInstallerNote,
-  fetchInstallerNotes,
   updateInstallerNote,
   type InstallerNote,
 } from "@/lib/installers/notes";
@@ -15,6 +14,11 @@ import {
 type Props = {
   customerId: string | null;
   nodeId?: string;
+  notes: InstallerNote[];
+  loading: boolean;
+  loadError: string | null;
+  onNoteUpsert: (note: InstallerNote) => void;
+  onNoteRemove: (id: string) => void;
 };
 
 type NoteFormState = {
@@ -185,43 +189,27 @@ function NoteFormModal({
   );
 }
 
-export function InstallerHomeNotesPanel({ customerId, nodeId }: Props) {
+export function InstallerHomeNotesPanel({
+  customerId,
+  nodeId,
+  notes,
+  loading,
+  loadError,
+  onNoteUpsert,
+  onNoteRemove,
+}: Props) {
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
 
-  const [notes, setNotes] = useState<InstallerNote[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editingNote, setEditingNote] = useState<InstallerNote | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadNotes = useCallback(async () => {
-    if (!selectedCustomerId) {
-      setNotes([]);
-      setLoadError(null);
-      return;
-    }
-
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const rows = await fetchInstallerNotes(selectedCustomerId);
-      setNotes(rows);
-    } catch (e) {
-      setNotes([]);
-      setLoadError(e instanceof Error ? e.message : "Failed to load notes");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCustomerId]);
-
-  useEffect(() => {
-    void loadNotes();
-  }, [loadNotes]);
+  const displayError = actionError ?? loadError;
 
   const openCreateModal = () => {
     setModalMode("create");
@@ -250,21 +238,25 @@ export function InstallerHomeNotesPanel({ customerId, nodeId }: Props) {
     setSaving(true);
     setFormError(null);
     try {
+      let saved: InstallerNote;
       if (modalMode === "create") {
-        await createInstallerNote({
+        saved = await createInstallerNote({
           customerId: selectedCustomerId,
           title: values.title,
           content: values.content,
         });
       } else if (editingNote) {
-        await updateInstallerNote(editingNote.id, {
+        saved = await updateInstallerNote(editingNote.id, {
           title: values.title,
           content: values.content,
         });
+      } else {
+        return;
       }
+      onNoteUpsert(saved);
       setModalOpen(false);
       setEditingNote(null);
-      await loadNotes();
+      setActionError(null);
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Could not save note");
     } finally {
@@ -276,11 +268,12 @@ export function InstallerHomeNotesPanel({ customerId, nodeId }: Props) {
     if (!window.confirm(`Delete note "${note.title}"?`)) return;
 
     setDeletingId(note.id);
+    setActionError(null);
     try {
       await deleteInstallerNote(note.id);
-      await loadNotes();
+      onNoteRemove(note.id);
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : "Failed to delete note");
+      setActionError(e instanceof Error ? e.message : "Failed to delete note");
     } finally {
       setDeletingId(null);
     }
@@ -324,9 +317,9 @@ export function InstallerHomeNotesPanel({ customerId, nodeId }: Props) {
             <p className="py-4 text-center font-dm-sans text-[13.25px] text-warm-gray">
               Loading notes…
             </p>
-          ) : loadError ? (
+          ) : displayError ? (
             <p className="py-4 text-center font-dm-sans text-[13.25px] text-red-600">
-              {loadError}
+              {displayError}
             </p>
           ) : notes.length === 0 ? (
             <p className="py-4 text-center font-dm-sans text-[13.25px] text-warm-gray">

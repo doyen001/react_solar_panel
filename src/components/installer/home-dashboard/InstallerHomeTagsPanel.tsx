@@ -1,7 +1,7 @@
 "use client";
 
 import classNames from "classnames";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   IconPanelPlus,
@@ -11,13 +11,17 @@ import Icon from "@/components/ui/Icons";
 import {
   createInstallerTag,
   deleteInstallerTag,
-  fetchInstallerTags,
   type InstallerTag,
 } from "@/lib/installers/tags";
 
 type Props = {
   customerId: string | null;
   nodeId?: string;
+  tags: InstallerTag[];
+  loading: boolean;
+  loadError: string | null;
+  onTagUpsert: (tag: InstallerTag) => void;
+  onTagRemove: (id: string) => void;
 };
 
 type TagVariant =
@@ -247,41 +251,25 @@ function AddTagModal({
   );
 }
 
-export function InstallerHomeTagsPanel({ customerId, nodeId }: Props) {
+export function InstallerHomeTagsPanel({
+  customerId,
+  nodeId,
+  tags,
+  loading,
+  loadError,
+  onTagUpsert,
+  onTagRemove,
+}: Props) {
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
 
-  const [tags, setTags] = useState<InstallerTag[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadTags = useCallback(async () => {
-    if (!selectedCustomerId) {
-      setTags([]);
-      setLoadError(null);
-      return;
-    }
-
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const rows = await fetchInstallerTags(selectedCustomerId);
-      setTags(rows);
-    } catch (e) {
-      setTags([]);
-      setLoadError(e instanceof Error ? e.message : "Failed to load tags");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCustomerId]);
-
-  useEffect(() => {
-    void loadTags();
-  }, [loadTags]);
+  const displayError = actionError ?? loadError;
 
   const handleAdd = async (value: string) => {
     if (!selectedCustomerId || !value) return;
@@ -289,9 +277,13 @@ export function InstallerHomeTagsPanel({ customerId, nodeId }: Props) {
     setSaving(true);
     setFormError(null);
     try {
-      await createInstallerTag({ customerId: selectedCustomerId, value });
+      const saved = await createInstallerTag({
+        customerId: selectedCustomerId,
+        value,
+      });
+      onTagUpsert(saved);
       setModalOpen(false);
-      await loadTags();
+      setActionError(null);
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Could not add tag");
     } finally {
@@ -301,11 +293,12 @@ export function InstallerHomeTagsPanel({ customerId, nodeId }: Props) {
 
   const handleRemove = async (tag: InstallerTag) => {
     setRemovingId(tag.id);
+    setActionError(null);
     try {
       await deleteInstallerTag(tag.id);
-      setTags((prev) => prev.filter((item) => item.id !== tag.id));
+      onTagRemove(tag.id);
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : "Failed to remove tag");
+      setActionError(e instanceof Error ? e.message : "Failed to remove tag");
     } finally {
       setRemovingId(null);
     }
@@ -352,9 +345,9 @@ export function InstallerHomeTagsPanel({ customerId, nodeId }: Props) {
             <p className="w-full py-2 text-center font-dm-sans text-[13.25px] text-warm-gray">
               Loading tags…
             </p>
-          ) : loadError ? (
+          ) : displayError ? (
             <p className="w-full py-2 text-center font-dm-sans text-[13.25px] text-red-600">
-              {loadError}
+              {displayError}
             </p>
           ) : tags.length === 0 ? (
             <p className="w-full py-2 text-center font-dm-sans text-[13.25px] text-warm-gray">
