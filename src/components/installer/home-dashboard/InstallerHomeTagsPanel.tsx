@@ -101,7 +101,7 @@ function TagPill({
         )}
         style={{ fontVariationSettings: "'opsz' 14" }}
       >
-        {tag.value}
+        {tag.value.charAt(0).toUpperCase() + tag.value.slice(1)}
       </span>
       <button
         type="button"
