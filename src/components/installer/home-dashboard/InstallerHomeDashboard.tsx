@@ -21,8 +21,6 @@ import {
 import {
   INSTALLER_HOME_EQUIPMENT,
   INSTALLER_HOME_FINANCE,
-  INSTALLER_HOME_PIPELINE_ACTIVE_PHASE_INDEX,
-  INSTALLER_HOME_PIPELINE_PHASES,
 } from "./installerHomeMock";
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
 import { InstallerHomeCustomerPanels } from "./InstallerHomeCustomerPanels";
@@ -61,37 +59,6 @@ function IconCpu({ className }: { className?: string }) {
     </svg>
   );
 }
-
-/** Figma 3:8986 — overlap layout is relative to 1166px-wide frame */
-const PIPELINE_BAR_REF_WIDTH = 1166;
-
-const PIPELINE_SEGMENT_LAYOUT = [
-  { left: 0, width: 303, z: 10, round: "rounded-[12px]" },
-  {
-    left: 271,
-    width: 300,
-    z: 20,
-    round: "rounded-br-[12px] rounded-tr-[12px]",
-  },
-  {
-    left: 542,
-    width: 312,
-    z: 30,
-    round: "rounded-br-[12px] rounded-tr-[12px]",
-  },
-  {
-    left: 833,
-    width: 333,
-    z: 40,
-    round: "rounded-br-[12px] rounded-tr-[12px]",
-  },
-] as const;
-
-const PIPELINE_PHASE_ACTIVE_BG =
-  "linear-gradient(98.60461707551042deg, rgb(191, 70, 198) 4.0573%, rgb(113, 0, 119) 98.533%), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%)";
-
-const PIPELINE_PHASE_INACTIVE_BG =
-  "linear-gradient(90deg, rgba(78, 78, 78, 0.83) 0%, rgba(78, 78, 78, 0.83) 100%), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%)";
 
 type InstallerHomeEquipment = typeof INSTALLER_HOME_EQUIPMENT;
 type InstallerHomeFinance = typeof INSTALLER_HOME_FINANCE;
@@ -208,51 +175,6 @@ function buildFinance(
     { label: "Equipment Cost", value: formatCurrency(equipmentCost) },
     { label: "Sale Price", value: formatCurrency(salePrice) },
   ].slice(0, INSTALLER_HOME_FINANCE.length) as InstallerHomeFinance;
-}
-
-function PipelinePhaseStrip({
-  phases,
-  activeIndex,
-}: {
-  phases: readonly string[];
-  activeIndex: number;
-}) {
-  return (
-    <ol className="relative isolate mx-auto mb-0 mt-0 h-[50px] w-[1166px] max-w-full min-w-[1166px] list-none overflow-hidden rounded-[12px] bg-white p-0">
-      {phases.map((label, i) => {
-        const layout = PIPELINE_SEGMENT_LAYOUT[i];
-        if (!layout) return null;
-        const isActive = i === activeIndex;
-        const leftPct = (layout.left / PIPELINE_BAR_REF_WIDTH) * 100;
-        const widthPct = (layout.width / PIPELINE_BAR_REF_WIDTH) * 100;
-        return (
-          <li
-            key={label}
-            className={classNames(
-              "absolute top-0 flex h-[50px] items-center justify-center overflow-hidden border-2 border-[rgba(231,231,231,0.3)] px-2",
-              layout.round,
-            )}
-            style={{
-              left: `${leftPct}%`,
-              width: `${widthPct}%`,
-              zIndex: layout.z,
-              backgroundImage: isActive
-                ? PIPELINE_PHASE_ACTIVE_BG
-                : PIPELINE_PHASE_INACTIVE_BG,
-            }}
-            aria-current={isActive ? "step" : undefined}
-          >
-            <span
-              className="text-center font-dm-sans text-[12px] font-bold leading-normal tracking-[0.5521px] whitespace-nowrap text-white uppercase"
-              style={{ fontVariationSettings: "'opsz' 14" }}
-            >
-              {label}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
-  );
 }
 
 export function InstallerHomeDashboard({
@@ -398,17 +320,6 @@ function InstallerHomeDetail({
             design={design}
             onCustomerUpdated={setCustomer}
           />
-
-          {/* Pipeline stage strip — Figma 3:8986 */}
-          <nav
-            className="mt-5 overflow-x-auto"
-            aria-label="Project pipeline phases"
-          >
-            <PipelinePhaseStrip
-              phases={INSTALLER_HOME_PIPELINE_PHASES}
-              activeIndex={INSTALLER_HOME_PIPELINE_ACTIVE_PHASE_INDEX}
-            />
-          </nav>
 
           {/* Finance strip */}
           <section className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-warm-border bg-warm-border md:grid-cols-3 xl:grid-cols-6">

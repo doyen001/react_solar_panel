@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { InstallerHeader } from "@/components/installer/dashboard/InstallerHeader";
 import { InstallerShortcutRail } from "@/components/installer/dashboard/InstallerShortcutRail";
+import { InstallerHomePipelinePhaseStrip } from "@/components/installer/home-dashboard/InstallerHomePipelinePhaseStrip";
 import Icon from "@/components/ui/Icons";
 import {
   fetchInstallerCustomers,
@@ -208,9 +209,10 @@ export function InstallerDashboardShell({
         </aside>
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-4 md:px-5 md:py-6 lg:px-6">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+          <div className="mb-5 flex min-w-0 flex-wrap items-center gap-2 sm:gap-2.5 xl:flex-nowrap xl:gap-3">
+            <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
               <div
+                className="shrink-0"
                 style={{
                   borderRadius: "13px",
                   padding: "2px 2px",
@@ -219,13 +221,14 @@ export function InstallerDashboardShell({
                 }}
               >
                 <div
-                  className="grid h-[35.881px] w-full max-w-[346.22px] shrink-0 grid-cols-[178.571fr_167.648fr] overflow-hidden rounded-[11px] "
+                  className="grid h-[32px] w-[72px] shrink-0 grid-cols-2 overflow-hidden rounded-[11px] sm:h-[35.881px] sm:w-full sm:max-w-[346.22px] sm:grid-cols-[178.571fr_167.648fr]"
                   data-node-id="31:27831"
                 >
                   <Link
                     href="/installers/dashboard/home"
+                    title="Customer Detail"
                     className={classNames(
-                      "relative flex h-full min-w-0 items-center justify-center gap-[10px] font-dm-sans text-[12.146px] font-bold uppercase leading-[18.219px] tracking-[0.4417px] no-underline transition-colors px-4",
+                      "relative flex h-full min-w-0 items-center justify-center gap-1 font-dm-sans text-[10px] font-bold uppercase leading-tight tracking-[0.4417px] no-underline transition-colors px-2 sm:gap-[10px] sm:px-4 sm:text-[12.146px] sm:leading-[18.219px]",
                       activeSubTab === "detail"
                         ? "bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black"
                         : "bg-cream-50 text-warm-gray hover:text-warm-ink",
@@ -235,21 +238,22 @@ export function InstallerDashboardShell({
                     <Icon
                       name="User"
                       className={classNames(
-                        "size-[17.651px] shrink-0",
+                        "size-4 shrink-0 sm:size-[17.651px]",
                         activeSubTab === "detail"
                           ? "text-warm-black"
                           : "text-warm-gray",
                       )}
                     />
-                    <span className="truncate">Customer Detail</span>
+                    <span className="hidden truncate sm:inline">Customer Detail</span>
                   </Link>
                   <Link
                     href={{
                       pathname: "/installers/dashboard/home",
                       query: { tab: "pipeline" },
                     }}
+                    title="Pipeline Status"
                     className={classNames(
-                      "relative flex h-full min-w-0 items-center justify-center gap-[10px] font-dm-sans text-[12.146px] font-bold uppercase leading-[18.219px] tracking-[0.4417px] no-underline transition-colors",
+                      "relative flex h-full min-w-0 items-center justify-center gap-1 font-dm-sans text-[10px] font-bold uppercase leading-tight tracking-[0.4417px] no-underline transition-colors px-2 sm:gap-[10px] sm:px-4 sm:text-[12.146px] sm:leading-[18.219px]",
                       activeSubTab === "pipeline"
                         ? "bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black"
                         : "bg-cream-50 text-warm-gray hover:text-warm-ink",
@@ -259,30 +263,42 @@ export function InstallerDashboardShell({
                     <Icon
                       name="LayoutGrid"
                       className={classNames(
-                        "size-[17.651px] shrink-0",
+                        "size-4 shrink-0 sm:size-[17.651px]",
                         activeSubTab === "pipeline"
                           ? "text-warm-black"
                           : "text-warm-gray",
                       )}
                     />
-                    <span className="truncate">Pipeline Status</span>
+                    <span className="hidden truncate sm:inline">Pipeline Status</span>
                   </Link>
                 </div>
               </div>
               <Link
                 href="/installers/dashboard/schedule"
+                title="Project Schedule"
                 className={classNames(
-                  "inline-flex items-center gap-2 rounded-lg border px-4 py-2 font-inter text-[13px] font-medium shadow-sm",
+                  "inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2 py-1.5 font-inter text-[11px] font-medium shadow-sm sm:gap-2 sm:px-4 sm:py-2 sm:text-[13px]",
                   activeSubTab === "schedule"
                     ? "border-transparent bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black"
                     : "border-warm-border bg-white text-warm-ink hover:bg-cream-50",
                 )}
               >
-                <Icon name="Calendar" className="size-[18px]" />
-                Project Schedule
+                <Icon name="Calendar" className="size-4 sm:size-[18px]" />
+                <span className="hidden md:inline">Project Schedule</span>
               </Link>
             </div>
+
+            {activeSubTab !== "schedule" ? (
+              <InstallerHomePipelinePhaseStrip className="order-3 w-full min-w-0 xl:order-none xl:min-w-[280px] xl:flex-1" />
+            ) : (
+              <div
+                className="order-3 hidden min-w-0 flex-1 xl:order-none xl:block"
+                aria-hidden
+              />
+            )}
+
             <div
+              className="order-2 ml-auto shrink-0 xl:order-none xl:ml-0"
               style={{
                 borderRadius: "8px",
                 padding: "2px 2px",
@@ -292,7 +308,8 @@ export function InstallerDashboardShell({
             >
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-[10px] self-start overflow-hidden rounded-[6px] bg-linear-to-r from-yellow-lemon to-orange-amber px-4 py-[9px] font-dm-sans text-[12.146px] font-bold uppercase tracking-[0.4417px] text-warm-black transition-opacity hover:opacity-95 lg:self-auto"
+                title="Register new customer"
+                className="inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-[6px] bg-linear-to-r from-yellow-lemon to-orange-amber px-2 py-1.5 font-dm-sans text-[10px] font-bold uppercase tracking-[0.4417px] text-warm-black transition-opacity hover:opacity-95 sm:gap-[10px] sm:px-4 sm:py-[9px] sm:text-[12.146px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
                 data-node-id="3:5380"
                 onClick={() => {
@@ -301,9 +318,10 @@ export function InstallerDashboardShell({
               >
                 <Icon
                   name="UserPlus"
-                  className="size-[18px] shrink-0 text-warm-black"
+                  className="size-4 shrink-0 text-warm-black sm:size-[18px]"
                 />
-                Register new customer
+                <span className="hidden sm:inline lg:hidden">Register</span>
+                <span className="hidden lg:inline">Register new customer</span>
               </button>
             </div>
           </div>
