@@ -6,6 +6,7 @@ import type { ComposeChannel } from "@/components/customer/messages/ComposeChann
 import { ChatThreadHeader } from "@/components/customer/messages/ChatThreadHeader";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
 import { MessageThreadRow } from "@/components/customer/messages/MessageThreadRow";
+import { VoiceCallOverlay } from "@/components/messages/VoiceCallOverlay";
 import type { CustomerUser } from "@/lib/store/customerAuthSlice";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
@@ -81,6 +82,21 @@ export function PortalRealtimeMessagesPanel({
 
   return (
     <>
+      <VoiceCallOverlay
+        callState={chat.voiceCall.callState}
+        peerName={chat.activeContactName}
+        error={chat.voiceCall.error}
+        localStream={chat.voiceCall.localStream}
+        remoteStream={chat.voiceCall.remoteStream}
+        cameraEnabled={chat.voiceCall.cameraEnabled}
+        micEnabled={chat.voiceCall.micEnabled}
+        hasVideoDevice={chat.voiceCall.hasVideoDevice}
+        onAnswer={() => void chat.voiceCall.answerCall()}
+        onReject={chat.voiceCall.rejectCall}
+        onHangUp={chat.voiceCall.hangUp}
+        onToggleCamera={() => void chat.voiceCall.toggleCamera()}
+        onToggleMic={chat.voiceCall.toggleMic}
+      />
       <ConversationSwitcher
         contacts={chat.contacts}
         activeId={activeTabId}
@@ -143,6 +159,13 @@ export function PortalRealtimeMessagesPanel({
             chatUploadBase={
               portal === "customer" ? "/api/customers" : "/api/installers"
             }
+            onStartCall={() => void chat.voiceCall.startCall()}
+            callDisabled={
+              !chat.conversationReady ||
+              chat.wsState !== "open" ||
+              !chat.voiceCall.canStartCall
+            }
+            callInProgress={chat.voiceCall.callActive}
           />
         </div>
       </section>

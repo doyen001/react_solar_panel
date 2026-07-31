@@ -4,6 +4,8 @@ import {
   unwrapApiData,
 } from "@/lib/customers/backend";
 import { getChatWebSocketUrl } from "@/lib/chat/backend-origin";
+import { isCallSignalMessage, type CallSignalMessage } from "@/lib/webrtc/call-signaling";
+import { useWebRtcCall } from "@/hooks/useWebRtcCall";
 
 export type ChatPeer = {
   id: string;
@@ -108,6 +110,19 @@ export function useRealtimeChat(
   const messageIdsRef = useRef<Set<string>>(new Set());
   const attemptedCreateRef = useRef<Set<string>>(new Set());
   const lastPeerChoiceRef = useRef<string | null>(null);
+  const signalingHandlersRef = useRef(
+    new Set<(message: CallSignalMessage) => void>(),
+  );
+
+  const registerSignalingHandler = useCallback(
+    (handler: (message: CallSignalMessage) => void) => {
+      signalingHandlersRef.current.add(handler);
+      return () => {
+        signalingHandlersRef.current.delete(handler);
+      };
+    },
+    [],
+  );
 
   const conversationId = useMemo(() => {
     if (!activePeerId || !userId) return null;
@@ -320,6 +335,10 @@ export function useRealtimeChat(
             type?: string;
             payload?: ChatMessage;
           };
+          if (isCallSignalMessage(msg)) {
+            signalingHandlersRef.current.forEach((handler) => handler(msg));
+            return;
+          }
           if (msg.type === "message" && msg.payload?.id) {
             const p = msg.payload;
             if (messageIdsRef.current.has(p.id)) return;
@@ -434,6 +453,15 @@ export function useRealtimeChat(
     return c ? otherName(c, role) : "Conversation";
   }, [activePeerId, conversations, peers, role]);
 
+  const voiceCall = useWebRtcCall({
+    conversationId,
+    userId,
+    peerUserId: activePeerId,
+    wsRef,
+    wsOpen: wsState === "open",
+    registerSignalingHandler,
+  });
+
   return {
     contacts,
     activePeerId,
@@ -446,8 +474,10 @@ export function useRealtimeChat(
     wsState,
     sending,
     conversationReady: Boolean(conversationId),
+    conversationId,
     refresh: bootstrap,
     userRole: role,
     userId,
+    voiceCall,
   };
 }

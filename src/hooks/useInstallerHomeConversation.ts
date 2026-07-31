@@ -6,6 +6,8 @@ import {
 import { getChatWebSocketUrl } from "@/lib/chat/backend-origin";
 import type { ChatMessage, ConversationRow } from "@/hooks/useRealtimeChat";
 import { isChatWebSocketSendReady } from "@/hooks/useRealtimeChat";
+import { isCallSignalMessage, type CallSignalMessage } from "@/lib/webrtc/call-signaling";
+import { useWebRtcCall } from "@/hooks/useWebRtcCall";
 
 type ConversationWithMessages = ConversationRow & {
   messages?: ChatMessage[];
@@ -48,6 +50,19 @@ export function useInstallerHomeConversation(
   const activeConvIdRef = useRef<string | null>(null);
   const messageIdsRef = useRef<Set<string>>(new Set());
   const attemptedCreateRef = useRef<string | null>(null);
+  const signalingHandlersRef = useRef(
+    new Set<(message: CallSignalMessage) => void>(),
+  );
+
+  const registerSignalingHandler = useCallback(
+    (handler: (message: CallSignalMessage) => void) => {
+      signalingHandlersRef.current.add(handler);
+      return () => {
+        signalingHandlersRef.current.delete(handler);
+      };
+    },
+    [],
+  );
 
   const conversationId = conversation?.id ?? null;
 
@@ -213,6 +228,10 @@ export function useInstallerHomeConversation(
             type?: string;
             payload?: ChatMessage;
           };
+          if (isCallSignalMessage(msg)) {
+            signalingHandlersRef.current.forEach((handler) => handler(msg));
+            return;
+          }
           if (msg.type === "message" && msg.payload?.id) {
             const p = msg.payload;
             if (messageIdsRef.current.has(p.id)) return;
@@ -314,6 +333,15 @@ export function useInstallerHomeConversation(
     return "Customer";
   }, [conversation]);
 
+  const voiceCall = useWebRtcCall({
+    conversationId,
+    userId: installerId,
+    peerUserId: customerId,
+    wsRef,
+    wsOpen: wsState === "open",
+    registerSignalingHandler,
+  });
+
   return {
     messages,
     sendText,
@@ -323,8 +351,10 @@ export function useInstallerHomeConversation(
     sending,
     peerAvailable,
     conversationReady: Boolean(conversationId),
+    conversationId,
     activeContactName,
     userId: installerId,
     refresh: loadConversation,
+    voiceCall,
   };
 }

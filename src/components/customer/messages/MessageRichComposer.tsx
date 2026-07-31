@@ -66,6 +66,9 @@ type Props = {
   disabled?: boolean;
   /** Base path for `/chat/upload`, e.g. `/api/customers` or `/api/installers`. */
   chatUploadBase?: string;
+  onStartCall?: () => void;
+  callDisabled?: boolean;
+  callInProgress?: boolean;
 };
 
 export function MessageRichComposer({
@@ -76,6 +79,9 @@ export function MessageRichComposer({
   sending = false,
   disabled = false,
   chatUploadBase,
+  onStartCall,
+  callDisabled = false,
+  callInProgress = false,
 }: Props) {
   const [draft, setDraft] = useState("");
   const words = useMemo(() => countWords(draft), [draft]);
@@ -401,11 +407,13 @@ export function MessageRichComposer({
           </button>
           <button
             type="button"
-            className="inline-flex h-7 min-w-[76px] items-center justify-center gap-1 rounded-lg border border-warm-border bg-white px-3 font-dm-sans text-[11px] font-medium text-warm-ink hover:bg-cream-50"
+            disabled={disabled || callDisabled || callInProgress}
+            onClick={() => onStartCall?.()}
+            className="inline-flex h-7 min-w-[76px] items-center justify-center gap-1 rounded-lg border border-warm-border bg-white px-3 font-dm-sans text-[11px] font-medium text-warm-ink hover:bg-cream-50 disabled:cursor-not-allowed disabled:opacity-50"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             <Icon name="Phone" className="size-3" />
-            Phone
+            {callInProgress ? "In call" : "Phone"}
           </button>
         </div>
       </div>
