@@ -17,6 +17,7 @@ import {
 } from "@/hooks/useInstallerHomePanel";
 import type { InstallerAppointment } from "@/lib/installers/appointments";
 import type { InstallerNote } from "@/lib/installers/notes";
+import type { InstallerTask } from "@/lib/installers/tasks";
 
 type HomeCustomer = {
   id: string;
@@ -164,6 +165,20 @@ export function InstallerDashboardShell({
       homePanel.upsertNote(note);
     },
     [homePanelEnabled, homePanel.upsertNote, selectedId],
+  );
+
+  const handleTaskCreated = useCallback(
+    (task: InstallerTask) => {
+      if (!homePanelEnabled) return;
+      if (
+        task.customerId !== selectedId ||
+        selectedId.startsWith("fallback-")
+      ) {
+        return;
+      }
+      homePanel.upsertTask(task);
+    },
+    [homePanelEnabled, homePanel.upsertTask, selectedId],
   );
 
   return (
@@ -389,6 +404,7 @@ export function InstallerDashboardShell({
           customers={customerRows}
           onAppointmentCreated={handleAppointmentCreated}
           onNoteCreated={handleNoteCreated}
+          onTaskCreated={handleTaskCreated}
         />
       </div>
     </div>

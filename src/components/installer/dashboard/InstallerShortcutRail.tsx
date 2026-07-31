@@ -12,9 +12,11 @@ import {
 } from "@/components/installer/customer-import/InstallerCustomerImportModal";
 import { InstallerCreateAppointmentModal } from "@/components/installer/appointments/InstallerCreateAppointmentModal";
 import { InstallerCreateNoteModal } from "@/components/installer/notes/InstallerCreateNoteModal";
+import { InstallerCreateTaskModal } from "@/components/installer/tasks/InstallerCreateTaskModal";
 import type { InstallerCustomerSummary } from "@/lib/installers/customers";
 import type { InstallerAppointment } from "@/lib/installers/appointments";
 import type { InstallerNote } from "@/lib/installers/notes";
+import type { InstallerTask } from "@/lib/installers/tasks";
 import { INSTALLER_HOME_PROFILE } from "@/components/installer/home-dashboard/installerHomeMock";
 import {
   IconCheckSquare,
@@ -459,6 +461,7 @@ export type InstallerShortcutRailProps = {
   customers?: InstallerCustomerSummary[];
   onAppointmentCreated?: (appointment: InstallerAppointment) => void;
   onNoteCreated?: (note: InstallerNote) => void;
+  onTaskCreated?: (task: InstallerTask) => void;
 };
 
 export function InstallerShortcutRail({
@@ -467,11 +470,13 @@ export function InstallerShortcutRail({
   customers = [],
   onAppointmentCreated,
   onNoteCreated,
+  onTaskCreated,
 }: InstallerShortcutRailProps = {}) {
   const [solarDesignerModalOpen, setSolarDesignerModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [importSource, setImportSource] =
     useState<CustomerImportSource>("file");
 
@@ -480,7 +485,7 @@ export function InstallerShortcutRail({
     setImportModalOpen(true);
   };
 
-  const noteDisabled =
+  const customerActionDisabled =
     !selectedCustomerId || selectedCustomerId.startsWith("fallback-");
 
   return (
@@ -512,6 +517,12 @@ export function InstallerShortcutRail({
         customerId={selectedCustomerId}
         onCreated={onNoteCreated}
       />
+      <InstallerCreateTaskModal
+        open={taskModalOpen}
+        onClose={() => setTaskModalOpen(false)}
+        customerId={selectedCustomerId}
+        onCreated={onTaskCreated}
+      />
       <nav className="flex flex-col gap-[7px] px-2">
         <ShortcutRailSolarDesignButton
           onPress={() => setSolarDesignerModalOpen(true)}
@@ -541,8 +552,8 @@ export function InstallerShortcutRail({
           }
           label="Notes"
           onClick={() => setNoteModalOpen(true)}
-          disabled={noteDisabled}
-          title={noteDisabled ? "Select a customer first" : undefined}
+          disabled={customerActionDisabled}
+          title={customerActionDisabled ? "Select a customer first" : undefined}
         />
         <ShortcutRailCard
           chip={
@@ -551,6 +562,9 @@ export function InstallerShortcutRail({
             </ShortcutRailGradientChip>
           }
           label="Tasks"
+          onClick={() => setTaskModalOpen(true)}
+          disabled={customerActionDisabled}
+          title={customerActionDisabled ? "Select a customer first" : undefined}
         />
         <ShortcutRailCard
           chip={
