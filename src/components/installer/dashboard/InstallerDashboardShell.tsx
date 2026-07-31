@@ -18,6 +18,7 @@ import {
 import type { InstallerAppointment } from "@/lib/installers/appointments";
 import type { InstallerNote } from "@/lib/installers/notes";
 import type { InstallerTask } from "@/lib/installers/tasks";
+import type { InstallerTag } from "@/lib/installers/tags";
 
 type HomeCustomer = {
   id: string;
@@ -179,6 +180,20 @@ export function InstallerDashboardShell({
       homePanel.upsertTask(task);
     },
     [homePanelEnabled, homePanel.upsertTask, selectedId],
+  );
+
+  const handleTagCreated = useCallback(
+    (tag: InstallerTag) => {
+      if (!homePanelEnabled) return;
+      if (
+        tag.customerId !== selectedId ||
+        selectedId.startsWith("fallback-")
+      ) {
+        return;
+      }
+      homePanel.upsertTag(tag);
+    },
+    [homePanelEnabled, homePanel.upsertTag, selectedId],
   );
 
   return (
@@ -405,6 +420,7 @@ export function InstallerDashboardShell({
           onAppointmentCreated={handleAppointmentCreated}
           onNoteCreated={handleNoteCreated}
           onTaskCreated={handleTaskCreated}
+          onTagCreated={handleTagCreated}
         />
       </div>
     </div>
