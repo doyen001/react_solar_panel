@@ -9,9 +9,9 @@ export type TokenRefreshResult =
   | { ok: true; accessToken: string; refreshToken: string }
   | { ok: false; clearSession: boolean; status: number };
 
-export async function executeTokenRefresh(
-  refreshToken: string,
-): Promise<TokenRefreshResult> {
+const refreshInFlight = new Map<string, Promise<TokenRefreshResult>>();
+
+async function refreshOnce(refreshToken: string): Promise<TokenRefreshResult> {
   const backendBaseUrl = process.env.BACKEND_API_BASE_URL;
   if (!backendBaseUrl) {
     return { ok: false, clearSession: false, status: 500 };
@@ -35,4 +35,24 @@ export async function executeTokenRefresh(
     accessToken: outcome.data.accessToken,
     refreshToken: outcome.data.refreshToken,
   };
+}
+
+/**
+ * Deduplicates concurrent refresh calls that share the same refresh token
+ * (e.g. middleware and BFF refresh routes racing after token rotation).
+ */
+export async function executeTokenRefresh(
+  refreshToken: string,
+): Promise<TokenRefreshResult> {
+  const existing = refreshInFlight.get(refreshToken);
+  if (existing) {
+    return existing;
+  }
+
+  const promise = refreshOnce(refreshToken).finally(() => {
+    refreshInFlight.delete(refreshToken);
+  });
+
+  refreshInFlight.set(refreshToken, promise);
+  return promise;
 }

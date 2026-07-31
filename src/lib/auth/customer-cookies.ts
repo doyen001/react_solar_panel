@@ -1,12 +1,14 @@
 import type { NextResponse } from "next/server";
+import {
+  ACCESS_COOKIE_MAX_AGE_SEC,
+  REFRESH_COOKIE_MAX_AGE_SEC,
+} from "@/lib/auth/jwt-cookie-max-age";
 
 /** Cookie names for customer JWTs (set by Next.js API routes; httpOnly). */
 export const CUSTOMER_ACCESS_COOKIE = "customer_access_token";
 export const CUSTOMER_REFRESH_COOKIE = "customer_refresh_token";
 
-/** Defaults aligned with backend `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN`. */
-export const ACCESS_COOKIE_MAX_AGE_SEC = 15 * 60;
-export const REFRESH_COOKIE_MAX_AGE_SEC = 7 * 24 * 60 * 60;
+export { ACCESS_COOKIE_MAX_AGE_SEC, REFRESH_COOKIE_MAX_AGE_SEC };
 
 export function cookieBaseOptions() {
   return {
