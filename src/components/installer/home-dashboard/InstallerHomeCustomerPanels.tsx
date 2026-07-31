@@ -3,15 +3,13 @@
 import { InstallerHomeNotesPanel } from "./InstallerHomeNotesPanel";
 import { InstallerHomeTagsPanel } from "./InstallerHomeTagsPanel";
 import { InstallerHomeTasksPanel } from "./InstallerHomeTasksPanel";
-import { useInstallerHomePanel } from "@/hooks/useInstallerHomePanel";
+import type { InstallerHomePanelState } from "@/hooks/useInstallerHomePanel";
 
 type Props = {
-  customerId: string | null;
+  panel: InstallerHomePanelState;
 };
 
-export function InstallerHomeCustomerPanels({ customerId }: Props) {
-  const panel = useInstallerHomePanel(customerId);
-
+export function InstallerHomeCustomerPanels({ panel }: Props) {
   return (
     <>
       <InstallerHomeNotesPanel

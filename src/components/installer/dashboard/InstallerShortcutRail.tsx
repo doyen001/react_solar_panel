@@ -10,6 +10,9 @@ import {
   InstallerCustomerImportModal,
   type CustomerImportSource,
 } from "@/components/installer/customer-import/InstallerCustomerImportModal";
+import { InstallerCreateAppointmentModal } from "@/components/installer/appointments/InstallerCreateAppointmentModal";
+import type { InstallerCustomerSummary } from "@/lib/installers/customers";
+import type { InstallerAppointment } from "@/lib/installers/appointments";
 import { INSTALLER_HOME_PROFILE } from "@/components/installer/home-dashboard/installerHomeMock";
 import {
   IconCheckSquare,
@@ -450,13 +453,20 @@ function ShortcutRailUploadButton({ onPress }: { onPress: () => void }) {
 
 export type InstallerShortcutRailProps = {
   onCustomersImported?: () => void;
+  selectedCustomerId?: string | null;
+  customers?: InstallerCustomerSummary[];
+  onAppointmentCreated?: (appointment: InstallerAppointment) => void;
 };
 
 export function InstallerShortcutRail({
   onCustomersImported,
+  selectedCustomerId = null,
+  customers = [],
+  onAppointmentCreated,
 }: InstallerShortcutRailProps = {}) {
   const [solarDesignerModalOpen, setSolarDesignerModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
   const [importSource, setImportSource] =
     useState<CustomerImportSource>("file");
 
@@ -481,18 +491,25 @@ export function InstallerShortcutRail({
         onClose={() => setImportModalOpen(false)}
         onImported={onCustomersImported}
       />
+      <InstallerCreateAppointmentModal
+        open={appointmentModalOpen}
+        onClose={() => setAppointmentModalOpen(false)}
+        defaultCustomerId={selectedCustomerId}
+        customers={customers}
+        onCreated={onAppointmentCreated}
+      />
       <nav className="flex flex-col gap-[7px] px-2">
         <ShortcutRailSolarDesignButton
           onPress={() => setSolarDesignerModalOpen(true)}
         />
         <ShortcutRailCard
-          href="/installers/dashboard/schedule"
           chip={
             <ShortcutRailGradientChip>
               <Icon name="Calendar" />
             </ShortcutRailGradientChip>
           }
           label="Appointment"
+          onClick={() => setAppointmentModalOpen(true)}
         />
         <ShortcutRailCard
           chip={

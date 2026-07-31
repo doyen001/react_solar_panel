@@ -107,6 +107,9 @@ export async function createInstallerAppointment(input: CreateAppointmentInput) 
   if (!res.ok) {
     throw new Error(json.message || "Failed to create appointment");
   }
+  if (!json.data) {
+    throw new Error(json.message || "Failed to create appointment");
+  }
   return json.data;
 }
 

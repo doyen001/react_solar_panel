@@ -5,6 +5,7 @@ import {
   fetchInstallerHomePanel,
   type InstallerHomePanelData,
 } from "@/lib/installers/home-panel";
+import type { InstallerAppointment } from "@/lib/installers/appointments";
 import type { InstallerNote } from "@/lib/installers/notes";
 import type { InstallerTag } from "@/lib/installers/tags";
 import type { InstallerTask } from "@/lib/installers/tasks";
@@ -13,6 +14,7 @@ const EMPTY_PANEL: InstallerHomePanelData = {
   notes: [],
   tasks: [],
   tags: [],
+  appointments: [],
 };
 
 function sortNotes(notes: InstallerNote[]) {
@@ -30,6 +32,12 @@ function sortTasks(tasks: InstallerTask[]) {
 function sortTags(tags: InstallerTag[]) {
   return [...tags].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+}
+
+function sortAppointments(appointments: InstallerAppointment[]) {
+  return [...appointments].sort(
+    (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
   );
 }
 
@@ -104,10 +112,7 @@ export function useInstallerHomePanel(customerId: string | null) {
   const upsertTag = useCallback((tag: InstallerTag) => {
     setData((prev) => ({
       ...prev,
-      tags: sortTags([
-        tag,
-        ...prev.tags.filter((item) => item.id !== tag.id),
-      ]),
+      tags: sortTags([tag, ...prev.tags.filter((item) => item.id !== tag.id)]),
     }));
   }, []);
 
@@ -118,11 +123,29 @@ export function useInstallerHomePanel(customerId: string | null) {
     }));
   }, []);
 
+  const upsertAppointment = useCallback((appointment: InstallerAppointment) => {
+    setData((prev) => ({
+      ...prev,
+      appointments: sortAppointments([
+        appointment,
+        ...prev.appointments.filter((item) => item.id !== appointment.id),
+      ]),
+    }));
+  }, []);
+
+  const removeAppointment = useCallback((id: string) => {
+    setData((prev) => ({
+      ...prev,
+      appointments: prev.appointments.filter((item) => item.id !== id),
+    }));
+  }, []);
+
   return {
     selectedCustomerId,
     notes: data.notes,
     tasks: data.tasks,
     tags: data.tags,
+    appointments: data.appointments,
     loading,
     loadError,
     upsertNote,
@@ -131,5 +154,9 @@ export function useInstallerHomePanel(customerId: string | null) {
     removeTask,
     upsertTag,
     removeTag,
+    upsertAppointment,
+    removeAppointment,
   };
 }
+
+export type InstallerHomePanelState = ReturnType<typeof useInstallerHomePanel>;

@@ -25,6 +25,7 @@ import { InstallerHomeCustomerPanels } from "./InstallerHomeCustomerPanels";
 import { InstallerHomeCustomerProfileStrip } from "./InstallerHomeCustomerProfileStrip";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
+import type { InstallerHomePanelState } from "@/hooks/useInstallerHomePanel";
 
 function IconBattery({ className }: { className?: string }) {
   return (
@@ -181,16 +182,20 @@ export function InstallerHomeDashboard({
   activeSubTab: Exclude<InstallerDashboardSubTab, "schedule">;
 }) {
   return (
-    <InstallerDashboardShell activeSubTab={activeSubTab}>
-      {({ selectedCustomerId, selectedCustomer }) =>
+    <InstallerDashboardShell
+      activeSubTab={activeSubTab}
+      homePanelEnabled={activeSubTab === "detail"}
+    >
+      {({ selectedCustomerId, selectedCustomer, homePanel }) =>
         activeSubTab === "pipeline" ? (
           <InstallerHomePipelineStatus />
-        ) : (
+        ) : homePanel ? (
           <InstallerHomeDetail
             selectedCustomerId={selectedCustomerId}
             selectedCustomer={selectedCustomer}
+            homePanel={homePanel}
           />
-        )
+        ) : null
       }
     </InstallerDashboardShell>
   );
@@ -199,7 +204,10 @@ export function InstallerHomeDashboard({
 function InstallerHomeDetail({
   selectedCustomerId,
   selectedCustomer,
-}: InstallerDashboardShellContext) {
+  homePanel,
+}: InstallerDashboardShellContext & {
+  homePanel: InstallerHomePanelState;
+}) {
   const [customer, setCustomer] = useState<InstallerCustomerSummary | null>(
     null,
   );
@@ -343,8 +351,11 @@ function InstallerHomeDetail({
             <InstallerHomeAppointmentsPanel
               nodeId="3:9097"
               customerId={selectedCustomerId}
+              appointments={homePanel.appointments}
+              loading={homePanel.loading}
+              loadError={homePanel.loadError}
             />
-            <InstallerHomeCustomerPanels customerId={selectedCustomerId} />
+            <InstallerHomeCustomerPanels panel={homePanel} />
           </div>
     </>
   );

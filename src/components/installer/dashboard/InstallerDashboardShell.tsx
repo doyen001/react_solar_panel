@@ -11,6 +11,11 @@ import {
   fetchInstallerCustomers,
   type InstallerCustomerSummary,
 } from "@/lib/installers/customers";
+import {
+  useInstallerHomePanel,
+  type InstallerHomePanelState,
+} from "@/hooks/useInstallerHomePanel";
+import type { InstallerAppointment } from "@/lib/installers/appointments";
 
 type HomeCustomer = {
   id: string;
@@ -22,6 +27,7 @@ type HomeCustomer = {
 export type InstallerDashboardShellContext = {
   selectedCustomerId: string;
   selectedCustomer: HomeCustomer | null;
+  homePanel: InstallerHomePanelState | null;
 };
 
 const DEFAULT_CUSTOMERS: HomeCustomer[] = [
@@ -49,19 +55,29 @@ const CUSTOMER_LIST_SCROLL =
 
 export function InstallerDashboardShell({
   activeSubTab,
+  homePanelEnabled = false,
   children,
 }: {
   activeSubTab: InstallerDashboardSubTab;
+  /** When true, loads notes/tasks/tags/appointments via installer-home-panel. */
+  homePanelEnabled?: boolean;
   children:
     | React.ReactNode
     | ((context: InstallerDashboardShellContext) => React.ReactNode);
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [customers, setCustomers] = useState<HomeCustomer[]>(DEFAULT_CUSTOMERS);
+  const [customerRows, setCustomerRows] = useState<InstallerCustomerSummary[]>(
+    [],
+  );
   const [selectedId, setSelectedId] = useState(
     DEFAULT_CUSTOMERS[0]?.id ?? "fallback-1",
   );
   const [customerSearch, setCustomerSearch] = useState("");
+
+  const homePanel = useInstallerHomePanel(
+    homePanelEnabled ? selectedId : null,
+  );
 
   const loadCustomers = useCallback(
     async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
@@ -71,10 +87,12 @@ export function InstallerDashboardShell({
           { signal: opts?.signal },
         );
         if (!rows.length) {
+          setCustomerRows([]);
           setCustomers(DEFAULT_CUSTOMERS);
           setSelectedId(DEFAULT_CUSTOMERS[0]?.id ?? "fallback-1");
           return;
         }
+        setCustomerRows(rows);
         const mapped = rows.map((row) => ({
           id: row.id,
           name: toName(row),
@@ -116,6 +134,21 @@ export function InstallerDashboardShell({
   const selectedCustomer = useMemo(
     () => customers.find((customer) => customer.id === selectedId) ?? null,
     [customers, selectedId],
+  );
+
+  const handleAppointmentCreated = useCallback(
+    (appointment: InstallerAppointment) => {
+      if (!homePanelEnabled) return;
+      if (
+        !appointment.customerId ||
+        appointment.customerId !== selectedId ||
+        selectedId.startsWith("fallback-")
+      ) {
+        return;
+      }
+      homePanel.upsertAppointment(appointment);
+    },
+    [homePanelEnabled, homePanel.upsertAppointment, selectedId],
   );
 
   return (
@@ -327,11 +360,20 @@ export function InstallerDashboardShell({
           </div>
 
           {typeof children === "function"
-            ? children({ selectedCustomerId: selectedId, selectedCustomer })
+            ? children({
+                selectedCustomerId: selectedId,
+                selectedCustomer,
+                homePanel: homePanelEnabled ? homePanel : null,
+              })
             : children}
         </main>
 
-        <InstallerShortcutRail onCustomersImported={refetchCustomers} />
+        <InstallerShortcutRail
+          onCustomersImported={refetchCustomers}
+          selectedCustomerId={selectedId}
+          customers={customerRows}
+          onAppointmentCreated={handleAppointmentCreated}
+        />
       </div>
     </div>
   );

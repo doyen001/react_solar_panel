@@ -2,11 +2,9 @@
 
 import classNames from "classnames";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { IconPanelPlus } from "@/components/installer/dashboard/installerDashboardIcons";
 import Icon from "@/components/ui/Icons";
 import {
-  fetchInstallerAppointments,
   type InstallerAppointment,
   type InstallerAppointmentStatus,
 } from "@/lib/installers/appointments";
@@ -14,6 +12,9 @@ import {
 type Props = {
   customerId: string | null;
   nodeId?: string;
+  appointments: InstallerAppointment[];
+  loading: boolean;
+  loadError: string | null;
 };
 
 function formatAppointmentWhen(startAt: string, endAt: string) {
@@ -55,52 +56,15 @@ function statusClassName(status: InstallerAppointmentStatus) {
   }
 }
 
-export function InstallerHomeAppointmentsPanel({ customerId, nodeId }: Props) {
+export function InstallerHomeAppointmentsPanel({
+  customerId,
+  nodeId,
+  appointments,
+  loading,
+  loadError,
+}: Props) {
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
-
-  const [appointments, setAppointments] = useState<InstallerAppointment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!selectedCustomerId) {
-      setAppointments([]);
-      setError(null);
-      return;
-    }
-
-    const controller = new AbortController();
-    setLoading(true);
-    setError(null);
-
-    fetchInstallerAppointments(
-      {
-        customerId: selectedCustomerId,
-        limit: 20,
-        page: 1,
-      },
-      { signal: controller.signal },
-    )
-      .then((rows) => {
-        setAppointments(
-          [...rows].sort(
-            (a, b) =>
-              new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
-          ),
-        );
-      })
-      .catch((e) => {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-        setError(e instanceof Error ? e.message : "Failed to load appointments");
-        setAppointments([]);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [selectedCustomerId]);
 
   const addDisabled = !selectedCustomerId || loading;
 
@@ -141,9 +105,9 @@ export function InstallerHomeAppointmentsPanel({ customerId, nodeId }: Props) {
           <p className="py-4 text-center font-dm-sans text-[13.25px] text-warm-gray">
             Loading appointments…
           </p>
-        ) : error ? (
+        ) : loadError ? (
           <p className="py-4 text-center font-dm-sans text-[13.25px] text-red-600">
-            {error}
+            {loadError}
           </p>
         ) : appointments.length === 0 ? (
           <p className="py-4 text-center font-dm-sans text-[13.25px] text-warm-gray">
