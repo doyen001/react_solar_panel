@@ -5,9 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { InstallerDashboardSubTab } from "@/components/installer/dashboard/InstallerDashboardShell";
 import type { InstallerDashboardShellContext } from "@/components/installer/dashboard/InstallerDashboardShell";
 import { InstallerDashboardShell } from "@/components/installer/dashboard/InstallerDashboardShell";
-import {
-  IconPanelPlus,
-} from "@/components/installer/dashboard/installerDashboardIcons";
 import Icon from "@/components/ui/Icons";
 import {
   fetchInstallerCustomer,
@@ -22,6 +19,7 @@ import {
   INSTALLER_HOME_EQUIPMENT,
   INSTALLER_HOME_FINANCE,
 } from "./installerHomeMock";
+import { InstallerHomeAppointmentsPanel } from "./InstallerHomeAppointmentsPanel";
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
 import { InstallerHomeCustomerPanels } from "./InstallerHomeCustomerPanels";
 import { InstallerHomeCustomerProfileStrip } from "./InstallerHomeCustomerProfileStrip";
@@ -342,11 +340,9 @@ function InstallerHomeDetail({
 
           {/* Bottom panels */}
           <div className="mt-6 space-y-6 pb-10">
-            <InstallerHomeAccentEmptyPanel
+            <InstallerHomeAppointmentsPanel
               nodeId="3:9097"
-              icon={<Icon name="Calendar" />}
-              title="Appointment Schedule"
-              emptyMessage="No upcoming appointments"
+              customerId={selectedCustomerId}
             />
             <InstallerHomeCustomerPanels customerId={selectedCustomerId} />
           </div>
@@ -419,51 +415,5 @@ function EquipmentCard({
         ))}
       </div>
     </div>
-  );
-}
-
-function InstallerHomeAccentEmptyPanel({
-  icon,
-  title,
-  emptyMessage,
-  nodeId,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  emptyMessage: string;
-  nodeId?: string;
-}) {
-  return (
-    <section
-      className="overflow-hidden rounded-[11.042px] border-[1.157px] border-warm-border bg-cream-50"
-      data-node-id={nodeId}
-    >
-      <div className="flex h-[39.733px] items-center justify-between border-l-[2.315px] border-yellow-lemon bg-linear-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[17.65px] pr-[17.65px]">
-        <div className="flex min-w-0 items-center gap-[8.83px]">
-          <span className="shrink-0 text-warm-ink [&_svg]:size-[17.651px]">
-            {icon}
-          </span>
-          <h3 className="truncate font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.3313px] text-warm-ink">
-            {title}
-          </h3>
-        </div>
-        <button
-          type="button"
-          className="inline-flex h-[24.288px] min-w-[61.453px] shrink-0 items-center gap-[8px] rounded-[6.625px] bg-linear-to-b from-yellow-lemon to-orange-amber px-[11.03px] font-dm-sans text-[9.938px] font-bold uppercase leading-[14.906px] tracking-[0.3313px] text-warm-black hover:opacity-95"
-          style={{ fontVariationSettings: "'opsz' 14" }}
-        >
-          <IconPanelPlus className="size-[13.238px] shrink-0" />
-          Add
-        </button>
-      </div>
-      <div className="flex h-[72.864px] items-center justify-center">
-        <p
-          className="font-dm-sans text-[13.25px] font-normal leading-[19.875px] text-warm-gray"
-          style={{ fontVariationSettings: "'opsz' 9" }}
-        >
-          {emptyMessage}
-        </p>
-      </div>
-    </section>
   );
 }
