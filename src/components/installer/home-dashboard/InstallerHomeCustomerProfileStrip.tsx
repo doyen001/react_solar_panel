@@ -1,9 +1,17 @@
 "use client";
 
 import classNames from "classnames";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { toast } from "react-toastify";
 import Icon from "@/components/ui/Icons";
+import {
+  deleteInstallerCustomerDocument,
+  fetchInstallerCustomerDocuments,
+  formatDocumentSize,
+  uploadInstallerCustomerDocument,
+  type InstallerCustomerDocument,
+} from "@/lib/installers/customer-documents";
 import {
   INSTALLER_CUSTOMER_TYPES,
   updateInstallerCustomerHomeProfile,
@@ -428,9 +436,49 @@ export function InstallerHomeCustomerProfileStrip({
   design,
   onCustomerUpdated,
 }: Props) {
+  const fileInputId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<InstallerCustomerDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const selectedCustomerId =
+    customerId && !customerId.startsWith("fallback-") ? customerId : null;
+
+  useEffect(() => {
+    if (!selectedCustomerId) {
+      setDocuments([]);
+      setDocumentsError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setDocumentsLoading(true);
+    setDocumentsError(null);
+
+    fetchInstallerCustomerDocuments(selectedCustomerId, {
+      signal: controller.signal,
+    })
+      .then(setDocuments)
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setDocuments([]);
+        setDocumentsError(
+          e instanceof Error ? e.message : "Failed to load documents",
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDocumentsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [selectedCustomerId]);
 
   const profile = useMemo(
     () => buildProfileDisplay(customer, design),
@@ -480,6 +528,44 @@ export function InstallerHomeCustomerProfileStrip({
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !selectedCustomerId) return;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const doc = await uploadInstallerCustomerDocument(selectedCustomerId, file);
+      setDocuments((prev) => [doc, ...prev]);
+      toast.success(`"${doc.fileName}" uploaded successfully.`);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to upload document";
+      setUploadError(message);
+      toast.error(message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleDeleteDocument(doc: InstallerCustomerDocument) {
+    if (!window.confirm(`Delete "${doc.fileName}"?`)) return;
+
+    setDeletingId(doc.id);
+    setUploadError(null);
+    try {
+      await deleteInstallerCustomerDocument(doc.id);
+      setDocuments((prev) => prev.filter((item) => item.id !== doc.id));
+    } catch (err) {
+      setUploadError(
+        err instanceof Error ? err.message : "Failed to delete document",
+      );
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -551,13 +637,72 @@ export function InstallerHomeCustomerProfileStrip({
             </button>
             <button
               type="button"
-              className="inline-flex h-[30.907px] items-center gap-2 rounded-[8.833px] bg-linear-to-br from-brand-blue to-brand-teal pl-[13.24px] pr-[16px] font-dm-sans text-[13.25px] font-semibold leading-[19.875px] text-white hover:opacity-95"
+              className="inline-flex h-[30.907px] items-center gap-2 rounded-[8.833px] bg-linear-to-br from-brand-blue to-brand-teal pl-[13.24px] pr-[16px] font-dm-sans text-[13.25px] font-semibold leading-[19.875px] text-white hover:opacity-95 disabled:opacity-60"
+              disabled={!selectedCustomerId || uploading}
+              onClick={() => fileInputRef.current?.click()}
             >
               <ProfileUploadIcon className="size-[15.445px] shrink-0 text-white" />
-              Upload
+              {uploading ? "Uploading…" : "Upload"}
             </button>
+            <input
+              ref={fileInputRef}
+              id={fileInputId}
+              type="file"
+              className="sr-only"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,image/*"
+              disabled={!selectedCustomerId || uploading}
+              onChange={(e) => void handleFileSelected(e)}
+            />
           </div>
         </div>
+
+        {(uploadError || documentsError || documentsLoading || documents.length > 0) && (
+          <div className="mt-4 border-t border-warm-black/15 pt-3">
+            {uploadError ? (
+              <p className="mb-2 font-dm-sans text-xs text-red-800">{uploadError}</p>
+            ) : null}
+            {documentsError ? (
+              <p className="font-dm-sans text-xs text-red-800">{documentsError}</p>
+            ) : documentsLoading ? (
+              <p className="font-dm-sans text-xs text-warm-black/70">
+                Loading documents…
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {documents.map((doc) => (
+                  <li
+                    key={doc.id}
+                    className="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-warm-black/10 px-3 py-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="truncate font-dm-sans text-sm font-semibold text-warm-black hover:underline"
+                        title={doc.fileName}
+                      >
+                        {doc.fileName}
+                      </a>
+                      <p className="font-dm-sans text-[11px] text-warm-black/60">
+                        {formatDocumentSize(doc.sizeBytes)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-warm-black/70 hover:bg-warm-black/10 disabled:opacity-50"
+                      aria-label={`Delete ${doc.fileName}`}
+                      disabled={deletingId === doc.id}
+                      onClick={() => void handleDeleteDocument(doc)}
+                    >
+                      <Icon name="Trash" className="size-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </section>
 
       <ProfileEditModal
