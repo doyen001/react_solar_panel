@@ -16,6 +16,7 @@ import {
   type InstallerHomePanelState,
 } from "@/hooks/useInstallerHomePanel";
 import type { InstallerAppointment } from "@/lib/installers/appointments";
+import type { InstallerNote } from "@/lib/installers/notes";
 
 type HomeCustomer = {
   id: string;
@@ -149,6 +150,20 @@ export function InstallerDashboardShell({
       homePanel.upsertAppointment(appointment);
     },
     [homePanelEnabled, homePanel.upsertAppointment, selectedId],
+  );
+
+  const handleNoteCreated = useCallback(
+    (note: InstallerNote) => {
+      if (!homePanelEnabled) return;
+      if (
+        note.customerId !== selectedId ||
+        selectedId.startsWith("fallback-")
+      ) {
+        return;
+      }
+      homePanel.upsertNote(note);
+    },
+    [homePanelEnabled, homePanel.upsertNote, selectedId],
   );
 
   return (
@@ -373,6 +388,7 @@ export function InstallerDashboardShell({
           selectedCustomerId={selectedId}
           customers={customerRows}
           onAppointmentCreated={handleAppointmentCreated}
+          onNoteCreated={handleNoteCreated}
         />
       </div>
     </div>
