@@ -98,22 +98,80 @@ export function buildLeadsListUrl(params: {
   return `/api/installers/leads${qs ? `?${qs}` : ""}`;
 }
 
+const inflightLeadFetches = new Map<string, Promise<LeadListResult>>();
+const recentLeadResults = new Map<
+  string,
+  { at: number; result: LeadListResult }
+>();
+const RECENT_LEAD_RESULT_MS = 5_000;
+
+const inflightAssignableFetches = new Map<
+  string,
+  Promise<AssignableUser[]>
+>();
+const recentAssignableResults = new Map<
+  string,
+  { at: number; result: AssignableUser[] }
+>();
+const ASSIGNABLE_URL = "/api/installers/users/assignable-for-leads";
+
+export function invalidateInstallerLeadsListCache(
+  params: Parameters<typeof buildLeadsListUrl>[0],
+) {
+  recentLeadResults.delete(buildLeadsListUrl(params));
+}
+
+export function invalidateAssignableUsersForLeadsCache() {
+  recentAssignableResults.delete(ASSIGNABLE_URL);
+}
+
+/** Test-only helper to reset module-level leads fetch dedupe state. */
+export function resetInstallerLeadsListCacheForTests() {
+  inflightLeadFetches.clear();
+  recentLeadResults.clear();
+  inflightAssignableFetches.clear();
+  recentAssignableResults.clear();
+}
+
 export async function fetchInstallerLeads(
   params: Parameters<typeof buildLeadsListUrl>[0],
   init?: RequestInit,
 ): Promise<LeadListResult> {
-  const res = await fetchWithInstallerSession(buildLeadsListUrl(params), {
-    cache: "no-store",
-    ...init,
-  });
-  const json = (await res.json()) as ApiEnvelope<InstallerLeadSummary[]>;
-  if (!res.ok) {
-    throw new Error(json.message || "Failed to load leads");
+  const url = buildLeadsListUrl(params);
+  const inflight = inflightLeadFetches.get(url);
+  if (inflight) return inflight;
+
+  const cached = recentLeadResults.get(url);
+  if (cached && Date.now() - cached.at < RECENT_LEAD_RESULT_MS) {
+    return cached.result;
   }
-  return {
-    leads: Array.isArray(json.data) ? json.data : [],
-    meta: json.meta?.pagination,
-  };
+
+  let promise!: Promise<LeadListResult>;
+  promise = (async () => {
+    try {
+      const res = await fetchWithInstallerSession(url, {
+        cache: "no-store",
+        ...init,
+      });
+      const json = (await res.json()) as ApiEnvelope<InstallerLeadSummary[]>;
+      if (!res.ok) {
+        throw new Error(json.message || "Failed to load leads");
+      }
+      const result = {
+        leads: Array.isArray(json.data) ? json.data : [],
+        meta: json.meta?.pagination,
+      };
+      recentLeadResults.set(url, { at: Date.now(), result });
+      return result;
+    } finally {
+      if (inflightLeadFetches.get(url) === promise) {
+        inflightLeadFetches.delete(url);
+      }
+    }
+  })();
+
+  inflightLeadFetches.set(url, promise);
+  return promise;
 }
 
 export async function fetchInstallerLeadDetail(
@@ -173,13 +231,37 @@ export async function assignInstallerLead(id: string, assignedToId: string) {
 }
 
 export async function fetchAssignableUsersForLeads(): Promise<AssignableUser[]> {
-  const res = await fetchWithInstallerSession(
-    "/api/installers/users/assignable-for-leads",
-    { cache: "no-store" },
-  );
-  const json = (await res.json()) as ApiEnvelope<AssignableUser[]>;
-  if (!res.ok) {
-    throw new Error(json.message || "Failed to load users");
+  const inflight = inflightAssignableFetches.get(ASSIGNABLE_URL);
+  if (inflight) return inflight;
+
+  const cached = recentAssignableResults.get(ASSIGNABLE_URL);
+  if (cached && Date.now() - cached.at < RECENT_LEAD_RESULT_MS) {
+    return cached.result;
   }
-  return Array.isArray(json.data) ? json.data : [];
+
+  let promise!: Promise<AssignableUser[]>;
+  promise = (async () => {
+    try {
+      const res = await fetchWithInstallerSession(ASSIGNABLE_URL, {
+        cache: "no-store",
+      });
+      const json = (await res.json()) as ApiEnvelope<AssignableUser[]>;
+      if (!res.ok) {
+        throw new Error(json.message || "Failed to load users");
+      }
+      const result = Array.isArray(json.data) ? json.data : [];
+      recentAssignableResults.set(ASSIGNABLE_URL, {
+        at: Date.now(),
+        result,
+      });
+      return result;
+    } finally {
+      if (inflightAssignableFetches.get(ASSIGNABLE_URL) === promise) {
+        inflightAssignableFetches.delete(ASSIGNABLE_URL);
+      }
+    }
+  })();
+
+  inflightAssignableFetches.set(ASSIGNABLE_URL, promise);
+  return promise;
 }

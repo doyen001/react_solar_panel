@@ -2,7 +2,7 @@
 
 import classNames from "classnames";
 import { formatDistanceToNow } from "date-fns";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePollingResource } from "@/hooks/usePollingResource";
 import {
   assignInstallerLead,
@@ -11,6 +11,7 @@ import {
   fetchInstallerLeads,
   formatPersonName,
   INSTALLER_LEAD_STATUSES,
+  invalidateInstallerLeadsListCache,
   type InstallerLeadStatus,
   type InstallerLeadSummary,
   patchInstallerLead,
@@ -80,24 +81,40 @@ export function InstallerLeadsWorkspace() {
   const [saving, setSaving] = useState(false);
   const [assigning, setAssigning] = useState(false);
 
+  const listParamsRef = useRef({
+    page,
+    limit: PAGE_SIZE,
+    status: statusFilter || undefined,
+    search: searchDebounced || undefined,
+    assignedToId: isAdmin ? assignedToFilter || undefined : undefined,
+  });
+  listParamsRef.current = {
+    page,
+    limit: PAGE_SIZE,
+    status: statusFilter || undefined,
+    search: searchDebounced || undefined,
+    assignedToId: isAdmin ? assignedToFilter || undefined : undefined,
+  };
+
+  const loadSeqRef = useRef(0);
+
   const refreshList = useCallback(
-    async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
+    async (opts?: { silent?: boolean; signal?: AbortSignal; force?: boolean }) => {
+      const loadSeq = ++loadSeqRef.current;
+      const isStale = () => loadSeq !== loadSeqRef.current;
+
       const silent = opts?.silent ?? false;
+      const params = listParamsRef.current;
+      if (opts?.force) {
+        invalidateInstallerLeadsListCache(params);
+      }
       if (!silent) {
         setListLoading(true);
       }
       setListError(null);
       try {
-        const result = await fetchInstallerLeads(
-          {
-            page,
-            limit: PAGE_SIZE,
-            status: statusFilter || undefined,
-            search: searchDebounced || undefined,
-            assignedToId: isAdmin ? assignedToFilter || undefined : undefined,
-          },
-          { signal: opts?.signal },
-        );
+        const result = await fetchInstallerLeads(params, { signal: opts?.signal });
+        if (isStale()) return;
         setList(result.leads);
         setListMeta(
           result.meta
@@ -111,19 +128,31 @@ export function InstallerLeadsWorkspace() {
         );
       } catch (e) {
         if (e instanceof DOMException && e.name === "AbortError") return;
+        if (isStale()) return;
         setListError(e instanceof Error ? e.message : "Could not load leads");
         setList([]);
         setListMeta(null);
       } finally {
-        if (!silent) setListLoading(false);
+        if (!isStale() && !silent) setListLoading(false);
       }
     },
-    [page, statusFilter, searchDebounced, assignedToFilter, isAdmin],
+    [],
   );
 
   useEffect(() => {
-    void refreshList();
-  }, [refreshList]);
+    const controller = new AbortController();
+    void refreshList({ signal: controller.signal });
+    return () => {
+      controller.abort();
+    };
+  }, [
+    page,
+    statusFilter,
+    searchDebounced,
+    assignedToFilter,
+    isAdmin,
+    refreshList,
+  ]);
 
   usePollingResource(
     useCallback(
@@ -132,7 +161,7 @@ export function InstallerLeadsWorkspace() {
       },
       [refreshList],
     ),
-    { skipInitialTick: true },
+    { skipInitialTick: true, refetchOnWindowFocus: false },
   );
 
   useEffect(() => {
@@ -216,7 +245,7 @@ export function InstallerLeadsWorkspace() {
         ...(status ? { status } : {}),
         notes: notesDraft,
       });
-      await refreshList();
+      await refreshList({ force: true });
       const fresh = await fetchInstallerLeadDetail(selectedId);
       setDetail(fresh);
       setNotesDraft(fresh.notes ?? "");
@@ -233,7 +262,7 @@ export function InstallerLeadsWorkspace() {
     setDetailError(null);
     try {
       await assignInstallerLead(selectedId, assignDraft);
-      await refreshList();
+      await refreshList({ force: true });
       const fresh = await fetchInstallerLeadDetail(selectedId);
       setDetail(fresh);
       setAssignDraft(fresh.assignedToId ?? fresh.assignedTo?.id ?? "");
@@ -262,7 +291,7 @@ export function InstallerLeadsWorkspace() {
           </div>
           <button
             type="button"
-            onClick={() => void refreshList()}
+            onClick={() => void refreshList({ force: true })}
             disabled={listLoading}
             className="shrink-0 rounded-md border border-warm-border bg-white px-2 py-1 font-dm-sans text-[10px] font-semibold text-navy-800 shadow-sm hover:bg-cream-50 disabled:opacity-50"
             aria-label="Refresh leads list"
