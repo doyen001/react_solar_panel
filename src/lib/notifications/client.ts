@@ -48,29 +48,30 @@ export async function fetchDashboardNotifications(
     return cached.result;
   }
 
-  const promise = (async () => {
-    try {
-      const res = await fetchWithSession(url, {
-        cache: "no-store",
-      });
-      const json = (await res.json()) as ApiEnvelope<DashboardNotificationItem[]>;
-      if (!res.ok) {
-        throw new Error(json.message || "Failed to load notifications");
-      }
-      const unreadCount =
-        typeof json.meta?.unreadCount === "number" ? json.meta.unreadCount : 0;
-      const result = {
-        items: Array.isArray(json.data) ? json.data : [],
-        unreadCount,
-      };
-      recentListResults.set(url, { at: Date.now(), result });
-      return result;
-    } finally {
-      if (inflightListFetches.get(url) === promise) {
-        inflightListFetches.delete(url);
-      }
+  const runFetch = async (): Promise<NotificationListResult> => {
+    const res = await fetchWithSession(url, {
+      cache: "no-store",
+    });
+    const json = (await res.json()) as ApiEnvelope<DashboardNotificationItem[]>;
+    if (!res.ok) {
+      throw new Error(json.message || "Failed to load notifications");
     }
-  })();
+    const unreadCount =
+      typeof json.meta?.unreadCount === "number" ? json.meta.unreadCount : 0;
+    const result = {
+      items: Array.isArray(json.data) ? json.data : [],
+      unreadCount,
+    };
+    recentListResults.set(url, { at: Date.now(), result });
+    return result;
+  };
+
+  let promise: Promise<NotificationListResult>;
+  promise = runFetch().finally(() => {
+    if (inflightListFetches.get(url) === promise) {
+      inflightListFetches.delete(url);
+    }
+  });
 
   inflightListFetches.set(url, promise);
   return promise;
