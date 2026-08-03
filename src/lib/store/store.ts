@@ -21,6 +21,57 @@ import adminAuthReducer, {
 } from "./adminAuthSlice";
 import { readPersistedAuthPreload } from "./read-persisted-auth";
 
+function hydrateStoreFromSessionStorage() {
+  const preload = readPersistedAuthPreload();
+  if (!preload) return;
+
+  const state = store.getState();
+
+  if (preload.customerAuth?.user && !state.customerAuth.user) {
+    if (preload.customerAuth.accessToken) {
+      store.dispatch(
+        setCustomerSession({
+          user: preload.customerAuth.user,
+          accessToken: preload.customerAuth.accessToken,
+        }),
+      );
+    } else {
+      store.dispatch(setUser(preload.customerAuth.user));
+    }
+  }
+
+  if (preload.installerAuth?.user && !state.installerAuth.user) {
+    if (preload.installerAuth.accessToken) {
+      store.dispatch(
+        setInstallerSession({
+          user: preload.installerAuth.user,
+          accessToken: preload.installerAuth.accessToken,
+        }),
+      );
+    } else {
+      store.dispatch(setInstallerUser(preload.installerAuth.user));
+    }
+  }
+
+  if (preload.adminAuth?.user && !state.adminAuth.user) {
+    if (preload.adminAuth.accessToken) {
+      store.dispatch(
+        setAdminSession({
+          user: preload.adminAuth.user,
+          accessToken: preload.adminAuth.accessToken,
+        }),
+      );
+    } else {
+      store.dispatch(setAdminUser(preload.adminAuth.user));
+    }
+  }
+}
+
+export function hydrateAuthFromSessionStorage() {
+  if (typeof window === "undefined") return;
+  hydrateStoreFromSessionStorage();
+}
+
 const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) => {
   const result = next(action);
   if (typeof window === "undefined") return result;
@@ -88,7 +139,6 @@ export const store = configureStore({
     designProposal: designProposalReducer,
     solarMaintenanceContract: solarMaintenanceContractReducer,
   },
-  preloadedState: readPersistedAuthPreload(),
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       customerAuthPersistenceMiddleware,

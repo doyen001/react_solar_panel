@@ -1,9 +1,6 @@
 import Image from "next/image";
 import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
-import {
-  PERFORMANCE_ESTIMATES,
-  SELECTED_DESIGN_SPECS,
-} from "./designConstants";
+import type { SpecLine } from "./designConstants";
 import { designAssets } from "./designAssets";
 import { DesignSpecRow } from "./DesignSpecRow";
 import Icon from "@/components/ui/Icons";
@@ -12,12 +9,20 @@ type Props = {
   title: string;
   lastUpdated: string;
   savingsLabel: string;
+  statusLabel: string;
+  statusApproved?: boolean;
+  designSpecs: SpecLine[];
+  performanceEstimates: SpecLine[];
 };
 
 export function SelectedDesignPanel({
   title,
   lastUpdated,
   savingsLabel,
+  statusLabel,
+  statusApproved = false,
+  designSpecs,
+  performanceEstimates,
 }: Props) {
   return (
     <section className="customer-card-bg customer-cream-card-border overflow-hidden rounded-[10px] border">
@@ -32,8 +37,14 @@ export function SelectedDesignPanel({
           />
         }
         action={
-          <span className="rounded-full bg-mint-soft px-2.5 py-0.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-success">
-            Approved
+          <span
+            className={`rounded-full px-2.5 py-0.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] ${
+              statusApproved
+                ? "bg-mint-soft text-success"
+                : "bg-cream-225 text-warm-gray"
+            }`}
+          >
+            {statusLabel}
           </span>
         }
       />
@@ -85,7 +96,7 @@ export function SelectedDesignPanel({
                   className="size-2 shrink-0 rounded-full bg-leaf"
                   aria-hidden
                 />
-                Design Approved
+                {statusLabel}
               </span>
               <span
                 className="font-dm-sans font-normal leading-[15px] customer-text-muted"
@@ -112,7 +123,7 @@ export function SelectedDesignPanel({
             Design Specifications
           </h3>
           <div className="mt-2 flex flex-col">
-            {SELECTED_DESIGN_SPECS.map((row) => (
+            {designSpecs.map((row) => (
               <DesignSpecRow
                 key={row.label}
                 label={row.label}
@@ -128,7 +139,7 @@ export function SelectedDesignPanel({
             Performance Estimates
           </h3>
           <div className="mt-2 flex flex-col">
-            {PERFORMANCE_ESTIMATES.map((row) => (
+            {performanceEstimates.map((row) => (
               <DesignSpecRow
                 key={row.label}
                 label={row.label}

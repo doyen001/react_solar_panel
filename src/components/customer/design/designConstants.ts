@@ -89,7 +89,7 @@ export const COMPARISON_DESIGNS: DesignColumn[] = [
 
 export type ComparisonRow = {
   feature: string;
-  values: [string, string, string, string];
+  values: string[];
 };
 
 export const COMPARISON_ROWS: ComparisonRow[] = [

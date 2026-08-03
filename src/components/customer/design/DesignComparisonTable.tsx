@@ -1,8 +1,13 @@
 import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
-import { COMPARISON_DESIGNS, COMPARISON_ROWS } from "./designConstants";
+import type { ComparisonRow, DesignColumn } from "./designConstants";
 
-export function DesignComparisonTable() {
-  const selectedIndex = COMPARISON_DESIGNS.findIndex((d) => d.selected);
+type Props = {
+  designs: DesignColumn[];
+  rows: ComparisonRow[];
+};
+
+export function DesignComparisonTable({ designs, rows }: Props) {
+  const selectedIndex = designs.findIndex((d) => d.selected);
   const colIdx = selectedIndex >= 0 ? selectedIndex : 0;
 
   return (
@@ -15,7 +20,7 @@ export function DesignComparisonTable() {
               <th className="sticky left-0 z-10 bg-cream-50 px-4 py-2.5 font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray">
                 Feature
               </th>
-              {COMPARISON_DESIGNS.map((d) => (
+              {designs.map((d) => (
                 <th
                   key={d.id}
                   className={`px-3 py-2.5 text-center font-dm-sans text-[9px] font-bold uppercase leading-[13.5px] tracking-[0.3px] ${
@@ -29,7 +34,7 @@ export function DesignComparisonTable() {
             </tr>
           </thead>
           <tbody>
-            {COMPARISON_ROWS.map((row, i) => {
+            {rows.map((row, i) => {
               const rowBg = i % 2 === 1 ? "bg-cream-225" : "bg-cream-50";
               return (
                 <tr

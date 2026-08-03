@@ -45,7 +45,7 @@ export function CustomerDashboardHeader({
               className="font-inter text-[14px] font-bold leading-[21px] tracking-[0.2px] customer-text-on-dark"
               style={{ fontFeatureSettings: '"liga" 1' }}
             >
-              {firstName} Dashboard
+              {firstName?.trim() ? `${firstName.trim()} Dashboard` : "My Dashboard"}
             </span>
           </Link>
           <div
