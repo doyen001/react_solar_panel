@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useInstallerNotificationSocket } from "@/hooks/useInstallerNotificationSocket";
+import { usePortalNotificationSocket } from "@/hooks/usePortalNotificationSocket";
 import {
   fetchDashboardNotifications,
   markAllDashboardNotificationsRead,
@@ -11,10 +11,8 @@ import type { DashboardNotificationItem } from "@/lib/notifications/types";
 import { fetchWithCustomerSession } from "@/lib/customers/customer-fetch-client";
 import { fetchWithInstallerSession } from "@/lib/installers/installer-fetch-client";
 
-/** HTTP poll interval when installer WebSocket is unavailable. */
-const INSTALLER_FALLBACK_POLL_MS = 60_000;
-/** Customer portal has no WS yet — occasional sync while the tab is open. */
-const CUSTOMER_POLL_MS = 120_000;
+/** HTTP poll interval only when WebSocket is unavailable. */
+const FALLBACK_POLL_MS = 60_000;
 /** Refetch when opening the bell if the list is older than this. */
 const STALE_MS = 5 * 60_000;
 
@@ -45,8 +43,6 @@ export function useDashboardNotifications(
   const polling = options?.polling ?? true;
   const enabled = options?.enabled ?? true;
   const { apiBase, fetchSession } = modeConfig(mode);
-  const pollMs =
-    mode === "installer" ? INSTALLER_FALLBACK_POLL_MS : CUSTOMER_POLL_MS;
 
   const [items, setItems] = useState<DashboardNotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -71,8 +67,9 @@ export function useDashboardNotifications(
     setUnreadCount((c) => (item.readAt == null ? c + 1 : c));
   };
 
-  const { wsState } = useInstallerNotificationSocket({
-    enabled: Boolean(enabled && mode === "installer"),
+  const { wsState } = usePortalNotificationSocket({
+    portal: mode,
+    enabled,
     onNotification: (item) => mergePushRef.current(item),
   });
 
@@ -107,12 +104,13 @@ export function useDashboardNotifications(
 
   const refetchIfStale = useCallback(
     async (maxAgeMs = STALE_MS) => {
+      if (wsState === "open") return;
       const last = lastFetchedAtRef.current;
       if (last == null || Date.now() - last > maxAgeMs) {
         await load({ silent: true });
       }
     },
-    [load],
+    [load, wsState],
   );
 
   useEffect(() => {
@@ -129,28 +127,19 @@ export function useDashboardNotifications(
 
   useEffect(() => {
     if (!enabled || !polling) return;
-
-    const shouldPollInstallerFallback =
-      mode === "installer" &&
-      wsState !== "open" &&
-      wsState !== "connecting";
-    const shouldPollCustomer = mode === "customer";
-
-    if (!shouldPollInstallerFallback && !shouldPollCustomer) return;
+    if (wsState === "open" || wsState === "connecting") return;
 
     const id = window.setInterval(
       () => void load({ silent: true }),
-      pollMs,
+      FALLBACK_POLL_MS,
     );
     return () => window.clearInterval(id);
-  }, [enabled, load, mode, polling, pollMs, wsState]);
+  }, [enabled, load, polling, wsState]);
 
   useEffect(() => {
-    if (!enabled || mode !== "installer") return;
+    if (!enabled) return;
     const prev = prevWsStateRef.current;
     if (prev !== "open" && wsState === "open") {
-      // Skip the first WS connect — mount effect already loads notifications.
-      // Refetch only after a reconnect to catch anything missed while offline.
       if (hadWsOpenRef.current && !loadInFlightRef.current) {
         const last = lastFetchedAtRef.current;
         if (last == null || Date.now() - last > 5_000) {
@@ -161,7 +150,7 @@ export function useDashboardNotifications(
       }
     }
     prevWsStateRef.current = wsState;
-  }, [enabled, load, mode, wsState]);
+  }, [enabled, load, wsState]);
 
   const markRead = useCallback(
     async (id: string) => {
@@ -203,7 +192,7 @@ export function useDashboardNotifications(
     error,
     refetch: load,
     refetchIfStale,
-    wsState: mode === "installer" ? wsState : null,
+    wsState,
     markRead,
     markAllRead,
   };

@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardNotificationsProvider } from "@/components/dashboard/DashboardNotificationsProvider";
 import { InstallerCustomersProvider } from "@/components/installer/dashboard/InstallerCustomersProvider";
 
 export default function InstallerDashboardLayout({
@@ -8,8 +9,10 @@ export default function InstallerDashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <InstallerCustomersProvider>
-      <div className="min-h-screen text-warm-ink">{children}</div>
-    </InstallerCustomersProvider>
+    <DashboardNotificationsProvider mode="installer">
+      <InstallerCustomersProvider>
+        <div className="min-h-screen text-warm-ink">{children}</div>
+      </InstallerCustomersProvider>
+    </DashboardNotificationsProvider>
   );
 }

@@ -16,6 +16,9 @@ import {
   useDashboardNotifications,
   type DashboardNotificationMode,
 } from "@/lib/notifications/useDashboardNotifications";
+import {
+  useDashboardNotificationsContextOptional,
+} from "@/components/dashboard/DashboardNotificationsProvider";
 
 function formatNotifTime(iso: string) {
   const d = new Date(iso);
@@ -125,6 +128,11 @@ export function DashboardNotificationBell({
     mode === "customer" ? "customer" : "installer";
   const portal: DashboardNotificationMode = apiMode;
 
+  const shared = useDashboardNotificationsContextOptional();
+  const local = useDashboardNotifications(apiMode, {
+    enabled: live && shared == null,
+    polling: live && shared == null,
+  });
   const {
     items,
     unreadCount,
@@ -133,10 +141,7 @@ export function DashboardNotificationBell({
     refetchIfStale,
     markRead,
     markAllRead,
-  } = useDashboardNotifications(apiMode, {
-    enabled: live,
-    polling: live,
-  });
+  } = shared ?? local;
 
   useEffect(() => {
     if (!panelOpen) return;
