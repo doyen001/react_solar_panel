@@ -46,6 +46,16 @@ export function buildInstallerCustomersUrl(params: {
   return `/api/installers/customers${qs ? `?${qs}` : ""}`;
 }
 
+const inflightCustomerFetches = new Map<
+  string,
+  Promise<InstallerCustomerSummary[]>
+>();
+const recentCustomerResults = new Map<
+  string,
+  { at: number; result: InstallerCustomerSummary[] }
+>();
+const RECENT_CUSTOMER_RESULT_MS = 5_000;
+
 export async function fetchInstallerCustomers(
   params: {
     page?: number;
@@ -55,18 +65,55 @@ export async function fetchInstallerCustomers(
   } = {},
   init?: RequestInit,
 ): Promise<InstallerCustomerSummary[]> {
-  const res = await fetchWithInstallerSession(
-    buildInstallerCustomersUrl(params),
-    {
-      cache: "no-store",
-      ...init,
-    },
-  );
-  const json = (await res.json()) as ApiEnvelope<InstallerCustomerSummary[]>;
-  if (!res.ok) {
-    throw new Error(json.message || "Failed to load customers");
+  const url = buildInstallerCustomersUrl(params);
+  const inflight = inflightCustomerFetches.get(url);
+  if (inflight) return inflight;
+
+  const cached = recentCustomerResults.get(url);
+  if (cached && Date.now() - cached.at < RECENT_CUSTOMER_RESULT_MS) {
+    return cached.result;
   }
-  return Array.isArray(json.data) ? json.data : [];
+
+  let promise!: Promise<InstallerCustomerSummary[]>;
+  promise = (async () => {
+    try {
+      const res = await fetchWithInstallerSession(url, {
+        cache: "no-store",
+        ...init,
+      });
+      const json = (await res.json()) as ApiEnvelope<InstallerCustomerSummary[]>;
+      if (!res.ok) {
+        throw new Error(json.message || "Failed to load customers");
+      }
+      const result = Array.isArray(json.data) ? json.data : [];
+      recentCustomerResults.set(url, { at: Date.now(), result });
+      return result;
+    } finally {
+      if (inflightCustomerFetches.get(url) === promise) {
+        inflightCustomerFetches.delete(url);
+      }
+    }
+  })();
+
+  inflightCustomerFetches.set(url, promise);
+  return promise;
+}
+
+/** Test-only helper to reset module-level customer fetch dedupe state. */
+export function resetInstallerCustomerListCacheForTests() {
+  inflightCustomerFetches.clear();
+  recentCustomerResults.clear();
+}
+
+export function invalidateInstallerCustomerListCache(
+  params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    leadLinkedOnly?: boolean;
+  } = { limit: 100, leadLinkedOnly: true },
+) {
+  recentCustomerResults.delete(buildInstallerCustomersUrl(params));
 }
 
 export async function fetchInstallerCustomer(

@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   fetchDashboardNotifications,
   markAllDashboardNotificationsRead,
   markDashboardNotificationRead,
+  resetDashboardNotificationListCacheForTests,
 } from "@/lib/notifications/client";
 
 function jsonResponse(body: unknown, status = 200) {
@@ -13,6 +14,10 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("notifications client (dashboard API shape)", () => {
+  beforeEach(() => {
+    resetDashboardNotificationListCacheForTests();
+  });
+
   it("fetchDashboardNotifications returns items and meta unreadCount", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       jsonResponse({
@@ -54,9 +59,14 @@ describe("notifications client (dashboard API shape)", () => {
       jsonResponse({ success: false, message: "Not allowed" }, 403),
     );
 
-    await expect(
-      fetchDashboardNotifications("/api/installers/notifications", fetchMock),
-    ).rejects.toThrow("Not allowed");
+    let caught: unknown;
+    try {
+      await fetchDashboardNotifications("/api/installers/notifications", fetchMock);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toBe("Not allowed");
   });
 
   it("markDashboardNotificationRead returns data row", async () => {

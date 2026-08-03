@@ -21,6 +21,7 @@ import {
   InstallerAppointmentConfirmationEmailAction,
   InstallerWelcomeFollowupEmailAction,
 } from "@/components/installer/InstallerCommsActions";
+import { useInstallerCustomers } from "@/components/installer/dashboard/InstallerCustomersProvider";
 import Icon from "@/components/ui/Icons";
 import { usePollingResource } from "@/hooks/usePollingResource";
 import {
@@ -33,7 +34,6 @@ import {
   updateInstallerAppointment,
 } from "@/lib/installers/appointments";
 import {
-  fetchInstallerCustomers,
   type InstallerCustomerSummary,
 } from "@/lib/installers/customers";
 import { fetchInstallerLeads, type InstallerLeadSummary } from "@/lib/installers/leads";
@@ -151,11 +151,11 @@ const eventPropGetter: EventPropGetter<CalendarAppointmentEvent> = (event) => {
 };
 
 export function InstallerScheduleCalendar() {
+  const { customers } = useInstallerCustomers();
   const [view, setView] = useState<View>(Views.MONTH);
   const [date, setDate] = useState(new Date());
   const [appointments, setAppointments] = useState<InstallerAppointment[]>([]);
   const [leads, setLeads] = useState<InstallerLeadSummary[]>([]);
-  const [customers, setCustomers] = useState<InstallerCustomerSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -194,18 +194,8 @@ export function InstallerScheduleCalendar() {
           ),
           fetchInstallerLeads({ page: 1, limit: 100 }, { signal }),
         ]);
-        let liveCustomers: InstallerCustomerSummary[] = [];
-        try {
-          liveCustomers = await fetchInstallerCustomers(
-            { limit: 100 },
-            { signal },
-          );
-        } catch {
-          liveCustomers = [];
-        }
         setAppointments(liveAppointments);
         setLeads(liveLeads.leads);
-        setCustomers(liveCustomers);
       } catch (loadError) {
         if (
           loadError instanceof DOMException &&

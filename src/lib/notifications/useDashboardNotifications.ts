@@ -55,6 +55,8 @@ export function useDashboardNotifications(
 
   const lastFetchedAtRef = useRef<number | null>(null);
   const prevWsStateRef = useRef<string | null>(null);
+  const hadWsOpenRef = useRef(false);
+  const loadInFlightRef = useRef(false);
 
   const mergePushRef = useRef<(item: DashboardNotificationItem) => void>(
     () => {},
@@ -79,6 +81,7 @@ export function useDashboardNotifications(
       if (!enabled) return;
       if (!opts?.silent) setIsLoading(true);
       setError(null);
+      loadInFlightRef.current = true;
       try {
         const r = await fetchDashboardNotifications(
           apiBase,
@@ -95,6 +98,7 @@ export function useDashboardNotifications(
           setUnreadCount(0);
         }
       } finally {
+        loadInFlightRef.current = false;
         if (!opts?.silent) setIsLoading(false);
       }
     },
@@ -145,9 +149,15 @@ export function useDashboardNotifications(
     if (!enabled || mode !== "installer") return;
     const prev = prevWsStateRef.current;
     if (prev !== "open" && wsState === "open") {
-      const last = lastFetchedAtRef.current;
-      if (last == null || Date.now() - last > 5_000) {
-        void load({ silent: true });
+      // Skip the first WS connect — mount effect already loads notifications.
+      // Refetch only after a reconnect to catch anything missed while offline.
+      if (hadWsOpenRef.current && !loadInFlightRef.current) {
+        const last = lastFetchedAtRef.current;
+        if (last == null || Date.now() - last > 5_000) {
+          void load({ silent: true });
+        }
+      } else {
+        hadWsOpenRef.current = true;
       }
     }
     prevWsStateRef.current = wsState;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createCallId,
   type CallSignalMessage,
@@ -425,24 +425,45 @@ export function useWebRtcCall({
     };
   }, [closePeerConnection]);
 
-  return {
-    callState,
-    localStream,
-    remoteStream,
-    error,
-    incomingCall,
-    cameraEnabled,
-    micEnabled,
-    hasVideoDevice,
-    startCall,
-    answerCall,
-    rejectCall,
-    hangUp,
-    toggleCamera,
-    toggleMic,
-    callActive: callState !== "idle" && callState !== "ended",
-    canStartCall:
-      Boolean(conversationId && peerUserId && wsOpen) &&
-      callState === "idle",
-  };
+  return useMemo(
+    () => ({
+      callState,
+      localStream,
+      remoteStream,
+      error,
+      incomingCall,
+      cameraEnabled,
+      micEnabled,
+      hasVideoDevice,
+      startCall,
+      answerCall,
+      rejectCall,
+      hangUp,
+      toggleCamera,
+      toggleMic,
+      callActive: callState !== "idle" && callState !== "ended",
+      canStartCall:
+        Boolean(conversationId && peerUserId && wsOpen) &&
+        callState === "idle",
+    }),
+    [
+      answerCall,
+      callState,
+      cameraEnabled,
+      conversationId,
+      error,
+      hangUp,
+      hasVideoDevice,
+      incomingCall,
+      localStream,
+      micEnabled,
+      peerUserId,
+      rejectCall,
+      remoteStream,
+      startCall,
+      toggleCamera,
+      toggleMic,
+      wsOpen,
+    ],
+  );
 }

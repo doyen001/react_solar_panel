@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "react-toastify";
+import { useInstallerCustomersOptional } from "@/components/installer/dashboard/InstallerCustomersProvider";
 import Icon from "@/components/ui/Icons";
 import {
   appointmentCustomerDisplayName,
@@ -70,6 +71,7 @@ export function InstallerCreateAppointmentModal({
   onCreated,
 }: Props) {
   const titleId = useId();
+  const sharedCustomers = useInstallerCustomersOptional();
   const [formState, setFormState] = useState<FormState>(() =>
     buildInitialForm(defaultCustomerId),
   );
@@ -78,7 +80,8 @@ export function InstallerCreateAppointmentModal({
     InstallerCustomerSummary[]
   >([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
-  const customers = customersProp ?? fetchedCustomers;
+  const customers =
+    customersProp ?? sharedCustomers?.customers ?? fetchedCustomers;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,15 +99,17 @@ export function InstallerCreateAppointmentModal({
     );
     const customersPromise = customersProp
       ? Promise.resolve(customersProp)
-      : fetchInstallerCustomers(
-          { limit: 100, leadLinkedOnly: true },
-          { signal: controller.signal },
-        );
+      : sharedCustomers
+        ? Promise.resolve(sharedCustomers.customers)
+        : fetchInstallerCustomers(
+            { limit: 100, leadLinkedOnly: true },
+            { signal: controller.signal },
+          );
 
     Promise.all([leadsPromise, customersPromise])
       .then(([leadResult, customerRows]) => {
         setLeads(leadResult.leads);
-        if (!customersProp) {
+        if (!customersProp && !sharedCustomers) {
           setFetchedCustomers(customerRows);
         }
       })
@@ -117,7 +122,7 @@ export function InstallerCreateAppointmentModal({
       });
 
     return () => controller.abort();
-  }, [customersProp, defaultCustomerId, open]);
+  }, [customersProp, defaultCustomerId, open, sharedCustomers]);
 
   useEffect(() => {
     if (!open) return;

@@ -4,7 +4,7 @@ import classNames from "classnames";
 import Link from "next/link";
 import Image from "next/image";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Icon from "@/components/ui/Icons";
 import {
   InstallerCustomerImportModal,
@@ -467,7 +467,7 @@ export type InstallerShortcutRailProps = {
   onTagCreated?: (tag: InstallerTag) => void;
 };
 
-export function InstallerShortcutRail({
+export const InstallerShortcutRail = memo(function InstallerShortcutRail({
   onCustomersImported,
   selectedCustomerId = null,
   customers = [],
@@ -656,4 +656,4 @@ export function InstallerShortcutRail({
       </nav>
     </aside>
   );
-}
+});

@@ -19,6 +19,7 @@ import adminAuthReducer, {
   setAdminSession,
   setAdminUser,
 } from "./adminAuthSlice";
+import { readPersistedAuthPreload } from "./read-persisted-auth";
 
 const customerAuthPersistenceMiddleware: Middleware = () => (next) => (action) => {
   const result = next(action);
@@ -87,6 +88,7 @@ export const store = configureStore({
     designProposal: designProposalReducer,
     solarMaintenanceContract: solarMaintenanceContractReducer,
   },
+  preloadedState: readPersistedAuthPreload(),
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       customerAuthPersistenceMiddleware,

@@ -23,6 +23,17 @@ function customerDisplayName(c: ConversationRow["customer"]) {
   return n || c.email;
 }
 
+function conversationQueryParams(customerId: string, installerId?: string) {
+  const params = new URLSearchParams({
+    customerId,
+    includeMessages: "true",
+  });
+  if (installerId) {
+    params.set("installerId", installerId);
+  }
+  return params;
+}
+
 export function useInstallerHomeConversation(
   sessionFetch: SessionFetch,
   installer: { id: string } | null,
@@ -49,7 +60,9 @@ export function useInstallerHomeConversation(
   const prevSubscribedConvRef = useRef<string | null>(null);
   const activeConvIdRef = useRef<string | null>(null);
   const messageIdsRef = useRef<Set<string>>(new Set());
-  const attemptedCreateRef = useRef<string | null>(null);
+  /** Set only after backend confirms this customer cannot be messaged (403). */
+  const createForbiddenRef = useRef<string | null>(null);
+  const loadSeqRef = useRef(0);
   const signalingHandlersRef = useRef(
     new Set<(message: CallSignalMessage) => void>(),
   );
@@ -65,6 +78,11 @@ export function useInstallerHomeConversation(
   );
 
   const conversationId = conversation?.id ?? null;
+  const effectiveUserId =
+    installerId ||
+    conversation?.installerId ||
+    conversation?.installer?.id ||
+    "";
 
   useEffect(() => {
     activeConvIdRef.current = conversationId;
@@ -78,7 +96,22 @@ export function useInstallerHomeConversation(
   }, []);
 
   const loadConversation = useCallback(async () => {
-    if (!installerId || !customerId) {
+    const loadSeq = ++loadSeqRef.current;
+    const isStale = () => loadSeq !== loadSeqRef.current;
+
+    if (!customerId) {
+      if (isStale()) return;
+      setConversation(null);
+      setMessages([]);
+      messageIdsRef.current.clear();
+      setPeerAvailable(false);
+      setLoadState("ready");
+      setLoadError(null);
+      return;
+    }
+
+    if (createForbiddenRef.current === customerId) {
+      if (isStale()) return;
       setConversation(null);
       setMessages([]);
       messageIdsRef.current.clear();
@@ -92,12 +125,9 @@ export function useInstallerHomeConversation(
     setLoadError(null);
 
     try {
-      const params = new URLSearchParams({
-        installerId,
-        customerId,
-        includeMessages: "true",
-      });
+      const params = conversationQueryParams(customerId, installerId || undefined);
       const res = await sessionFetch(`${api}/conversations?${params}`);
+      if (isStale()) return;
       if (!res.ok) {
         throw new Error(
           extractMessage(
@@ -108,6 +138,7 @@ export function useInstallerHomeConversation(
       }
 
       const payload = await res.json();
+      if (isStale()) return;
       const list = unwrapApiData<ConversationWithMessages[]>(payload);
       const rows = Array.isArray(list) ? list : [];
       const existing = rows[0];
@@ -119,16 +150,6 @@ export function useInstallerHomeConversation(
         return;
       }
 
-      if (attemptedCreateRef.current === customerId) {
-        setConversation(null);
-        setMessages([]);
-        messageIdsRef.current.clear();
-        setPeerAvailable(false);
-        setLoadState("ready");
-        return;
-      }
-
-      attemptedCreateRef.current = customerId;
       const createRes = await sessionFetch(`${api}/conversations`, {
         method: "POST",
         headers: {
@@ -138,12 +159,15 @@ export function useInstallerHomeConversation(
         body: JSON.stringify({ peerUserId: customerId }),
       });
 
+      if (isStale()) return;
       if (!createRes.ok) {
+        if (isStale()) return;
         setConversation(null);
         setMessages([]);
         messageIdsRef.current.clear();
         setPeerAvailable(false);
         if (createRes.status === 403) {
+          createForbiddenRef.current = customerId;
           setLoadState("ready");
           return;
         }
@@ -156,6 +180,7 @@ export function useInstallerHomeConversation(
       }
 
       const refetch = await sessionFetch(`${api}/conversations?${params}`);
+      if (isStale()) return;
       if (!refetch.ok) {
         throw new Error(
           extractMessage(
@@ -165,20 +190,24 @@ export function useInstallerHomeConversation(
         );
       }
       const refetchPayload = await refetch.json();
+      if (isStale()) return;
       const refetchList = unwrapApiData<ConversationWithMessages[]>(refetchPayload);
       const created = (Array.isArray(refetchList) ? refetchList : [])[0];
       if (created) {
         applyConversation(created);
       } else {
         const createPayload = await createRes.json();
+        if (isStale()) return;
         const conv = unwrapApiData<ConversationWithMessages>(createPayload);
         if (conv?.id) {
           applyConversation({ ...conv, messages: [] });
         }
       }
+      if (isStale()) return;
       setPeerAvailable(true);
       setLoadState("ready");
     } catch (e) {
+      if (isStale()) return;
       setLoadState("error");
       setLoadError(
         e instanceof Error ? e.message : "Failed to load messaging.",
@@ -187,7 +216,10 @@ export function useInstallerHomeConversation(
   }, [api, applyConversation, customerId, installerId, sessionFetch]);
 
   useEffect(() => {
-    attemptedCreateRef.current = null;
+    createForbiddenRef.current = null;
+  }, [customerId]);
+
+  useEffect(() => {
     void loadConversation();
   }, [loadConversation]);
 
@@ -195,7 +227,6 @@ export function useInstallerHomeConversation(
     let stopped = false;
 
     async function connect() {
-      if (!installerId) return;
       const tokRes = await fetch(`${api}/ws-token`, { credentials: "include" });
       if (!tokRes.ok) return;
       const jar = (await tokRes.json()) as { token?: string };
@@ -263,7 +294,7 @@ export function useInstallerHomeConversation(
       wsRef.current = null;
       prevSubscribedConvRef.current = null;
     };
-  }, [api, installerId]);
+  }, [api]);
 
   useEffect(() => {
     const ws = wsRef.current;
@@ -285,7 +316,7 @@ export function useInstallerHomeConversation(
   const sendText = useCallback(
     async (body: string) => {
       const trimmed = body.trim();
-      if (!trimmed || !conversationId || !installerId) return;
+      if (!trimmed || !conversationId) return;
 
       const ws = wsRef.current;
       if (isChatWebSocketSendReady(ws)) {
@@ -323,7 +354,7 @@ export function useInstallerHomeConversation(
         setSending(false);
       }
     },
-    [api, conversationId, installerId, sessionFetch],
+    [api, conversationId, sessionFetch],
   );
 
   const activeContactName = useMemo(() => {
@@ -335,7 +366,7 @@ export function useInstallerHomeConversation(
 
   const voiceCall = useWebRtcCall({
     conversationId,
-    userId: installerId,
+    userId: effectiveUserId,
     peerUserId: customerId,
     wsRef,
     wsOpen: wsState === "open",
@@ -353,7 +384,7 @@ export function useInstallerHomeConversation(
     conversationReady: Boolean(conversationId),
     conversationId,
     activeContactName,
-    userId: installerId,
+    userId: effectiveUserId,
     refresh: loadConversation,
     voiceCall,
   };

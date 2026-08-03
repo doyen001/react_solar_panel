@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchInstallerHomePanel,
   type InstallerHomePanelData,
@@ -140,23 +140,42 @@ export function useInstallerHomePanel(customerId: string | null) {
     }));
   }, []);
 
-  return {
-    selectedCustomerId,
-    notes: data.notes,
-    tasks: data.tasks,
-    tags: data.tags,
-    appointments: data.appointments,
-    loading,
-    loadError,
-    upsertNote,
-    removeNote,
-    upsertTask,
-    removeTask,
-    upsertTag,
-    removeTag,
-    upsertAppointment,
-    removeAppointment,
-  };
+  return useMemo(
+    () => ({
+      selectedCustomerId,
+      notes: data.notes,
+      tasks: data.tasks,
+      tags: data.tags,
+      appointments: data.appointments,
+      loading,
+      loadError,
+      upsertNote,
+      removeNote,
+      upsertTask,
+      removeTask,
+      upsertTag,
+      removeTag,
+      upsertAppointment,
+      removeAppointment,
+    }),
+    [
+      data.appointments,
+      data.notes,
+      data.tags,
+      data.tasks,
+      loadError,
+      loading,
+      removeAppointment,
+      removeNote,
+      removeTag,
+      removeTask,
+      selectedCustomerId,
+      upsertAppointment,
+      upsertNote,
+      upsertTag,
+      upsertTask,
+    ],
+  );
 }
 
 export type InstallerHomePanelState = ReturnType<typeof useInstallerHomePanel>;

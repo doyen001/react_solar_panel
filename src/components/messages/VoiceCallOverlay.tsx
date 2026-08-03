@@ -1,7 +1,7 @@
 "use client";
 
 import classNames from "classnames";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import Icon from "@/components/ui/Icons";
 import type { CallState } from "@/hooks/useWebRtcCall";
 
@@ -153,7 +153,7 @@ function VideoPane({
   );
 }
 
-export function VoiceCallOverlay({
+export const VoiceCallOverlay = memo(function VoiceCallOverlay({
   callState,
   peerName,
   error,
@@ -286,4 +286,4 @@ export function VoiceCallOverlay({
       </div>
     </div>
   );
-}
+});

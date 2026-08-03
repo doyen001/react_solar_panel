@@ -4,13 +4,11 @@ import classNames from "classnames";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { InstallerHeader } from "@/components/installer/dashboard/InstallerHeader";
+import { useInstallerCustomers } from "@/components/installer/dashboard/InstallerCustomersProvider";
 import { InstallerShortcutRail } from "@/components/installer/dashboard/InstallerShortcutRail";
 import { InstallerHomePipelinePhaseStrip } from "@/components/installer/home-dashboard/InstallerHomePipelinePhaseStrip";
 import Icon from "@/components/ui/Icons";
-import {
-  fetchInstallerCustomers,
-  type InstallerCustomerSummary,
-} from "@/lib/installers/customers";
+import { type InstallerCustomerSummary } from "@/lib/installers/customers";
 import {
   useInstallerHomePanel,
   type InstallerHomePanelState,
@@ -69,10 +67,8 @@ export function InstallerDashboardShell({
     | ((context: InstallerDashboardShellContext) => React.ReactNode);
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [customers, setCustomers] = useState<HomeCustomer[]>(DEFAULT_CUSTOMERS);
-  const [customerRows, setCustomerRows] = useState<InstallerCustomerSummary[]>(
-    [],
-  );
+  const { customers: customerRows, refetch: refetchCustomers } =
+    useInstallerCustomers();
   const [selectedId, setSelectedId] = useState(
     DEFAULT_CUSTOMERS[0]?.id ?? "fallback-1",
   );
@@ -82,47 +78,25 @@ export function InstallerDashboardShell({
     homePanelEnabled ? selectedId : null,
   );
 
-  const loadCustomers = useCallback(
-    async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
-      try {
-        const rows = await fetchInstallerCustomers(
-          { limit: 100, leadLinkedOnly: true },
-          { signal: opts?.signal },
-        );
-        if (!rows.length) {
-          setCustomerRows([]);
-          setCustomers(DEFAULT_CUSTOMERS);
-          setSelectedId(DEFAULT_CUSTOMERS[0]?.id ?? "fallback-1");
-          return;
-        }
-        setCustomerRows(rows);
-        const mapped = rows.map((row) => ({
-          id: row.id,
-          name: toName(row),
-          initials: toInitials(row.firstName, row.lastName),
-          email: row.email,
-        }));
-        setCustomers(mapped);
-        setSelectedId((prev) =>
-          mapped.some((item) => item.id === prev) ? prev : mapped[0].id,
-        );
-      } catch (e) {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-        // Keep safe fallback list when API is unavailable.
-      }
-    },
-    [],
-  );
+  const customers = useMemo(() => {
+    if (!customerRows.length) return DEFAULT_CUSTOMERS;
+    return customerRows.map((row) => ({
+      id: row.id,
+      name: toName(row),
+      initials: toInitials(row.firstName, row.lastName),
+      email: row.email,
+    }));
+  }, [customerRows]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    void loadCustomers({ signal: controller.signal });
-    return () => controller.abort();
-  }, [loadCustomers]);
-
-  const refetchCustomers = useCallback(() => {
-    void loadCustomers();
-  }, [loadCustomers]);
+    if (!customerRows.length) {
+      setSelectedId(DEFAULT_CUSTOMERS[0]?.id ?? "fallback-1");
+      return;
+    }
+    setSelectedId((prev) =>
+      customerRows.some((item) => item.id === prev) ? prev : customerRows[0].id,
+    );
+  }, [customerRows]);
 
   const filteredCustomers = useMemo(() => {
     const q = customerSearch.trim().toLowerCase();
