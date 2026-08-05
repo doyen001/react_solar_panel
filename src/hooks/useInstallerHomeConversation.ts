@@ -3,7 +3,7 @@ import {
   extractMessage,
   unwrapApiData,
 } from "@/lib/customers/backend";
-import { getChatWebSocketUrl } from "@/lib/chat/backend-origin";
+import { resolveChatWebSocketUrl } from "@/lib/chat/backend-origin";
 import type { ChatMessage, ConversationRow } from "@/hooks/useRealtimeChat";
 import { isChatWebSocketSendReady } from "@/hooks/useRealtimeChat";
 import { isCallSignalMessage, type CallSignalMessage } from "@/lib/webrtc/call-signaling";
@@ -229,11 +229,11 @@ export function useInstallerHomeConversation(
     async function connect() {
       const tokRes = await fetch(`${api}/ws-token`, { credentials: "include" });
       if (!tokRes.ok) return;
-      const jar = (await tokRes.json()) as { token?: string };
+      const jar = (await tokRes.json()) as { token?: string; wsUrl?: string };
       const token = jar.token;
       if (!token || stopped) return;
 
-      const url = getChatWebSocketUrl(token);
+      const url = resolveChatWebSocketUrl(token, jar.wsUrl);
       if (!url) {
         setWsState("error");
         return;

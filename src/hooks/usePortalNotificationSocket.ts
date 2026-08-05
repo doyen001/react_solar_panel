@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   getBackendHttpOrigin,
-  getChatWebSocketUrl,
+  resolveChatWebSocketUrl,
 } from "@/lib/chat/backend-origin";
 import type { DashboardNotificationItem } from "@/lib/notifications/types";
 import { wsPayloadToDashboardItem } from "@/lib/notifications/ws-payload";
@@ -90,7 +90,7 @@ export function usePortalNotificationSocket(options: {
         scheduleReconnect();
         return;
       }
-      const jar = (await tokRes.json()) as { token?: string };
+      const jar = (await tokRes.json()) as { token?: string; wsUrl?: string };
       const token = jar.token;
       if (!token || stopped) {
         setWsState("error");
@@ -98,7 +98,7 @@ export function usePortalNotificationSocket(options: {
         return;
       }
 
-      const url = getChatWebSocketUrl(token);
+      const url = resolveChatWebSocketUrl(token, jar.wsUrl);
       if (!url || stopped) {
         setWsState("error");
         scheduleReconnect();

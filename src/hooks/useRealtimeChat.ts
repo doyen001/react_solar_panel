@@ -3,7 +3,7 @@ import {
   extractMessage,
   unwrapApiData,
 } from "@/lib/customers/backend";
-import { getChatWebSocketUrl } from "@/lib/chat/backend-origin";
+import { resolveChatWebSocketUrl } from "@/lib/chat/backend-origin";
 import { isCallSignalMessage, type CallSignalMessage } from "@/lib/webrtc/call-signaling";
 import { useWebRtcCall } from "@/hooks/useWebRtcCall";
 
@@ -305,11 +305,11 @@ export function useRealtimeChat(
       if (!userId) return;
       const tokRes = await fetch(`${api}/ws-token`, { credentials: "include" });
       if (!tokRes.ok) return;
-      const jar = (await tokRes.json()) as { token?: string };
+      const jar = (await tokRes.json()) as { token?: string; wsUrl?: string };
       const token = jar.token;
       if (!token || stopped) return;
 
-      const url = getChatWebSocketUrl(token);
+      const url = resolveChatWebSocketUrl(token, jar.wsUrl);
       if (!url) {
         setWsState("error");
         return;

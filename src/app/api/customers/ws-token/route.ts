@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { CUSTOMER_ACCESS_COOKIE } from "@/lib/auth/customer-cookies";
+import { resolveChatWebSocketUrlForRequest } from "@/lib/server/chat-ws-url";
 
-/** Returns the access JWT for opening a WebSocket to the backend (httpOnly cookie is not readable from client JS). */
-export async function GET() {
+/** Returns the access JWT and WebSocket URL for the backend chat gateway. */
+export async function GET(request: Request) {
   const jar = await cookies();
   const token = jar.get(CUSTOMER_ACCESS_COOKIE)?.value;
   if (!token) {
     return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
   }
-  return NextResponse.json({ token });
+
+  const wsUrl = resolveChatWebSocketUrlForRequest(request, token);
+  return NextResponse.json({ token, wsUrl });
 }
