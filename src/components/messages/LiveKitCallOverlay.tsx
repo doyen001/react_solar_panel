@@ -32,10 +32,11 @@ type Props = {
   onRoomConnected?: () => void;
   onRoomDisconnected?: () => void;
   onRoomError?: (message: string) => void;
+  onMediaWarning?: (message: string) => void;
   onPeerJoined?: () => void;
   registerMediaControls?: (controls: {
-    setCameraEnabled: (enabled: boolean) => void;
-    setMicEnabled: (enabled: boolean) => void;
+    setCameraEnabled: (enabled: boolean) => Promise<boolean | void>;
+    setMicEnabled: (enabled: boolean) => Promise<boolean | void>;
     hasVideoDevice: boolean;
     cameraEnabled: boolean;
     micEnabled: boolean;
@@ -190,12 +191,14 @@ function LiveKitCallMedia({
   registerMediaControls,
   onPeerJoined,
   onRoomConnected,
+  onMediaWarning,
 }: {
   peerName: string;
   callState: CallState;
   registerMediaControls?: Props["registerMediaControls"];
   onPeerJoined?: () => void;
   onRoomConnected?: () => void;
+  onMediaWarning?: (message: string) => void;
 }) {
   const { localParticipant } = useLocalParticipant();
   const remoteParticipants = useRemoteParticipants();
@@ -228,21 +231,65 @@ function LiveKitCallMedia({
   useEffect(() => {
     if (!registerMediaControls || !localParticipant) return;
 
+    let hasVideo = false;
+    if (typeof navigator !== "undefined" && navigator.mediaDevices?.enumerateDevices) {
+      void navigator.mediaDevices.enumerateDevices().then((devices) => {
+        hasVideo = devices.some((d) => d.kind === "videoinput");
+        registerMediaControls({
+          hasVideoDevice: hasVideo,
+          cameraEnabled: localParticipant.isCameraEnabled,
+          micEnabled: localParticipant.isMicrophoneEnabled,
+          setCameraEnabled: async (enabled: boolean) => {
+            try {
+              await localParticipant.setCameraEnabled(enabled);
+              return true;
+            } catch {
+              onMediaWarning?.("Could not access camera.");
+              return false;
+            }
+          },
+          setMicEnabled: async (enabled: boolean) => {
+            try {
+              await localParticipant.setMicrophoneEnabled(enabled);
+              return true;
+            } catch {
+              onMediaWarning?.("Could not access microphone.");
+              return false;
+            }
+          },
+        });
+      });
+      return;
+    }
+
     registerMediaControls({
-      hasVideoDevice: true,
+      hasVideoDevice: false,
       cameraEnabled: localParticipant.isCameraEnabled,
       micEnabled: localParticipant.isMicrophoneEnabled,
-      setCameraEnabled: (enabled: boolean) => {
-        void localParticipant.setCameraEnabled(enabled);
+      setCameraEnabled: async (enabled: boolean) => {
+        try {
+          await localParticipant.setCameraEnabled(enabled);
+          return true;
+        } catch {
+          onMediaWarning?.("Could not access camera.");
+          return false;
+        }
       },
-      setMicEnabled: (enabled: boolean) => {
-        void localParticipant.setMicrophoneEnabled(enabled);
+      setMicEnabled: async (enabled: boolean) => {
+        try {
+          await localParticipant.setMicrophoneEnabled(enabled);
+          return true;
+        } catch {
+          onMediaWarning?.("Could not access microphone.");
+          return false;
+        }
       },
     });
   }, [
     localParticipant,
     localParticipant?.isCameraEnabled,
     localParticipant?.isMicrophoneEnabled,
+    onMediaWarning,
     registerMediaControls,
   ]);
 
@@ -297,6 +344,7 @@ export const LiveKitCallOverlay = memo(function LiveKitCallOverlay({
   onRoomConnected,
   onRoomDisconnected,
   onRoomError,
+  onMediaWarning,
   onPeerJoined,
   registerMediaControls,
 }: Props) {
@@ -341,8 +389,6 @@ export const LiveKitCallOverlay = memo(function LiveKitCallOverlay({
               token={liveKitToken}
               serverUrl={liveKitUrl}
               connect
-              audio
-              video
               onDisconnected={onRoomDisconnected}
               onError={(e) => onRoomError?.(e.message)}
             >
@@ -352,6 +398,7 @@ export const LiveKitCallOverlay = memo(function LiveKitCallOverlay({
                 registerMediaControls={registerMediaControls}
                 onPeerJoined={onPeerJoined}
                 onRoomConnected={onRoomConnected}
+                onMediaWarning={onMediaWarning}
               />
               {error ? (
                 <p className="mt-2 font-dm-sans text-sm text-red-400">{error}</p>
@@ -395,7 +442,6 @@ export const LiveKitCallOverlay = memo(function LiveKitCallOverlay({
                 label={cameraEnabled ? "Turn off camera" : "Turn on camera"}
                 onClick={onToggleCamera}
                 active={cameraEnabled}
-                disabled={!hasVideoDevice && !cameraEnabled}
               >
                 <VideoIcon off={!cameraEnabled} />
               </CallControlButton>

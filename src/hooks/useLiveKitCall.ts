@@ -44,6 +44,22 @@ function sendSignal(ws: WebSocket | null, message: CallSignalMessage) {
   ws.send(JSON.stringify(message));
 }
 
+function isRecoverableLiveKitError(message: string) {
+  const m = message.toLowerCase();
+  return (
+    m.includes("notfound") ||
+    m.includes("device not found") ||
+    m.includes("requested device") ||
+    m.includes("permission") ||
+    m.includes("notallowed") ||
+    m.includes("not allowed") ||
+    m.includes("client initiated disconnect") ||
+    m.includes("cancelled") ||
+    m.includes("canceled") ||
+    m.includes("abort")
+  );
+}
+
 export function useLiveKitCall({
   portal,
   conversationId,
@@ -66,16 +82,17 @@ export function useLiveKitCall({
     null,
   );
   const [cameraEnabled, setCameraEnabled] = useState(false);
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [hasVideoDevice, setHasVideoDevice] = useState(true);
+  const [micEnabled, setMicEnabled] = useState(false);
+  const [hasVideoDevice, setHasVideoDevice] = useState(false);
 
   const callStateRef = useRef<CallState>("idle");
   const callIdRef = useRef<string | null>(null);
   const isCallerRef = useRef(false);
   const connectRequestedRef = useRef(false);
+  const closingIntentionallyRef = useRef(false);
   const mediaControlsRef = useRef<{
-    setCameraEnabled: (enabled: boolean) => void;
-    setMicEnabled: (enabled: boolean) => void;
+    setCameraEnabled: (enabled: boolean) => Promise<boolean | void>;
+    setMicEnabled: (enabled: boolean) => Promise<boolean | void>;
   } | null>(null);
 
   useEffect(() => {
@@ -89,9 +106,10 @@ export function useLiveKitCall({
     setIncomingCall(null);
     setCredentials(null);
     setCameraEnabled(false);
-    setMicEnabled(true);
-    setHasVideoDevice(true);
+    setMicEnabled(false);
+    setHasVideoDevice(false);
     setCallState("idle");
+    closingIntentionallyRef.current = false;
   }, []);
 
   const fetchLiveKitToken = useCallback(
@@ -151,6 +169,7 @@ export function useLiveKitCall({
   );
 
   const hangUp = useCallback(() => {
+    closingIntentionallyRef.current = true;
     const callId = callIdRef.current;
     if (callId && conversationId) {
       sendSignal(wsRef.current, {
@@ -246,7 +265,15 @@ export function useLiveKitCall({
     setError(null);
   }, []);
 
+  const onMediaWarning = useCallback((message: string) => {
+    setError(
+      message ||
+        "Microphone or camera unavailable. The call stays open — enable devices in browser settings or use the controls below.",
+    );
+  }, []);
+
   const onRoomDisconnected = useCallback(() => {
+    if (closingIntentionallyRef.current) return;
     if (callStateRef.current === "idle" || callStateRef.current === "ended") {
       return;
     }
@@ -257,18 +284,29 @@ export function useLiveKitCall({
     }, 1200);
   }, [resetCall]);
 
-  const onRoomError = useCallback((message: string) => {
-    setError(message || "Call connection failed.");
-    setCallState("ended");
-    window.setTimeout(() => {
-      resetCall();
-    }, 1500);
-  }, [resetCall]);
+  const onRoomError = useCallback(
+    (message: string) => {
+      if (isRecoverableLiveKitError(message)) {
+        onMediaWarning(
+          message.includes("device")
+            ? "Microphone or camera not available. The call stays open."
+            : message,
+        );
+        return;
+      }
+      setError(message || "Call connection failed.");
+      setCallState("ended");
+      window.setTimeout(() => {
+        resetCall();
+      }, 1500);
+    },
+    [onMediaWarning, resetCall],
+  );
 
   const registerMediaControls = useCallback(
     (controls: {
-      setCameraEnabled: (enabled: boolean) => void;
-      setMicEnabled: (enabled: boolean) => void;
+      setCameraEnabled: (enabled: boolean) => Promise<boolean | void>;
+      setMicEnabled: (enabled: boolean) => Promise<boolean | void>;
       hasVideoDevice: boolean;
       cameraEnabled: boolean;
       micEnabled: boolean;
@@ -283,15 +321,21 @@ export function useLiveKitCall({
 
   const toggleCamera = useCallback(() => {
     const next = !cameraEnabled;
-    mediaControlsRef.current?.setCameraEnabled(next);
-    setCameraEnabled(next);
-  }, [cameraEnabled]);
+    void mediaControlsRef.current?.setCameraEnabled(next).then((ok) => {
+      if (ok !== false) setCameraEnabled(next);
+    }).catch(() => {
+      onMediaWarning("Could not access camera.");
+    });
+  }, [cameraEnabled, onMediaWarning]);
 
   const toggleMic = useCallback(() => {
     const next = !micEnabled;
-    mediaControlsRef.current?.setMicEnabled(next);
-    setMicEnabled(next);
-  }, [micEnabled]);
+    void mediaControlsRef.current?.setMicEnabled(next).then((ok) => {
+      if (ok !== false) setMicEnabled(next);
+    }).catch(() => {
+      onMediaWarning("Could not access microphone.");
+    });
+  }, [micEnabled, onMediaWarning]);
 
   useEffect(() => {
     return registerSignalingHandler((message) => {
@@ -351,6 +395,7 @@ export function useLiveKitCall({
       onRoomConnected,
       onRoomDisconnected,
       onRoomError,
+      onMediaWarning,
       onPeerJoined,
       registerMediaControls,
       callActive: callState !== "idle" && callState !== "ended",
@@ -375,6 +420,7 @@ export function useLiveKitCall({
       onRoomConnected,
       onRoomDisconnected,
       onRoomError,
+      onMediaWarning,
       onPeerJoined,
       peerUserId,
       registerMediaControls,

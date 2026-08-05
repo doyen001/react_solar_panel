@@ -99,6 +99,7 @@ export function PortalRealtimeMessagesPanel({
         onRoomConnected={chat.voiceCall.onRoomConnected}
         onRoomDisconnected={chat.voiceCall.onRoomDisconnected}
         onRoomError={chat.voiceCall.onRoomError}
+        onMediaWarning={chat.voiceCall.onMediaWarning}
         onPeerJoined={chat.voiceCall.onPeerJoined}
         registerMediaControls={chat.voiceCall.registerMediaControls}
       />
