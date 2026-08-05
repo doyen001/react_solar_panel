@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { InstallerDashboardSubTab } from "@/components/installer/dashboard/InstallerDashboardShell";
 import type { InstallerDashboardShellContext } from "@/components/installer/dashboard/InstallerDashboardShell";
 import { InstallerDashboardShell } from "@/components/installer/dashboard/InstallerDashboardShell";
-import Icon from "@/components/ui/Icons";
 import {
   fetchInstallerCustomer,
   type InstallerCustomerSummary,
@@ -23,44 +22,10 @@ import { InstallerHomeAppointmentsPanel } from "./InstallerHomeAppointmentsPanel
 import { InstallerHomeCustomerCommunication } from "./InstallerHomeCustomerCommunication";
 import { InstallerHomeCustomerPanels } from "./InstallerHomeCustomerPanels";
 import { InstallerHomeCustomerProfileStrip } from "./InstallerHomeCustomerProfileStrip";
+import { InstallerHomeEquipmentSection } from "./InstallerHomeEquipmentSection";
 import { InstallerHomePipelineStatus } from "./InstallerHomePipelineStatus";
 import { InstallerHomeSolarDesignCard } from "./InstallerHomeSolarDesignCard";
 import type { InstallerHomePanelState } from "@/hooks/useInstallerHomePanel";
-
-function IconBattery({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <rect x="2" y="7" width="18" height="10" rx="2" ry="2" />
-      <path d="M22 11v2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconCpu({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <rect x="4" y="4" width="16" height="16" rx="2" />
-      <path d="M9 9h6v6H9zM9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
-    </svg>
-  );
-}
-
-type InstallerHomeEquipment = typeof INSTALLER_HOME_EQUIPMENT;
-type InstallerHomeFinance = typeof INSTALLER_HOME_FINANCE;
 
 function formatCurrency(value?: number | null) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "-";
@@ -110,7 +75,7 @@ function systemSizeKw(design?: InstallerCustomerDesign | null) {
 
 function buildEquipment(
   design: InstallerCustomerDesign | null,
-): InstallerHomeEquipment {
+): typeof INSTALLER_HOME_EQUIPMENT {
   const panel = productByCategory(design, "panel");
   const inverter = productByCategory(design, "inverter");
   const battery = productByCategory(design, "battery");
@@ -155,7 +120,7 @@ function buildEquipment(
 
 function buildFinance(
   design: InstallerCustomerDesign | null,
-): InstallerHomeFinance {
+): typeof INSTALLER_HOME_FINANCE {
   const equipmentCost = designProductsTotal(design);
   const salePrice = design?.estimatedSavings
     ? design.estimatedSavings * 8
@@ -173,7 +138,7 @@ function buildFinance(
     { label: "Installer Cost", value: formatCurrency(installerCost) },
     { label: "Equipment Cost", value: formatCurrency(equipmentCost) },
     { label: "Sale Price", value: formatCurrency(salePrice) },
-  ].slice(0, INSTALLER_HOME_FINANCE.length) as InstallerHomeFinance;
+  ].slice(0, INSTALLER_HOME_FINANCE.length) as typeof INSTALLER_HOME_FINANCE;
 }
 
 export function InstallerHomeDashboard({
@@ -286,39 +251,11 @@ function InstallerHomeDetail({
 
       <InstallerHomeSolarDesignCard design={design} />
 
-          {/* Equipment cards */}
-          <section className="mt-5">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <EquipmentCard
-                title="Solar System"
-                icon={<Icon name="Sun" className="text-warm-ink" />}
-                rows={equipment.solar}
-              />
-              <EquipmentCard
-                title="Battery System"
-                icon={<IconBattery className="text-warm-ink" />}
-                rows={equipment.battery}
-              />
-              <EquipmentCard
-                title="Equipment"
-                icon={<IconCpu className="text-warm-ink" />}
-                rows={equipment.equipment}
-              />
-              <EquipmentCard
-                title="Site Details"
-                icon={<Icon name="LocationPin" className="text-warm-ink" />}
-                rows={equipment.site}
-              />
-            </div>
-
-            <button
-              type="button"
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-warm-border bg-cream-50 py-3 font-inter text-sm font-medium text-warm-ink hover:bg-cream-100"
-            >
-              <span className="text-lg leading-none">+</span>
-              Create New Deal / System
-            </button>
-          </section>
+      <InstallerHomeEquipmentSection
+        design={design}
+        baseEquipment={equipment}
+        onDesignUpdated={setDesign}
+      />
 
           <InstallerHomeCustomerProfileStrip
             customerId={selectedCustomerId}
@@ -358,73 +295,5 @@ function InstallerHomeDetail({
             <InstallerHomeCustomerPanels panel={homePanel} />
           </div>
     </>
-  );
-}
-
-/** Figma node 3:8717 — equipment mini-card (Solar System reference). */
-function EquipmentSpecRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex min-h-[19.875px] min-w-0 items-start justify-between gap-2 font-dm-sans">
-      <span className="shrink-0 text-[13.25px] leading-[19.875px] text-warm-gray">
-        {label}
-      </span>
-      <span
-        className="min-w-0 truncate text-right text-[13.25px] font-medium leading-[19.875px] text-warm-ink"
-        title={value}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function EquipmentCard({
-  title,
-  icon,
-  rows,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  rows: { label: string; value: string }[];
-}) {
-  return (
-    <div
-      className="relative min-w-0 overflow-hidden rounded-[11px] border-[1.157px] border-warm-border bg-cream-50 p-[13.24px]"
-      data-node-id="3:8717"
-    >
-      <div className="flex items-center gap-[8.825px] pr-[52px]">
-        <span className="flex size-[30.907px] shrink-0 items-center justify-center rounded-[8.833px] bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-ink [&_svg]:size-[15.445px]">
-          {icon}
-        </span>
-        <h4 className="min-w-0 truncate font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.33px] text-warm-ink">
-          {title}
-        </h4>
-      </div>
-      <div className="absolute right-[13.24px] top-[8.83px] flex gap-[4.413px]">
-        <button
-          type="button"
-          className="flex size-[22.082px] items-center justify-center rounded-[4.417px] text-warm-gray hover:bg-black/5"
-          aria-label="Edit"
-        >
-          <Icon name="Pencil" className="size-[13.24px]" />
-        </button>
-        <button
-          type="button"
-          className="flex size-[22.082px] items-center justify-center rounded-[4.417px] text-danger hover:bg-black/5"
-          aria-label="Delete"
-        >
-          <Icon name="Trash" className="size-[13.24px]" />
-        </button>
-      </div>
-      <div className="mt-[13px] flex flex-col gap-[4.413px]">
-        {rows.map((row) => (
-          <EquipmentSpecRow
-            key={row.label}
-            label={row.label}
-            value={row.value}
-          />
-        ))}
-      </div>
-    </div>
   );
 }

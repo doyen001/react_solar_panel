@@ -85,3 +85,32 @@ export async function fetchInstallerDesigns(
   }
   return Array.isArray(json.data) ? json.data : [];
 }
+
+export async function updateInstallerDesign(
+  id: string,
+  body: {
+    wizardData?: unknown;
+    title?: string;
+    address?: string | null;
+    panelCount?: number | null;
+    estimatedSavings?: number | null;
+    status?: InstallerCustomerDesign["status"];
+  },
+  init?: RequestInit,
+): Promise<InstallerCustomerDesign> {
+  const res = await fetchWithInstallerSession(`/api/installers/designs/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+    ...init,
+  });
+  const json = (await res.json()) as ApiEnvelope<InstallerCustomerDesign>;
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to update design");
+  }
+  if (!json.data) {
+    throw new Error("Failed to update design");
+  }
+  return json.data;
+}
