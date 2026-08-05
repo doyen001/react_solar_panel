@@ -5,7 +5,7 @@ import {
 } from "@/lib/customers/backend";
 import { resolveChatWebSocketUrl } from "@/lib/chat/backend-origin";
 import { isCallSignalMessage, type CallSignalMessage } from "@/lib/webrtc/call-signaling";
-import { useWebRtcCall } from "@/hooks/useWebRtcCall";
+import { useLiveKitCall } from "@/hooks/useLiveKitCall";
 
 export type ChatPeer = {
   id: string;
@@ -453,12 +453,14 @@ export function useRealtimeChat(
     return c ? otherName(c, role) : "Conversation";
   }, [activePeerId, conversations, peers, role]);
 
-  const voiceCall = useWebRtcCall({
+  const voiceCall = useLiveKitCall({
+    portal,
     conversationId,
     userId,
     peerUserId: activePeerId,
     wsRef,
     wsOpen: wsState === "open",
+    sessionFetch,
     registerSignalingHandler,
   });
 

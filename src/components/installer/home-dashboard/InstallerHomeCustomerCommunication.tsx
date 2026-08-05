@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { ComposeChannel } from "@/components/customer/messages/ComposeChannelBar";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
 import { MessageThreadRow } from "@/components/customer/messages/MessageThreadRow";
-import { VoiceCallOverlay } from "@/components/messages/VoiceCallOverlay";
+import { LiveKitCallOverlay } from "@/components/messages/LiveKitCallOverlay";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
 import {
@@ -91,20 +91,25 @@ export function InstallerHomeCustomerCommunication({ customerId }: Props) {
 
   return (
     <section className="mt-6 overflow-hidden rounded-[11.042px] border-[1.157px] border-warm-border bg-cream-50">
-      <VoiceCallOverlay
+      <LiveKitCallOverlay
         callState={chat.voiceCall.callState}
         peerName={chat.activeContactName}
         error={chat.voiceCall.error}
-        localStream={chat.voiceCall.localStream}
-        remoteStream={chat.voiceCall.remoteStream}
         cameraEnabled={chat.voiceCall.cameraEnabled}
         micEnabled={chat.voiceCall.micEnabled}
         hasVideoDevice={chat.voiceCall.hasVideoDevice}
+        liveKitToken={chat.voiceCall.credentials?.token ?? null}
+        liveKitUrl={chat.voiceCall.credentials?.url ?? null}
         onAnswer={() => void chat.voiceCall.answerCall()}
         onReject={chat.voiceCall.rejectCall}
         onHangUp={chat.voiceCall.hangUp}
         onToggleCamera={() => void chat.voiceCall.toggleCamera()}
         onToggleMic={chat.voiceCall.toggleMic}
+        onRoomConnected={chat.voiceCall.onRoomConnected}
+        onRoomDisconnected={chat.voiceCall.onRoomDisconnected}
+        onRoomError={chat.voiceCall.onRoomError}
+        onPeerJoined={chat.voiceCall.onPeerJoined}
+        registerMediaControls={chat.voiceCall.registerMediaControls}
       />
       <div className="flex min-h-[43.06px] items-center justify-between gap-4 border-l-[2.315px] border-yellow-lemon bg-linear-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[19.966px] pr-[17.65px]">
         <span className="font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.3313px] text-warm-ink">

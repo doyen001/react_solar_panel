@@ -1,4 +1,5 @@
 export const CALL_SIGNAL_TYPES = [
+  "call_invite",
   "call_offer",
   "call_answer",
   "call_ice",

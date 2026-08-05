@@ -7,7 +7,7 @@ import { resolveChatWebSocketUrl } from "@/lib/chat/backend-origin";
 import type { ChatMessage, ConversationRow } from "@/hooks/useRealtimeChat";
 import { isChatWebSocketSendReady } from "@/hooks/useRealtimeChat";
 import { isCallSignalMessage, type CallSignalMessage } from "@/lib/webrtc/call-signaling";
-import { useWebRtcCall } from "@/hooks/useWebRtcCall";
+import { useLiveKitCall } from "@/hooks/useLiveKitCall";
 
 type ConversationWithMessages = ConversationRow & {
   messages?: ChatMessage[];
@@ -364,12 +364,14 @@ export function useInstallerHomeConversation(
     return "Customer";
   }, [conversation]);
 
-  const voiceCall = useWebRtcCall({
+  const voiceCall = useLiveKitCall({
+    portal: "installer",
     conversationId,
     userId: effectiveUserId,
     peerUserId: customerId,
     wsRef,
     wsOpen: wsState === "open",
+    sessionFetch,
     registerSignalingHandler,
   });
 

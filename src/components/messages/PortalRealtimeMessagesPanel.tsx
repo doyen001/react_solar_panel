@@ -6,7 +6,7 @@ import type { ComposeChannel } from "@/components/customer/messages/ComposeChann
 import { ChatThreadHeader } from "@/components/customer/messages/ChatThreadHeader";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
 import { MessageThreadRow } from "@/components/customer/messages/MessageThreadRow";
-import { VoiceCallOverlay } from "@/components/messages/VoiceCallOverlay";
+import { LiveKitCallOverlay } from "@/components/messages/LiveKitCallOverlay";
 import type { CustomerUser } from "@/lib/store/customerAuthSlice";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
@@ -82,20 +82,25 @@ export function PortalRealtimeMessagesPanel({
 
   return (
     <>
-      <VoiceCallOverlay
+      <LiveKitCallOverlay
         callState={chat.voiceCall.callState}
         peerName={chat.activeContactName}
         error={chat.voiceCall.error}
-        localStream={chat.voiceCall.localStream}
-        remoteStream={chat.voiceCall.remoteStream}
         cameraEnabled={chat.voiceCall.cameraEnabled}
         micEnabled={chat.voiceCall.micEnabled}
         hasVideoDevice={chat.voiceCall.hasVideoDevice}
+        liveKitToken={chat.voiceCall.credentials?.token ?? null}
+        liveKitUrl={chat.voiceCall.credentials?.url ?? null}
         onAnswer={() => void chat.voiceCall.answerCall()}
         onReject={chat.voiceCall.rejectCall}
         onHangUp={chat.voiceCall.hangUp}
         onToggleCamera={() => void chat.voiceCall.toggleCamera()}
         onToggleMic={chat.voiceCall.toggleMic}
+        onRoomConnected={chat.voiceCall.onRoomConnected}
+        onRoomDisconnected={chat.voiceCall.onRoomDisconnected}
+        onRoomError={chat.voiceCall.onRoomError}
+        onPeerJoined={chat.voiceCall.onPeerJoined}
+        registerMediaControls={chat.voiceCall.registerMediaControls}
       />
       <ConversationSwitcher
         contacts={chat.contacts}
