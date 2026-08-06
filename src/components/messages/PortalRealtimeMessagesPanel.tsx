@@ -5,7 +5,7 @@ import { ConversationSwitcher } from "@/components/customer/messages/Conversatio
 import type { ComposeChannel } from "@/components/customer/messages/ComposeChannelBar";
 import { ChatThreadHeader } from "@/components/customer/messages/ChatThreadHeader";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
-import { MessageThreadRow } from "@/components/customer/messages/MessageThreadRow";
+import { ChatThreadMessageRow } from "@/components/customer/messages/ChatThreadMessageRow";
 import { LiveKitCallOverlay } from "@/components/messages/LiveKitCallOverlay";
 import type { CustomerUser } from "@/lib/store/customerAuthSlice";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
@@ -126,7 +126,7 @@ export function PortalRealtimeMessagesPanel({
               const isUser = m.senderId === chat.userId;
               const peerName = chat.activeContactName;
               return (
-                <MessageThreadRow
+                <ChatThreadMessageRow
                   key={m.id}
                   direction={isUser ? "outgoing" : "incoming"}
                   senderName={isUser ? userDisplayName : peerName}

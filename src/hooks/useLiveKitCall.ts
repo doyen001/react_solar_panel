@@ -6,6 +6,10 @@ import {
   type CallSignalMessage,
 } from "@/lib/webrtc/call-signaling";
 import { resolveLiveKitServerUrl } from "@/lib/livekit/livekit-url";
+import {
+  buildVideoCallHistoryBody,
+  formatCallDuration,
+} from "@/lib/chat/call-history-message";
 import { extractMessage, unwrapApiData } from "@/lib/customers/backend";
 
 export type CallState =
@@ -90,6 +94,7 @@ export function useLiveKitCall({
   const isCallerRef = useRef(false);
   const connectRequestedRef = useRef(false);
   const closingIntentionallyRef = useRef(false);
+  const connectedAtRef = useRef<number | null>(null);
   const mediaControlsRef = useRef<{
     setCameraEnabled: (enabled: boolean) => Promise<boolean | void>;
     setMicEnabled: (enabled: boolean) => Promise<boolean | void>;
@@ -103,6 +108,7 @@ export function useLiveKitCall({
     callIdRef.current = null;
     isCallerRef.current = false;
     connectRequestedRef.current = false;
+    connectedAtRef.current = null;
     setIncomingCall(null);
     setCredentials(null);
     setCameraEnabled(false);
@@ -111,6 +117,27 @@ export function useLiveKitCall({
     setCallState("idle");
     closingIntentionallyRef.current = false;
   }, []);
+
+  const postCallHistory = useCallback(
+    async (label: string) => {
+      if (!conversationId) return;
+      try {
+        await sessionFetch(`${api}/conversations/${conversationId}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            body: buildVideoCallHistoryBody(label),
+          }),
+        });
+      } catch {
+        // Call history is best-effort and should not block call teardown.
+      }
+    },
+    [api, conversationId, sessionFetch],
+  );
 
   const fetchLiveKitToken = useCallback(
     async (convId: string) => {
@@ -170,7 +197,24 @@ export function useLiveKitCall({
 
   const hangUp = useCallback(() => {
     closingIntentionallyRef.current = true;
+    const state = callStateRef.current;
+    const wasCaller = isCallerRef.current;
     const callId = callIdRef.current;
+
+    if (state === "connected") {
+      const startedAt = connectedAtRef.current;
+      const durationSec = startedAt
+        ? Math.max(1, Math.round((Date.now() - startedAt) / 1000))
+        : 0;
+      const label =
+        durationSec > 0
+          ? `Video call · ${formatCallDuration(durationSec)}`
+          : "Video call";
+      void postCallHistory(label);
+    } else if (state === "calling" && wasCaller) {
+      void postCallHistory("Video call · No answer");
+    }
+
     if (callId && conversationId) {
       sendSignal(wsRef.current, {
         type: "call_hangup",
@@ -180,10 +224,11 @@ export function useLiveKitCall({
       });
     }
     resetCall();
-  }, [conversationId, resetCall, userId, wsRef]);
+  }, [conversationId, postCallHistory, resetCall, userId, wsRef]);
 
   const rejectCall = useCallback(() => {
     const callId = callIdRef.current ?? incomingCall?.callId;
+    void postCallHistory("Video call · Declined");
     if (callId && conversationId) {
       sendSignal(wsRef.current, {
         type: "call_reject",
@@ -193,7 +238,7 @@ export function useLiveKitCall({
       });
     }
     resetCall();
-  }, [conversationId, incomingCall?.callId, resetCall, userId, wsRef]);
+  }, [conversationId, incomingCall?.callId, postCallHistory, resetCall, userId, wsRef]);
 
   const startCall = useCallback(async () => {
     if (!conversationId || !peerUserId || !wsOpen) {
@@ -261,6 +306,7 @@ export function useLiveKitCall({
   }, []);
 
   const onPeerJoined = useCallback(() => {
+    connectedAtRef.current = Date.now();
     setCallState("connected");
     setError(null);
   }, []);

@@ -65,6 +65,7 @@ function CallControlButton({
   onClick,
   children,
   danger,
+  success,
 }: {
   active?: boolean;
   disabled?: boolean;
@@ -72,6 +73,7 @@ function CallControlButton({
   onClick?: () => void;
   children: React.ReactNode;
   danger?: boolean;
+  success?: boolean;
 }) {
   return (
     <button
@@ -84,9 +86,11 @@ function CallControlButton({
         "flex size-11 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40",
         danger
           ? "bg-red-600 text-white hover:bg-red-700"
-          : active
-            ? "bg-white/20 text-white hover:bg-white/30"
-            : "bg-[rgba(28,26,23,0.55)] text-white hover:bg-[rgba(28,26,23,0.7)]",
+          : success
+            ? "bg-green-600 text-white hover:bg-green-700"
+            : active
+              ? "bg-white/20 text-white hover:bg-white/30"
+              : "bg-[rgba(28,26,23,0.55)] text-white hover:bg-[rgba(28,26,23,0.7)]",
       )}
     >
       {children}
@@ -425,7 +429,7 @@ export const LiveKitCallOverlay = memo(function LiveKitCallOverlay({
               <CallControlButton label="Decline" onClick={onReject} danger>
                 <Icon name="Phone" className="size-5 rotate-[135deg]" />
               </CallControlButton>
-              <CallControlButton label="Answer" onClick={onAnswer} active>
+              <CallControlButton label="Answer" onClick={onAnswer} success>
                 <Icon name="Phone" className="size-5" />
               </CallControlButton>
             </>

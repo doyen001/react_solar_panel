@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { ComposeChannel } from "@/components/customer/messages/ComposeChannelBar";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
-import { MessageThreadRow } from "@/components/customer/messages/MessageThreadRow";
+import { ChatThreadMessageRow } from "@/components/customer/messages/ChatThreadMessageRow";
 import { LiveKitCallOverlay } from "@/components/messages/LiveKitCallOverlay";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
@@ -135,7 +135,7 @@ export function InstallerHomeCustomerCommunication({ customerId }: Props) {
               const isUser = message.senderId === chat.userId;
               const peerName = chat.activeContactName;
               return (
-                <MessageThreadRow
+                <ChatThreadMessageRow
                   key={message.id}
                   direction={isUser ? "outgoing" : "incoming"}
                   senderName={isUser ? userDisplayName : peerName}
