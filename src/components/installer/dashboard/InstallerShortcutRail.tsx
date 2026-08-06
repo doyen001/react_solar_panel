@@ -4,7 +4,7 @@ import classNames from "classnames";
 import Link from "next/link";
 import Image from "next/image";
 import { createPortal } from "react-dom";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import Icon from "@/components/ui/Icons";
 import {
   InstallerCustomerImportModal,
@@ -14,6 +14,7 @@ import { InstallerCreateAppointmentModal } from "@/components/installer/appointm
 import { InstallerCreateNoteModal } from "@/components/installer/notes/InstallerCreateNoteModal";
 import { InstallerCreateTaskModal } from "@/components/installer/tasks/InstallerCreateTaskModal";
 import { InstallerCreateTagModal } from "@/components/installer/tags/InstallerCreateTagModal";
+import { InstallerPaymentsModal } from "@/components/installer/payments/InstallerPaymentsModal";
 import type { InstallerCustomerSummary } from "@/lib/installers/customers";
 import type { InstallerAppointment } from "@/lib/installers/appointments";
 import type { InstallerNote } from "@/lib/installers/notes";
@@ -482,6 +483,7 @@ export const InstallerShortcutRail = memo(function InstallerShortcutRail({
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [tagModalOpen, setTagModalOpen] = useState(false);
+  const [paymentsModalOpen, setPaymentsModalOpen] = useState(false);
   const [importSource, setImportSource] =
     useState<CustomerImportSource>("file");
 
@@ -492,6 +494,11 @@ export const InstallerShortcutRail = memo(function InstallerShortcutRail({
 
   const customerActionDisabled =
     !selectedCustomerId || selectedCustomerId.startsWith("fallback-");
+
+  const selectedCustomer = useMemo(
+    () => customers.find((c) => c.id === selectedCustomerId) ?? null,
+    [customers, selectedCustomerId],
+  );
 
   return (
     <aside
@@ -533,6 +540,11 @@ export const InstallerShortcutRail = memo(function InstallerShortcutRail({
         onClose={() => setTagModalOpen(false)}
         customerId={selectedCustomerId}
         onCreated={onTagCreated}
+      />
+      <InstallerPaymentsModal
+        open={paymentsModalOpen}
+        onClose={() => setPaymentsModalOpen(false)}
+        customer={selectedCustomer}
       />
       <nav className="flex flex-col gap-[7px] px-2">
         <ShortcutRailSolarDesignButton
@@ -617,6 +629,9 @@ export const InstallerShortcutRail = memo(function InstallerShortcutRail({
             </ShortcutRailGradientChip>
           }
           label="Payments"
+          onClick={() => setPaymentsModalOpen(true)}
+          disabled={customerActionDisabled}
+          title={customerActionDisabled ? "Select a customer first" : undefined}
         />
         <ShortcutRailCard
           chip={
