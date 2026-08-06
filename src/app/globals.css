@@ -591,6 +591,35 @@
   --color-sm-wizard-dropzone-border: rgb(81 162 255 / 0.4);
   --color-sm-wizard-combo-shadow: rgb(0 0 0 / 0.1);
 
+  /* Services — Website Design & Development page (`/services`) */
+  --color-svc-page-bg: #f6fafd;
+  --color-svc-surface: #ffffff;
+  --color-svc-surface-alt: #f1f7fb;
+  --color-svc-ink: #09234a;
+  --color-svc-body: #45556c;
+  --color-svc-muted: #62748e;
+  --color-svc-border: #dbe7f0;
+  --color-svc-border-soft: #eaf2f8;
+  --color-svc-accent: #05afd1;
+  --color-svc-accent-strong: #0284c5;
+  /* 6.2:1 on white — safe for small text, unlike the two above */
+  --color-svc-accent-text: #01698a;
+  --color-svc-accent-soft: #e4f6fb;
+  --color-svc-gold: #f8c532;
+  --color-svc-track: #cfe3ef;
+  --color-svc-shadow: rgb(9 35 74 / 0.08);
+  --color-svc-shadow-lift: rgb(9 35 74 / 0.16);
+  --color-svc-focus: #0b63b0;
+
+  /* Dark hero / final CTA surfaces */
+  --color-svc-dark: #071b38;
+  --color-svc-dark-2: #0b2b52;
+  --color-svc-dark-body: #b9cbe0;
+  --color-svc-dark-muted: #93a9c4;
+  --color-svc-dark-border: rgb(255 255 255 / 0.14);
+  --color-svc-glass: rgb(255 255 255 / 0.07);
+  --color-svc-glass-strong: rgb(255 255 255 / 0.12);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-source-sans: var(--font-source-sans);
@@ -3913,4 +3942,554 @@ button {
 
 .installer-schedule-cal .rbc-agenda-view tbody > tr > td {
   border-color: var(--color-warm-border);
+}
+
+/* ==========================================================================
+   Services — Website Design & Development (`/services`)
+
+   Everything below lives in @layer components on purpose. Tailwind v4 emits
+   its utilities into @layer utilities, and UNLAYERED css beats any layered
+   rule regardless of source order — so an unlayered `.svc-card` would silently
+   override a `bg-svc-ink` / `border-svc-accent` applied alongside it. Declaring
+   the layer puts these composites below utilities in the cascade, which is what
+   "a component class you can override with a utility" actually requires.
+
+   @keyframes stay outside the layer: layers do not scope keyframe names, so
+   keeping them at top level avoids ambiguity.
+
+   All motion here is switched off by the prefers-reduced-motion block at the
+   end. Its !important declarations still win from inside the layer, because
+   !important reverses layer precedence (the earlier layer wins).
+   ========================================================================== */
+
+@keyframes svc-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes svc-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes svc-ripple {
+  to {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* Process timeline. The rail animates width/height rather than a transform so
+   its leading-edge ::after dot stays circular instead of being scaled into an
+   ellipse. It is one absolutely-positioned 2px bar, so there is no reflow cost
+   worth optimising away here. */
+@keyframes svc-rail-grow-y {
+  from {
+    height: 0;
+  }
+  to {
+    height: 100%;
+  }
+}
+
+@keyframes svc-rail-grow-x {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes svc-comet {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  84% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes svc-step-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes svc-step-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.65);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.3);
+  }
+}
+
+@keyframes svc-step-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+  .svc-page {
+    background-color: var(--color-svc-page-bg);
+  }
+
+  /* Anchor jumps must clear the 80px fixed landing header. */
+  .svc-anchor {
+    scroll-margin-top: 6.5rem;
+  }
+
+  /* --- Scroll reveal ----------------------------------------------------- */
+
+  .svc-reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    will-change: opacity, transform;
+  }
+
+  .svc-reveal.is-visible {
+    animation: svc-reveal-up 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* --- Floating hero art -------------------------------------------------- */
+
+  .svc-float {
+    animation: svc-float 6.5s ease-in-out infinite;
+  }
+
+  .svc-float-slow {
+    animation: svc-float 9s ease-in-out infinite;
+  }
+
+  .svc-float-delay-1 {
+    animation-delay: -2.2s;
+  }
+
+  .svc-float-delay-2 {
+    animation-delay: -4.4s;
+  }
+
+  /* --- Surfaces ----------------------------------------------------------- */
+
+  .svc-card {
+    border: 1px solid var(--color-svc-border);
+    background-color: var(--color-svc-surface);
+    box-shadow: 0 1px 2px var(--color-svc-shadow);
+    transition:
+      transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 300ms ease,
+      border-color 300ms ease;
+  }
+
+  .svc-lift:hover,
+  .svc-lift:focus-within {
+    transform: translateY(-6px);
+    border-color: var(--color-svc-accent);
+    box-shadow: 0 18px 40px -18px var(--color-svc-shadow-lift);
+  }
+
+  .svc-scale-target {
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .svc-scale:hover .svc-scale-target {
+    transform: scale(1.06);
+  }
+
+  .svc-glass {
+    border: 1px solid var(--color-svc-dark-border);
+    background-color: var(--color-svc-glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .svc-hero-bg {
+    background:
+      radial-gradient(
+        circle at 14% 18%,
+        rgb(5 175 209 / 0.28) 0%,
+        transparent 46%
+      ),
+      radial-gradient(
+        circle at 86% 8%,
+        rgb(32 148 243 / 0.22) 0%,
+        transparent 44%
+      ),
+      radial-gradient(
+        circle at 72% 92%,
+        rgb(248 197 50 / 0.14) 0%,
+        transparent 42%
+      ),
+      linear-gradient(
+        168deg,
+        var(--color-svc-dark) 0%,
+        var(--color-svc-dark-2) 58%,
+        var(--color-svc-dark) 100%
+      );
+  }
+
+  .svc-grid-lines {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 72%);
+    -webkit-mask-image: radial-gradient(
+      ellipse at 50% 30%,
+      #000 0%,
+      transparent 72%
+    );
+  }
+
+  .svc-gradient-text {
+    background: linear-gradient(
+      100deg,
+      var(--color-svc-accent) 0%,
+      var(--color-brand-teal) 42%,
+      var(--color-svc-gold) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .svc-cta-primary {
+    background: linear-gradient(
+      135deg,
+      var(--color-brand-blue) 0%,
+      var(--color-svc-accent) 100%
+    );
+    box-shadow: 0 10px 30px -12px rgb(32 148 243 / 0.75);
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      filter 220ms ease;
+  }
+
+  .svc-cta-primary:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.08);
+    box-shadow: 0 16px 38px -14px rgb(32 148 243 / 0.85);
+  }
+
+  .svc-final-cta {
+    background:
+      radial-gradient(
+        circle at 12% 20%,
+        rgb(5 175 209 / 0.36) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 88% 78%,
+        rgb(248 197 50 / 0.2) 0%,
+        transparent 48%
+      ),
+      linear-gradient(
+        120deg,
+        var(--color-svc-dark) 0%,
+        #0d3566 52%,
+        var(--color-svc-dark) 100%
+      );
+  }
+
+  .svc-icon-well {
+    background: linear-gradient(
+      135deg,
+      var(--color-svc-accent-soft) 0%,
+      rgb(232 240 254 / 0.9) 100%
+    );
+    color: var(--color-svc-accent-text);
+  }
+
+  /* --- Process timeline ---------------------------------------------------- */
+
+  /*
+   * The whole sequence is driven by one class (`.is-running`) that a tiny
+   * client wrapper adds when the section scrolls into view, plus a per-step
+   * `--svc-i` index carried as an inline custom property. That keeps the
+   * choreography in CSS and the step markup server-rendered — no JS timers,
+   * no state, and the stagger stays in sync with the rail on any device.
+   *
+   * Budget: rail 2200ms, steps every 240ms. Step 7 starts at 1440ms and
+   * settles ~2060ms, just before the rail tops out.
+   */
+
+  .svc-rail-track {
+    background-color: var(--color-svc-track);
+    opacity: 0.5;
+  }
+
+  /* Vertical rail (mobile) */
+  .svc-rail-v-fill {
+    height: 0;
+    background: linear-gradient(
+      to bottom,
+      var(--color-brand-blue) 0%,
+      var(--color-svc-accent) 55%,
+      var(--color-brand-teal) 100%
+    );
+  }
+
+  .svc-process.is-running .svc-rail-v-fill {
+    animation: svc-rail-grow-y 2200ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+
+  /* Horizontal rail (lg+) */
+  .svc-rail-h-fill {
+    width: 0;
+    background: linear-gradient(
+      to right,
+      var(--color-brand-blue) 0%,
+      var(--color-svc-accent) 55%,
+      var(--color-brand-teal) 100%
+    );
+  }
+
+  .svc-process.is-running .svc-rail-h-fill {
+    animation: svc-rail-grow-x 2200ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+
+  /* Glowing dot that rides the growing edge of the rail. */
+  .svc-rail-v-fill::after,
+  .svc-rail-h-fill::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background-color: var(--color-svc-accent);
+    box-shadow: 0 0 16px 4px rgb(5 175 209 / 0.7);
+    opacity: 0;
+  }
+
+  .svc-rail-v-fill::after {
+    left: 50%;
+    bottom: 0;
+    margin-left: -5px;
+    margin-bottom: -5px;
+  }
+
+  .svc-rail-h-fill::after {
+    top: 50%;
+    right: 0;
+    margin-top: -5px;
+    margin-right: -5px;
+  }
+
+  .svc-process.is-running .svc-rail-v-fill::after,
+  .svc-process.is-running .svc-rail-h-fill::after {
+    animation: svc-comet 2200ms ease-out forwards;
+  }
+
+  /* Step marker: the wrapper pops, the inner disc handles hover. Splitting the
+     two matters — `animation-fill-mode: forwards` pins the wrapper's transform,
+     so a hover transform on the same element would never apply. */
+  .svc-step-marker-wrap {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  .svc-process.is-running .svc-step-marker-wrap {
+    animation: svc-step-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(var(--svc-i, 0) * 240ms);
+  }
+
+  .svc-step-pulse {
+    opacity: 0;
+    background-color: var(--color-svc-accent);
+  }
+
+  .svc-process.is-running .svc-step-pulse {
+    animation: svc-step-pulse 1500ms ease-out forwards;
+    animation-delay: calc(var(--svc-i, 0) * 240ms + 180ms);
+  }
+
+  .svc-step-marker {
+    background: linear-gradient(
+      135deg,
+      var(--color-brand-blue) 0%,
+      var(--color-svc-accent) 100%
+    );
+    box-shadow: 0 0 0 6px var(--color-svc-page-bg);
+    transition:
+      transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 260ms ease;
+  }
+
+  .svc-step:hover .svc-step-marker,
+  .svc-step:focus-within .svc-step-marker {
+    transform: scale(1.14);
+    box-shadow:
+      0 0 0 6px var(--color-svc-page-bg),
+      0 10px 26px -8px rgb(5 175 209 / 0.9);
+  }
+
+  .svc-step-body {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .svc-process.is-running .svc-step-body {
+    animation: svc-step-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--svc-i, 0) * 240ms + 140ms);
+  }
+
+  .svc-step-title {
+    transition: color 220ms ease;
+  }
+
+  .svc-step:hover .svc-step-title {
+    color: var(--color-svc-accent-text);
+  }
+
+  /* --- Accordion ---------------------------------------------------------- */
+
+  .svc-accordion-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .svc-accordion-panel[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  .svc-accordion-panel > div {
+    overflow: hidden;
+  }
+
+  /* --- Ripple ------------------------------------------------------------- */
+
+  .svc-ripple {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .svc-ripple-ink {
+    position: absolute;
+    border-radius: 9999px;
+    background-color: currentColor;
+    opacity: 0.3;
+    transform: scale(0);
+    pointer-events: none;
+    animation: svc-ripple 620ms ease-out forwards;
+  }
+
+  /* --- Focus indicators --------------------------------------------------- */
+
+  .svc-focusable:focus-visible {
+    outline: 3px solid var(--color-svc-focus);
+    outline-offset: 3px;
+  }
+
+  .svc-focusable-dark:focus-visible {
+    outline: 3px solid var(--color-customer-nav-active);
+    outline-offset: 3px;
+  }
+}
+
+/* Scope smooth scrolling to pages that opt in, rather than the whole app. */
+html:has(.svc-page) {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.svc-page) {
+    scroll-behavior: auto;
+  }
+
+  .svc-reveal,
+  .svc-reveal.is-visible {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .svc-float,
+  .svc-float-slow {
+    animation: none !important;
+  }
+
+  .svc-ripple-ink {
+    display: none !important;
+  }
+
+  .svc-card,
+  .svc-cta-primary,
+  .svc-scale-target,
+  .svc-accordion-panel {
+    transition: none !important;
+  }
+
+  .svc-lift:hover,
+  .svc-lift:focus-within,
+  .svc-cta-primary:hover,
+  .svc-scale:hover .svc-scale-target {
+    transform: none !important;
+  }
+
+  /* Process timeline: show the finished state immediately. */
+  .svc-step-marker-wrap,
+  .svc-step-body {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .svc-rail-v-fill {
+    animation: none !important;
+    height: 100% !important;
+  }
+
+  .svc-rail-h-fill {
+    animation: none !important;
+    width: 100% !important;
+  }
+
+  .svc-step-pulse,
+  .svc-rail-v-fill::after,
+  .svc-rail-h-fill::after {
+    display: none !important;
+  }
+
+  .svc-step-marker {
+    transition: none !important;
+  }
+
+  .svc-step:hover .svc-step-marker,
+  .svc-step:focus-within .svc-step-marker {
+    transform: none !important;
+  }
 }

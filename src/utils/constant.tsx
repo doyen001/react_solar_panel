@@ -5,6 +5,7 @@ export const LANDING_NAV_ITEMS = [
   { label: "Customers", link: "/customers" },
   { label: "Installers", link: "/installers/landing" },
   { label: "Design Platform", link: "/designs" },
+  { label: "Services", link: "/services" },
   { label: "About Us", link: "/about-us" },
 ] as const;
 
@@ -2341,6 +2342,7 @@ export const LANDING_FOOTER_COLUMNS: LandingFooterColumn[] = [
     title: "Company",
     items: [
       { label: "About Us", href: "/about-us" },
+      { label: "Web Design & Development", href: "/services" },
       { label: "Careers", href: "#" },
       { label: "Projects", href: "#" },
       { label: "Partners", href: "#" },
@@ -3609,3 +3611,654 @@ export const SOLAR_MAINTENANCE_CUSTOMER_SECTION = {
   ctaLabel: "Open maintenance agreement",
   ctaHref: "/customers/solar-maintenance",
 } as const;
+
+/**
+ * Public Website Design & Development service page (`/services`).
+ *
+ * Copy is placeholder-grade but production-shaped: swap the strings here and the
+ * whole page re-themes without touching a component.
+ */
+export const SERVICES_PAGE = {
+  seo: {
+    title:
+      "Website Design & Development Services | Fast, SEO-Friendly Websites",
+    description:
+      "Professional website design and development that grows your business. We build fast, modern, SEO-friendly websites that increase traffic, generate leads, and improve customer trust.",
+    keywords: [
+      "website design",
+      "web development",
+      "ecommerce development",
+      "WordPress development",
+      "landing page design",
+      "website redesign",
+      "SEO friendly website",
+    ],
+    path: "/services",
+    ogImageAlt:
+      "Website Design & Development services — dashboard and landing page mockups",
+  },
+  breadcrumb: [
+    { label: "Home", href: "/" },
+    { label: "Services", href: "/services" },
+    { label: "Website Design & Development", href: null },
+  ],
+  hero: {
+    badge: "Website Design & Development",
+    title: "Professional Website Design & Development That Grows Your Business",
+    subtitle:
+      "We build fast, modern, SEO-friendly websites that increase traffic, generate leads, and improve customer trust.",
+    primaryCta: { label: "Get Free Quote", href: "/contact-us" },
+    secondaryCta: { label: "View Portfolio", href: "#portfolio" },
+    trustNote:
+      "Free consultation. No obligation. Most quotes returned within one business day.",
+    stats: [
+      {
+        id: "projects",
+        value: 200,
+        suffix: "+",
+        label: "Projects",
+        srLabel: "Over 200 projects delivered",
+      },
+      {
+        id: "satisfaction",
+        value: 98,
+        suffix: "%",
+        label: "Client Satisfaction",
+        srLabel: "98 percent client satisfaction",
+      },
+      {
+        id: "experience",
+        value: 10,
+        suffix: "+",
+        label: "Years Experience",
+        srLabel: "More than 10 years of experience",
+      },
+      {
+        id: "support",
+        value: 24,
+        suffix: "/7",
+        label: "Support",
+        srLabel: "24 by 7 support",
+      },
+    ],
+    floatingCards: [
+      { id: "speed", title: "98", unit: "Performance", caption: "Lighthouse" },
+      { id: "traffic", title: "+64%", unit: "Organic traffic", caption: "6 months" },
+      { id: "uptime", title: "99.9%", unit: "Uptime", caption: "Monitored" },
+    ],
+  },
+  services: {
+    eyebrow: "What we build",
+    title: "Websites engineered for growth, not just good looks",
+    subtitle:
+      "From a five-page brochure site to a bespoke web application, every build ships fast, accessible, and ready to rank.",
+    learnMoreLabel: "Learn More",
+    learnMoreHref: "/contact-us",
+    items: [
+      {
+        id: "business",
+        iconId: "Globe" as const,
+        title: "Business Websites",
+        description:
+          "Conversion-focused sites for small and mid-sized businesses, built to turn visitors into enquiries.",
+      },
+      {
+        id: "corporate",
+        iconId: "Building2" as const,
+        title: "Corporate Websites",
+        description:
+          "Multi-department, multi-language corporate presences with governance and approval workflows.",
+      },
+      {
+        id: "landing",
+        iconId: "Target" as const,
+        title: "Landing Pages",
+        description:
+          "High-intent campaign pages with A/B-ready layouts, tuned for paid traffic and lead capture.",
+      },
+      {
+        id: "portfolio",
+        iconId: "LayoutGrid" as const,
+        title: "Portfolio Websites",
+        description:
+          "Gallery-led sites for studios and creators, with fast image pipelines and case-study templates.",
+      },
+      {
+        id: "ecommerce",
+        iconId: "Shop" as const,
+        title: "Ecommerce Stores",
+        description:
+          "Shopify, WooCommerce, and headless storefronts with clean checkout flows and analytics baked in.",
+      },
+      {
+        id: "wordpress",
+        iconId: "FileText" as const,
+        title: "WordPress Development",
+        description:
+          "Custom themes and blocks your team can actually edit — no page-builder bloat, no plugin sprawl.",
+      },
+      {
+        id: "apps",
+        iconId: "Cpu" as const,
+        title: "Custom Web Applications",
+        description:
+          "Portals, dashboards, and internal tools built on React and Node with role-based access control.",
+      },
+      {
+        id: "redesign",
+        iconId: "Sparkles" as const,
+        title: "Website Redesign",
+        description:
+          "Modernise an ageing site without losing rankings — content, redirects, and equity carried across.",
+      },
+      {
+        id: "maintenance",
+        iconId: "Wrench" as const,
+        title: "Maintenance & Support",
+        description:
+          "Patching, backups, uptime monitoring, and a named engineer on a predictable monthly retainer.",
+      },
+      {
+        id: "optimization",
+        iconId: "TrendingUp" as const,
+        title: "Website Optimization",
+        description:
+          "Core Web Vitals, technical SEO, and conversion-rate work measured against your real analytics.",
+      },
+    ],
+  },
+  whyChooseUs: {
+    eyebrow: "Why choose us",
+    title: "Nine reasons teams stay with us after launch",
+    subtitle:
+      "We treat a website as infrastructure. It has to be quick, findable, secure, and cheap to change six months from now.",
+    cta: { label: "Talk to an engineer", href: "/contact-us" },
+    items: [
+      {
+        id: "responsive",
+        iconId: "LayoutGrid" as const,
+        title: "Mobile Responsive",
+        description:
+          "Designed mobile-first and tested on real devices from 320px up to ultrawide.",
+      },
+      {
+        id: "fast",
+        iconId: "Zap" as const,
+        title: "Lightning Fast Performance",
+        description:
+          "Budgeted for Core Web Vitals, with image, font, and JavaScript payloads kept honest.",
+      },
+      {
+        id: "seo",
+        iconId: "Search" as const,
+        title: "SEO Optimized",
+        description:
+          "Semantic markup, structured data, clean URLs, sitemaps, and a technical audit at handover.",
+      },
+      {
+        id: "secure",
+        iconId: "Shield" as const,
+        title: "Secure Development",
+        description:
+          "Hardened headers, dependency scanning, least-privilege access, and encrypted secrets.",
+      },
+      {
+        id: "uiux",
+        iconId: "Sparkles" as const,
+        title: "Modern UI/UX",
+        description:
+          "Interfaces built from a design system, so every page stays consistent as the site grows.",
+      },
+      {
+        id: "cms",
+        iconId: "FileText" as const,
+        title: "CMS Integration",
+        description:
+          "Editors get structured, guard-railed fields instead of a blank rich-text box.",
+      },
+      {
+        id: "scalable",
+        iconId: "Package" as const,
+        title: "Scalable Architecture",
+        description:
+          "Component-driven codebases that survive new sections, new markets, and new teams.",
+      },
+      {
+        id: "support",
+        iconId: "Users" as const,
+        title: "Ongoing Support",
+        description:
+          "Named contacts, documented SLAs, and a change log you can actually read.",
+      },
+      {
+        id: "pricing",
+        iconId: "Dollar" as const,
+        title: "Affordable Pricing",
+        description:
+          "Fixed-scope quotes with no surprise line items, plus staged payments tied to milestones.",
+      },
+    ],
+  },
+  process: {
+    eyebrow: "How we work",
+    title: "A seven-step process with no black boxes",
+    subtitle:
+      "You see working software early and often. Every stage ends in something you can review, not just a status update.",
+    steps: [
+      {
+        id: "discovery",
+        step: "01",
+        title: "Discovery",
+        duration: "Week 1",
+        description:
+          "Goals, audience, competitors, and the metrics that will tell us this project worked.",
+      },
+      {
+        id: "planning",
+        step: "02",
+        title: "Planning",
+        duration: "Week 1–2",
+        description:
+          "Sitemap, content model, technical approach, and a fixed scope you sign off before design starts.",
+      },
+      {
+        id: "design",
+        step: "03",
+        title: "UI/UX Design",
+        duration: "Week 2–4",
+        description:
+          "Wireframes to high-fidelity screens, with a component library and accessibility checked at design time.",
+      },
+      {
+        id: "development",
+        step: "04",
+        title: "Development",
+        duration: "Week 4–8",
+        description:
+          "Built in reviewable increments on a staging URL you can open any day of the week.",
+      },
+      {
+        id: "testing",
+        step: "05",
+        title: "Testing",
+        duration: "Week 8–9",
+        description:
+          "Cross-browser, device, performance, accessibility, and content QA — each with a written pass.",
+      },
+      {
+        id: "launch",
+        step: "06",
+        title: "Launch",
+        duration: "Week 9",
+        description:
+          "DNS, redirects, analytics, and search console handled by us, with a rollback plan ready.",
+      },
+      {
+        id: "maintenance",
+        step: "07",
+        title: "Maintenance",
+        duration: "Ongoing",
+        description:
+          "Monitoring, updates, and a monthly performance report with recommendations, not just numbers.",
+      },
+    ],
+  },
+  portfolio: {
+    eyebrow: "Selected work",
+    title: "Recent projects",
+    subtitle:
+      "A representative sample across ecommerce, corporate, healthcare, hospitality, SaaS, and education.",
+    viewLabel: "View Project",
+    items: [
+      {
+        id: "ecommerce",
+        variant: "storefront" as const,
+        category: "Ecommerce Website",
+        title: "Northline Supply Co.",
+        summary:
+          "Headless storefront with a rebuilt checkout that cut cart abandonment by a third.",
+        technologies: ["Next.js", "Shopify", "Tailwind CSS", "Vercel"],
+        href: "/contact-us",
+        imageAlt:
+          "Ecommerce website project mockup showing a product grid and checkout screen",
+      },
+      {
+        id: "corporate",
+        variant: "corporate" as const,
+        category: "Corporate Website",
+        title: "Arden Group",
+        summary:
+          "Nine-market corporate site with editor workflows and per-region content governance.",
+        technologies: ["React", "TypeScript", "WordPress", "AWS"],
+        href: "/contact-us",
+        imageAlt:
+          "Corporate website project mockup showing a multi-region landing page layout",
+      },
+      {
+        id: "healthcare",
+        variant: "healthcare" as const,
+        category: "Healthcare Website",
+        title: "Meadowbrook Clinics",
+        summary:
+          "Patient-facing booking site meeting WCAG 2.2 AA with online appointment intake.",
+        technologies: ["Next.js", "Node.js", "PostgreSQL", "Cloudflare"],
+        href: "/contact-us",
+        imageAlt:
+          "Healthcare website project mockup showing an appointment booking interface",
+      },
+      {
+        id: "restaurant",
+        variant: "restaurant" as const,
+        category: "Restaurant Website",
+        title: "Ember & Oak",
+        summary:
+          "Menu-led site with table reservations and a sub-second first contentful paint on 4G.",
+        technologies: ["Astro", "Tailwind CSS", "Firebase", "Netlify"],
+        href: "/contact-us",
+        imageAlt:
+          "Restaurant website project mockup showing a menu page and reservation form",
+      },
+      {
+        id: "saas",
+        variant: "dashboard" as const,
+        category: "SaaS Dashboard",
+        title: "Pulseboard Analytics",
+        summary:
+          "Multi-tenant analytics dashboard rendering 50k-row datasets without blocking the UI.",
+        technologies: ["React", "TypeScript", "Node.js", "MongoDB"],
+        href: "/contact-us",
+        imageAlt:
+          "SaaS dashboard project mockup showing charts and a data table",
+      },
+      {
+        id: "education",
+        variant: "education" as const,
+        category: "Education Platform",
+        title: "Latitude Learning",
+        summary:
+          "Course delivery platform with video streaming, progress tracking, and assessments.",
+        technologies: ["Next.js", "Laravel", "MySQL", "Docker"],
+        href: "/contact-us",
+        imageAlt:
+          "Education platform project mockup showing a course player and progress tracker",
+      },
+    ],
+  },
+  techStack: {
+    eyebrow: "Technology",
+    title: "The stack we build on",
+    subtitle:
+      "We pick the boring, well-supported option unless there is a measurable reason not to.",
+    groups: [
+      {
+        id: "frontend",
+        label: "Frontend",
+        items: [
+          { name: "HTML5", abbr: "H5" },
+          { name: "CSS3", abbr: "C3" },
+          { name: "JavaScript", abbr: "JS" },
+          { name: "TypeScript", abbr: "TS" },
+          { name: "React", abbr: "Re" },
+          { name: "Next.js", abbr: "Nx" },
+          { name: "Vue.js", abbr: "Vu" },
+          { name: "Angular", abbr: "Ng" },
+          { name: "Tailwind CSS", abbr: "Tw" },
+          { name: "Bootstrap", abbr: "Bs" },
+        ],
+      },
+      {
+        id: "backend",
+        label: "Backend & CMS",
+        items: [
+          { name: "Node.js", abbr: "No" },
+          { name: "PHP", abbr: "Ph" },
+          { name: "Laravel", abbr: "La" },
+          { name: "WordPress", abbr: "Wp" },
+        ],
+      },
+      {
+        id: "commerce",
+        label: "Ecommerce",
+        items: [
+          { name: "Shopify", abbr: "Sh" },
+          { name: "WooCommerce", abbr: "Wo" },
+        ],
+      },
+      {
+        id: "data",
+        label: "Data",
+        items: [
+          { name: "MySQL", abbr: "My" },
+          { name: "PostgreSQL", abbr: "Pg" },
+          { name: "MongoDB", abbr: "Mo" },
+          { name: "Firebase", abbr: "Fb" },
+        ],
+      },
+      {
+        id: "infrastructure",
+        label: "Infrastructure",
+        items: [
+          { name: "AWS", abbr: "Aw" },
+          { name: "Vercel", abbr: "Ve" },
+          { name: "Cloudflare", abbr: "Cf" },
+          { name: "Docker", abbr: "Dk" },
+          { name: "GitHub", abbr: "Gh" },
+        ],
+      },
+    ],
+  },
+  benefits: {
+    eyebrow: "What you get",
+    title: "Every build ships with these as standard",
+    subtitle:
+      "Not upsells. These are the baseline we refuse to launch without.",
+    items: [
+      { id: "seo", title: "SEO Friendly", description: "Crawlable, structured, and indexed from day one." },
+      { id: "fast", title: "Fast Loading", description: "Performance budgets enforced in the build pipeline." },
+      { id: "mobile", title: "Mobile Optimized", description: "Tested on real hardware, not just a resized window." },
+      { id: "secure", title: "Secure", description: "HTTPS, hardened headers, and scanned dependencies." },
+      { id: "manage", title: "Easy to Manage", description: "A CMS your team can use without calling us." },
+      { id: "modern", title: "Modern Design", description: "A design system that still looks current in year three." },
+      { id: "convert", title: "High Conversion", description: "Clear paths to enquiry, measured and iterated." },
+      { id: "scale", title: "Easy Scalability", description: "Add sections, locales, and integrations cleanly." },
+    ],
+  },
+  testimonials: {
+    eyebrow: "Client feedback",
+    title: "What clients say after launch",
+    subtitle:
+      "Independent reviews collected six months post-launch, once the numbers were in.",
+    items: [
+      {
+        id: "t1",
+        name: "Priya Raman",
+        role: "Marketing Director",
+        company: "Northline Supply Co.",
+        initials: "PR",
+        rating: 5,
+        quote:
+          "Our old store took eleven seconds to load on mobile. The rebuild landed under two, and checkout completions went up 34% in the first quarter without us touching ad spend.",
+      },
+      {
+        id: "t2",
+        name: "Daniel Okafor",
+        role: "Chief Operating Officer",
+        company: "Arden Group",
+        initials: "DO",
+        rating: 5,
+        quote:
+          "Nine regional teams publish to the same site now. Before this, every content change was a support ticket. That alone paid for the project inside a year.",
+      },
+      {
+        id: "t3",
+        name: "Hannah Whitlock",
+        role: "Practice Manager",
+        company: "Meadowbrook Clinics",
+        initials: "HW",
+        rating: 5,
+        quote:
+          "They took accessibility seriously without being asked twice. We passed our WCAG audit first time, and online bookings now cover 60% of appointments.",
+      },
+    ],
+  },
+  pricing: {
+    eyebrow: "Pricing",
+    title: "Transparent, fixed-scope pricing",
+    subtitle:
+      "Indicative starting points. Your quote is fixed after discovery — no hourly surprises.",
+    footnote:
+      "All prices exclude GST. Staged payments are tied to milestones, not calendar dates.",
+    tiers: [
+      {
+        id: "starter",
+        name: "Starter Website",
+        priceLabel: "From $2,400",
+        cadence: "one-off project",
+        summary:
+          "A credible, fast presence for a new business or a single service line.",
+        featured: false,
+        ctaLabel: "Get Free Quote",
+        ctaHref: "/contact-us",
+        features: [
+          "Up to 5 pages",
+          "Custom responsive design",
+          "Contact form with spam protection",
+          "Basic on-page SEO setup",
+          "Google Analytics & Search Console",
+          "2 rounds of revisions",
+          "30 days post-launch support",
+        ],
+      },
+      {
+        id: "business",
+        name: "Business Website",
+        priceLabel: "From $6,900",
+        cadence: "one-off project",
+        summary:
+          "A growing site with a CMS, content strategy, and room to expand.",
+        featured: true,
+        badge: "Most popular",
+        ctaLabel: "Get Free Quote",
+        ctaHref: "/contact-us",
+        features: [
+          "Up to 20 pages",
+          "Full CMS with editor training",
+          "Blog and case-study templates",
+          "Technical SEO audit at handover",
+          "Performance budget & Core Web Vitals pass",
+          "WCAG 2.2 AA accessibility pass",
+          "Analytics dashboard & goal tracking",
+          "90 days post-launch support",
+        ],
+      },
+      {
+        id: "enterprise",
+        name: "Custom Enterprise Solution",
+        priceLabel: "Let's scope it",
+        cadence: "quoted after discovery",
+        summary:
+          "Multi-market sites, ecommerce at scale, portals, and bespoke web applications.",
+        featured: false,
+        ctaLabel: "Book a Consultation",
+        ctaHref: "/contact-us",
+        features: [
+          "Unlimited pages & locales",
+          "Custom integrations and APIs",
+          "Role-based access & approval workflows",
+          "Design system & component library",
+          "Automated testing and CI/CD",
+          "Load testing and scaling plan",
+          "Dedicated account engineer",
+          "12-month SLA-backed support",
+        ],
+      },
+    ],
+  },
+  faq: {
+    eyebrow: "Questions",
+    title: "Frequently asked questions",
+    subtitle: "Still unsure? Ask us directly — we answer in plain language.",
+    items: [
+      {
+        id: "f1",
+        question: "How long does development take?",
+        answer:
+          "A starter site typically takes 3 to 4 weeks. A business site runs 8 to 10 weeks, and enterprise projects are scoped individually. The single biggest variable is how quickly final content and approvals come back, so we build the content deadline into the plan from day one.",
+      },
+      {
+        id: "f2",
+        question: "Do you provide hosting?",
+        answer:
+          "Yes. We host on Vercel, AWS, or Cloudflare depending on the build, and we can also deploy into infrastructure you already own. Managed hosting includes SSL, daily backups, uptime monitoring, and patching. If you would rather self-host, we hand over the deployment pipeline and documentation at no extra cost.",
+      },
+      {
+        id: "f3",
+        question: "Can you redesign my current website?",
+        answer:
+          "That is a large share of our work. We start with a technical and content audit, map every existing URL so search rankings carry across, and rebuild in stages. In most cases we can keep your current site live until the replacement is fully tested.",
+      },
+      {
+        id: "f4",
+        question: "Will my website be SEO optimized?",
+        answer:
+          "Every build ships with semantic HTML, a proper heading hierarchy, structured data, generated sitemaps, canonical URLs, and Open Graph tags. You receive a technical SEO audit at handover. We do not sell ongoing content marketing, but we will happily work alongside the agency that does.",
+      },
+      {
+        id: "f5",
+        question: "Can I edit the website myself?",
+        answer:
+          "Yes. We integrate a CMS with structured, guard-railed fields rather than a blank rich-text box, so edits stay on-brand and cannot break the layout. Editor training and a short written guide are included in every project above the starter tier.",
+      },
+      {
+        id: "f6",
+        question: "Do you provide maintenance?",
+        answer:
+          "We offer monthly retainers covering security patching, dependency updates, backups, uptime monitoring, and a set allocation of change requests. Every retainer includes a monthly report with performance data and specific recommendations.",
+      },
+      {
+        id: "f7",
+        question: "What technologies do you use?",
+        answer:
+          "Mostly React, Next.js, and TypeScript on the frontend, with Node.js, Laravel, or WordPress behind it depending on your team's skills. For ecommerce we use Shopify or WooCommerce. We choose the well-supported option your team can maintain, not whatever is trending.",
+      },
+      {
+        id: "f8",
+        question: "How much does a website cost?",
+        answer:
+          "Starter sites begin around $2,400, business sites around $6,900, and enterprise work is quoted after discovery. Price is driven by page count, integrations, and content volume. You get a fixed-scope quote before any work starts, so the number does not move mid-project.",
+      },
+    ],
+  },
+  finalCta: {
+    title: "Ready to Build Your Dream Website?",
+    description:
+      "Let's create a high-performing website that helps your business grow.",
+    primary: { label: "Get Free Consultation", href: "/contact-us" },
+    secondary: { label: "Contact Us", href: "/contact-us" },
+    contact: {
+      title: "Prefer to talk first?",
+      items: [
+        { id: "phone", iconId: "Phone" as const, label: "1300 000 000", href: "tel:1300000000" },
+        { id: "email", iconId: "Mail" as const, label: "hello@easylinksolar.com.au", href: "mailto:hello@easylinksolar.com.au" },
+        { id: "address", iconId: "Pin" as const, label: "Sydney, NSW, Australia", href: null },
+      ],
+      social: [
+        { id: "linkedin", label: "LinkedIn", href: "#" },
+        { id: "facebook", label: "Facebook", href: "#" },
+        { id: "x", label: "X", href: "#" },
+        { id: "github", label: "GitHub", href: "#" },
+      ],
+    },
+  },
+} as const;
+
+export type ServicesOffering = (typeof SERVICES_PAGE.services.items)[number];
+export type ServicesReason = (typeof SERVICES_PAGE.whyChooseUs.items)[number];
+export type ServicesProcessStep = (typeof SERVICES_PAGE.process.steps)[number];
+export type ServicesPortfolioItem =
+  (typeof SERVICES_PAGE.portfolio.items)[number];
+export type ServicesPortfolioVariant = ServicesPortfolioItem["variant"];
+export type ServicesPricingTier = (typeof SERVICES_PAGE.pricing.tiers)[number];
+export type ServicesFaqEntry = (typeof SERVICES_PAGE.faq.items)[number];
+export type ServicesTestimonial =
+  (typeof SERVICES_PAGE.testimonials.items)[number];
