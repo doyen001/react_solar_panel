@@ -1,15 +1,18 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import searchIcon from "@/components/ui/Icons/search.svg";
 import userIcon from "@/components/ui/Icons/user.svg";
 import shopIcon from "@/components/ui/Icons/shop.svg";
 import { LANDING_NAV_ITEMS } from "@/utils/constant";
 
+/** Shared by the desktop and mobile account menus. `block` so `w-full` applies. */
+const PORTAL_LINK_CLASS =
+  "block w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10";
+
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   return (
     <header className="fixed top-0 z-30 w-full bg-white/75 backdrop-blur-md">
       <div className="mx-auto flex h-20 w-full max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -57,27 +60,15 @@ export function Header() {
                 <Image src={userIcon} alt="Account" width={16} height={16} />
               </summary>
               <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl">
-                <button
-                  type="button"
-                  className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
-                  onClick={() => router.push("/customers/auth")}
-                >
+                <Link href="/customers/auth" className={PORTAL_LINK_CLASS}>
                   Customer login
-                </button>
-                <button
-                  type="button"
-                  className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
-                  onClick={() => router.push("/installers/auth")}
-                >
+                </Link>
+                <Link href="/installers/auth" className={PORTAL_LINK_CLASS}>
                   Installer login
-                </button>
-                <button
-                  type="button"
-                  className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
-                  onClick={() => router.push("/admin/auth")}
-                >
+                </Link>
+                <Link href="/admin/auth" className={PORTAL_LINK_CLASS}>
                   Distributor login
-                </button>
+                </Link>
               </div>
             </details>
             <button
@@ -88,13 +79,12 @@ export function Header() {
               <Image src={shopIcon} alt="Cart" width={26} height={24} />
             </button>
 
-            <button 
-              type="button"
-              onClick={() => router.push("/contact-us")}
+            <Link
+              href="/contact-us"
               className="rounded-xl border-2 border-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-cyan-50 xl:px-5"
             >
               Contact Us
-            </button>
+            </Link>
             <button className="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500 xl:px-5">
               Buy Now
             </button>
@@ -116,27 +106,21 @@ export function Header() {
               <Image src={userIcon} alt="Account" width={16} height={16} />
             </summary>
             <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl">
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
-                onClick={() => router.push("/customers/auth?portal=customer")}
+              <Link
+                href="/customers/auth?portal=customer"
+                className={PORTAL_LINK_CLASS}
               >
                 Customer login
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
-                onClick={() => router.push("/installers/auth?portal=installer")}
+              </Link>
+              <Link
+                href="/installers/auth?portal=installer"
+                className={PORTAL_LINK_CLASS}
               >
                 Installer login
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10"
-                onClick={() => router.push("/admin/auth")}
-              >
+              </Link>
+              <Link href="/admin/auth" className={PORTAL_LINK_CLASS}>
                 Distributor login
-              </button>
+              </Link>
             </div>
           </details>
 
@@ -157,12 +141,12 @@ export function Header() {
               ))}
             </div>
             <div className="grid gap-2">
-              <button
-                type="button"
-                onClick={() => router.push("/contact-us")}
-                className="rounded-md border border-cyan-300/80 px-3 py-2 text-xs font-semibold text-cyan-200">
+              <Link
+                href="/contact-us"
+                className="rounded-md border border-cyan-300/80 px-3 py-2 text-center text-xs font-semibold text-cyan-200"
+              >
                 Contact Us
-              </button>
+              </Link>
               <button className="rounded-md bg-cyan-400 px-3 py-2 text-xs font-semibold text-slate-950">
                 Buy Now
               </button>
