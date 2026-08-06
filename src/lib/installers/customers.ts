@@ -174,6 +174,27 @@ export type CustomerImportRowInput = {
   address?: string;
 };
 
+export type CreateInstallerCustomerInput = CustomerImportRowInput;
+
+export async function createInstallerCustomer(
+  input: CreateInstallerCustomerInput,
+): Promise<InstallerCustomerSummary> {
+  const res = await fetchWithInstallerSession("/api/installers/customers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const json = (await res.json()) as ApiEnvelope<InstallerCustomerSummary>;
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to create customer");
+  }
+  if (!json.data) {
+    throw new Error(json.message || "Failed to create customer");
+  }
+  invalidateInstallerCustomerListCache();
+  return json.data;
+}
+
 export type CustomerImportRowResult = {
   rowNumber: number;
   status: "created" | "skipped" | "failed";

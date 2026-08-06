@@ -7,6 +7,7 @@ import { InstallerHeader } from "@/components/installer/dashboard/InstallerHeade
 import { useInstallerCustomers } from "@/components/installer/dashboard/InstallerCustomersProvider";
 import { InstallerShortcutRail } from "@/components/installer/dashboard/InstallerShortcutRail";
 import { InstallerHomePipelinePhaseStrip } from "@/components/installer/home-dashboard/InstallerHomePipelinePhaseStrip";
+import { InstallerRegisterCustomerModal } from "@/components/installer/customers/InstallerRegisterCustomerModal";
 import Icon from "@/components/ui/Icons";
 import { type InstallerCustomerSummary } from "@/lib/installers/customers";
 import {
@@ -67,6 +68,7 @@ export function InstallerDashboardShell({
     | ((context: InstallerDashboardShellContext) => React.ReactNode);
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [registerCustomerOpen, setRegisterCustomerOpen] = useState(false);
   const { customers: customerRows, refetch: refetchCustomers } =
     useInstallerCustomers();
   const [selectedId, setSelectedId] = useState(
@@ -168,6 +170,15 @@ export function InstallerDashboardShell({
       homePanel.upsertTag(tag);
     },
     [homePanelEnabled, homePanel.upsertTag, selectedId],
+  );
+
+  const handleCustomerRegistered = useCallback(
+    (customer: InstallerCustomerSummary) => {
+      refetchCustomers();
+      setSelectedId(customer.id);
+      setMobileMenuOpen(false);
+    },
+    [refetchCustomers],
   );
 
   return (
@@ -364,9 +375,7 @@ export function InstallerDashboardShell({
                 className="inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-[6px] bg-linear-to-r from-yellow-lemon to-orange-amber px-2 py-1.5 font-dm-sans text-[10px] font-bold uppercase tracking-[0.4417px] text-warm-black transition-opacity hover:opacity-95 sm:gap-[10px] sm:px-4 sm:py-[9px] sm:text-[12.146px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
                 data-node-id="3:5380"
-                onClick={() => {
-                  window.location.href = "/designs";
-                }}
+                onClick={() => setRegisterCustomerOpen(true)}
               >
                 <Icon
                   name="UserPlus"
@@ -397,6 +406,12 @@ export function InstallerDashboardShell({
           onTagCreated={handleTagCreated}
         />
       </div>
+
+      <InstallerRegisterCustomerModal
+        open={registerCustomerOpen}
+        onClose={() => setRegisterCustomerOpen(false)}
+        onCreated={handleCustomerRegistered}
+      />
     </div>
   );
 }
