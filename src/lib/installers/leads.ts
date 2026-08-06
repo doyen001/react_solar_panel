@@ -1,4 +1,5 @@
 import { fetchWithInstallerSession } from "@/lib/installers/installer-fetch-client";
+import type { CustomerProjectPhaseState } from "@/lib/installers/project-phase";
 
 export const INSTALLER_LEAD_STATUSES = [
   "NEW",
@@ -26,6 +27,7 @@ export type InstallerLeadSummary = {
   customerPhone?: string | null;
   address?: string | null;
   status: string;
+  projectPhase?: string | null;
   notes?: string | null;
   estimatedValue?: number | null;
   assignedToId?: string | null;
@@ -191,12 +193,40 @@ export async function fetchInstallerLeadDetail(
   return json.data;
 }
 
+export async function fetchInstallerLeadForCustomer(
+  customerId: string,
+): Promise<CustomerProjectPhaseState> {
+  const res = await fetchWithInstallerSession(
+    `/api/installers/leads/by-customer/${encodeURIComponent(customerId)}`,
+    { cache: "no-store" },
+  );
+  const json = (await res.json()) as ApiEnvelope<{
+    id: string;
+    status: string;
+    projectPhase: string;
+    suggestedProjectPhase: string;
+  }>;
+  if (!res.ok) {
+    throw new Error(json.message || "No lead found for this customer");
+  }
+  if (!json.data) {
+    throw new Error("No lead found for this customer");
+  }
+  return {
+    leadId: json.data.id,
+    projectPhase: json.data.projectPhase as CustomerProjectPhaseState["projectPhase"],
+    suggestedProjectPhase: json.data.suggestedProjectPhase as CustomerProjectPhaseState["suggestedProjectPhase"],
+    leadStatus: json.data.status,
+  };
+}
+
 export async function patchInstallerLead(
   id: string,
   body: Partial<{
     status: InstallerLeadStatus;
     notes: string;
     customerName: string;
+    projectPhase: string;
   }>,
 ) {
   const res = await fetchWithInstallerSession(

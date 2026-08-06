@@ -89,14 +89,11 @@ export const INSTALLER_HOME_FINANCE = [
 ];
 
 /** Installer home pipeline strip (Figma 3:8986): four horizontal segments */
-export const INSTALLER_HOME_PIPELINE_PHASES = [
-  "Design and Permissions",
-  "Installation",
-  "Commissioning",
-  "Maintenance and Monitoring",
-] as const;
+export {
+  INSTALLER_HOME_PIPELINE_PHASES,
+} from "@/lib/installers/project-phase";
 
-/** Index of the highlighted segment (0–3). Matches Figma default (Design and Permissions). */
+/** @deprecated Use live lead projectPhase from API instead. */
 export const INSTALLER_HOME_PIPELINE_ACTIVE_PHASE_INDEX = 0;
 
 export const INSTALLER_HOME_CHANNELS = [
