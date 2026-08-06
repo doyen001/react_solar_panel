@@ -3,9 +3,9 @@ import {
   extractMessage,
   unwrapApiData,
 } from "@/lib/customers/backend";
-import { resolveChatWebSocketUrl } from "@/lib/chat/backend-origin";
 import type { ChatMessage, ConversationRow } from "@/hooks/useRealtimeChat";
 import { isChatWebSocketSendReady } from "@/hooks/useRealtimeChat";
+import { useChatWebSocket } from "@/hooks/useChatWebSocket";
 import { isCallSignalMessage, type CallSignalMessage } from "@/lib/webrtc/call-signaling";
 import { useLiveKitCall } from "@/hooks/useLiveKitCall";
 
@@ -51,12 +51,8 @@ export function useInstallerHomeConversation(
   );
   const [loadError, setLoadError] = useState<string | null>(null);
   const [peerAvailable, setPeerAvailable] = useState(false);
-  const [wsState, setWsState] = useState<
-    "idle" | "connecting" | "open" | "error"
-  >("idle");
   const [sending, setSending] = useState(false);
 
-  const wsRef = useRef<WebSocket | null>(null);
   const prevSubscribedConvRef = useRef<string | null>(null);
   const activeConvIdRef = useRef<string | null>(null);
   const messageIdsRef = useRef<Set<string>>(new Set());
@@ -87,6 +83,38 @@ export function useInstallerHomeConversation(
   useEffect(() => {
     activeConvIdRef.current = conversationId;
   }, [conversationId]);
+
+  const handleChatWsOpen = useCallback((ws: WebSocket) => {
+    const cid = activeConvIdRef.current;
+    if (cid) {
+      ws.send(JSON.stringify({ type: "subscribe", conversationId: cid }));
+      prevSubscribedConvRef.current = cid;
+    }
+  }, []);
+
+  const handleChatWsMessage = useCallback((raw: unknown) => {
+    const msg = raw as { type?: string; payload?: ChatMessage };
+    if (isCallSignalMessage(msg)) {
+      signalingHandlersRef.current.forEach((handler) => handler(msg));
+      return;
+    }
+    if (msg.type === "message" && msg.payload?.id) {
+      const p = msg.payload;
+      if (messageIdsRef.current.has(p.id)) return;
+      messageIdsRef.current.add(p.id);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === p.id)) return prev;
+        return [...prev, p];
+      });
+    }
+  }, []);
+
+  const { wsRef, wsState } = useChatWebSocket({
+    api,
+    enabled: Boolean(installerId),
+    onOpen: handleChatWsOpen,
+    onMessage: handleChatWsMessage,
+  });
 
   const applyConversation = useCallback((conv: ConversationWithMessages) => {
     setConversation(conv);
@@ -222,79 +250,6 @@ export function useInstallerHomeConversation(
   useEffect(() => {
     void loadConversation();
   }, [loadConversation]);
-
-  useEffect(() => {
-    let stopped = false;
-
-    async function connect() {
-      const tokRes = await fetch(`${api}/ws-token`, { credentials: "include" });
-      if (!tokRes.ok) return;
-      const jar = (await tokRes.json()) as { token?: string; wsUrl?: string };
-      const token = jar.token;
-      if (!token || stopped) return;
-
-      const url = resolveChatWebSocketUrl(token, jar.wsUrl);
-      if (!url) {
-        setWsState("error");
-        return;
-      }
-
-      setWsState("connecting");
-      const ws = new WebSocket(url);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        if (stopped) return;
-        setWsState("open");
-        const cid = activeConvIdRef.current;
-        if (cid) {
-          ws.send(JSON.stringify({ type: "subscribe", conversationId: cid }));
-          prevSubscribedConvRef.current = cid;
-        }
-      };
-
-      ws.onmessage = (ev) => {
-        try {
-          const msg = JSON.parse(String(ev.data)) as {
-            type?: string;
-            payload?: ChatMessage;
-          };
-          if (isCallSignalMessage(msg)) {
-            signalingHandlersRef.current.forEach((handler) => handler(msg));
-            return;
-          }
-          if (msg.type === "message" && msg.payload?.id) {
-            const p = msg.payload;
-            if (messageIdsRef.current.has(p.id)) return;
-            messageIdsRef.current.add(p.id);
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === p.id)) return prev;
-              return [...prev, p];
-            });
-          }
-        } catch {
-          /* ignore */
-        }
-      };
-
-      ws.onerror = () => {
-        if (!stopped) setWsState("error");
-      };
-
-      ws.onclose = () => {
-        if (!stopped) setWsState("idle");
-      };
-    }
-
-    void connect();
-
-    return () => {
-      stopped = true;
-      wsRef.current?.close();
-      wsRef.current = null;
-      prevSubscribedConvRef.current = null;
-    };
-  }, [api]);
 
   useEffect(() => {
     const ws = wsRef.current;
