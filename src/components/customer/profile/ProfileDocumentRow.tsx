@@ -3,10 +3,10 @@ import Icon from "@/components/ui/Icons";
 type Props = {
   name: string;
   sizeLabel: string;
-  onDownload?: () => void;
+  url: string;
 };
 
-export function ProfileDocumentRow({ name, sizeLabel, onDownload }: Props) {
+export function ProfileDocumentRow({ name, sizeLabel, url }: Props) {
   return (
     <div className="flex items-center gap-2">
       <Icon
@@ -26,10 +26,12 @@ export function ProfileDocumentRow({ name, sizeLabel, onDownload }: Props) {
       >
         {sizeLabel}
       </span>
-      <button
-        type="button"
+      <a
+        href={url}
+        download={name}
+        target="_blank"
+        rel="noopener noreferrer"
         aria-label={`Download ${name}`}
-        onClick={onDownload}
         className="flex size-5 shrink-0 items-center justify-center rounded hover:bg-black/5"
       >
         <Icon
@@ -37,7 +39,7 @@ export function ProfileDocumentRow({ name, sizeLabel, onDownload }: Props) {
           className="size-3 shrink-0 text-warm-gray mb-1"
           aria-hidden
         />
-      </button>
+      </a>
     </div>
   );
 }

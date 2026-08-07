@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
 import { CustomerPanelCard } from "@/components/customer/profile/CustomerPanelCard";
@@ -13,9 +13,36 @@ import { profileAssets } from "@/components/customer/profile/profileAssets";
 import { StatusBadge } from "@/components/customer/profile/StatusBadge";
 import { useAppSelector } from "@/lib/store/hooks";
 import Icon from "@/components/ui/Icons";
+import {
+  fetchCustomerDocuments,
+  formatDocumentSize,
+  type CustomerDocument,
+} from "@/lib/customers/documents";
 
 export default function CustomerProfilePage() {
   const user = useAppSelector((s) => s.customerAuth.user);
+
+  const [documents, setDocuments] = useState<CustomerDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetchCustomerDocuments({ signal: controller.signal })
+      .then(setDocuments)
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setDocumentsError(
+          e instanceof Error ? e.message : "Failed to load documents",
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDocumentsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, []);
 
   const displayName = useMemo(() => {
     const fn = user?.firstName?.trim();
@@ -280,18 +307,37 @@ export default function CustomerProfilePage() {
                 Documents
               </p>
               <div className="mt-3 flex flex-col gap-3">
-                <ProfileDocumentRow
-                  name="Solar Design PDF"
-                  sizeLabel="2.4 MB"
-                />
-                <ProfileDocumentRow
-                  name="Contract Agreement"
-                  sizeLabel="1.1 MB"
-                />
-                <ProfileDocumentRow
-                  name="Invoice #INV-2026-047"
-                  sizeLabel="340 KB"
-                />
+                {documentsLoading ? (
+                  <p
+                    className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
+                    style={{ fontVariationSettings: "'opsz' 9" }}
+                  >
+                    Loading documents…
+                  </p>
+                ) : documentsError ? (
+                  <p
+                    className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-red-600"
+                    style={{ fontVariationSettings: "'opsz' 9" }}
+                  >
+                    {documentsError}
+                  </p>
+                ) : documents.length > 0 ? (
+                  documents.map((doc) => (
+                    <ProfileDocumentRow
+                      key={doc.id}
+                      name={doc.fileName}
+                      sizeLabel={formatDocumentSize(doc.sizeBytes)}
+                      url={doc.url}
+                    />
+                  ))
+                ) : (
+                  <p
+                    className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
+                    style={{ fontVariationSettings: "'opsz' 9" }}
+                  >
+                    No documents shared yet.
+                  </p>
+                )}
               </div>
             </div>
           </CustomerPanelCard>
