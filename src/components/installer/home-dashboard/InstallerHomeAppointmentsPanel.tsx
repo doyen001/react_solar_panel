@@ -84,6 +84,7 @@ export function InstallerHomeAppointmentsPanel({
         </div>
         <Link
           href="/installers/dashboard/schedule"
+          prefetch={false}
           aria-disabled={addDisabled}
           className={classNames(
             "inline-flex h-[24.288px] min-w-[61.453px] shrink-0 items-center gap-[8px] rounded-[6.625px] bg-linear-to-b from-yellow-lemon to-orange-amber px-[11.03px] font-dm-sans text-[9.938px] font-bold uppercase leading-[14.906px] tracking-[0.3313px] text-warm-black hover:opacity-95",

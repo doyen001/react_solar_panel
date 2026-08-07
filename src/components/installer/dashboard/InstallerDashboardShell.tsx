@@ -290,6 +290,7 @@ export function InstallerDashboardShell({
                   >
                     <Link
                       href="/installers/dashboard/home"
+                      prefetch={false}
                       title="Customer Detail"
                       className={classNames(
                         "relative flex h-full min-w-0 items-center justify-center gap-1 font-dm-sans text-[10px] font-bold uppercase leading-tight tracking-[0.4417px] no-underline transition-colors px-2 sm:gap-[10px] sm:px-4 sm:text-[12.146px] sm:leading-[18.219px]",
@@ -315,6 +316,7 @@ export function InstallerDashboardShell({
                         pathname: "/installers/dashboard/home",
                         query: { tab: "pipeline" },
                       }}
+                      prefetch={false}
                       title="Pipeline Status"
                       className={classNames(
                         "relative flex h-full min-w-0 items-center justify-center gap-1 font-dm-sans text-[10px] font-bold uppercase leading-tight tracking-[0.4417px] no-underline transition-colors px-2 sm:gap-[10px] sm:px-4 sm:text-[12.146px] sm:leading-[18.219px]",
@@ -339,6 +341,7 @@ export function InstallerDashboardShell({
                 </div>
                 <Link
                   href="/installers/dashboard/schedule"
+                  prefetch={false}
                   title="Project Schedule"
                   className={classNames(
                     "inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2 py-1.5 font-inter text-[11px] font-medium shadow-sm sm:gap-2 sm:px-4 sm:py-2 sm:text-[13px]",

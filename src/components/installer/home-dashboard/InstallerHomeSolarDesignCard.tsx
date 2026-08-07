@@ -214,6 +214,7 @@ export function InstallerHomeSolarDesignCard({
         </div>
         <Link
           href="/designs"
+          prefetch={false}
           className="inline-flex shrink-0 items-center gap-[6px] font-dm-sans text-[11px] font-semibold leading-[16.56px] text-[#333333] hover:opacity-80"
         >
           Open Designer

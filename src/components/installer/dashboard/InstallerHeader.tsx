@@ -88,6 +88,7 @@ export function InstallerHeader({
                     <Link
                       key={item.key}
                       href={item.href}
+                      prefetch={false}
                       onClick={() => mobileNavRef.current?.removeAttribute("open")}
                       className={`rounded-md px-3 py-2 font-inter text-[14px] font-medium leading-[21px] ${
                         active
@@ -104,6 +105,7 @@ export function InstallerHeader({
           </details>
           <Link
             href="/installers/dashboard/home"
+            prefetch={false}
             className="flex shrink-0 items-center gap-8"
           >
             <div className="flex size-9 items-center justify-center rounded-[7.72px] bg-navy-800">
@@ -125,6 +127,7 @@ export function InstallerHeader({
                 <Link
                   key={item.key}
                   href={item.href}
+                  prefetch={false}
                   className="relative pb-1 font-inter text-[14px] font-medium leading-[21px]"
                 >
                   <span
