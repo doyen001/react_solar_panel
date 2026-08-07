@@ -23,7 +23,6 @@ import {
 } from "@/components/installer/InstallerCommsActions";
 import { useInstallerCustomers } from "@/components/installer/dashboard/InstallerCustomersProvider";
 import Icon from "@/components/ui/Icons";
-import { usePollingResource } from "@/hooks/usePollingResource";
 import {
   createInstallerAppointment,
   deleteInstallerAppointment,
@@ -215,19 +214,15 @@ export function InstallerScheduleCalendar() {
     [],
   );
 
+  // Loaded once on mount. Auto-polling used to refetch every 20s (plus on
+  // window focus), which is what produced the repeated appointments/leads
+  // calls — appointments and leads only change through actions this component
+  // itself performs (create/update/cancel below, each already followed by a
+  // `loadScheduleData()` call), so a timer added no freshness here, only
+  // traffic. Use the "Refresh" button for anything changed elsewhere.
   useEffect(() => {
     void loadScheduleData();
   }, [loadScheduleData]);
-
-  usePollingResource(
-    useCallback(
-      async (signal) => {
-        await loadScheduleData({ silent: true, signal });
-      },
-      [loadScheduleData],
-    ),
-    { skipInitialTick: true },
-  );
 
   const selectedAppointment = useMemo(
     () => appointments.find((a) => a.id === selectedAppointmentId) ?? null,
