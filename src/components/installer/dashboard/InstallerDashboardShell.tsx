@@ -74,11 +74,19 @@ export function InstallerDashboardShell({
   );
   const [customerSearch, setCustomerSearch] = useState("");
 
-  const homePanel = useInstallerHomePanel(
-    homePanelEnabled ? selectedId : null,
-  );
+  // The phase strip below needs the lead on every tab except schedule, while
+  // notes/tasks/tags/appointments are only surfaced to children on the detail
+  // tab (see `homePanelEnabled` in the children() call below). Gating the
+  // fetch on the wider condition keeps this at one request per customer
+  // selection instead of adding a second fetch just for the phase strip.
+  const wantsPanel = activeSubTab !== "schedule";
+  const homePanel = useInstallerHomePanel(wantsPanel ? selectedId : null);
 
-  const projectPhase = useCustomerProjectPhase(selectedId);
+  const projectPhase = useCustomerProjectPhase(
+    homePanel.lead,
+    homePanel.setLead,
+    homePanel.loading,
+  );
 
   const customers = useMemo(() => {
     if (!customerRows.length) return DEFAULT_CUSTOMERS;

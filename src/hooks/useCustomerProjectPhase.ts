@@ -1,92 +1,55 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
   indexToProjectPhase,
-  projectPhaseLabel,
   projectPhaseToIndex,
-  type CustomerProjectPhaseState,
   type InstallerProjectPhaseId,
 } from "@/lib/installers/project-phase";
-import {
-  fetchInstallerLeadForCustomer,
-  patchInstallerLead,
-} from "@/lib/installers/leads";
+import { patchInstallerLead } from "@/lib/installers/leads";
+import type { InstallerHomePanelLead } from "@/lib/installers/home-panel";
 
-export function useCustomerProjectPhase(customerId: string | null) {
-  const selectedCustomerId =
-    customerId && !customerId.startsWith("fallback-") ? customerId : null;
-
-  const [state, setState] = useState<CustomerProjectPhaseState | null>(null);
-  const [loading, setLoading] = useState(false);
+/**
+ * Project-phase controls for the selected customer's lead.
+ *
+ * The lead itself is not fetched here — it comes from the single
+ * `installer-home-panel` request (`useInstallerHomePanel`) and is passed in
+ * as `lead`. This hook only derives phase indices from it and performs the
+ * PATCH on change, writing the optimistic/confirmed result back through
+ * `setLead` so no extra fetch is needed on either side of the mutation.
+ */
+export function useCustomerProjectPhase(
+  lead: InstallerHomePanelLead | null,
+  setLead: (lead: InstallerHomePanelLead | null) => void,
+  loading: boolean,
+) {
   const [updating, setUpdating] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    if (!selectedCustomerId) {
-      setState(null);
-      setLoadError(null);
-      return;
-    }
-
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const data = await fetchInstallerLeadForCustomer(selectedCustomerId);
-      setState(data);
-    } catch (e) {
-      setState(null);
-      setLoadError(
-        e instanceof Error ? e.message : "Could not load project phase",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCustomerId]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   const activeIndex = useMemo(
-    () => projectPhaseToIndex(state?.projectPhase),
-    [state?.projectPhase],
+    () => projectPhaseToIndex(lead?.projectPhase),
+    [lead?.projectPhase],
   );
 
   const suggestedIndex = useMemo(
-    () => projectPhaseToIndex(state?.suggestedProjectPhase),
-    [state?.suggestedProjectPhase],
+    () => projectPhaseToIndex(lead?.suggestedProjectPhase),
+    [lead?.suggestedProjectPhase],
   );
 
   const setPhaseByIndex = useCallback(
     async (index: number) => {
-      if (!state?.leadId) return;
+      if (!lead?.id) return;
       const nextPhase = indexToProjectPhase(index);
-      if (nextPhase === state.projectPhase) return;
+      if (nextPhase === lead.projectPhase) return;
 
       setUpdating(true);
-      const previous = state;
-      setState((current) =>
-        current ? { ...current, projectPhase: nextPhase } : current,
-      );
+      const previous = lead;
+      setLead({ ...lead, projectPhase: nextPhase });
 
       try {
-        const updated = await patchInstallerLead(state.leadId, {
-          projectPhase: nextPhase,
-        });
-        // setState((current) =>
-        //   current
-        //     ? {
-        //         ...current,
-        //         projectPhase: (updated?.projectPhase as InstallerProjectPhaseId) ?? nextPhase,
-        //         leadStatus: updated?.status ?? current.leadStatus,
-        //       }
-        //     : current,
-        // );
-        // toast.success(`Project phase set to ${projectPhaseLabel(nextPhase)}.`);
+        await patchInstallerLead(lead.id, { projectPhase: nextPhase });
       } catch (e) {
-        setState(previous);
+        setLead(previous);
         toast.error(
           e instanceof Error ? e.message : "Could not update project phase",
         );
@@ -94,25 +57,25 @@ export function useCustomerProjectPhase(customerId: string | null) {
         setUpdating(false);
       }
     },
-    [state],
+    [lead, setLead],
   );
 
   const applySuggestedPhase = useCallback(async () => {
-    if (!state) return;
-    const index = projectPhaseToIndex(state.suggestedProjectPhase);
+    if (!lead) return;
+    const index = projectPhaseToIndex(lead.suggestedProjectPhase);
     await setPhaseByIndex(index);
-  }, [setPhaseByIndex, state]);
+  }, [lead, setPhaseByIndex]);
 
   return {
-    state,
+    lead,
     loading,
     updating,
-    loadError,
     activeIndex,
     suggestedIndex,
-    hasLead: Boolean(state?.leadId),
+    hasLead: Boolean(lead?.id),
     setPhaseByIndex,
     applySuggestedPhase,
-    refresh: load,
   };
 }
+
+export type { InstallerProjectPhaseId };

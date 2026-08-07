@@ -1,16 +1,12 @@
 "use client";
 
 import classNames from "classnames";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { InstallerDashboardSubTab } from "@/components/installer/dashboard/InstallerDashboardShell";
 import type { InstallerDashboardShellContext } from "@/components/installer/dashboard/InstallerDashboardShell";
 import { InstallerDashboardShell } from "@/components/installer/dashboard/InstallerDashboardShell";
+import type { InstallerCustomerSummary } from "@/lib/installers/customers";
 import {
-  fetchInstallerCustomer,
-  type InstallerCustomerSummary,
-} from "@/lib/installers/customers";
-import {
-  fetchInstallerDesigns,
   type InstallerCustomerDesign,
   type InstallerDesignProduct,
 } from "@/lib/installers/designs";
@@ -173,54 +169,9 @@ function InstallerHomeDetail({
 }: InstallerDashboardShellContext & {
   homePanel: InstallerHomePanelState;
 }) {
-  const [customer, setCustomer] = useState<InstallerCustomerSummary | null>(
-    null,
-  );
-  const [design, setDesign] = useState<InstallerCustomerDesign | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!selectedCustomerId || selectedCustomerId.startsWith("fallback-")) {
-      setCustomer(null);
-      setDesign(null);
-      setError(null);
-      return;
-    }
-
-    const controller = new AbortController();
-    setLoading(true);
-    setError(null);
-
-    Promise.all([
-      fetchInstallerCustomer(selectedCustomerId, {
-        signal: controller.signal,
-      }),
-      fetchInstallerDesigns(
-        {
-          customerId: selectedCustomerId,
-          customerEmail: selectedCustomer?.email,
-          limit: 1,
-        },
-        { signal: controller.signal },
-      ),
-    ])
-      .then(([customerData, designs]) => {
-        setCustomer(customerData);
-        setDesign(designs[0] ?? null);
-      })
-      .catch((e) => {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-        setError(e instanceof Error ? e.message : "Failed to load customer");
-        setCustomer(null);
-        setDesign(null);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [selectedCustomer?.email, selectedCustomerId]);
+  // Customer profile and design both come from the single installer-home-panel
+  // request already made by the shell — no separate fetch here.
+  const { customer, design, loading, loadError: error } = homePanel;
 
   const customerForDisplay = useMemo<InstallerCustomerSummary | null>(() => {
     if (customer) return customer;
@@ -254,14 +205,19 @@ function InstallerHomeDetail({
       <InstallerHomeEquipmentSection
         design={design}
         baseEquipment={equipment}
-        onDesignUpdated={setDesign}
+        onDesignUpdated={homePanel.setDesign}
       />
 
           <InstallerHomeCustomerProfileStrip
             customerId={selectedCustomerId}
             customer={customerForDisplay}
             design={design}
-            onCustomerUpdated={setCustomer}
+            documents={homePanel.documents}
+            documentsLoading={homePanel.loading}
+            documentsError={homePanel.loadError}
+            onCustomerUpdated={homePanel.setCustomer}
+            onDocumentUploaded={homePanel.upsertDocument}
+            onDocumentDeleted={homePanel.removeDocument}
           />
 
           {/* Finance strip */}

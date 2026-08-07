@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import Icon from "@/components/ui/Icons";
 import {
   deleteInstallerCustomerDocument,
-  fetchInstallerCustomerDocuments,
   formatDocumentSize,
   uploadInstallerCustomerDocument,
   type InstallerCustomerDocument,
@@ -427,58 +426,37 @@ type Props = {
   customerId: string | null;
   customer: InstallerCustomerSummary | null;
   design: InstallerCustomerDesign | null;
+  /** Sourced from the shell's single installer-home-panel fetch — not refetched here. */
+  documents: InstallerCustomerDocument[];
+  documentsLoading: boolean;
+  documentsError: string | null;
   onCustomerUpdated: (customer: InstallerCustomerSummary) => void;
+  onDocumentUploaded: (document: InstallerCustomerDocument) => void;
+  onDocumentDeleted: (id: string) => void;
 };
 
 export function InstallerHomeCustomerProfileStrip({
   customerId,
   customer,
   design,
+  documents,
+  documentsLoading,
+  documentsError,
   onCustomerUpdated,
+  onDocumentUploaded,
+  onDocumentDeleted,
 }: Props) {
   const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [documents, setDocuments] = useState<InstallerCustomerDocument[]>([]);
-  const [documentsLoading, setDocumentsLoading] = useState(false);
-  const [documentsError, setDocumentsError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
-
-  useEffect(() => {
-    if (!selectedCustomerId) {
-      setDocuments([]);
-      setDocumentsError(null);
-      return;
-    }
-
-    const controller = new AbortController();
-    setDocumentsLoading(true);
-    setDocumentsError(null);
-
-    fetchInstallerCustomerDocuments(selectedCustomerId, {
-      signal: controller.signal,
-    })
-      .then(setDocuments)
-      .catch((e) => {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-        setDocuments([]);
-        setDocumentsError(
-          e instanceof Error ? e.message : "Failed to load documents",
-        );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setDocumentsLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [selectedCustomerId]);
 
   const profile = useMemo(
     () => buildProfileDisplay(customer, design),
@@ -540,7 +518,7 @@ export function InstallerHomeCustomerProfileStrip({
     setUploadError(null);
     try {
       const doc = await uploadInstallerCustomerDocument(selectedCustomerId, file);
-      setDocuments((prev) => [doc, ...prev]);
+      onDocumentUploaded(doc);
       toast.success(`"${doc.fileName}" uploaded successfully.`);
     } catch (err) {
       const message =
@@ -559,7 +537,7 @@ export function InstallerHomeCustomerProfileStrip({
     setUploadError(null);
     try {
       await deleteInstallerCustomerDocument(doc.id);
-      setDocuments((prev) => prev.filter((item) => item.id !== doc.id));
+      onDocumentDeleted(doc.id);
     } catch (err) {
       setUploadError(
         err instanceof Error ? err.message : "Failed to delete document",

@@ -4,13 +4,21 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchInstallerHomePanel,
   type InstallerHomePanelData,
+  type InstallerHomePanelLead,
 } from "@/lib/installers/home-panel";
 import type { InstallerAppointment } from "@/lib/installers/appointments";
+import type { InstallerCustomerDocument } from "@/lib/installers/customer-documents";
+import type { InstallerCustomerSummary } from "@/lib/installers/customers";
+import type { InstallerCustomerDesign } from "@/lib/installers/designs";
 import type { InstallerNote } from "@/lib/installers/notes";
 import type { InstallerTag } from "@/lib/installers/tags";
 import type { InstallerTask } from "@/lib/installers/tasks";
 
 const EMPTY_PANEL: InstallerHomePanelData = {
+  customer: null,
+  design: null,
+  documents: [],
+  lead: null,
   notes: [],
   tasks: [],
   tags: [],
@@ -41,6 +49,22 @@ function sortAppointments(appointments: InstallerAppointment[]) {
   );
 }
 
+function sortDocuments(documents: InstallerCustomerDocument[]) {
+  return [...documents].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+}
+
+/**
+ * Single source of truth for the installer home dashboard's selected
+ * customer. One request per customer selection (`fetchInstallerHomePanel`)
+ * populates customer, design, documents, lead/phase, notes, tasks, tags, and
+ * appointments together. Every mutation elsewhere (creating a note, uploading
+ * a document, editing the customer profile, changing the project phase, …)
+ * must call one of the `upsert*`/`set*` setters below instead of refetching —
+ * that is what keeps this a single request per selection rather than one per
+ * edit.
+ */
 export function useInstallerHomePanel(customerId: string | null) {
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
@@ -74,6 +98,38 @@ export function useInstallerHomePanel(customerId: string | null) {
   useEffect(() => {
     void loadPanel();
   }, [loadPanel]);
+
+  const setCustomer = useCallback((customer: InstallerCustomerSummary) => {
+    setData((prev) => ({ ...prev, customer }));
+  }, []);
+
+  const setDesign = useCallback(
+    (design: InstallerCustomerDesign | null) => {
+      setData((prev) => ({ ...prev, design }));
+    },
+    [],
+  );
+
+  const setLead = useCallback((lead: InstallerHomePanelLead | null) => {
+    setData((prev) => ({ ...prev, lead }));
+  }, []);
+
+  const upsertDocument = useCallback((document: InstallerCustomerDocument) => {
+    setData((prev) => ({
+      ...prev,
+      documents: sortDocuments([
+        document,
+        ...prev.documents.filter((item) => item.id !== document.id),
+      ]),
+    }));
+  }, []);
+
+  const removeDocument = useCallback((id: string) => {
+    setData((prev) => ({
+      ...prev,
+      documents: prev.documents.filter((item) => item.id !== id),
+    }));
+  }, []);
 
   const upsertNote = useCallback((note: InstallerNote) => {
     setData((prev) => ({
@@ -143,12 +199,22 @@ export function useInstallerHomePanel(customerId: string | null) {
   return useMemo(
     () => ({
       selectedCustomerId,
+      customer: data.customer,
+      design: data.design,
+      documents: data.documents,
+      lead: data.lead,
       notes: data.notes,
       tasks: data.tasks,
       tags: data.tags,
       appointments: data.appointments,
       loading,
       loadError,
+      refresh: loadPanel,
+      setCustomer,
+      setDesign,
+      setLead,
+      upsertDocument,
+      removeDocument,
       upsertNote,
       removeNote,
       upsertTask,
@@ -160,17 +226,27 @@ export function useInstallerHomePanel(customerId: string | null) {
     }),
     [
       data.appointments,
+      data.customer,
+      data.design,
+      data.documents,
+      data.lead,
       data.notes,
       data.tags,
       data.tasks,
       loadError,
       loading,
+      loadPanel,
       removeAppointment,
+      removeDocument,
       removeNote,
       removeTag,
       removeTask,
       selectedCustomerId,
+      setCustomer,
+      setDesign,
+      setLead,
       upsertAppointment,
+      upsertDocument,
       upsertNote,
       upsertTag,
       upsertTask,
