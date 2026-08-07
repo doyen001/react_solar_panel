@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { IconPanelPlus } from "@/components/installer/dashboard/installerDashboardIcons";
+import { useInstallerConfirm } from "@/components/installer/home-dashboard/InstallerConfirmDialog";
 import Icon from "@/components/ui/Icons";
 import {
   createInstallerNote,
@@ -208,6 +209,7 @@ export function InstallerHomeNotesPanel({
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useInstallerConfirm();
 
   const displayError = actionError ?? loadError;
 
@@ -265,7 +267,13 @@ export function InstallerHomeNotesPanel({
   };
 
   const handleDelete = async (note: InstallerNote) => {
-    if (!window.confirm(`Delete note "${note.title}"?`)) return;
+    const confirmed = await confirm({
+      title: "Delete note",
+      description: `Delete note "${note.title}"?`,
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!confirmed) return;
 
     setDeletingId(note.id);
     setActionError(null);
@@ -380,6 +388,8 @@ export function InstallerHomeNotesPanel({
         onClose={closeModal}
         onSubmit={(values) => void handleSubmit(values)}
       />
+
+      {confirmDialog}
     </>
   );
 }

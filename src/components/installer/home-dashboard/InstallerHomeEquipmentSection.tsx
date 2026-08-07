@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon from "@/components/ui/Icons";
+import { useInstallerConfirm } from "@/components/installer/home-dashboard/InstallerConfirmDialog";
 import {
   buildEquipmentWizardPatch,
   mergeEquipmentWithWizardData,
@@ -351,6 +352,7 @@ export function InstallerHomeEquipmentSection({
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingKey, setDeletingKey] = useState<EquipmentCardKey | null>(null);
+  const { confirm, confirmDialog } = useInstallerConfirm();
 
   const editingCard = editingKey
     ? CARD_CONFIG.find((card) => card.key === editingKey)
@@ -388,7 +390,12 @@ export function InstallerHomeEquipmentSection({
 
   async function handleDelete(cardKey: EquipmentCardKey, title: string) {
     if (!design?.id) return;
-    const confirmed = window.confirm(`Remove "${title}" from this customer?`);
+    const confirmed = await confirm({
+      title: "Remove equipment",
+      description: `Remove "${title}" from this customer?`,
+      confirmLabel: "Remove",
+      tone: "danger",
+    });
     if (!confirmed) return;
 
     setDeletingKey(cardKey);
@@ -454,6 +461,8 @@ export function InstallerHomeEquipmentSection({
         }}
         onSubmit={(rows) => void handleSaveEdit(rows)}
       />
+
+      {confirmDialog}
     </section>
   );
 }

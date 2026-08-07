@@ -5,6 +5,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "react-toastify";
 import Icon from "@/components/ui/Icons";
+import { useInstallerConfirm } from "@/components/installer/home-dashboard/InstallerConfirmDialog";
 import {
   deleteInstallerCustomerDocument,
   formatDocumentSize,
@@ -454,6 +455,7 @@ export function InstallerHomeCustomerProfileStrip({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useInstallerConfirm();
 
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
@@ -531,7 +533,13 @@ export function InstallerHomeCustomerProfileStrip({
   }
 
   async function handleDeleteDocument(doc: InstallerCustomerDocument) {
-    if (!window.confirm(`Delete "${doc.fileName}"?`)) return;
+    const confirmed = await confirm({
+      title: "Delete document",
+      description: `Delete "${doc.fileName}"?`,
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!confirmed) return;
 
     setDeletingId(doc.id);
     setUploadError(null);
@@ -693,6 +701,8 @@ export function InstallerHomeCustomerProfileStrip({
         }}
         onSubmit={handleSave}
       />
+
+      {confirmDialog}
     </>
   );
 }

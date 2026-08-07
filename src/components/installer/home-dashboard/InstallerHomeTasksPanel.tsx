@@ -6,6 +6,7 @@ import {
   IconCheckSquare,
   IconPanelPlus,
 } from "@/components/installer/dashboard/installerDashboardIcons";
+import { useInstallerConfirm } from "@/components/installer/home-dashboard/InstallerConfirmDialog";
 import Icon from "@/components/ui/Icons";
 import {
   createInstallerTask,
@@ -211,6 +212,7 @@ export function InstallerHomeTasksPanel({
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useInstallerConfirm();
 
   const displayError = actionError ?? loadError;
 
@@ -268,7 +270,13 @@ export function InstallerHomeTasksPanel({
   };
 
   const handleDelete = async (task: InstallerTask) => {
-    if (!window.confirm(`Delete task "${task.title}"?`)) return;
+    const confirmed = await confirm({
+      title: "Delete task",
+      description: `Delete task "${task.title}"?`,
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!confirmed) return;
 
     setDeletingId(task.id);
     setActionError(null);
@@ -383,6 +391,8 @@ export function InstallerHomeTasksPanel({
         onClose={closeModal}
         onSubmit={(values) => void handleSubmit(values)}
       />
+
+      {confirmDialog}
     </>
   );
 }
