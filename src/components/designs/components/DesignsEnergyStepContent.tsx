@@ -73,7 +73,7 @@ function EnergyBreakdownChart() {
 
             return (
               <div
-                key={MONTH_LABELS[index]}
+                key={index}
                 className="flex flex-1 flex-col items-center justify-end gap-[10px]"
               >
                 <div className="flex h-[122px] w-full max-w-[26px] flex-col justify-end overflow-hidden rounded-t-[4px] bg-[#E3E6EC] sm:max-w-[28px]">
