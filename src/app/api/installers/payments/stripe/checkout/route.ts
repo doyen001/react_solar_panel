@@ -5,7 +5,7 @@ import {
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const res = await backendAuthedFetch("installer", "/payments/unlimit/checkout", {
+  const res = await backendAuthedFetch("installer", "/payments/stripe/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body,
