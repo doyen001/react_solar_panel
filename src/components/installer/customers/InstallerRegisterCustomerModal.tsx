@@ -13,6 +13,11 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onCreated?: (customer: InstallerCustomerSummary) => void;
+  /**
+   * Hands off to the bulk Excel import flow. Omitted when no import surface is
+   * mounted, in which case the choice is hidden rather than shown broken.
+   */
+  onImportFromExcel?: () => void;
 };
 
 const EMPTY_FORM = {
@@ -27,6 +32,7 @@ export function InstallerRegisterCustomerModal({
   open,
   onClose,
   onCreated,
+  onImportFromExcel,
 }: Props) {
   const titleId = useId();
   const [form, setForm] = useState(EMPTY_FORM);
@@ -141,6 +147,23 @@ export function InstallerRegisterCustomerModal({
             </button>
           </div>
         </div>
+
+        {onImportFromExcel ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-warm-border bg-cream-50 px-4 py-2.5">
+            <p className="font-dm-sans text-xs text-warm-gray">
+              Adding one customer. Have a list?
+            </p>
+            <button
+              type="button"
+              onClick={onImportFromExcel}
+              disabled={submitting}
+              className="flex items-center gap-1.5 rounded-lg border border-warm-border bg-white px-3 py-1.5 font-dm-sans text-xs font-semibold text-warm-ink hover:bg-cream-50 disabled:opacity-60"
+            >
+              <Icon name="ArrowUpRight" className="size-3.5" />
+              Import from Excel file
+            </button>
+          </div>
+        ) : null}
 
         <form className="space-y-4 px-4 py-4" onSubmit={(e) => void handleSubmit(e)}>
           {error ? (

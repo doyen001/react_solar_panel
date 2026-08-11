@@ -59,7 +59,73 @@ describe("validateRows", () => {
     expect(result.invalid).toHaveLength(1);
     expect(result.invalid[0]?.rowNumber).toBe(2);
     expect(result.invalid[0]?.message).toContain("Invalid email address");
-    expect(result.invalid[0]?.message).toContain("First name is required");
+    expect(result.invalid[0]?.message).toContain("A name is required");
+  });
+
+  it("generates a placeholder email for rows with none", () => {
+    const result = validateRows([
+      {
+        rowNumber: 1,
+        values: {
+          firstName: "Rohit",
+          lastName: "Malhotra",
+          phone: "0433218029",
+          externalRef: "4187879",
+        },
+      },
+    ]);
+
+    expect(result.invalid).toEqual([]);
+    expect(result.valid).toHaveLength(1);
+    expect(result.valid[0]?.data.email).toBe(
+      "imported-4187879@no-email.invalid",
+    );
+    expect(result.valid[0]?.data.emailPlaceholder).toBe(true);
+  });
+
+  it("does not flag a supplied email as a placeholder", () => {
+    const result = validateRows([
+      {
+        rowNumber: 1,
+        values: {
+          email: "real@example.com",
+          firstName: "Real",
+          lastName: "Person",
+        },
+      },
+    ]);
+
+    expect(result.valid[0]?.data.emailPlaceholder).toBe(false);
+  });
+
+  it("imports a single-word name with an empty surname", () => {
+    const result = validateRows([
+      {
+        rowNumber: 1,
+        values: { firstName: "Cher", email: "cher@example.com" },
+      },
+    ]);
+
+    expect(result.invalid).toEqual([]);
+    expect(result.valid[0]?.data.lastName).toBe("");
+  });
+
+  it("carries DNCR flags through", () => {
+    const result = validateRows([
+      {
+        rowNumber: 1,
+        values: {
+          firstName: "Do",
+          lastName: "NotCall",
+          email: "dnc@example.com",
+          dncrFixed: "true",
+          dncrMobile: "false",
+        },
+      },
+    ]);
+
+    expect(result.valid[0]?.data.dncrFixed).toBe(true);
+    expect(result.valid[0]?.data.dncrMobile).toBe(false);
   });
 
   it("flags duplicate emails within the file", () => {

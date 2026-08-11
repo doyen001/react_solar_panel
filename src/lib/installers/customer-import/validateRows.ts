@@ -1,18 +1,28 @@
 import { z } from "zod";
-import type { CustomerImportApiField } from "./template";
+import {
+  placeholderEmailFor,
+  type CustomerImportApiField,
+} from "./template";
 
-/** Mirrors backend createCustomerSchema */
+/** Mirrors backend importCustomerRowSchema. */
 export const createCustomerImportRowSchema = z.object({
   email: z.string().email("Invalid email address"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  firstName: z.string().min(1, "A name is required"),
+  // Blank when the source had a single-word name; we do not invent a surname.
+  lastName: z.string().default(""),
   phone: z.string().optional(),
   address: z.string().optional(),
+  externalRef: z.string().optional(),
+  status: z.string().optional(),
+  dncrFixed: z.boolean().optional(),
+  dncrMobile: z.boolean().optional(),
+  /** True when `email` was generated because the source row had none. */
+  emailPlaceholder: z.boolean().optional(),
 });
 
 export type CustomerImportRow = z.infer<typeof createCustomerImportRowSchema>;
 
-export const CUSTOMER_IMPORT_MAX_ROWS = 500;
+export const CUSTOMER_IMPORT_MAX_ROWS = 1000000;
 
 export type CustomerImportParsedRow = {
   /** 1-based index among data rows in the spreadsheet (after the header row). */
@@ -64,6 +74,10 @@ export function normalizeCustomerImportValues(
     "lastName",
     "phone",
     "address",
+    "externalRef",
+    "status",
+    "dncrFixed",
+    "dncrMobile",
   ] as const) {
     const raw = values[key];
     if (typeof raw !== "string") continue;
@@ -112,12 +126,26 @@ export function validateRows(
 
   for (const { rowNumber, values } of rows) {
     const normalized = normalizeCustomerImportValues(values);
+    const externalRef = trimOptional(normalized.externalRef);
+
+    // A row with no email still imports: it gets a deterministic, undeliverable
+    // address so the customer has a unique key, flagged for follow-up.
+    const suppliedEmail = trimOptional(normalized.email);
+    const emailPlaceholder = !suppliedEmail;
+    const email =
+      suppliedEmail ?? placeholderEmailFor({ externalRef, rowNumber });
+
     const parsed = createCustomerImportRowSchema.safeParse({
-      email: normalized.email ?? "",
+      email,
       firstName: normalized.firstName ?? "",
       lastName: normalized.lastName ?? "",
       phone: trimOptional(normalized.phone),
       address: trimOptional(normalized.address),
+      externalRef,
+      status: trimOptional(normalized.status),
+      dncrFixed: normalized.dncrFixed === "true",
+      dncrMobile: normalized.dncrMobile === "true",
+      emailPlaceholder,
     });
 
     if (!parsed.success) {

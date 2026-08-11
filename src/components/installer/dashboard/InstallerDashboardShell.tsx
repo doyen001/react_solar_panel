@@ -8,6 +8,7 @@ import { useInstallerCustomers } from "@/components/installer/dashboard/Installe
 import { InstallerShortcutRail } from "@/components/installer/dashboard/InstallerShortcutRail";
 import { InstallerHomePipelinePhaseStrip } from "@/components/installer/home-dashboard/InstallerHomePipelinePhaseStrip";
 import { InstallerRegisterCustomerModal } from "@/components/installer/customers/InstallerRegisterCustomerModal";
+import { InstallerCustomerImportModal } from "@/components/installer/customer-import/InstallerCustomerImportModal";
 import Icon from "@/components/ui/Icons";
 import { type InstallerCustomerSummary } from "@/lib/installers/customers";
 import { useInstallerHomePanel, type InstallerHomePanelState } from "@/hooks/useInstallerHomePanel";
@@ -74,6 +75,7 @@ export function InstallerDashboardShell({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [registerCustomerOpen, setRegisterCustomerOpen] = useState(false);
+  const [excelImportOpen, setExcelImportOpen] = useState(false);
   const { customers: customerRows, refetch: refetchCustomers } =
     useInstallerCustomers();
   const [selectedId, setSelectedId] = useState(
@@ -505,6 +507,19 @@ export function InstallerDashboardShell({
         open={registerCustomerOpen}
         onClose={() => setRegisterCustomerOpen(false)}
         onCreated={handleCustomerRegistered}
+        onImportFromExcel={() => {
+          setRegisterCustomerOpen(false);
+          setExcelImportOpen(true);
+        }}
+      />
+
+      <InstallerCustomerImportModal
+        open={excelImportOpen}
+        source="excel"
+        onClose={() => setExcelImportOpen(false)}
+        // Fires while the summary step is on screen — refresh the list behind
+        // it, but leave closing to the user so they can read the row report.
+        onImported={() => void refetchCustomers()}
       />
     </div>
   );

@@ -11,10 +11,14 @@ import {
   type CustomerImportResult,
   type CustomerImportRowInput,
 } from "@/lib/installers/customers";
-import { parseSpreadsheet } from "@/lib/installers/customer-import/parseSpreadsheet";
+import {
+  parseSpreadsheet,
+  CUSTOMER_IMPORT_MAX_FILE_LABEL,
+} from "@/lib/installers/customer-import/parseSpreadsheet";
 import { CUSTOMER_IMPORT_TEMPLATE_PATH } from "@/lib/installers/customer-import/template";
 import {
   validateRows,
+  CUSTOMER_IMPORT_MAX_ROWS,
   type ValidateRowsResult,
 } from "@/lib/installers/customer-import/validateRows";
 
@@ -467,7 +471,8 @@ export function InstallerCustomerImportModal({
                 className="font-dm-sans text-[10px] text-warm-gray"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                .xlsx, .xls, or .csv — max 5 MB, 500 rows
+                .xlsx, .xls, or .csv — max {CUSTOMER_IMPORT_MAX_FILE_LABEL},{" "}
+                {CUSTOMER_IMPORT_MAX_ROWS} rows
               </span>
               {fileName && !busy ? (
                 <span

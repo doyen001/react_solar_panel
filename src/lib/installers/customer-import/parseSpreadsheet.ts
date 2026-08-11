@@ -1,9 +1,9 @@
 import * as XLSX from "xlsx";
 import {
-  CUSTOMER_IMPORT_COLUMNS,
   CUSTOMER_IMPORT_SHEET_NAME,
+  composeImportRow,
   type CustomerImportApiField,
-  type CustomerImportColumnKey,
+  type CustomerImportSourceKey,
   resolveCustomerImportHeader,
 } from "./template";
 import {
@@ -11,7 +11,11 @@ import {
   type CustomerImportParsedRow,
 } from "./validateRows";
 
-export const CUSTOMER_IMPORT_MAX_FILE_BYTES = 5 * 1024 * 1024;
+export const CUSTOMER_IMPORT_MAX_FILE_BYTES = 50 * 1024 * 1024;
+
+export const CUSTOMER_IMPORT_MAX_FILE_LABEL = `${Math.round(
+  CUSTOMER_IMPORT_MAX_FILE_BYTES / (1024 * 1024),
+)} MB`;
 
 const ACCEPTED_EXTENSIONS = new Set(["xlsx", "xls", "csv"]);
 const HEADER_SCAN_MAX_ROWS = 8;
@@ -53,15 +57,26 @@ function cellToString(value: unknown): string {
   return String(value).trim();
 }
 
-function isRowEmpty(values: Partial<Record<CustomerImportApiField, string>>): boolean {
-  return CUSTOMER_IMPORT_COLUMNS.every((col) => {
-    const value = values[col.apiField];
+/** Ignores DNCR flags: they resolve to "false" and would mask a blank row. */
+function isRowEmpty(
+  values: Partial<Record<CustomerImportApiField, string>>,
+): boolean {
+  const meaningful: CustomerImportApiField[] = [
+    "email",
+    "firstName",
+    "lastName",
+    "phone",
+    "address",
+    "externalRef",
+  ];
+  return meaningful.every((field) => {
+    const value = values[field];
     return value == null || value.length === 0;
   });
 }
 
 type HeaderMatch = {
-  columnKeys: (CustomerImportColumnKey | null)[];
+  columnKeys: (CustomerImportSourceKey | null)[];
   matchedCount: number;
   rowIndex: number;
 };
@@ -73,14 +88,16 @@ function scoreHeaderRow(
     resolveCustomerImportHeader(cellToString(cell)),
   );
   const matched = new Set(
-    columnKeys.filter((key): key is CustomerImportColumnKey => key != null),
+    columnKeys.filter((key): key is CustomerImportSourceKey => key != null),
   );
-  const hasRequired =
-    matched.has("email") &&
-    matched.has("first_name") &&
+  // A name is the only thing we cannot synthesise, so it alone gates detection:
+  // email, phone and address are all optional in real exports.
+  const hasName =
+    matched.has("full_name") ||
+    matched.has("first_name") ||
     matched.has("last_name");
 
-  if (!hasRequired) return null;
+  if (!hasName) return null;
 
   return {
     columnKeys,
@@ -107,9 +124,9 @@ function findHeaderRow(aoa: unknown[][]): HeaderMatch | null {
 }
 
 function buildColumnIndex(
-  columnKeys: (CustomerImportColumnKey | null)[],
-): Partial<Record<CustomerImportColumnKey, number>> {
-  const index: Partial<Record<CustomerImportColumnKey, number>> = {};
+  columnKeys: (CustomerImportSourceKey | null)[],
+): Partial<Record<CustomerImportSourceKey, number>> {
+  const index: Partial<Record<CustomerImportSourceKey, number>> = {};
   columnKeys.forEach((key, colIndex) => {
     if (key != null && index[key] === undefined) {
       index[key] = colIndex;
@@ -120,20 +137,21 @@ function buildColumnIndex(
 
 function rowToValues(
   row: unknown[],
-  columnIndex: Partial<Record<CustomerImportColumnKey, number>>,
+  columnIndex: Partial<Record<CustomerImportSourceKey, number>>,
 ): Partial<Record<CustomerImportApiField, string>> {
-  const values: Partial<Record<CustomerImportApiField, string>> = {};
+  const source: Partial<Record<CustomerImportSourceKey, string>> = {};
 
-  for (const col of CUSTOMER_IMPORT_COLUMNS) {
-    const idx = columnIndex[col.header];
-    if (idx === undefined) continue;
+  for (const [key, idx] of Object.entries(columnIndex) as [
+    CustomerImportSourceKey,
+    number,
+  ][]) {
     const str = cellToString(row[idx]);
     if (str.length > 0) {
-      values[col.apiField] = str;
+      source[key] = str;
     }
   }
 
-  return values;
+  return composeImportRow(source);
 }
 
 function sheetToArrayOfArrays(sheet: XLSX.WorkSheet): unknown[][] {
@@ -204,7 +222,7 @@ export function parseSpreadsheetBuffer(
       errors: [
         {
           code: "file_too_large",
-          message: "File must be 5 MB or smaller.",
+          message: `File must be ${CUSTOMER_IMPORT_MAX_FILE_LABEL} or smaller.`,
         },
       ],
       skippedEmptyRows: 0,
@@ -249,7 +267,7 @@ export function parseSpreadsheetBuffer(
         {
           code: "missing_required_columns",
           message:
-            "Missing required columns. Include email, first name, and last name (see the import template).",
+            "Missing a name column. Include Full-name (or first_name and last_name) — see the import template.",
         },
       ],
       skippedEmptyRows: 0,
