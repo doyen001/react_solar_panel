@@ -12,6 +12,13 @@ import Icon from "@/components/ui/Icons";
 import { type InstallerCustomerSummary } from "@/lib/installers/customers";
 import { useInstallerHomePanel, type InstallerHomePanelState } from "@/hooks/useInstallerHomePanel";
 import { useCustomerProjectPhase } from "@/hooks/useCustomerProjectPhase";
+import { useInstallerProjectJourney } from "@/hooks/useInstallerProjectJourney";
+import { InstallerJourneyStepBar } from "@/components/installer/home-dashboard/InstallerJourneyStepBar";
+import { toast } from "react-toastify";
+import {
+  firstMilestoneKeyOfPhase,
+  setInstallerCurrentMilestone,
+} from "@/lib/project-journey";
 import type { InstallerAppointment } from "@/lib/installers/appointments";
 import type { InstallerNote } from "@/lib/installers/notes";
 import type { InstallerTask } from "@/lib/installers/tasks";
@@ -86,6 +93,38 @@ export function InstallerDashboardShell({
     homePanel.lead,
     homePanel.setLead,
     homePanel.loading,
+  );
+
+  // Detailed steps behind the coarse phase strip. Both are click-driven and
+  // write to the same lead, so they stay in agreement.
+  const journey = useInstallerProjectJourney(
+    wantsPanel ? homePanel.lead?.id : null,
+  );
+  const [stepsOpen, setStepsOpen] = useState(false);
+
+  // Clicking a coarse phase lands on that phase's first detailed step, so both
+  // bars move the same pointer rather than tracking progress separately.
+  const selectPhase = useCallback(
+    async (index: number) => {
+      const current = journey.journey;
+      if (!current) {
+        await projectPhase.setPhaseByIndex(index);
+        return;
+      }
+      const key = firstMilestoneKeyOfPhase(current, index);
+      if (!key || key === current.currentMilestoneKey) return;
+
+      try {
+        journey.setJourney(
+          await setInstallerCurrentMilestone(current.leadId, key),
+        );
+      } catch (e) {
+        toast.error(
+          e instanceof Error ? e.message : "Could not update project phase",
+        );
+      }
+    },
+    [journey, projectPhase],
   );
 
   const customers = useMemo(() => {
@@ -391,17 +430,54 @@ export function InstallerDashboardShell({
             </div>
 
             {activeSubTab !== "schedule" ? (
-              <InstallerHomePipelinePhaseStrip
-                className="w-full min-w-0"
-                activeIndex={projectPhase.activeIndex}
-                suggestedIndex={
-                  projectPhase.hasLead ? projectPhase.suggestedIndex : undefined
-                }
-                interactive={projectPhase.hasLead}
-                disabled={!projectPhase.hasLead}
-                loading={projectPhase.loading}
-                onPhaseSelect={(index) => void projectPhase.setPhaseByIndex(index)}
-              />
+              <div className="w-full min-w-0">
+                <InstallerHomePipelinePhaseStrip
+                  className="w-full min-w-0"
+                  activeIndex={
+                    journey.journey?.phaseIndex ?? projectPhase.activeIndex
+                  }
+                  suggestedIndex={
+                    projectPhase.hasLead ? projectPhase.suggestedIndex : undefined
+                  }
+                  interactive={projectPhase.hasLead}
+                  disabled={!projectPhase.hasLead}
+                  loading={projectPhase.loading}
+                  onPhaseSelect={(index) => void selectPhase(index)}
+                />
+
+                {projectPhase.hasLead ? (
+                  <div className="mt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setStepsOpen((open) => !open)}
+                      aria-expanded={stepsOpen}
+                      className="flex items-center gap-1 font-dm-sans text-[10px] font-semibold text-brand-blue hover:underline"
+                    >
+                      {stepsOpen ? "Hide" : "Show"} detailed steps
+                      {journey.journey
+                        ? ` (${journey.journey.completedCount}/${journey.journey.totalCount})`
+                        : ""}
+                    </button>
+
+                    {stepsOpen ? (
+                      <div className="mt-2 rounded-lg border border-warm-border bg-cream-50 p-3">
+                        {journey.error ? (
+                          <p className="font-dm-sans text-[11px] text-danger">
+                            {journey.error}
+                          </p>
+                        ) : (
+                          <InstallerJourneyStepBar
+                            journey={journey.journey}
+                            loading={journey.loading}
+                            disabled={!projectPhase.hasLead}
+                            onJourneyChange={journey.setJourney}
+                          />
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             ) : null}
           </div>
 

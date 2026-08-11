@@ -12,6 +12,11 @@ type Props = {
   steps: readonly Omit<TimelineStep, "state">[];
   /** Footer slot (e.g. installer card). */
   footer?: ReactNode;
+  /** Right-aligned header text, e.g. "4 of 9 done". */
+  meta?: string;
+  loading?: boolean;
+  /** Shown instead of the step list when there are no steps. */
+  emptyMessage?: string;
 };
 
 export function ProjectTimeline({
@@ -19,6 +24,9 @@ export function ProjectTimeline({
   activeStepIndex,
   steps,
   footer,
+  meta,
+  loading = false,
+  emptyMessage = "Your installer has not started your project yet.",
 }: Props) {
   const resolved: TimelineStep[] = steps.map((s, i) => ({
     ...s,
@@ -32,9 +40,18 @@ export function ProjectTimeline({
 
   return (
     <section className="customer-panel-bg customer-panel-border flex min-h-[min(533px,80vh)] flex-col overflow-hidden rounded-[14px] border lg:min-h-[520px]">
-      <CustomerSectionHeader variant="dark" title={title} />
+      <CustomerSectionHeader variant="dark" title={title} meta={meta} />
 
       <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-4">
+        {loading ? (
+          <p className="font-dm-sans text-xs customer-text-muted">
+            Loading your project timeline…
+          </p>
+        ) : resolved.length === 0 ? (
+          <p className="font-dm-sans text-xs customer-text-muted">
+            {emptyMessage}
+          </p>
+        ) : null}
         <ol className="flex flex-col">
           {resolved.map((step, i) => {
             const isLast = i === resolved.length - 1;

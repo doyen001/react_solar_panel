@@ -7,7 +7,9 @@ import { DashboardWelcomeBanner } from "@/components/customer/dashboard/Dashboar
 import { ProjectTimeline } from "@/components/customer/dashboard/ProjectTimeline";
 import { TimelineInstallerCard } from "@/components/customer/dashboard/TimelineInstallerCard";
 import { YourDesignsSection } from "@/components/customer/dashboard/YourDesignsSection";
+import { useCustomerProjectJourney } from "@/components/customer/dashboard/useCustomerProjectJourney";
 import { useAppSelector } from "@/lib/store/hooks";
+import { currentStepIndex, formatMilestoneDate } from "@/lib/project-journey";
 import { CUSTOMER_PORTAL } from "@/utils/constant";
 
 export default function CustomerDashboardPage() {
@@ -30,7 +32,21 @@ export default function CustomerDashboardPage() {
   }, []);
 
   const [selectedDesignId, setSelectedDesignId] = useState("a");
-  const [timelineActiveIndex] = useState(dashboard.defaultTimelineActiveIndex);
+
+  // Real journey, shared with the installer pipeline bar. The backend serves
+  // only customer-visible milestones, so internal stages (permits, equipment
+  // orders, invoicing) never reach this view.
+  const { journey, loading: journeyLoading } = useCustomerProjectJourney();
+
+  const timelineSteps = journey
+    ? journey.milestones.map((m) => ({
+        id: m.key,
+        title: m.label,
+        dateLabel: formatMilestoneDate(m.completedAt),
+      }))
+    : [];
+
+  const timelineActiveIndex = journey ? currentStepIndex(journey) : 0;
 
   return (
     <div className="customer-page-bg flex min-h-screen flex-col">
@@ -71,7 +87,13 @@ export default function CustomerDashboardPage() {
 
           <ProjectTimeline
             activeStepIndex={timelineActiveIndex}
-            steps={dashboard.timelineSteps}
+            steps={timelineSteps}
+            loading={journeyLoading}
+            meta={
+              journey
+                ? `${journey.completedCount} of ${journey.totalCount} done`
+                : undefined
+            }
             footer={
               <TimelineInstallerCard
                 initials={dashboard.installer.initials}
