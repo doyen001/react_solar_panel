@@ -5,7 +5,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import {
   brandsOf,
-  fetchBuilderProducts,
+  fetchBuilderCatalogue,
   modelsOf,
   type BuilderProduct,
   type BuilderProductCategory,
@@ -401,29 +401,37 @@ export const DesignsItemsStepContent = forwardRef<
     Record<SectionKey, BuilderProduct[]>
   >({ solarPanel: [], battery: [], equipment: [] });
 
+  /** Captured once: the fetch must not re-run as the customer changes selection. */
+  const [pinnedProductIds] = useState(() =>
+    [
+      storedEquipment.solarPanelProductId,
+      storedEquipment.inverterProductId,
+      storedEquipment.batteryProductId,
+    ].filter((id): id is string => Boolean(id)),
+  );
+
   useEffect(() => {
     let cancelled = false;
 
-    void Promise.all(
-      (Object.keys(SECTION_CATEGORY) as SectionKey[]).map(async (key) => {
-        try {
-          return [key, await fetchBuilderProducts(SECTION_CATEGORY[key])] as const;
-        } catch {
-          // A category that fails to load simply offers no options.
-          return [key, [] as BuilderProduct[]] as const;
-        }
-      }),
-    ).then((entries) => {
-      if (cancelled) return;
-      setCatalogue(
-        Object.fromEntries(entries) as Record<SectionKey, BuilderProduct[]>,
-      );
-    });
+    // One request for all three categories, pinning whatever this design
+    // already has so those options exist and can show as selected.
+    void fetchBuilderCatalogue(pinnedProductIds)
+      .then((grouped) => {
+        if (cancelled) return;
+        setCatalogue({
+          solarPanel: grouped[SECTION_CATEGORY.solarPanel],
+          battery: grouped[SECTION_CATEGORY.battery],
+          equipment: grouped[SECTION_CATEGORY.equipment],
+        });
+      })
+      .catch(() => {
+        // Non-fatal: the dropdowns simply offer no options.
+      });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [pinnedProductIds]);
 
   /**
    * What the two selects show. Derived rather than synced into state: a card

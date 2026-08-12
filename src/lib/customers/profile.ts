@@ -80,6 +80,32 @@ export function profileDiff(
   return update;
 }
 
+/** Shape Redux's customerAuth expects. */
+export type CustomerAuthProfile = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  address: string | null;
+  role: string;
+  emailVerified: boolean;
+  phone?: string | null;
+};
+
+/**
+ * Recovers the signed-in customer from the session cookie. Returns null when
+ * nobody is signed in, so callers can treat it as "anonymous" rather than an
+ * error — the design builder is also a public lead-gen flow.
+ */
+export async function fetchCustomerProfile(): Promise<CustomerAuthProfile | null> {
+  const res = await fetchWithCustomerSession("/api/customers/profile");
+  if (!res.ok) return null;
+  const json = (await res.json().catch(() => ({}))) as ApiEnvelope<
+    CustomerAuthProfile
+  >;
+  return json.data ?? null;
+}
+
 export async function updateCustomerProfile(
   update: CustomerProfileUpdate,
 ): Promise<UpdatedCustomerProfile> {

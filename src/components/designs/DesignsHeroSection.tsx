@@ -13,6 +13,8 @@ import {
   fetchCustomDesign,
   fetchDesignById,
 } from "@/lib/customers/custom-design";
+import { fetchCustomerProfile } from "@/lib/customers/profile";
+import { setUser } from "@/lib/store/customerAuthSlice";
 import { DesignTopBar } from "../modules/DesignTopBar";
 import {
   DesignsRegisterStepContent,
@@ -91,6 +93,16 @@ export function DesignsHeroSection({
     // Editing is driven by the URL; the custom-design fallback needs the user.
     if (!editingDesignId && !customerUser) return;
     hydratedRef.current = true;
+
+    // Redux auth lives in sessionStorage, so a fresh tab or a direct link to
+    // this page has no user even though the cookie still authenticates. Recover
+    // it, or anything gated on being signed in — the save button, writing
+    // contact changes back to the account — silently disappears.
+    if (editingDesignId && !customerUser) {
+      void fetchCustomerProfile().then((profile) => {
+        if (profile) dispatch(setUser(profile));
+      });
+    }
 
     const load = editingDesignId
       ? fetchDesignById(editingDesignId)

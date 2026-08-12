@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { brandsOf, modelsOf, type BuilderProduct } from "./catalogue";
+import {
+  BUILDER_CATEGORIES,
+  brandsOf,
+  modelsOf,
+  type BuilderProduct,
+} from "./catalogue";
 
 const products: BuilderProduct[] = [
   {
@@ -35,6 +40,12 @@ describe("brandsOf", () => {
 
   it("handles an empty catalogue", () => {
     expect(brandsOf([])).toEqual([]);
+  });
+});
+
+describe("BUILDER_CATEGORIES", () => {
+  it("covers the three builder cards and matches the API keys", () => {
+    expect(BUILDER_CATEGORIES).toEqual(["Solar Panel", "Inverter", "Battery"]);
   });
 });
 

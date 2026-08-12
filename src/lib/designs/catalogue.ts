@@ -51,33 +51,65 @@ function toBuilderProduct(
   };
 }
 
-/**
- * One category's active products. Capped at the API's max page size — these
- * feed two dropdowns, not an exhaustive browse.
- */
-export async function fetchBuilderProducts(
-  category: BuilderProductCategory,
-): Promise<BuilderProduct[]> {
-  const params = new URLSearchParams({
-    category,
-    limit: "100",
-    active: "true",
-  });
+export const BUILDER_CATEGORIES: readonly BuilderProductCategory[] = [
+  "Solar Panel",
+  "Inverter",
+  "Battery",
+] as const;
 
-  const res = await fetch(`/api/products?${params.toString()}`, {
+export type BuilderCatalogue = Record<
+  BuilderProductCategory,
+  BuilderProduct[]
+>;
+
+const EMPTY_CATALOGUE: BuilderCatalogue = {
+  "Solar Panel": [],
+  Inverter: [],
+  Battery: [],
+};
+
+/**
+ * Every dropdown's options in **one** request.
+ *
+ * The builder used to fetch per category, which meant three round trips for a
+ * single step. `/products/equipment-options` returns them grouped and trimmed
+ * to the fields the dropdowns and spec rows read.
+ */
+export async function fetchBuilderCatalogue(
+  /**
+   * Products that must appear in the options even if they fall outside the
+   * per-category cap — pass the design's current equipment, otherwise its
+   * dropdowns cannot show what is already selected.
+   */
+  includeIds: readonly string[] = [],
+): Promise<BuilderCatalogue> {
+  const params = new URLSearchParams({ perCategory: "100" });
+  const ids = includeIds.filter(Boolean);
+  if (ids.length > 0) params.set("ids", ids.join(","));
+
+  const res = await fetch(`/api/products/equipment-options?${params}`, {
     cache: "no-store",
   });
   const json = (await res.json().catch(() => ({}))) as ApiEnvelope<
-    BackendProduct[]
+    Record<string, BackendProduct[]>
   >;
 
   if (!res.ok) {
-    throw new Error(json.message || `Could not load ${category} options`);
+    throw new Error(json.message || "Could not load equipment options");
   }
 
-  return Array.isArray(json.data)
-    ? json.data.map((product) => toBuilderProduct(product, category))
-    : [];
+  const grouped = json.data ?? {};
+
+  return BUILDER_CATEGORIES.reduce<BuilderCatalogue>(
+    (accumulator, category) => {
+      const rows = grouped[category];
+      accumulator[category] = Array.isArray(rows)
+        ? rows.map((product) => toBuilderProduct(product, category))
+        : [];
+      return accumulator;
+    },
+    { ...EMPTY_CATALOGUE },
+  );
 }
 
 /** Distinct brands, alphabetical, for the first dropdown. */

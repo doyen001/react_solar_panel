@@ -102,6 +102,14 @@ export function DesignsProposalStepContent({
   const editingDesignId = searchParams.get("designId");
 
   /**
+   * In update mode the button always shows: arriving with a designId means an
+   * authenticated fetch already succeeded, and Redux auth can legitimately be
+   * empty (it is restored from sessionStorage, which a fresh tab lacks) — gating
+   * on it hid the only way to save.
+   */
+  const showSave = Boolean(editingDesignId) || Boolean(customerUser);
+
+  /**
    * Persists the builder output so it shows on the customer's design page and
    * to their installer. When the customer arrived from their design page
    * (`?designId=`) the edit is written back to that design and we return them
@@ -291,12 +299,17 @@ export function DesignsProposalStepContent({
                 Download your proposal
               </button>
 
-              {customerUser ? (
+              {/*
+                Dark fill on purpose: this button sits on the card's
+                yellow-to-orange gradient, where white text on a transparent
+                background is effectively invisible.
+              */}
+              {showSave ? (
                 <button
                   type="button"
                   disabled={saving}
                   onClick={() => void handleSaveToAccount()}
-                  className="w-full rounded-[14.412px] border-[1.5px] border-solid border-design-accent-cyan py-2 font-source-sans text-[16px] font-medium uppercase leading-[24px] tracking-[0.9265px] text-white transition hover:bg-white/10 disabled:opacity-60"
+                  className="mt-[12px] w-full rounded-[14.412px] bg-[#12203a] py-2 font-source-sans text-[18.529px] font-semibold uppercase leading-[27.794px] tracking-[0.9265px] text-white shadow-[0px_0px_20px_0px_rgba(0,0,0,0.25)] transition hover:brightness-125 disabled:opacity-60"
                 >
                   {saving
                     ? "Saving…"
