@@ -3,6 +3,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { DESIGNS_REGISTER_STEP } from "@/utils/constant";
+import { useAppSelector } from "@/lib/store/hooks";
 
 type RegisterFormState = {
   name: string;
@@ -21,12 +22,25 @@ export type DesignsRegisterStepHandle = {
  */
 export const DesignsRegisterStepContent = forwardRef<
   DesignsRegisterStepHandle,
-  object
->(function DesignsRegisterStepContent(_, ref) {
+  {
+    /**
+     * Set when editing a saved design. Comes from the URL rather than auth
+     * state so the server and client agree — a Redux-derived flag would change
+     * between the server HTML and the first client render and break hydration.
+     */
+    lockEmail?: boolean;
+  }
+>(function DesignsRegisterStepContent({ lockEmail = false }, ref) {
   const defaults = DESIGNS_REGISTER_STEP.defaultValues;
-  const [name, setName] = useState<string>(defaults.name);
-  const [email, setEmail] = useState<string>(defaults.email);
-  const [phone, setPhone] = useState<string>(defaults.phone);
+  // Seed from the store so an existing design shows its customer details
+  // instead of empty placeholders. Falls back to the blank defaults for the
+  // anonymous create flow.
+  const stored = useAppSelector((s) => s.designProposal.customer);
+  const [name, setName] = useState<string>(stored.name || defaults.name);
+  const [email, setEmail] = useState<string>(stored.email || defaults.email);
+  const [phone, setPhone] = useState<string>(
+    stored.phoneNumber || defaults.phone,
+  );
 
   useImperativeHandle(ref, () => ({
     getValues: () => ({ name, email, phone }),
@@ -68,23 +82,44 @@ export const DesignsRegisterStepContent = forwardRef<
               className="flex w-full flex-col gap-[26px]"
               onSubmit={(e) => e.preventDefault()}
             >
-              {DESIGNS_REGISTER_STEP.fields.map((field) => (
-                <label key={field.id} className="flex flex-col gap-[8px]">
-                  <span className="font-inter text-[15.531px] font-semibold leading-[22.188px] tracking-[-0.1668px] text-white">
-                    {field.label}
-                  </span>
-                  <input
-                    type={field.type}
-                    value={field.id === "name" ? name : email}
-                    onChange={(event) =>
-                      field.id === "name"
-                        ? setName(event.target.value)
-                        : setEmail(event.target.value)
-                    }
-                    className="h-[55.529px] rounded-[11.094px] border border-yellow-lemon bg-transparent px-[17.75px] font-inter text-[17.75px] leading-normal tracking-[-0.3467px] text-white outline-none transition focus:border-yellow-lemon focus:ring-2 focus:ring-yellow-lemon/20 placeholder:text-white/70"
-                  />
-                </label>
-              ))}
+              {DESIGNS_REGISTER_STEP.fields.map((field) => {
+                // Email is the account login, and the profile API deliberately
+                // will not change it — so show it locked rather than accepting
+                // an edit we would silently discard.
+                const emailLocked = field.id === "email" && lockEmail;
+
+                return (
+                  <label key={field.id} className="flex flex-col gap-[8px]">
+                    <span className="font-inter text-[15.531px] font-semibold leading-[22.188px] tracking-[-0.1668px] text-white">
+                      {field.label}
+                    </span>
+                    <input
+                      type={field.type}
+                      value={field.id === "name" ? name : email}
+                      readOnly={emailLocked}
+                      aria-describedby={
+                        emailLocked ? "designs-email-locked" : undefined
+                      }
+                      onChange={(event) =>
+                        field.id === "name"
+                          ? setName(event.target.value)
+                          : setEmail(event.target.value)
+                      }
+                      className={`h-[55.529px] rounded-[11.094px] border border-yellow-lemon bg-transparent px-[17.75px] font-inter text-[17.75px] leading-normal tracking-[-0.3467px] text-white outline-none transition focus:border-yellow-lemon focus:ring-2 focus:ring-yellow-lemon/20 placeholder:text-white/70 ${
+                        emailLocked ? "cursor-not-allowed opacity-70" : ""
+                      }`}
+                    />
+                    {emailLocked ? (
+                      <span
+                        id="designs-email-locked"
+                        className="font-inter text-[12px] leading-normal text-white/60"
+                      >
+                        This is your sign-in email. Contact support to change it.
+                      </span>
+                    ) : null}
+                  </label>
+                );
+              })}
 
               <label className="flex flex-col gap-[8px]">
                 <span className="font-inter text-[15.531px] font-semibold leading-[22.188px] tracking-[-0.1668px] text-white">

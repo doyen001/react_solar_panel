@@ -7,6 +7,7 @@ import {
 } from "@/utils/constant";
 import { DesignsHeadlineBanner } from "./DesignsHeadlineBanner";
 import { DesignsPropertyTypeCard } from "./DesignsPropertyTypeCard";
+import { useAppSelector } from "@/lib/store/hooks";
 
 export type DesignsPropertyStepHandle = {
   getValues: () => { propertyLabel: string };
@@ -19,8 +20,18 @@ export const DesignsPropertyStepContent = forwardRef<
   DesignsPropertyStepHandle,
   object
 >(function DesignsPropertyStepContent(_, ref) {
-  const [selectedPropertyId, setSelectedPropertyId] =
-    useState<DesignsPropertyType["id"]>("residential");
+  // Reflect the saved property type when editing an existing design.
+  const storedProperty = useAppSelector(
+    (s) => s.designProposal.customer.property,
+  );
+  const [selectedPropertyId, setSelectedPropertyId] = useState<
+    DesignsPropertyType["id"]
+  >(
+    () =>
+      DESIGNS_PROPERTY_TYPES.find(
+        (item) => item.label.toLowerCase() === storedProperty?.toLowerCase(),
+      )?.id ?? "residential",
+  );
 
   useImperativeHandle(ref, () => ({
     getValues: () => ({

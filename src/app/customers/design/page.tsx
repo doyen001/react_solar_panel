@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
 import { DesignComparisonTable } from "@/components/customer/design/DesignComparisonTable";
@@ -19,8 +20,13 @@ import {
   formatSavingsLabel,
   pickPrimaryDesign,
 } from "@/lib/customers/customer-design-view";
-import { fetchCustomerDesigns, type CustomerDesign } from "@/lib/customers/designs";
+import {
+  fetchCustomerDesigns,
+  isCustomerEditableDesign,
+  type CustomerDesign,
+} from "@/lib/customers/designs";
 import { useAppSelector } from "@/lib/store/hooks";
+import Icon from "@/components/ui/Icons";
 
 export default function CustomerDesignPage() {
   const user = useAppSelector((s) => s.customerAuth.user);
@@ -54,6 +60,8 @@ export default function CustomerDesignPage() {
   }, []);
 
   const primaryDesign = useMemo(() => pickPrimaryDesign(designs), [designs]);
+
+  const canEdit = primaryDesign ? isCustomerEditableDesign(primaryDesign) : false;
 
   const comparison = useMemo(
     () =>
@@ -103,6 +111,23 @@ export default function CustomerDesignPage() {
           </div>
         ) : (
           <>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-dm-sans text-xs text-warm-gray">
+                {canEdit
+                  ? "Open the design builder to change this design."
+                  : "This design has been approved, so it is now read-only. Contact your installer to request a change."}
+              </p>
+              {canEdit ? (
+                <Link
+                  href={`/designs?designId=${encodeURIComponent(primaryDesign.id)}`}
+                  className="flex items-center gap-1.5 rounded-lg border border-warm-border bg-white px-3 py-1.5 font-dm-sans text-xs font-semibold text-warm-ink hover:bg-cream-50"
+                >
+                  <Icon name="Pencil" className="size-3.5" />
+                  Edit design
+                </Link>
+              ) : null}
+            </div>
+
             <SelectedDesignPanel
               title={primaryDesign.title}
               lastUpdated={formatDesignUpdatedAt(primaryDesign.updatedAt)}
@@ -112,6 +137,17 @@ export default function CustomerDesignPage() {
               designSpecs={buildDesignSpecs(primaryDesign)}
               performanceEstimates={buildPerformanceEstimates(primaryDesign)}
             />
+
+            {primaryDesign.customerNotes ? (
+              <section className="customer-card-bg customer-cream-card-border rounded-[10px] border p-4">
+                <p className="font-dm-sans text-[10px] font-semibold uppercase tracking-wide text-warm-gray">
+                  Your notes for the installer
+                </p>
+                <p className="mt-1.5 whitespace-pre-wrap font-dm-sans text-sm text-warm-ink">
+                  {primaryDesign.customerNotes}
+                </p>
+              </section>
+            ) : null}
 
             <YourEquipmentSection cards={buildEquipmentCards(primaryDesign)} />
           </>

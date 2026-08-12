@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import type { DesignOption } from "./types";
 import Icon from "../../ui/Icons";
 
@@ -8,17 +9,34 @@ type Props = {
   option: DesignOption;
   selected: boolean;
   onSelect: () => void;
+  /** Set once the design is approved — the choice can no longer change. */
+  disabled?: boolean;
+  /** Extra content under the specs, e.g. the custom design's edit link. */
+  footer?: ReactNode;
 };
 
-export function DesignOptionCard({ option, selected, onSelect }: Props) {
+export function DesignOptionCard({
+  option,
+  selected,
+  onSelect,
+  disabled = false,
+  footer,
+}: Props) {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={`group w-full overflow-hidden rounded-[14px] text-left transition-[box-shadow,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-amber focus-visible:ring-offset-2 focus-visible:ring-offset-customer-page-bg ${
+    <div
+      className={`group w-full overflow-hidden rounded-[14px] text-left transition-[box-shadow,border-color] ${
         selected
           ? "border-[3px] border-orange-amber"
           : "customer-card-border border hover:border-customer-border-strong"
+      }`}
+    >
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      aria-pressed={selected}
+      className={`block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-amber focus-visible:ring-offset-2 focus-visible:ring-offset-customer-page-bg ${
+        disabled ? "cursor-not-allowed opacity-70" : ""
       }`}
     >
       <div className="relative bg-customer-design-image-bg">
@@ -76,5 +94,12 @@ export function DesignOptionCard({ option, selected, onSelect }: Props) {
         </div>
       </div>
     </button>
+
+      {footer ? (
+        <div className="customer-gradient-accent-h border-t border-white/30 px-4 pb-3">
+          {footer}
+        </div>
+      ) : null}
+    </div>
   );
 }

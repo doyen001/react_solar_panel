@@ -7,7 +7,13 @@ import { DashboardWelcomeBanner } from "@/components/customer/dashboard/Dashboar
 import { ProjectTimeline } from "@/components/customer/dashboard/ProjectTimeline";
 import { TimelineInstallerCard } from "@/components/customer/dashboard/TimelineInstallerCard";
 import { YourDesignsSection } from "@/components/customer/dashboard/YourDesignsSection";
+import { toast } from "react-toastify";
 import { useCustomerProjectJourney } from "@/components/customer/dashboard/useCustomerProjectJourney";
+import {
+  fetchDesignOptions,
+  selectDesignOption,
+  type DesignOptions,
+} from "@/lib/customers/design-options";
 import { useAppSelector } from "@/lib/store/hooks";
 import { currentStepIndex, formatMilestoneDate } from "@/lib/project-journey";
 import { CUSTOMER_PORTAL } from "@/utils/constant";
@@ -31,7 +37,50 @@ export default function CustomerDashboardPage() {
     return () => window.removeEventListener("hashchange", sync);
   }, []);
 
-  const [selectedDesignId, setSelectedDesignId] = useState("a");
+  // The four design cards come from the server: three static packages plus the
+  // customer's own custom design, with the stored selection flagged.
+  const [designOptions, setDesignOptions] = useState<DesignOptions | null>(null);
+  const [optionsLoading, setOptionsLoading] = useState(true);
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchDesignOptions()
+      .then((data) => {
+        if (!cancelled) setDesignOptions(data);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          toast.error(
+            err instanceof Error
+              ? err.message
+              : "Could not load your design options",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setOptionsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleSelectDesign(key: string) {
+    if (savingKey) return;
+    setSavingKey(key);
+    try {
+      const next = await selectDesignOption(key);
+      setDesignOptions(next);
+      toast.success("Design selection saved.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not save your selection",
+      );
+    } finally {
+      setSavingKey(null);
+    }
+  }
 
   // Real journey, shared with the installer pipeline bar. The backend serves
   // only customer-visible milestones, so internal stages (permits, equipment
@@ -80,9 +129,12 @@ export default function CustomerDashboardPage() {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.48fr)] xl:items-start">
           <YourDesignsSection
-            options={dashboard.designOptions}
-            selectedId={selectedDesignId}
-            onSelect={setSelectedDesignId}
+            options={designOptions?.options ?? []}
+            selectedKey={designOptions?.selectedKey ?? null}
+            locked={designOptions?.locked ?? false}
+            loading={optionsLoading}
+            savingKey={savingKey}
+            onSelect={(key) => void handleSelectDesign(key)}
           />
 
           <ProjectTimeline

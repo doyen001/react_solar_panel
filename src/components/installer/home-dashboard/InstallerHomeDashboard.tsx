@@ -11,6 +11,16 @@ import {
   type InstallerDesignProduct,
 } from "@/lib/installers/designs";
 import {
+  batteryCapacityKwh,
+  cecApprovedLabel,
+  inverterRatedKw,
+  productLabel,
+  productSeries,
+  systemSizeKwFrom,
+  NOT_AVAILABLE,
+  NO_VALUE,
+} from "@/lib/designs/product-specs";
+import {
   INSTALLER_HOME_EQUIPMENT,
   INSTALLER_HOME_FINANCE,
 } from "./installerHomeMock";
@@ -55,18 +65,16 @@ function productByCategory(
   );
 }
 
+/** Same convention as the customer design page: unattached category reads N/A. */
 function productName(item?: InstallerDesignProduct) {
-  if (!item?.product) return "Not selected";
-  return item.product.brand
-    ? `${item.product.brand} ${item.product.name}`
-    : item.product.name;
+  return productLabel(item) ?? NOT_AVAILABLE;
 }
 
 function systemSizeKw(design?: InstallerCustomerDesign | null) {
-  if (!design?.panelCount) return undefined;
-  const panel = productByCategory(design, "panel");
-  const wattage = panel?.product?.wattage ?? 412;
-  return (design.panelCount * wattage) / 1000;
+  return systemSizeKwFrom(
+    productByCategory(design ?? null, "panel"),
+    design?.panelCount,
+  );
 }
 
 function buildEquipment(
@@ -76,6 +84,8 @@ function buildEquipment(
   const inverter = productByCategory(design, "inverter");
   const battery = productByCategory(design, "battery");
   const kw = systemSizeKw(design);
+  const batteryKwh = batteryCapacityKwh(battery);
+  const inverterKw = inverterRatedKw(inverter);
 
   return {
     solar: [
@@ -91,16 +101,21 @@ function buildEquipment(
     battery: [
       { label: "Battery Model", value: productName(battery) },
       {
-        label: "Type",
-        value: battery ? "Lithium-ion" : "Not selected",
+        label: "Capacity",
+        value:
+          batteryKwh !== undefined ? `${formatNumber(batteryKwh)} kWh` : NO_VALUE,
       },
-      { label: "Size", value: battery ? `${battery.quantity} unit` : "-" },
-      { label: "CEC Approved", value: battery ? "Yes" : "-" },
+      { label: "Series", value: productSeries(battery) ?? NO_VALUE },
+      { label: "CEC Approved", value: cecApprovedLabel(battery) ?? NO_VALUE },
     ],
     equipment: [
       { label: "Inverter", value: productName(inverter) },
-      { label: "Optimizer", value: "N/A" },
-      { label: "Monitoring", value: "Included" },
+      {
+        label: "Rated Output",
+        value:
+          inverterKw !== undefined ? `${formatNumber(inverterKw)} kW` : NO_VALUE,
+      },
+      { label: "CEC Approved", value: cecApprovedLabel(inverter) ?? NO_VALUE },
     ],
     site: [
       { label: "Address", value: design?.address || "-" },
@@ -127,7 +142,7 @@ function buildFinance(
     { label: "STC Panel", value: design?.panelCount ? `${design.panelCount} panels` : "-" },
     {
       label: "STC BESS",
-      value: productByCategory(design, "battery") ? "Included" : "Not selected",
+      value: productByCategory(design, "battery") ? "Included" : NOT_AVAILABLE,
     },
     { label: "Payment Type", value: "Finance" },
     { label: "Payment Status", value: design?.lead?.status || design?.status || "-" },

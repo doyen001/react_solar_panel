@@ -1,9 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
-import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { selectDesignProposal } from "@/lib/store/designProposalSlice";
+import { setUser } from "@/lib/store/customerAuthSlice";
+import {
+  profileDiff,
+  updateCustomerProfile,
+} from "@/lib/customers/profile";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  proposalToDesignInput,
+  saveBuilderDesign,
+  saveCustomDesign,
+} from "@/lib/customers/custom-design";
 import { DesignsProposalDownloadModal } from "./DesignsProposalDownloadModal";
 
 function ProposalStatCard({
@@ -82,6 +94,59 @@ export function DesignsProposalStepContent({
   const proposal = useAppSelector(selectDesignProposal);
   console.log("proposal", proposal);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const customerUser = useAppSelector((s) => s.customerAuth.user);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editingDesignId = searchParams.get("designId");
+
+  /**
+   * Persists the builder output so it shows on the customer's design page and
+   * to their installer. When the customer arrived from their design page
+   * (`?designId=`) the edit is written back to that design and we return them
+   * there; otherwise it upserts their custom design. Only offered when signed
+   * in — the builder is also a public lead-gen flow.
+   */
+  async function handleSaveToAccount() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      // Contact details belong to the account record, not the design — the
+      // design page, the installer and comms all read it there. Without this
+      // write the customer's edit lives only in wizardData and is overwritten
+      // by the account values on the next load.
+      if (customerUser) {
+        const update = profileDiff(customerUser, {
+          name: proposal.customer.name,
+          phoneNumber: proposal.customer.phoneNumber,
+        });
+
+        if (Object.keys(update).length > 0) {
+          const saved = await updateCustomerProfile(update);
+          dispatch(setUser({ ...customerUser, ...saved }));
+        }
+      }
+
+      const input = proposalToDesignInput(proposal);
+
+      if (editingDesignId) {
+        await saveBuilderDesign(editingDesignId, input);
+        toast.success("Your design changes were saved.");
+        router.push("/customers/design");
+        return;
+      }
+
+      await saveCustomDesign(input);
+      toast.success("Design saved to your account.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not save your design",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
   const displayCustomerName = proposal.customer.name || customerName;
 
   const letterFirstName = useMemo(() => {
@@ -225,6 +290,21 @@ export function DesignsProposalStepContent({
               >
                 Download your proposal
               </button>
+
+              {customerUser ? (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => void handleSaveToAccount()}
+                  className="w-full rounded-[14.412px] border-[1.5px] border-solid border-design-accent-cyan py-2 font-source-sans text-[16px] font-medium uppercase leading-[24px] tracking-[0.9265px] text-white transition hover:bg-white/10 disabled:opacity-60"
+                >
+                  {saving
+                    ? "Saving…"
+                    : editingDesignId
+                      ? "Save changes"
+                      : "Save to my account"}
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

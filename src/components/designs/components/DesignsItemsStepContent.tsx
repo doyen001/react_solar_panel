@@ -1,21 +1,54 @@
 "use client";
 
 import Image from "next/image";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { useAppSelector } from "@/lib/store/hooks";
+import {
+  brandsOf,
+  fetchBuilderProducts,
+  modelsOf,
+  type BuilderProduct,
+  type BuilderProductCategory,
+} from "@/lib/designs/catalogue";
+import {
+  batteryCapacityKwh,
+  inverterRatedKw,
+} from "@/lib/designs/product-specs";
 import {
   DesignsSelectField,
   type DesignsSelectOption,
 } from "./DesignsSelectField";
 
-const BRAND_OPTIONS: DesignsSelectOption[] = [
-  { value: "trina", label: "TRINA" },
-  { value: "bluetti", label: "BLUETTI" },
-];
+type SectionKey = "solarPanel" | "battery" | "equipment";
 
-const PANEL_SIZE_OPTIONS: DesignsSelectOption[] = [
-  { value: "630", label: "630 W" },
-  { value: "400", label: "400 W" },
-];
+/** The third card is the inverter. */
+const SECTION_CATEGORY: Record<SectionKey, BuilderProductCategory> = {
+  solarPanel: "Solar Panel",
+  battery: "Battery",
+  equipment: "Inverter",
+};
+
+/** Panels advertise watts; batteries kWh; inverters rated kW. */
+function ratingLabel(product: BuilderProduct): string {
+  if (product.category === "Solar Panel") {
+    return product.wattage ? `${product.wattage} W` : "—";
+  }
+  if (product.category === "Battery") {
+    const kwh = batteryCapacityKwh({ quantity: 1, product });
+    return kwh !== undefined ? `${kwh} kWh` : "—";
+  }
+  const kw = inverterRatedKw({ quantity: 1, product });
+  return kw !== undefined ? `${kw} kW` : "—";
+}
+
+function cecApprovedLabel(product: BuilderProduct): string {
+  const specs = product.specs;
+  if (specs && typeof specs === "object" && !Array.isArray(specs)) {
+    const approved = (specs as Record<string, unknown>).cecApproved;
+    if (typeof approved === "boolean") return approved ? "Yes" : "No";
+  }
+  return "—";
+}
 
 type SpecLine = { label: string; value: string };
 type SummarySpec = {
@@ -27,28 +60,26 @@ type SummarySpec = {
   rightCol: SpecLine[];
 };
 
+type ItemsSectionValue = {
+  brand: string;
+  /** Second dropdown: the chosen model, held as its catalogue id. */
+  size: string;
+  /** Catalogue id of the selected product; '' until one is picked. */
+  productId: string;
+  summary: SummarySpec;
+};
+
 export type DesignsItemsStepValue = {
-  solarPanel: {
-    brand: string;
-    size: string;
-    summary: SummarySpec;
-  };
-  battery: {
-    brand: string;
-    size: string;
-    summary: SummarySpec;
-  };
-  equipment: {
-    brand: string;
-    size: string;
-    summary: SummarySpec;
-  };
+  solarPanel: ItemsSectionValue;
+  battery: ItemsSectionValue;
+  equipment: ItemsSectionValue;
 };
 
 const DEFAULT_ITEMS_STEP_VALUE: DesignsItemsStepValue = {
   solarPanel: {
     brand: "",
     size: "",
+    productId: "",
     summary: {
       imageSrc: "/images/designs/solarPanel.png",
       imageWidth: 67,
@@ -69,6 +100,7 @@ const DEFAULT_ITEMS_STEP_VALUE: DesignsItemsStepValue = {
   battery: {
     brand: "",
     size: "",
+    productId: "",
     summary: {
       imageSrc: "/images/designs/battery.png",
       imageWidth: 57,
@@ -89,6 +121,7 @@ const DEFAULT_ITEMS_STEP_VALUE: DesignsItemsStepValue = {
   equipment: {
     brand: "",
     size: "",
+    productId: "",
     summary: {
       imageSrc: "/images/designs/equipment.png",
       imageWidth: 47,
@@ -218,6 +251,9 @@ function DesignsItemsGradientCard({
   secondSelectId,
   brand,
   size,
+  brandOptions,
+  modelOptions,
+  modelPlaceholder = "Select Model",
   onBrandChange,
   onSizeChange,
   summary,
@@ -227,6 +263,10 @@ function DesignsItemsGradientCard({
   secondSelectId: string;
   brand: string;
   size: string;
+  /** Catalogue-driven, so the selection maps to a real product. */
+  brandOptions: DesignsSelectOption[];
+  modelOptions: DesignsSelectOption[];
+  modelPlaceholder?: string;
   onBrandChange: (value: string) => void;
   onSizeChange: (value: string) => void;
   summary: React.ReactNode;
@@ -246,15 +286,15 @@ function DesignsItemsGradientCard({
                 placeholder="Select Brand"
                 value={brand}
                 onChange={onBrandChange}
-                options={BRAND_OPTIONS}
+                options={brandOptions}
               />
               <DesignsSelectField
                 id={secondSelectId}
-                ariaLabel={`${title}: select panel size`}
-                placeholder="Select Panel Size"
+                ariaLabel={`${title}: select model`}
+                placeholder={modelPlaceholder}
                 value={size}
                 onChange={onSizeChange}
-                options={PANEL_SIZE_OPTIONS}
+                options={modelOptions}
               />
             </div>
           </div>
@@ -269,6 +309,78 @@ export type DesignsItemsStepHandle = {
   getValues: () => DesignsItemsStepValue;
 };
 
+type ItemsSection = DesignsItemsStepValue[keyof DesignsItemsStepValue];
+
+/**
+ * Overlays a saved product onto one card. Row 0 of each column is what
+ * `DesignsHeroSection` reads back into Redux, so those rows must carry the real
+ * values. The brand/model selects stay empty here — they are resolved from the
+ * catalogue once it loads, since only a product id can match reliably.
+ */
+function seedSection(
+  section: ItemsSection,
+  name: string | undefined,
+  size: string | undefined,
+  count?: string,
+  productId?: string,
+): ItemsSection {
+  if (!name && !size && !count && !productId) return section;
+
+  return {
+    ...section,
+    productId: productId ?? section.productId,
+    summary: {
+      ...section.summary,
+      leftCol: section.summary.leftCol.map((row, index) =>
+        index === 0 && name ? { ...row, value: name } : row,
+      ),
+      rightCol: section.summary.rightCol.map((row, index) => {
+        if (index === 0 && size) return { ...row, value: size };
+        if (index === 1 && count) return { ...row, value: count };
+        return row;
+      }),
+    },
+  };
+}
+
+function seedItemsValue(equipment: {
+  solarPanelName?: string;
+  solarPanelWatts?: string;
+  solarPanelProductId?: string;
+  batteryName?: string;
+  batteryWatts?: string;
+  batteryProductId?: string;
+  inverterName?: string;
+  inverterWatts?: string;
+  inverterProductId?: string;
+  numberOfPanels?: string;
+}): DesignsItemsStepValue {
+  return {
+    solarPanel: seedSection(
+      DEFAULT_ITEMS_STEP_VALUE.solarPanel,
+      equipment.solarPanelName,
+      equipment.solarPanelWatts,
+      equipment.numberOfPanels,
+      equipment.solarPanelProductId,
+    ),
+    battery: seedSection(
+      DEFAULT_ITEMS_STEP_VALUE.battery,
+      equipment.batteryName,
+      equipment.batteryWatts,
+      undefined,
+      equipment.batteryProductId,
+    ),
+    // The third card is the inverter.
+    equipment: seedSection(
+      DEFAULT_ITEMS_STEP_VALUE.equipment,
+      equipment.inverterName,
+      equipment.inverterWatts,
+      undefined,
+      equipment.inverterProductId,
+    ),
+  };
+}
+
 /**
  * Figma Screen 18 (3:4410) — three gradient cards, 45px gap; inner padding 28.98 / 25.98.
  */
@@ -276,7 +388,59 @@ export const DesignsItemsStepContent = forwardRef<
   DesignsItemsStepHandle,
   object
 >(function DesignsItemsStepContent(_, ref) {
-  const [itemsValue, setItemsValue] = useState(DEFAULT_ITEMS_STEP_VALUE);
+  // Seed from the store so editing an existing design shows its real equipment
+  // instead of the placeholder specs.
+  const storedEquipment = useAppSelector((s) => s.designProposal.equipment);
+  const [itemsValue, setItemsValue] = useState(() =>
+    seedItemsValue(storedEquipment),
+  );
+
+  // The real catalogue backs both dropdowns, so a selection yields a product id
+  // the save can persist as a DesignProduct row.
+  const [catalogue, setCatalogue] = useState<
+    Record<SectionKey, BuilderProduct[]>
+  >({ solarPanel: [], battery: [], equipment: [] });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void Promise.all(
+      (Object.keys(SECTION_CATEGORY) as SectionKey[]).map(async (key) => {
+        try {
+          return [key, await fetchBuilderProducts(SECTION_CATEGORY[key])] as const;
+        } catch {
+          // A category that fails to load simply offers no options.
+          return [key, [] as BuilderProduct[]] as const;
+        }
+      }),
+    ).then((entries) => {
+      if (cancelled) return;
+      setCatalogue(
+        Object.fromEntries(entries) as Record<SectionKey, BuilderProduct[]>,
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
+   * What the two selects show. Derived rather than synced into state: a card
+   * seeded from a saved design knows only its product id, and resolving that
+   * against the catalogue at render time avoids a setState-in-effect cascade.
+   * Only a product id can match reliably — a stored display name like
+   * "AE Solar GmbH AE400MD-108" is not a catalogue key.
+   */
+  const selectionFor = (key: SectionKey) => {
+    const section = itemsValue[key];
+    if (section.brand) return { brand: section.brand, size: section.size };
+
+    const product = catalogue[key].find((item) => item.id === section.productId);
+    return product
+      ? { brand: product.brand, size: product.id }
+      : { brand: "", size: "" };
+  };
 
   useImperativeHandle(
     ref,
@@ -286,47 +450,78 @@ export const DesignsItemsStepContent = forwardRef<
     [itemsValue],
   );
 
-  const updateItem = (
-    key: keyof DesignsItemsStepValue,
-    next: Partial<DesignsItemsStepValue[keyof DesignsItemsStepValue]>,
-  ) => {
+  /**
+   * Brand change clears the model: the previously chosen product belongs to the
+   * old brand, and keeping its id would silently save the wrong equipment.
+   */
+  const handleBrandChange = (key: SectionKey, brand: string) => {
+    setItemsValue((prev) => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        brand,
+        size: "",
+        productId: "",
+        summary: {
+          ...prev[key].summary,
+          leftCol: prev[key].summary.leftCol.map((row, i) =>
+            i === 0 ? { ...row, value: brand } : row,
+          ),
+        },
+      },
+    }));
+  };
+
+  /** Model change is the real selection — it fixes the product id and specs. */
+  const handleModelChange = (key: SectionKey, productId: string) => {
+    const product = catalogue[key].find((item) => item.id === productId);
+
     setItemsValue((prev) => {
-      const prevSection = prev[key];
-      const merged = { ...prevSection, ...next };
-      let summary = merged.summary;
-
-      if (next.brand !== undefined) {
-        const brandOpt = BRAND_OPTIONS.find((o) => o.value === next.brand);
-        if (brandOpt) {
-          summary = {
-            ...summary,
-            leftCol: summary.leftCol.map((row, i) =>
-              i === 0 ? { ...row, value: brandOpt.label } : row,
-            ),
-          };
-        }
+      const section = prev[key];
+      if (!product) {
+        return { ...prev, [key]: { ...section, size: productId, productId } };
       }
 
-      if (next.size !== undefined) {
-        const sizeOpt = PANEL_SIZE_OPTIONS.find((o) => o.value === next.size);
-        if (sizeOpt) {
-          summary = {
-            ...summary,
-            rightCol: summary.rightCol.map((row, i) =>
-              i === 0 ? { ...row, value: sizeOpt.label } : row,
-            ),
-          };
-        }
-      }
+      const rating = ratingLabel(product);
 
       return {
         ...prev,
         [key]: {
-          ...merged,
-          summary,
+          ...section,
+          size: productId,
+          productId,
+          summary: {
+            ...section.summary,
+            leftCol: section.summary.leftCol.map((row, i) => {
+              if (i === 0) return { ...row, value: product.brand };
+              if (i === 1) return { ...row, value: product.name };
+              if (i === 3) {
+                return { ...row, value: cecApprovedLabel(product) };
+              }
+              return row;
+            }),
+            rightCol: section.summary.rightCol.map((row, i) =>
+              i === 0 ? { ...row, value: rating } : row,
+            ),
+          },
         },
       };
     });
+  };
+
+  const optionsFor = (key: SectionKey) => {
+    const products = catalogue[key];
+    const { brand } = selectionFor(key);
+    return {
+      brandOptions: brandsOf(products).map((value) => ({
+        value,
+        label: value,
+      })),
+      modelOptions: modelsOf(products, brand).map((product) => ({
+        value: product.id,
+        label: product.name,
+      })),
+    };
   };
 
   return (
@@ -336,10 +531,12 @@ export const DesignsItemsStepContent = forwardRef<
           title="Select Solar Panels"
           firstSelectId="items-solar-brand"
           secondSelectId="items-solar-size"
-          brand={itemsValue.solarPanel.brand}
-          size={itemsValue.solarPanel.size}
-          onBrandChange={(next) => updateItem("solarPanel", { brand: next })}
-          onSizeChange={(next) => updateItem("solarPanel", { size: next })}
+          brand={selectionFor("solarPanel").brand}
+          size={selectionFor("solarPanel").size}
+          brandOptions={optionsFor("solarPanel").brandOptions}
+          modelOptions={optionsFor("solarPanel").modelOptions}
+          onBrandChange={(next) => handleBrandChange("solarPanel", next)}
+          onSizeChange={(next) => handleModelChange("solarPanel", next)}
           summary={
             <DesignsItemProductSummary
               imageSrc={itemsValue.solarPanel.summary.imageSrc}
@@ -355,10 +552,12 @@ export const DesignsItemsStepContent = forwardRef<
           title="Select Battery"
           firstSelectId="items-battery-brand"
           secondSelectId="items-battery-size"
-          brand={itemsValue.battery.brand}
-          size={itemsValue.battery.size}
-          onBrandChange={(next) => updateItem("battery", { brand: next })}
-          onSizeChange={(next) => updateItem("battery", { size: next })}
+          brand={selectionFor("battery").brand}
+          size={selectionFor("battery").size}
+          brandOptions={optionsFor("battery").brandOptions}
+          modelOptions={optionsFor("battery").modelOptions}
+          onBrandChange={(next) => handleBrandChange("battery", next)}
+          onSizeChange={(next) => handleModelChange("battery", next)}
           summary={
             <DesignsItemProductSummary
               imageSrc={itemsValue.battery.summary.imageSrc}
@@ -374,10 +573,12 @@ export const DesignsItemsStepContent = forwardRef<
           title="Select Equipment"
           firstSelectId="items-equipment-brand"
           secondSelectId="items-equipment-size"
-          brand={itemsValue.equipment.brand}
-          size={itemsValue.equipment.size}
-          onBrandChange={(next) => updateItem("equipment", { brand: next })}
-          onSizeChange={(next) => updateItem("equipment", { size: next })}
+          brand={selectionFor("equipment").brand}
+          size={selectionFor("equipment").size}
+          brandOptions={optionsFor("equipment").brandOptions}
+          modelOptions={optionsFor("equipment").modelOptions}
+          onBrandChange={(next) => handleBrandChange("equipment", next)}
+          onSizeChange={(next) => handleModelChange("equipment", next)}
           summary={
             <DesignsItemProductSummary
               imageSrc={itemsValue.equipment.summary.imageSrc}

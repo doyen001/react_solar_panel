@@ -15,6 +15,7 @@ import {
   DESIGNS_LOCATION_STEP,
   type DesignsMapLocation,
 } from "@/utils/constant";
+import { useAppSelector } from "@/lib/store/hooks";
 
 const MAP_CONTAINER: React.CSSProperties = {
   width: "100%",
@@ -46,9 +47,18 @@ export const DesignsLocationStepContent = forwardRef<
   DesignsLocationStepHandle,
   object
 >(function DesignsLocationStepContent(_, ref) {
-  const [selectedAddress, setSelectedAddress] = useState("");
+  // Seed from the store so editing an existing design opens on its saved site
+  // address and pin rather than an empty search box.
+  const storedCustomer = useAppSelector((s) => s.designProposal.customer);
+  const [selectedAddress, setSelectedAddress] = useState(
+    storedCustomer.address ?? "",
+  );
   const [selectedLocation, setSelectedLocation] =
-    useState<DesignsMapLocation | null>(null);
+    useState<DesignsMapLocation | null>(() =>
+      storedCustomer.mapLat != null && storedCustomer.mapLng != null
+        ? { lat: storedCustomer.mapLat, lng: storedCustomer.mapLng }
+        : null,
+    );
 
   useImperativeHandle(ref, () => ({
     getValues: () => ({

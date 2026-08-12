@@ -8,6 +8,17 @@ import type {
   CustomerDesign,
   CustomerDesignProduct,
 } from "@/lib/customers/designs";
+import {
+  batteryCapacityKwh,
+  cecApprovedLabel,
+  inverterRatedKw,
+  productLabel,
+  productSeries,
+  systemSizeKwFrom,
+  NOT_AVAILABLE,
+  NO_VALUE,
+  productType,
+} from "@/lib/designs/product-specs";
 
 const STATUS_RANK: Record<CustomerDesign["status"], number> = {
   COMPLETED: 0,
@@ -41,11 +52,9 @@ function productByCategory(
   );
 }
 
+/** One convention across the page: an unattached category always reads N/A. */
 function productDisplayName(item?: CustomerDesignProduct) {
-  if (!item?.product) return "Not selected";
-  return item.product.brand
-    ? `${item.product.brand} ${item.product.name}`
-    : item.product.name;
+  return productLabel(item) ?? NOT_AVAILABLE;
 }
 
 function designProductsTotal(design: CustomerDesign) {
@@ -56,10 +65,7 @@ function designProductsTotal(design: CustomerDesign) {
 }
 
 function systemSizeKw(design: CustomerDesign) {
-  if (!design.panelCount) return undefined;
-  const panel = productByCategory(design, "panel");
-  const wattage = panel?.product?.wattage ?? 412;
-  return (design.panelCount * wattage) / 1000;
+  return systemSizeKwFrom(productByCategory(design, "panel"), design.panelCount);
 }
 
 function annualOutputKwh(design: CustomerDesign) {
@@ -80,12 +86,33 @@ function wizardField(design: CustomerDesign, key: string): string | undefined {
   return undefined;
 }
 
+/**
+ * The design this customer's page is about.
+ *
+ * Prefers the server's `isPrimary` flag, which the installer home panel
+ * resolves through too — that shared flag is what keeps the two portals showing
+ * the same design. The local sort is only a fallback for payloads without it,
+ * and mirrors the backend rule in `design.selection.ts`.
+ */
 export function pickPrimaryDesign(designs: CustomerDesign[]) {
   if (!designs.length) return null;
+
+  const flagged = designs.find((design) => design.isPrimary);
+  if (flagged) return flagged;
+
   return [...designs].sort((a, b) => {
     const rank = STATUS_RANK[a.status] - STATUS_RANK[b.status];
     if (rank !== 0) return rank;
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+
+    const updated =
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    if (updated !== 0) return updated;
+
+    const created =
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (created !== 0) return created;
+
+    return a.id.localeCompare(b.id);
   })[0];
 }
 
@@ -116,7 +143,7 @@ export function buildDesignSpecs(design: CustomerDesign): SpecLine[] {
       value: design.panelCount != null ? String(design.panelCount) : "—",
     },
     { label: "Inverter", value: productDisplayName(inverter) },
-    { label: "Battery", value: battery ? productDisplayName(battery) : "None" },
+    { label: "Battery", value: productDisplayName(battery) },
     { label: "Orientation", value: wizardField(design, "orientation") ?? "—" },
     { label: "Tilt Angle", value: wizardField(design, "tiltAngle") ?? "—" },
   ];
@@ -160,16 +187,23 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
   const battery = productByCategory(design, "battery");
   const kw = systemSizeKw(design);
 
+  // Every card is always rendered, but a category with nothing in the design's
+  // products array reads N/A rather than a placeholder spec.
+  const batteryKwh = batteryCapacityKwh(battery);
+  const inverterKw = inverterRatedKw(inverter);
+
   return [
     {
       id: "panels",
       title: "Solar Panels",
       iconName: "MyDesignSun",
       rows: [
-        { label: "Model", value: productDisplayName(panel) },
+        { label: "Model", value: productLabel(panel) ?? NOT_AVAILABLE },
         {
           label: "Watts",
-          value: panel?.product?.wattage ? `${panel.product.wattage}W` : "—",
+          value: panel?.product?.wattage
+            ? `${panel.product.wattage}W`
+            : NO_VALUE,
         },
         {
           label: "Qty",
@@ -178,9 +212,9 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
               ? String(design.panelCount)
               : panel?.quantity != null
                 ? String(panel.quantity)
-                : "—",
+                : NO_VALUE,
         },
-        { label: "Total", value: kw ? `${kw.toFixed(2)} kW` : "—" },
+        { label: "Total", value: kw ? `${kw.toFixed(2)} kW` : NO_VALUE },
       ],
     },
     {
@@ -188,12 +222,15 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
       title: "Battery",
       iconName: "MyDesignsBattery",
       rows: [
-        { label: "Model", value: battery ? productDisplayName(battery) : "N/A" },
+        { label: "Model", value: productLabel(battery) ?? NOT_AVAILABLE },
         {
           label: "Capacity",
-          value: battery ? `${battery.quantity} unit` : "—",
+          value:
+            batteryKwh !== undefined
+              ? `${formatNumber(batteryKwh)} kWh`
+              : NO_VALUE,
         },
-        { label: "Type", value: battery ? "Lithium-ion" : "—" },
+        { label: "Type", value: productType(battery) ?? NO_VALUE },
       ],
     },
     {
@@ -201,9 +238,12 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
       title: "Inverter",
       iconName: "MyDesignsInverter",
       rows: [
-        { label: "Model", value: productDisplayName(inverter) },
-        { label: "Type", value: inverter ? "String" : "—" },
-        { label: "Monitoring", value: inverter ? "Included" : "—" },
+        { label: "Model", value: productLabel(inverter) ?? NOT_AVAILABLE },
+        {
+          label: "Type",
+          value: productType(inverter) ?? NO_VALUE,
+        },
+        { label: "Monitoring", value: productType(inverter) ?? NO_VALUE },
       ],
     },
     {
@@ -211,17 +251,17 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
       title: "Site Details",
       iconName: "LocationPin",
       rows: [
-        { label: "Address", value: design.address?.trim() || "—" },
+        { label: "Roof", value: design.address?.trim() || "—" },
         {
-          label: "Roof Area",
+          label: "Phase",
           value: formatNumber(design.roofArea, " m²"),
         },
         {
-          label: "Annual Sunlight",
+          label: "NMI",
           value: formatNumber(design.annualSunlight, " hrs"),
         },
         {
-          label: "Design Status",
+          label: "Retailer",
           value: design.status.replaceAll("_", " "),
         },
       ],
@@ -266,7 +306,7 @@ export function buildComparisonTable(
       feature: "Battery",
       values: mapValues((design) => {
         const battery = productByCategory(design, "battery");
-        return battery ? productDisplayName(battery) : "None";
+        return productDisplayName(battery);
       }),
     },
     {

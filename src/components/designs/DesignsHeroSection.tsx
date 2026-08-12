@@ -1,11 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   mergeProposalData,
   selectDesignProposal,
 } from "@/lib/store/designProposalSlice";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+  designToProposalPayload,
+  fetchCustomDesign,
+  fetchDesignById,
+} from "@/lib/customers/custom-design";
 import { DesignTopBar } from "../modules/DesignTopBar";
 import {
   DesignsRegisterStepContent,
@@ -51,6 +58,55 @@ export function DesignsHeroSection({
 }: DesignsHeroSectionProps) {
   const dispatch = useAppDispatch();
   const proposal = useAppSelector(selectDesignProposal);
+  const customerUser = useAppSelector((s) => s.customerAuth.user);
+  const searchParams = useSearchParams();
+  const editingDesignId = searchParams.get("designId");
+
+  /**
+   * Load the design being edited.
+   *
+   * `?designId=` is set when the customer arrives from their design page, so
+   * the builder edits exactly the design shown there — which may be a
+   * materialised package, not only their custom one. Without it we fall back to
+   * their custom design. Runs once per visit; failures are silent because the
+   * builder must still work for anonymous lead-gen visitors.
+   */
+  const hydratedRef = useRef(false);
+  // The step components seed their local state from the store on mount, so they
+  // must not mount until hydration has landed — otherwise they capture the
+  // blank defaults and the customer sees empty placeholders.
+  //
+  // Gated on the URL param, not on `customerUser`: auth is restored in a
+  // layout effect, so the user is still null during the first render and a
+  // user-based gate would open before the design had loaded.
+  const [hydrating, setHydrating] = useState(Boolean(editingDesignId));
+
+  // Deliberately no cancellation flag. This effect re-runs when auth arrives,
+  // and `hydratedRef` makes that second run a no-op — so a per-run flag would
+  // let the first run's cleanup cancel the only in-flight request and leave
+  // `hydrating` stuck on forever. Settling unconditionally is safe: a setState
+  // after unmount is a no-op in React 18+, and the store is global.
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    // Editing is driven by the URL; the custom-design fallback needs the user.
+    if (!editingDesignId && !customerUser) return;
+    hydratedRef.current = true;
+
+    const load = editingDesignId
+      ? fetchDesignById(editingDesignId)
+      : fetchCustomDesign();
+
+    void load
+      .then((design) => {
+        if (!design) return;
+        const payload = designToProposalPayload(design);
+        if (payload) dispatch(mergeProposalData(payload));
+      })
+      .catch(() => {
+        // Non-fatal: fall back to the default proposal state.
+      })
+      .finally(() => setHydrating(false));
+  }, [customerUser, dispatch, editingDesignId]);
 
   const [activeScreen, setActiveScreen] = useState<
     | "start"
@@ -61,8 +117,12 @@ export function DesignsHeroSection({
     | "energy"
     | "items"
     | "proposal"
-  >("start");
-  const [fillPercent, setFillPercent] = useState(10);
+  >(
+    // Update mode opens on the first data step: the marketing intro has nothing
+    // to show someone who is here to change an existing design.
+    editingDesignId ? "register" : "start",
+  );
+  const [fillPercent, setFillPercent] = useState(editingDesignId ? 30 : 10);
 
   const registerStepRef = useRef<DesignsRegisterStepHandle>(null);
   const propertyStepRef = useRef<DesignsPropertyStepHandle>(null);
@@ -207,6 +267,11 @@ export function DesignsHeroSection({
               numberOfPanels:
                 itemsValues.solarPanel.summary.rightCol[1]?.value ||
                 proposal.equipment.numberOfPanels,
+              // Carried so the save can write real DesignProduct rows; the
+              // display strings above cannot identify a catalogue product.
+              solarPanelProductId: itemsValues.solarPanel.productId,
+              batteryProductId: itemsValues.battery.productId,
+              inverterProductId: itemsValues.equipment.productId,
             },
           }),
         );
@@ -263,8 +328,39 @@ export function DesignsHeroSection({
     <section className="relative flex min-h-dvh flex-col overflow-hidden">
       <DesignsHeroBackground />
       <DesignTopBar />
+
+      {/*
+        Two modes: anonymous visitors from the landing page create a new design,
+        while a customer arriving from their design page updates that one.
+      */}
+      {/*
+        Keyed off the URL only. Branching on `customerUser` here caused a
+        hydration mismatch: auth is restored in a layout effect, so it is null in
+        the server HTML and set on the client.
+      */}
+      {editingDesignId ? (
+        <div className="relative z-10 mx-auto w-full max-w-[1446px] px-4 pt-3 sm:px-8 lg:px-[81px]">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-[14px] border-[1.5px] border-solid border-design-accent-cyan bg-[rgba(255,255,255,0.08)] px-4 py-2.5">
+            <p className="font-source-sans text-[14px] leading-[21px] text-white/80">
+              Editing your saved design. Your details and equipment are filled in
+              below — finish the steps and save to update it.
+            </p>
+            <Link
+              href="/customers/design"
+              className="font-source-sans text-[13px] font-medium uppercase tracking-[0.5px] text-white underline"
+            >
+              Cancel
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex items-center flex-1">
-        {activeScreen === "start" ? (
+        {hydrating ? (
+          <p className="relative z-10 mx-auto px-4 font-source-sans text-[16px] text-white/80">
+            Loading your design…
+          </p>
+        ) : activeScreen === "start" ? (
           <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col gap-[29px] px-4 pt-8 sm:px-8 lg:px-[81px]">
             <div className="flex w-full max-w-[1283px] flex-col items-stretch gap-5 lg:flex-row">
               <DesignsSavingsPromoCard className="lg:w-[629px]" />
@@ -275,7 +371,10 @@ export function DesignsHeroSection({
         ) : activeScreen === "second" ? (
           <DesignsPropertyStepContent ref={propertyStepRef} />
         ) : activeScreen === "register" ? (
-          <DesignsRegisterStepContent ref={registerStepRef} />
+          <DesignsRegisterStepContent
+            ref={registerStepRef}
+            lockEmail={Boolean(editingDesignId)}
+          />
         ) : activeScreen === "address" ? (
           <DesignsLocationStepContent ref={locationStepRef} />
         ) : activeScreen === "solarPanel" ? (

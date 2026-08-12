@@ -42,6 +42,14 @@ export type DesignProposalEquipment = {
   batteryWatts: string;
   numberOfPanels: string;
   co2Offset: string;
+  /**
+   * Catalogue ids for the chosen kit. Carried so the save can write real
+   * DesignProduct rows — the display strings above cannot identify a product.
+   * Empty when the customer has not picked from the catalogue.
+   */
+  solarPanelProductId?: string;
+  inverterProductId?: string;
+  batteryProductId?: string;
 };
 
 /** How the user expresses their grid bill amount on the energy step (stored alongside monthly-normalized figures). */
