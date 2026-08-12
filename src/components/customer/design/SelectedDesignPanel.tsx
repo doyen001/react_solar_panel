@@ -13,6 +13,11 @@ type Props = {
   statusApproved?: boolean;
   designSpecs: SpecLine[];
   performanceEstimates: SpecLine[];
+  /** Opens the proposal PDF in a viewer tab. */
+  onViewPdf?: () => void;
+  onDownloadPdf?: () => void;
+  /** True while a PDF is being generated; disables both actions. */
+  pdfBusy?: boolean;
 };
 
 export function SelectedDesignPanel({
@@ -23,6 +28,9 @@ export function SelectedDesignPanel({
   statusApproved = false,
   designSpecs,
   performanceEstimates,
+  onViewPdf,
+  onDownloadPdf,
+  pdfBusy = false,
 }: Props) {
   return (
     <section className="customer-card-bg customer-cream-card-border overflow-hidden rounded-[10px] border">
@@ -65,7 +73,9 @@ export function SelectedDesignPanel({
             <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5">
               <button
                 type="button"
-                className="inline-flex h-7 items-center gap-1.5 rounded-md border customer-cream-card-border bg-cream-50/90 px-2.5 font-dm-sans text-[10px] font-semibold text-warm-ink shadow-sm backdrop-blur-sm"
+                onClick={onViewPdf}
+                disabled={pdfBusy || !onViewPdf}
+                className="inline-flex h-7 items-center gap-1.5 rounded-md border customer-cream-card-border bg-cream-50/90 px-2.5 font-dm-sans text-[10px] font-semibold text-warm-ink shadow-sm backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-60"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 <Icon
@@ -77,7 +87,9 @@ export function SelectedDesignPanel({
               </button>
               <button
                 type="button"
-                className="inline-flex h-7 items-center gap-1.5 rounded-md bg-navy-800 px-2.5 font-dm-sans text-[10px] font-semibold text-white shadow-sm"
+                onClick={onDownloadPdf}
+                disabled={pdfBusy || !onDownloadPdf}
+                className="inline-flex h-7 items-center gap-1.5 rounded-md bg-navy-800 px-2.5 font-dm-sans text-[10px] font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 <Icon
@@ -85,7 +97,7 @@ export function SelectedDesignPanel({
                   className="size-4 shrink-0 text-white"
                   aria-hidden
                 />
-                Download PDF
+                {pdfBusy ? "Preparing…" : "Download PDF"}
               </button>
             </div>
           </div>

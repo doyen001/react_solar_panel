@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import {
+  downloadDesignProposalPdf,
+  viewDesignProposalPdf,
+} from "@/lib/customers/design-pdf";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
 import { DesignComparisonTable } from "@/components/customer/design/DesignComparisonTable";
 import { DesignPageToolbar } from "@/components/customer/design/DesignPageToolbar";
@@ -62,6 +67,44 @@ export default function CustomerDesignPage() {
   const primaryDesign = useMemo(() => pickPrimaryDesign(designs), [designs]);
 
   const canEdit = primaryDesign ? isCustomerEditableDesign(primaryDesign) : false;
+
+  const [pdfBusy, setPdfBusy] = useState(false);
+
+  /**
+   * Rebuilds the same proposal PDF the design builder produces, from the stored
+   * design — one generator, so the two documents cannot drift.
+   */
+  async function handleDownloadPdf() {
+    if (!primaryDesign || pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      await downloadDesignProposalPdf(primaryDesign);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not generate your PDF",
+      );
+    } finally {
+      setPdfBusy(false);
+    }
+  }
+
+  async function handleViewPdf() {
+    if (!primaryDesign || pdfBusy) return;
+    // Opened before the await so the click gesture is still active; a popup
+    // opened afterwards gets blocked.
+    const viewer = window.open("", "_blank", "noopener,noreferrer");
+    setPdfBusy(true);
+    try {
+      await viewDesignProposalPdf(primaryDesign, viewer);
+    } catch (err) {
+      viewer?.close();
+      toast.error(
+        err instanceof Error ? err.message : "Could not open your PDF",
+      );
+    } finally {
+      setPdfBusy(false);
+    }
+  }
 
   const comparison = useMemo(
     () =>
@@ -136,6 +179,9 @@ export default function CustomerDesignPage() {
               statusApproved={primaryDesign.status === "COMPLETED"}
               designSpecs={buildDesignSpecs(primaryDesign)}
               performanceEstimates={buildPerformanceEstimates(primaryDesign)}
+              onViewPdf={() => void handleViewPdf()}
+              onDownloadPdf={() => void handleDownloadPdf()}
+              pdfBusy={pdfBusy}
             />
 
             {primaryDesign.customerNotes ? (
