@@ -15,13 +15,18 @@ type Props = {
   referralCode: string | null;
 };
 
+/**
+ * The customer theme is dark (`--color-customer-card-bg: #0f2240`), so this page
+ * uses the on-dark text tokens throughout. The light-theme `text-warm-ink` /
+ * `text-warm-gray` are near-black and disappear against it.
+ */
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="customer-card-bg customer-cream-card-border rounded-[10px] border px-4 py-3 text-center">
-      <p className="font-inter text-lg font-bold leading-[27px] text-warm-ink">
+      <p className="font-inter text-lg font-bold leading-[27px] text-white">
         {value}
       </p>
-      <p className="mt-1 font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray">
+      <p className="mt-1 font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] customer-text-muted">
         {label}
       </p>
     </div>
@@ -68,15 +73,15 @@ export function SharedJourneyView({ token, referralCode }: Props) {
   return (
     <div className="mx-auto flex w-full max-w-[720px] flex-1 flex-col gap-5 px-4 py-10">
       {loading ? (
-        <p className="font-dm-sans text-sm text-warm-gray">Loading…</p>
+        <p className="font-dm-sans text-sm customer-text-subtle">Loading…</p>
       ) : error || !journey ? (
         <div className="customer-card-bg customer-cream-card-border rounded-[10px] border p-8 text-center">
-          <p className="font-dm-sans text-sm text-warm-gray">
+          <p className="font-dm-sans text-sm customer-text-subtle">
             {error ?? "This shared design is unavailable."}
           </p>
           <Link
             href="/designs"
-            className="mt-3 inline-block font-dm-sans text-xs font-bold uppercase tracking-wide text-brand-blue underline"
+            className="mt-3 inline-block font-dm-sans text-xs font-bold uppercase tracking-wide text-orange-amber underline"
           >
             Design your own system
           </Link>
@@ -84,10 +89,10 @@ export function SharedJourneyView({ token, referralCode }: Props) {
       ) : (
         <>
           <header className="text-center">
-            <p className="font-dm-sans text-xs font-semibold uppercase tracking-wide text-warm-gray">
+            <p className="font-dm-sans text-xs font-semibold uppercase tracking-wide customer-text-subtle">
               {journey.ownerFirstName}&apos;s solar journey
             </p>
-            <h1 className="mt-1 font-inter text-2xl font-bold text-warm-ink">
+            <h1 className="mt-1 font-inter text-2xl font-bold text-white">
               {journey.title}
             </h1>
             {journey.status === "COMPLETED" ? (

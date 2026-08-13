@@ -186,22 +186,22 @@ export default function CustomerDesignPage() {
 
       <main className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-4 px-4 py-5 md:gap-5 md:px-5">
         {loading ? (
-          <div className="customer-card-bg customer-cream-card-border rounded-[10px] border p-8 text-center font-dm-sans text-sm text-warm-gray">
+          <div className="customer-card-bg customer-cream-card-border rounded-[10px] border p-8 text-center font-dm-sans text-sm customer-text-subtle">
             Loading your designs…
           </div>
         ) : error ? (
-          <div className="customer-card-bg customer-cream-card-border rounded-[10px] border p-8 text-center font-dm-sans text-sm text-red-600">
+          <div className="customer-card-bg customer-cream-card-border rounded-[10px] border p-8 text-center font-dm-sans text-sm text-red-400">
             {error}
           </div>
         ) : !primaryDesign ? (
-          <div className="customer-card-bg customer-cream-card-border rounded-[10px] border p-8 text-center font-dm-sans text-sm text-warm-gray">
+          <div className="customer-card-bg customer-cream-card-border rounded-[10px] border p-8 text-center font-dm-sans text-sm customer-text-subtle">
             No solar designs yet. Your installer will add designs here once they are
             ready.
           </div>
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-dm-sans text-xs text-warm-gray">
+              <p className="font-dm-sans text-xs customer-text-subtle">
                 {canEdit
                   ? "Open the design builder to change this design."
                   : "This design has been approved, so it is now read-only. Contact your installer to request a change."}
@@ -232,10 +232,10 @@ export default function CustomerDesignPage() {
 
             {primaryDesign.customerNotes ? (
               <section className="customer-card-bg customer-cream-card-border rounded-[10px] border p-4">
-                <p className="font-dm-sans text-[10px] font-semibold uppercase tracking-wide text-warm-gray">
+                <p className="font-dm-sans text-[10px] font-semibold uppercase tracking-wide customer-text-muted">
                   Your notes for the installer
                 </p>
-                <p className="mt-1.5 whitespace-pre-wrap font-dm-sans text-sm text-warm-ink">
+                <p className="mt-1.5 whitespace-pre-wrap font-dm-sans text-sm customer-text-on-dark">
                   {primaryDesign.customerNotes}
                 </p>
               </section>
