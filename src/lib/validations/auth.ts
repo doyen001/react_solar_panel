@@ -37,6 +37,13 @@ export const signUpSchema = z.object({
     .string()
     .min(1, "Address is required")
     .min(5, "Address must be at least 5 characters"),
+  /**
+   * Referral code the visitor arrived with, from a shared link's `?ref=`.
+   * Optional and never shown as a form field — it rides along so the referrer
+   * gets credit. Attribution is best-effort on the backend, so a stale code
+   * cannot block a signup.
+   */
+  referralCode: z.string().trim().min(4).max(32).optional(),
 });
 
 export type SignInFormData = z.infer<typeof signInSchema>;

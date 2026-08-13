@@ -229,6 +229,10 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 
 function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
+  // `?ref=` arrives on links shared by existing customers, so the referrer gets
+  // credit. Never rendered as a field — it just rides along with the signup.
+  const searchParams = useSearchParams();
+  const referralCode = searchParams.get("ref")?.trim() || undefined;
 
   const {
     register,
@@ -256,7 +260,9 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(
+          referralCode ? { ...data, referralCode } : data,
+        ),
       });
 
       const result = (await response.json().catch(() => null)) as {

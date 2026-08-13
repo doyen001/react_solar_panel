@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import {
+  buildShareUrl,
+  createShareLink,
+  fetchReferralOverview,
+  type ReferralOverview,
+} from "@/lib/customers/referrals";
 import {
   downloadDesignProposalPdf,
   viewDesignProposalPdf,
@@ -120,14 +126,54 @@ export default function CustomerDesignPage() {
     [designs, primaryDesign?.id],
   );
 
-  const shareUrl = useMemo(() => {
-    const raw = initialsFromPersonName(user?.firstName, user?.lastName)
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
-    const slug = raw || "guest";
-    const kw = primaryDesign?.title.match(/[\d.]+kW/i)?.[0] ?? "design";
-    return `https://easylink.solar/share/${slug}-${kw.toLowerCase()}`;
-  }, [user?.firstName, user?.lastName, primaryDesign?.title]);
+  // Referral totals and the share link are both real now. The share token is
+  // minted on demand for the design on screen, so nothing is publicly reachable
+  // until the customer opens this page.
+  const [referrals, setReferrals] = useState<ReferralOverview | null>(null);
+  const [referralsLoading, setReferralsLoading] = useState(true);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
+
+  const loadReferrals = useCallback(async () => {
+    try {
+      setReferrals(await fetchReferralOverview());
+    } catch {
+      // Non-fatal: the card renders its empty state.
+      setReferrals(null);
+    } finally {
+      setReferralsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadReferrals();
+  }, [loadReferrals]);
+
+  const primaryDesignId = primaryDesign?.id;
+  useEffect(() => {
+    if (!primaryDesignId) {
+      setShareUrl(null);
+      return;
+    }
+
+    let cancelled = false;
+    setShareLoading(true);
+
+    createShareLink(primaryDesignId)
+      .then((link) => {
+        if (!cancelled) setShareUrl(buildShareUrl(link));
+      })
+      .catch(() => {
+        if (!cancelled) setShareUrl(null);
+      })
+      .finally(() => {
+        if (!cancelled) setShareLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [primaryDesignId]);
 
   return (
     <div className="customer-page-bg flex min-h-screen flex-col">
@@ -200,8 +246,12 @@ export default function CustomerDesignPage() {
         )}
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
-          <ShareJourneyCard shareUrl={shareUrl} />
-          <ReferralProgramCard />
+          <ShareJourneyCard shareUrl={shareUrl} loading={shareLoading} />
+          <ReferralProgramCard
+            overview={referrals}
+            loading={referralsLoading}
+            onInvited={() => void loadReferrals()}
+          />
         </div>
 
         {designs.length > 1 ? (

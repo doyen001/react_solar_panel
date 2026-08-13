@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
-import { designAssets } from "./designAssets";
 import Icon, { IconType } from "@/components/ui/Icons";
+import { socialShareUrl } from "@/lib/customers/referrals";
 
 const SOCIAL = [
   {
@@ -34,13 +33,32 @@ const SOCIAL = [
 ] as const;
 
 type Props = {
-  shareUrl: string;
+  /** Null until the share link has been created. */
+  shareUrl: string | null;
+  loading?: boolean;
+  /** Message used by the social intents. */
+  shareMessage?: string;
 };
 
-export function ShareJourneyCard({ shareUrl }: Props) {
+const NETWORKS: Record<
+  (typeof SOCIAL)[number]["label"],
+  "facebook" | "twitter" | "linkedin" | "email"
+> = {
+  Facebook: "facebook",
+  Twitter: "twitter",
+  LinkedIn: "linkedin",
+  Email: "email",
+};
+
+export function ShareJourneyCard({
+  shareUrl,
+  loading = false,
+  shareMessage = "I just designed my solar system with EasyLink — take a look at my savings.",
+}: Props) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
+    if (!shareUrl) return;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -48,6 +66,18 @@ export function ShareJourneyCard({ shareUrl }: Props) {
     } catch {
       setCopied(false);
     }
+  };
+
+  const share = (label: (typeof SOCIAL)[number]["label"]) => {
+    if (!shareUrl) return;
+    const target = socialShareUrl(NETWORKS[label], shareUrl, shareMessage);
+    // Email is a mailto: — hand it to the OS handler rather than opening a tab
+    // that would be left blank.
+    if (NETWORKS[label] === "email") {
+      window.location.assign(target);
+      return;
+    }
+    window.open(target, "_blank", "noopener,noreferrer,width=640,height=640");
   };
 
   return (
@@ -76,7 +106,10 @@ export function ShareJourneyCard({ shareUrl }: Props) {
             <button
               key={s.label}
               type="button"
-              className={`flex h-10 items-center justify-center gap-2 rounded-lg ${s.bg} ${s.color}`}
+              onClick={() => share(s.label)}
+              disabled={!shareUrl}
+              aria-label={`Share on ${s.label}`}
+              className={`flex h-10 items-center justify-center gap-2 rounded-lg ${s.bg} ${s.color} disabled:cursor-not-allowed disabled:opacity-50`}
             >
               <Icon
                 name={s.icon}
@@ -98,13 +131,16 @@ export function ShareJourneyCard({ shareUrl }: Props) {
               className="truncate font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
               style={{ fontVariationSettings: "'opsz' 9" }}
             >
-              {shareUrl}
+              {loading
+                ? "Preparing your link…"
+                : (shareUrl ?? "Share link unavailable")}
             </p>
           </div>
           <button
             type="button"
             onClick={copy}
-            className="inline-flex h-[34px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy-800 px-4 font-dm-sans text-[11px] font-semibold text-white sm:min-w-[102px]"
+            disabled={!shareUrl}
+            className="inline-flex h-[34px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy-800 px-4 font-dm-sans text-[11px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[102px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             <Icon
