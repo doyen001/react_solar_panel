@@ -27,9 +27,7 @@ export function ServicesSectionHeading({
     >
       <span
         className={`inline-flex w-fit items-center rounded-full border px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em] ${
-          isDark
-            ? "border-svc-dark-border bg-svc-glass text-svc-dark-body"
-            : "border-svc-border bg-svc-accent-soft text-svc-accent-text"
+          isDark ? "svc-eyebrow-dark backdrop-blur-md" : "svc-eyebrow-light"
         }`}
       >
         {eyebrow}

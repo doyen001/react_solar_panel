@@ -30,7 +30,7 @@ export function ServicesBenefitsSection() {
                 <div className="svc-card svc-lift flex h-full w-full flex-col gap-3 rounded-2xl p-5">
                   <span
                     aria-hidden="true"
-                    className="inline-flex size-8 items-center justify-center rounded-full bg-mint-soft text-success"
+                    className="inline-flex size-8 items-center justify-center rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black"
                   >
                     <Icon name="Check" className="size-4 text-current" />
                   </span>

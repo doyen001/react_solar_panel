@@ -14,7 +14,7 @@ export function ServicesWhyChooseSection() {
     >
       <div className="mx-auto grid w-full max-w-[1226px] gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16 lg:px-8">
         <ServicesReveal className="flex flex-col gap-5 lg:sticky lg:top-28 lg:self-start">
-          <span className="inline-flex w-fit items-center rounded-full border border-svc-border bg-svc-accent-soft px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em] text-svc-accent-text">
+          <span className="svc-eyebrow-light inline-flex w-fit items-center rounded-full border px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em]">
             {whyChooseUs.eyebrow}
           </span>
           <h2
@@ -28,7 +28,7 @@ export function ServicesWhyChooseSection() {
           </p>
           <ServicesRippleLink
             href={whyChooseUs.cta.href}
-            className="svc-cta-primary mt-2 inline-flex h-12 w-fit items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-white"
+            className="svc-cta-primary mt-2 inline-flex h-12 w-fit items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
           >
             {whyChooseUs.cta.label}
             <Icon name="ArrowRight" className="size-[18px] text-current" />

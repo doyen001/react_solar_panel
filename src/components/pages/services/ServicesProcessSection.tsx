@@ -9,7 +9,7 @@ export function ServicesProcessSection() {
     <section
       id="process"
       aria-labelledby="services-process-title"
-      className="svc-anchor bg-svc-page-bg py-16 sm:py-20 lg:py-28"
+      className="svc-anchor svc-section-warm bg-svc-page-bg py-16 sm:py-20 lg:py-28"
     >
       <div className="mx-auto w-full max-w-[1226px] px-4 sm:px-6 lg:px-8">
         <ServicesSectionHeading
@@ -51,7 +51,7 @@ export function ServicesProcessSection() {
                     className="svc-step-marker-wrap relative flex size-10 shrink-0 items-center justify-center"
                   >
                     <span className="svc-step-pulse absolute inset-0 rounded-full" />
-                    <span className="svc-step-marker relative flex size-10 items-center justify-center rounded-full font-outfit text-[13px] font-bold text-white">
+                    <span className="svc-step-marker relative flex size-10 items-center justify-center rounded-full font-outfit text-[13px] font-bold text-warm-black">
                       {step.step}
                     </span>
                   </span>

@@ -10,7 +10,7 @@ export function ServicesFaqSection() {
     <section
       id="faq"
       aria-labelledby="services-faq-title"
-      className="svc-anchor bg-svc-page-bg py-16 sm:py-20 lg:py-28"
+      className="svc-anchor svc-section-warm bg-svc-page-bg py-16 sm:py-20 lg:py-28"
     >
       <div className="mx-auto w-full max-w-[880px] px-4 sm:px-6 lg:px-8">
         <ServicesSectionHeading

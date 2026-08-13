@@ -33,12 +33,12 @@ export function ServicesPricingSection() {
                   <article
                     className={`svc-card svc-lift relative flex h-full w-full flex-col gap-6 rounded-3xl p-7 sm:p-8 ${
                       isFeatured
-                        ? "border-svc-accent bg-svc-ink lg:-mt-4 lg:mb-4"
+                        ? "border-svc-gold bg-svc-ink lg:-mt-4 lg:mb-4"
                         : ""
                     }`}
                   >
                     {badge ? (
-                      <span className="absolute -top-3 left-8 inline-flex items-center rounded-full bg-svc-gold px-3 py-1 font-inter text-[11px] font-bold uppercase tracking-[0.1em] text-warm-black">
+                      <span className="absolute -top-3 left-8 inline-flex items-center rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber px-3 py-1 font-inter text-[11px] font-bold uppercase tracking-[0.1em] text-warm-black">
                         {badge}
                       </span>
                     ) : null}
@@ -84,8 +84,8 @@ export function ServicesPricingSection() {
                             aria-hidden="true"
                             className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full ${
                               isFeatured
-                                ? "bg-white/15 text-svc-accent"
-                                : "bg-mint-soft text-success"
+                                ? "bg-yellow-lemon/20 text-yellow-lemon"
+                                : "bg-svc-accent-soft text-svc-accent-text"
                             }`}
                           >
                             <Icon name="Check" className="size-3 text-current" />
@@ -107,7 +107,7 @@ export function ServicesPricingSection() {
                       ariaLabel={`${tier.ctaLabel} for the ${tier.name} package`}
                       className={
                         isFeatured
-                          ? "svc-cta-primary inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-white"
+                          ? "svc-cta-primary inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
                           : "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-svc-accent bg-white px-6 font-outfit text-base font-semibold text-svc-accent-text transition hover:bg-svc-accent-soft"
                       }
                     >

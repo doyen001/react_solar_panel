@@ -28,8 +28,8 @@ export function ServicesHeroSection() {
         <div className="mt-8 grid items-center gap-12 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:gap-14">
           <div className="flex flex-col gap-7">
             <ServicesReveal className="flex flex-col gap-6">
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-svc-dark-border bg-svc-glass px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em] text-svc-dark-body backdrop-blur-md">
-                <Icon name="Sparkles" className="size-3.5 text-svc-accent" />
+              <span className="svc-eyebrow-dark inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em] backdrop-blur-md">
+                <Icon name="Sparkles" className="size-3.5 text-yellow-lemon" />
                 {hero.badge}
               </span>
 
@@ -54,7 +54,7 @@ export function ServicesHeroSection() {
                 <ServicesRippleLink
                   href={hero.primaryCta.href}
                   onDark
-                  className="svc-cta-primary inline-flex h-13 min-w-[190px] items-center justify-center gap-2 rounded-xl px-7 font-outfit text-base font-semibold text-white"
+                  className="svc-cta-primary inline-flex h-13 min-w-[190px] items-center justify-center gap-2 rounded-xl px-7 font-outfit text-base font-semibold text-warm-black"
                 >
                   {hero.primaryCta.label}
                   <Icon name="ArrowRight" className="size-[18px] text-current" />
@@ -82,7 +82,7 @@ export function ServicesHeroSection() {
                     <dt className="order-2 font-inter text-[13px] font-medium leading-5 text-svc-dark-muted">
                       {stat.label}
                     </dt>
-                    <dd className="order-1 font-outfit text-[30px] font-bold leading-9 text-white sm:text-[34px]">
+                    <dd className="order-1 font-outfit text-[30px] font-bold leading-9 text-yellow-lemon sm:text-[34px]">
                       <ServicesCounter
                         value={stat.value}
                         suffix={stat.suffix}
@@ -108,7 +108,7 @@ export function ServicesHeroSection() {
                   <p className="font-outfit text-lg font-bold leading-6 text-white">
                     {card.title}
                   </p>
-                  <p className="font-inter text-[11px] font-medium uppercase tracking-[0.1em] text-svc-accent">
+                  <p className="font-inter text-[11px] font-medium uppercase tracking-[0.1em] text-yellow-lemon">
                     {card.unit}
                   </p>
                   <p className="font-inter text-[11px] leading-4 text-svc-dark-muted">

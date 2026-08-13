@@ -32,7 +32,7 @@ export function ServicesFinalCtaSection() {
             <ServicesRippleLink
               href={finalCta.primary.href}
               onDark
-              className="svc-cta-primary inline-flex h-13 min-w-[214px] items-center justify-center gap-2 rounded-xl px-7 font-outfit text-base font-semibold text-white"
+              className="svc-cta-primary inline-flex h-13 min-w-[214px] items-center justify-center gap-2 rounded-xl px-7 font-outfit text-base font-semibold text-warm-black"
             >
               {finalCta.primary.label}
               <Icon name="ArrowRight" className="size-[18px] text-current" />
@@ -61,7 +61,7 @@ export function ServicesFinalCtaSection() {
                     <>
                       <Icon
                         name={item.iconId}
-                        className="size-4 shrink-0 text-svc-accent"
+                        className="size-4 shrink-0 text-yellow-lemon"
                       />
                       <span className="truncate">{item.label}</span>
                     </>

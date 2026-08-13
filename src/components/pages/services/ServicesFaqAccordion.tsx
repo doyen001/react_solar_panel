@@ -24,7 +24,7 @@ export function ServicesFaqAccordion({ items }: ServicesFaqAccordionProps) {
           <div
             key={item.id}
             className={`svc-card overflow-hidden rounded-2xl ${
-              isOpen ? "border-svc-accent" : ""
+              isOpen ? "border-svc-accent-strong" : ""
             }`}
           >
             <h3 className="m-0">
@@ -43,7 +43,7 @@ export function ServicesFaqAccordion({ items }: ServicesFaqAccordionProps) {
                   aria-hidden="true"
                   className={`flex size-9 shrink-0 items-center justify-center rounded-full transition-[transform,background-color,color] duration-300 ${
                     isOpen
-                      ? "rotate-180 bg-svc-accent text-white"
+                      ? "rotate-180 bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-black"
                       : "bg-svc-surface-alt text-svc-accent-text"
                   }`}
                 >

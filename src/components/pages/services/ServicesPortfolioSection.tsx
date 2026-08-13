@@ -46,7 +46,7 @@ export function ServicesPortfolioSection() {
                     <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-svc-ink/60 px-3 py-1.5 font-inter text-[11px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur-md">
                       <span
                         aria-hidden="true"
-                        className="size-1.5 rounded-full bg-svc-accent"
+                        className="size-1.5 rounded-full bg-yellow-lemon"
                       />
                       {item.category}
                     </span>
