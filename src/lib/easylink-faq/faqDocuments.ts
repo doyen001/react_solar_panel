@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Document } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { buildServicesKnowledgeDocuments } from "./servicesKnowledge";
 
 const FAQ_PDF = path.join(process.cwd(), "data", "easylink-solar-faq.pdf");
 
@@ -50,20 +51,26 @@ async function loadPdfText(): Promise<string> {
   }
 }
 
-/**
- * Loads the Easylink FAQ PDF once, splits it with LangChain, caches {@link Document} chunks.
- */
-export async function getFaqDocuments(): Promise<Document[]> {
-  if (cachedDocs) return cachedDocs;
+async function loadPdfDocuments(): Promise<Document[]> {
   const raw = await loadPdfText();
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1200,
     chunkOverlap: 150,
     separators: ["\n\n", "\n", ". ", " ", ""],
   });
-  cachedDocs = await splitter.createDocuments([raw], [
-    { source: "easylink-solar-faq.pdf" },
+  return splitter.createDocuments([raw], [{ source: "easylink-solar-faq.pdf" }]);
+}
+
+/**
+ * Loads solar FAQ PDF chunks plus `/services` page knowledge, cached as {@link Document} chunks.
+ */
+export async function getFaqDocuments(): Promise<Document[]> {
+  if (cachedDocs) return cachedDocs;
+  const [pdfDocs, servicesDocs] = await Promise.all([
+    loadPdfDocuments(),
+    Promise.resolve(buildServicesKnowledgeDocuments()),
   ]);
+  cachedDocs = [...pdfDocs, ...servicesDocs];
   return cachedDocs;
 }
 

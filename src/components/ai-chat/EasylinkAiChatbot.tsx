@@ -12,7 +12,7 @@ type ChatTurn = { role: ChatRole; content: string };
 const WELCOME: ChatTurn = {
   role: "assistant",
   content:
-    "Hi — I'm the EasyLink Solar AI. Ask me about our platform, solar quotes, installers, or how we work.",
+    "Hi — I'm the EasyLink AI. Ask me about solar quotes, installers, our platform, or our website design and development services.",
 };
 
 export function EasylinkAiChatbot() {
@@ -206,7 +206,7 @@ export function EasylinkAiChatbot() {
                     void send();
                   }
                 }}
-                placeholder="Ask about EasyLink Solar…"
+                placeholder="Ask about solar or web design…"
                 className="font-inter max-h-28 min-h-[44px] flex-1 resize-y rounded-lg border border-warm-border bg-white px-3 py-2 text-sm text-navy-900 outline-none placeholder:text-warm-gray focus:border-brand-blue"
               />
               <button

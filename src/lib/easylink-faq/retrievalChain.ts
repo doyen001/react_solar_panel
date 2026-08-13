@@ -2,7 +2,7 @@ import { RunnableLambda } from "@langchain/core/runnables";
 import { retrieveFaqContext } from "./faqDocuments";
 
 /**
- * LangChain runnable: maps a user query to retrieved FAQ text (keyword overlap over chunked PDF).
+ * LangChain runnable: maps a user query to retrieved FAQ text (keyword overlap over PDF + services page).
  */
 export const retrieveFaqRunnable = RunnableLambda.from(
   async (input: { query: string }) => ({
