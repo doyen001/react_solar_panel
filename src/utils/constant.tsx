@@ -3907,81 +3907,94 @@ export const SERVICES_PAGE = {
     eyebrow: "Selected work",
     title: "Recent projects",
     subtitle:
-      "A representative sample across ecommerce, corporate, healthcare, hospitality, SaaS, and education.",
+      "Live builds across ecommerce, corporate, real estate, mobile UI, and service brands — designed for clarity, speed, and conversion.",
     viewLabel: "View Project",
     items: [
       {
-        id: "ecommerce",
-        variant: "storefront" as const,
+        id: "intertop",
+        featured: true,
+        imageSrc: "/images/services/portfolio/intertop-ecommerce.jpg",
         category: "Ecommerce Website",
-        title: "Northline Supply Co.",
+        title: "Intertop",
         summary:
-          "Headless storefront with a rebuilt checkout that cut cart abandonment by a third.",
-        technologies: ["Next.js", "Shopify", "Tailwind CSS", "Vercel"],
+          "Multi-brand footwear marketplace with campaign banners, brand carousel, and product grids tuned for high-volume retail traffic.",
+        technologies: ["React", "Next.js", "Tailwind CSS", "Headless CMS"],
         href: "/contact-us",
         imageAlt:
-          "Ecommerce website project mockup showing a product grid and checkout screen",
+          "Intertop ecommerce website showing a shopping day promotion, brand logos, and product grids",
       },
       {
-        id: "corporate",
-        variant: "corporate" as const,
-        category: "Corporate Website",
-        title: "Arden Group",
+        id: "carlamp",
+        imageSrc: "/images/services/portfolio/carlamp-ecommerce.jpg",
+        category: "Ecommerce Website",
+        title: "Carlamp",
         summary:
-          "Nine-market corporate site with editor workflows and per-region content governance.",
-        technologies: ["React", "TypeScript", "WordPress", "AWS"],
+          "Automotive LED lighting store with product series pages, vehicle fitment flows, and technical specification layouts.",
+        technologies: ["WordPress", "WooCommerce", "PHP", "Custom Theme"],
         href: "/contact-us",
         imageAlt:
-          "Corporate website project mockup showing a multi-region landing page layout",
+          "Carlamp automotive lighting ecommerce site with product series and LED bulb catalogues",
       },
       {
-        id: "healthcare",
-        variant: "healthcare" as const,
-        category: "Healthcare Website",
-        title: "Meadowbrook Clinics",
+        id: "dompoint",
+        imageSrc: "/images/services/portfolio/dompoint-real-estate.png",
+        category: "Real Estate Landing",
+        title: "DomPoint",
         summary:
-          "Patient-facing booking site meeting WCAG 2.2 AA with online appointment intake.",
-        technologies: ["Next.js", "Node.js", "PostgreSQL", "Cloudflare"],
+          "Kyiv real-estate agency landing page with property listings, lead capture, and a mobile-first responsive layout.",
+        technologies: ["WordPress", "Elementor", "Responsive UI", "Lead Forms"],
         href: "/contact-us",
         imageAlt:
-          "Healthcare website project mockup showing an appointment booking interface",
+          "DomPoint real estate agency landing page with desktop and mobile mockups",
+      },
+      // {
+      //   id: "fitch",
+      //   imageSrc: "/images/services/portfolio/fitch-corporate.png",
+      //   category: "Corporate Website",
+      //   title: "Fitch Ratings",
+      //   summary:
+      //     "Global financial intelligence portal with editorial grids, video hubs, podcast cards, and an events timeline.",
+      //   technologies: ["React", "TypeScript", "Content Platform", "AWS"],
+      //   href: "/contact-us",
+      //   imageAlt:
+      //     "Fitch Ratings corporate website with insights, videos, podcasts, and events sections",
+      // },
+      {
+        id: "sushi-app",
+        imageSrc: "/images/services/portfolio/sushi-mobile-app.png",
+        category: "Mobile App UI",
+        title: "Sushi Ordering App",
+        summary:
+          "Premium dark-mode food ordering experience with discovery feed, rich product detail, and streamlined checkout.",
+        technologies: ["Figma", "React Native", "UI/UX Design", "Design System"],
+        href: "/contact-us",
+        imageAlt:
+          "Sushi mobile app UI mockups showing splash, menu discovery, and product detail screens",
       },
       {
-        id: "restaurant",
-        variant: "restaurant" as const,
-        category: "Restaurant Website",
-        title: "Ember & Oak",
+        id: "alveneis",
+        imageSrc: "/images/services/portfolio/wedding.jpg",
+        category: "Wedding Services",
+        title: "Alveneis",
         summary:
-          "Menu-led site with table reservations and a sub-second first contentful paint on 4G.",
-        technologies: ["Astro", "Tailwind CSS", "Firebase", "Netlify"],
+          "Luxury wedding agency site with gold-accent brand storytelling, service showcases, and team profiles.",
+        technologies: ["WordPress", "Custom Theme", "SEO", "Photography Layout"],
         href: "/contact-us",
         imageAlt:
-          "Restaurant website project mockup showing a menu page and reservation form",
+          "Alveneis wedding services website with gold accents and service sections",
       },
-      {
-        id: "saas",
-        variant: "dashboard" as const,
-        category: "SaaS Dashboard",
-        title: "Pulseboard Analytics",
-        summary:
-          "Multi-tenant analytics dashboard rendering 50k-row datasets without blocking the UI.",
-        technologies: ["React", "TypeScript", "Node.js", "MongoDB"],
-        href: "/contact-us",
-        imageAlt:
-          "SaaS dashboard project mockup showing charts and a data table",
-      },
-      {
-        id: "education",
-        variant: "education" as const,
-        category: "Education Platform",
-        title: "Latitude Learning",
-        summary:
-          "Course delivery platform with video streaming, progress tracking, and assessments.",
-        technologies: ["Next.js", "Laravel", "MySQL", "Docker"],
-        href: "/contact-us",
-        imageAlt:
-          "Education platform project mockup showing a course player and progress tracker",
-      },
+      // {
+      //   id: "kavkaz",
+      //   imageSrc: "/images/services/portfolio/kavkaz-shooting-club.png",
+      //   category: "Sports & Recreation",
+      //   title: "Kavkaz Shooting Club",
+      //   summary:
+      //     "Tactical shooting club website with course booking, news, announcements, and an event photo gallery.",
+      //   technologies: ["WordPress", "Custom Theme", "Booking Flow", "Gallery"],
+      //   href: "/contact-us",
+      //   imageAlt:
+      //     "Kavkaz shooting club website with training courses and event photo gallery",
+      // },
     ],
   },
   techStack: {
@@ -4257,7 +4270,6 @@ export type ServicesReason = (typeof SERVICES_PAGE.whyChooseUs.items)[number];
 export type ServicesProcessStep = (typeof SERVICES_PAGE.process.steps)[number];
 export type ServicesPortfolioItem =
   (typeof SERVICES_PAGE.portfolio.items)[number];
-export type ServicesPortfolioVariant = ServicesPortfolioItem["variant"];
 export type ServicesPricingTier = (typeof SERVICES_PAGE.pricing.tiers)[number];
 export type ServicesFaqEntry = (typeof SERVICES_PAGE.faq.items)[number];
 export type ServicesTestimonial =

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ServicesPortfolioThumb } from "@/components/pages/services/ServicesPortfolioThumb";
+import { ServicesPortfolioImage } from "@/components/pages/services/ServicesPortfolioImage";
 import { ServicesReveal } from "@/components/pages/services/ServicesReveal";
 import { ServicesSectionHeading } from "@/components/pages/services/ServicesSectionHeading";
 import Icon from "@/components/ui/Icons";
@@ -24,71 +24,78 @@ export function ServicesPortfolioSection() {
         />
 
         <ul className="mt-12 grid gap-7 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
-          {portfolio.items.map((item, index) => (
-            <li key={item.id} className="flex">
-              <ServicesReveal
-                delayMs={Math.min(index, 5) * 60}
-                className="flex w-full"
+          {portfolio.items.map((item, index) => {
+            const featured = "featured" in item && item.featured === true;
+
+            return (
+              <li
+                key={item.id}
+                className={`flex ${featured ? "sm:col-span-2 lg:col-span-2" : ""}`}
               >
-                <article className="svc-card svc-lift svc-scale flex h-full w-full flex-col overflow-hidden rounded-2xl">
-                  <div className="relative aspect-16/10 overflow-hidden bg-svc-ink">
-                    <ServicesPortfolioThumb
-                      variant={item.variant}
-                      label={item.imageAlt}
-                    />
+                <ServicesReveal
+                  delayMs={Math.min(index, 6) * 55}
+                  className="flex w-full"
+                >
+                  <article className="group svc-card svc-lift svc-scale flex h-full w-full flex-col overflow-hidden rounded-2xl">
+                    <div className="relative overflow-hidden bg-svc-ink">
+                      <ServicesPortfolioImage
+                        src={item.imageSrc}
+                        alt={item.imageAlt}
+                        featured={featured}
+                      />
 
-                    {/* Inner hairline reads as glass over the artwork rather than a hard crop. */}
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-0 rounded-t-2xl ring-1 ring-inset ring-white/12"
-                    />
-
-                    <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-svc-ink/60 px-3 py-1.5 font-inter text-[11px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur-md">
                       <span
                         aria-hidden="true"
-                        className="size-1.5 rounded-full bg-yellow-lemon"
+                        className="pointer-events-none absolute inset-0 rounded-t-2xl ring-1 ring-inset ring-white/12"
                       />
-                      {item.category}
-                    </span>
-                  </div>
 
-                  <div className="flex flex-1 flex-col gap-4 p-6">
-                    <div className="flex flex-col gap-2">
-                      <h3 className="font-outfit text-lg font-semibold leading-7 text-svc-ink">
-                        {item.title}
-                      </h3>
-                      <p className="font-dm-sans text-[15px] leading-7 text-svc-body">
-                        {item.summary}
-                      </p>
+                      <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-svc-ink/55 px-3 py-1.5 font-inter text-[11px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur-md">
+                        <span
+                          aria-hidden="true"
+                          className="size-1.5 rounded-full bg-yellow-lemon"
+                        />
+                        {item.category}
+                      </span>
                     </div>
 
-                    <ul
-                      aria-label={`Technologies used on ${item.title}`}
-                      className="flex flex-wrap gap-2"
-                    >
-                      {item.technologies.map((tech) => (
-                        <li
-                          key={tech}
-                          className="rounded-md border border-svc-border bg-svc-surface-alt px-2.5 py-1 font-inter text-[11px] font-medium text-svc-muted"
-                        >
-                          {tech}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="flex flex-1 flex-col gap-4 p-6 sm:p-7">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="font-outfit text-lg font-semibold leading-7 text-svc-ink sm:text-xl">
+                          {item.title}
+                        </h3>
+                        <p className="font-dm-sans text-[15px] leading-7 text-svc-body">
+                          {item.summary}
+                        </p>
+                      </div>
 
-                    <Link
-                      href={item.href}
-                      aria-label={`${portfolio.viewLabel}: ${item.title}`}
-                      className="svc-focusable mt-auto inline-flex w-fit items-center gap-1.5 rounded-md font-inter text-sm font-semibold text-svc-accent-text transition hover:gap-2.5 hover:text-svc-ink"
-                    >
-                      {portfolio.viewLabel}
-                      <Icon name="ArrowUpRight" className="size-4 text-current" />
-                    </Link>
-                  </div>
-                </article>
-              </ServicesReveal>
-            </li>
-          ))}
+                      <ul
+                        aria-label={`Technologies used on ${item.title}`}
+                        className="flex flex-wrap gap-2"
+                      >
+                        {item.technologies.map((tech) => (
+                          <li
+                            key={tech}
+                            className="rounded-md border border-svc-border bg-svc-surface-alt px-2.5 py-1 font-inter text-[11px] font-medium text-svc-muted"
+                          >
+                            {tech}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <Link
+                        href={item.href}
+                        aria-label={`${portfolio.viewLabel}: ${item.title}`}
+                        className="svc-focusable mt-auto inline-flex w-fit items-center gap-1.5 rounded-md font-inter text-sm font-semibold text-svc-accent-text transition hover:gap-2.5 hover:text-svc-ink"
+                      >
+                        {portfolio.viewLabel}
+                        <Icon name="ArrowUpRight" className="size-4 text-current" />
+                      </Link>
+                    </div>
+                  </article>
+                </ServicesReveal>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>
