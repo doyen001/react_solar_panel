@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { ComposeChannel } from "@/components/customer/messages/ComposeChannelBar";
+import { useMemo } from "react";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
 import { ChatThreadMessageRow } from "@/components/customer/messages/ChatThreadMessageRow";
 import { LiveKitCallOverlay } from "@/components/messages/LiveKitCallOverlay";
@@ -13,15 +12,6 @@ import {
 import { useInstallerHomeConversation } from "@/hooks/useInstallerHomeConversation";
 import { fetchWithInstallerSession } from "@/lib/installers/installer-fetch-client";
 import { useAppSelector } from "@/lib/store/hooks";
-
-const CHANNEL_LABEL: Record<ComposeChannel, string> = {
-  ai: "AI Compose",
-  email: "Email",
-  sms: "SMS",
-  whatsapp: "WhatsApp",
-  facebook: "Facebook",
-  other: "Others",
-};
 
 type Props = {
   customerId: string | null;
@@ -39,7 +29,6 @@ function displayName(
 
 export function InstallerHomeCustomerCommunication({ customerId }: Props) {
   const user = useAppSelector((s) => s.installerAuth.user);
-  const [channel, setChannel] = useState<ComposeChannel>("facebook");
 
   const selectedCustomerId =
     customerId && !customerId.startsWith("fallback-") ? customerId : null;
@@ -112,15 +101,9 @@ export function InstallerHomeCustomerCommunication({ customerId }: Props) {
         onPeerJoined={chat.voiceCall.onPeerJoined}
         registerMediaControls={chat.voiceCall.registerMediaControls}
       />
-      <div className="flex min-h-[43.06px] items-center justify-between gap-4 border-l-[2.315px] border-yellow-lemon bg-linear-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[19.966px] pr-[17.65px]">
+      <div className="flex min-h-[43.06px] items-center border-l-[2.315px] border-yellow-lemon bg-linear-to-b from-[rgba(245,159,10,0.15)] to-transparent pl-[19.966px] pr-[17.65px]">
         <span className="font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.3313px] text-warm-ink">
           Customer Communication
-        </span>
-        <span
-          className="inline-flex h-[23.293px] shrink-0 items-center rounded-full border-[1.157px] border-brand-blue/20 bg-brand-blue/10 px-[11px] font-dm-sans text-[11.042px] font-semibold leading-[16.563px] text-brand-blue"
-          style={{ fontVariationSettings: "'opsz' 14" }}
-        >
-          {CHANNEL_LABEL[channel]}
         </span>
       </div>
 
@@ -166,8 +149,6 @@ export function InstallerHomeCustomerCommunication({ customerId }: Props) {
 
       <div className="border-t-[1.157px] border-warm-border px-[16.97px] pb-[8px] pt-0">
         <MessageRichComposer
-          channel={channel}
-          onChannelChange={setChannel}
           onSend={chat.sendText}
           sending={chat.sending}
           disabled={composerDisabled}

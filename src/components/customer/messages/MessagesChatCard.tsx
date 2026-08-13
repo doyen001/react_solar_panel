@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
 import { ChatThreadHeader } from "./ChatThreadHeader";
-import type { ComposeChannel } from "./ComposeChannelBar";
 import { DEMO_MESSAGES_BY_CONTACT } from "./messagesDemoData";
 import { MessageRichComposer } from "./MessageRichComposer";
 import { MessageThreadRow } from "./MessageThreadRow";
@@ -21,8 +20,6 @@ export function MessagesChatCard({
   userLastName,
   contact,
 }: Props) {
-  const [channel, setChannel] = useState<ComposeChannel>("ai");
-
   const messages = DEMO_MESSAGES_BY_CONTACT[contact.id] ?? [];
   const threadHeading = `Conversation with ${contact.displayName.replace(/\s*\([^)]*\)\s*$/, "").trim()}`.toUpperCase();
 
@@ -71,10 +68,7 @@ export function MessagesChatCard({
       </div>
 
       <div className="border-t border-warm-border px-4 pb-4 pt-3">
-        <MessageRichComposer
-          channel={channel}
-          onChannelChange={setChannel}
-        />
+        <MessageRichComposer />
       </div>
     </section>
   );

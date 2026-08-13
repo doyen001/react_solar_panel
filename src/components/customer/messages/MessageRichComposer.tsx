@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { toast } from "react-toastify";
-import type { ComposeChannel } from "./ComposeChannelBar";
-import { ComposeChannelBar } from "./ComposeChannelBar";
 import Icon from "@/components/ui/Icons";
 import {
   insertAttachmentMarkdown,
@@ -59,8 +57,6 @@ function countWords(text: string): number {
 
 type Props = {
   placeholder?: string;
-  channel: ComposeChannel;
-  onChannelChange: (c: ComposeChannel) => void;
   onSend?: (text: string) => void | Promise<void>;
   sending?: boolean;
   disabled?: boolean;
@@ -73,8 +69,6 @@ type Props = {
 
 export function MessageRichComposer({
   placeholder = "Type your message...",
-  channel,
-  onChannelChange,
   onSend,
   sending = false,
   disabled = false,
@@ -272,8 +266,6 @@ export function MessageRichComposer({
         tabIndex={-1}
         onChange={onPickAttachment}
       />
-
-      <ComposeChannelBar value={channel} onChange={onChannelChange} />
 
       <label className="sr-only" htmlFor="customer-message-input">
         Message

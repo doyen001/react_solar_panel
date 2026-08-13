@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ConversationSwitcher } from "@/components/customer/messages/ConversationSwitcher";
-import type { ComposeChannel } from "@/components/customer/messages/ComposeChannelBar";
 import { ChatThreadHeader } from "@/components/customer/messages/ChatThreadHeader";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
 import { ChatThreadMessageRow } from "@/components/customer/messages/ChatThreadMessageRow";
@@ -37,8 +36,6 @@ export function PortalRealtimeMessagesPanel({
   sessionFetch,
   user,
 }: Props) {
-  const [channel, setChannel] = useState<ComposeChannel>("ai");
-
   const chat = useRealtimeChat(portal, sessionFetch, user);
 
   const userDisplayName = useMemo(() => displayName(user), [user]);
@@ -157,8 +154,6 @@ export function PortalRealtimeMessagesPanel({
 
         <div className="shrink-0 border-t customer-cream-card-border px-4 pb-4 pt-3">
           <MessageRichComposer
-            channel={channel}
-            onChannelChange={setChannel}
             onSend={chat.sendText}
             sending={chat.sending}
             disabled={!chat.conversationReady}
