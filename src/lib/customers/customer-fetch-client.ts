@@ -1,9 +1,11 @@
 "use client";
 
+import { navigateWithSessionRefresh } from "@/lib/auth/app-router-navigation";
 import { store } from "@/lib/store/store";
 import { clearUser } from "@/lib/store/customerAuthSlice";
 
 let refreshInFlight: Promise<Response> | null = null;
+let logoutRedirectInFlight: Promise<void> | null = null;
 
 /** Single in-flight refresh so parallel 401s do not spam `/api/customers/refresh`. */
 function getRefreshPromise(): Promise<Response> {
@@ -18,21 +20,44 @@ function getRefreshPromise(): Promise<Response> {
   return refreshInFlight;
 }
 
-function logoutClientAndRedirect() {
-  store.dispatch(clearUser());
-  if (typeof window !== "undefined") {
-    const path = `${window.location.pathname}${window.location.search}`;
-    const url = new URL("/customers/auth", window.location.origin);
-    if (path.startsWith("/customers") && !path.startsWith("/customers/auth")) {
-      url.searchParams.set("from", path);
-    }
-    window.location.assign(url.toString());
+function customerAuthHref(fromPath?: string): string {
+  const path =
+    fromPath ??
+    (typeof window !== "undefined"
+      ? `${window.location.pathname}${window.location.search}`
+      : "");
+  if (path.startsWith("/customers") && !path.startsWith("/customers/auth")) {
+    return `/customers/auth?from=${encodeURIComponent(path)}`;
   }
+  return "/customers/auth";
+}
+
+async function logoutClientAndRedirect() {
+  if (logoutRedirectInFlight) {
+    await logoutRedirectInFlight;
+    return;
+  }
+
+  logoutRedirectInFlight = (async () => {
+    store.dispatch(clearUser());
+    await fetch("/api/customers/logout", {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
+
+    if (typeof window !== "undefined") {
+      navigateWithSessionRefresh(customerAuthHref());
+    }
+  })().finally(() => {
+    logoutRedirectInFlight = null;
+  });
+
+  await logoutRedirectInFlight;
 }
 
 /**
  * Fetch with credentials; on 401, tries one refresh via `customer_refresh_token`, then retries once.
- * If refresh fails (expired/invalid refresh token), clears Redux user and redirects to sign-in.
+ * If refresh fails (expired/invalid refresh token), clears Redux + httpOnly cookies and redirects to sign-in.
  */
 export async function fetchWithCustomerSession(
   input: RequestInfo | URL,
@@ -50,13 +75,13 @@ export async function fetchWithCustomerSession(
 
   const refreshRes = await getRefreshPromise();
   if (!refreshRes.ok) {
-    logoutClientAndRedirect();
+    await logoutClientAndRedirect();
     return refreshRes;
   }
 
   const second = await fetch(input, merged);
   if (second.status === 401) {
-    logoutClientAndRedirect();
+    await logoutClientAndRedirect();
   }
   return second;
 }

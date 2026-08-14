@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { Provider } from "react-redux";
+import { AppRouterBridge } from "@/components/providers/AppRouterBridge";
 import { hydrateAuthFromSessionStorage, store } from "@/lib/store/store";
 
 export function ReduxProvider({ children }: { children: React.ReactNode }) {
@@ -13,5 +14,9 @@ export function ReduxProvider({ children }: { children: React.ReactNode }) {
     hydrateAuthFromSessionStorage();
   }, []);
 
-  return <Provider store={store}>{children}</Provider>;
+  return (
+    <Provider store={store}>
+      <AppRouterBridge>{children}</AppRouterBridge>
+    </Provider>
+  );
 }

@@ -1,9 +1,11 @@
 "use client";
 
+import { navigateWithSessionRefresh } from "@/lib/auth/app-router-navigation";
 import { store } from "@/lib/store/store";
 import { clearInstallerUser } from "@/lib/store/installerAuthSlice";
 
 let refreshInFlight: Promise<Response> | null = null;
+let logoutRedirectInFlight: Promise<void> | null = null;
 
 function getRefreshPromise(): Promise<Response> {
   if (!refreshInFlight) {
@@ -17,20 +19,42 @@ function getRefreshPromise(): Promise<Response> {
   return refreshInFlight;
 }
 
-function logoutClientAndRedirect() {
-  store.dispatch(clearInstallerUser());
-  if (typeof window !== "undefined") {
-    const path = `${window.location.pathname}${window.location.search}`;
-    const url = new URL("/installers/auth", window.location.origin);
-    if (
-      (path.startsWith("/installers") &&
-        !path.startsWith("/installers/auth")) ||
-      path.startsWith("/master")
-    ) {
-      url.searchParams.set("from", path);
-    }
-    window.location.assign(url.toString());
+function installerAuthHref(fromPath?: string): string {
+  const path =
+    fromPath ??
+    (typeof window !== "undefined"
+      ? `${window.location.pathname}${window.location.search}`
+      : "");
+  if (
+    (path.startsWith("/installers") && !path.startsWith("/installers/auth")) ||
+    path.startsWith("/master")
+  ) {
+    return `/installers/auth?from=${encodeURIComponent(path)}`;
   }
+  return "/installers/auth";
+}
+
+async function logoutClientAndRedirect() {
+  if (logoutRedirectInFlight) {
+    await logoutRedirectInFlight;
+    return;
+  }
+
+  logoutRedirectInFlight = (async () => {
+    store.dispatch(clearInstallerUser());
+    await fetch("/api/installers/logout", {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
+
+    if (typeof window !== "undefined") {
+      navigateWithSessionRefresh(installerAuthHref());
+    }
+  })().finally(() => {
+    logoutRedirectInFlight = null;
+  });
+
+  await logoutRedirectInFlight;
 }
 
 /** Fetch with credentials; refresh installer session once on 401 (same pattern as customer). */
@@ -50,13 +74,13 @@ export async function fetchWithInstallerSession(
 
   const refreshRes = await getRefreshPromise();
   if (!refreshRes.ok) {
-    logoutClientAndRedirect();
+    await logoutClientAndRedirect();
     return refreshRes;
   }
 
   const second = await fetch(input, merged);
   if (second.status === 401) {
-    logoutClientAndRedirect();
+    await logoutClientAndRedirect();
   }
   return second;
 }

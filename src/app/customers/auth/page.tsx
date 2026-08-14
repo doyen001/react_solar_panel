@@ -26,6 +26,7 @@ import {
   setUser,
   type CustomerUser,
 } from "@/lib/store/customerAuthSlice";
+import { navigateWithSessionRefresh } from "@/lib/auth/app-router-navigation";
 import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
@@ -100,7 +101,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
             {
               autoClose: 8000,
               onClick: () => {
-                window.location.assign(mismatch.suggested!.url);
+                navigateWithSessionRefresh(mismatch.suggested!.url);
               },
             },
           );
@@ -126,8 +127,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       const target = safeCustomerFrom(searchParams.get("from"));
-      /** Hard navigation so httpOnly session cookies are stored before the next document / RSC request. */
-      window.location.assign(target);
+      navigateWithSessionRefresh(target);
     } catch {
       toast.error("Unable to reach the login service. Please try again.");
     }
