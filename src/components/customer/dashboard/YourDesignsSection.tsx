@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
+import { CustomDesignImageAction } from "./CustomDesignImageAction";
 import { DesignOptionCard } from "./DesignOptionCard";
 import {
   formatOptionPrice,
@@ -90,31 +90,7 @@ export function YourDesignsSection({
                 outputKwh: formatOutput(opt.annualOutputKwh),
                 imageSrc: opt.imageSrc,
               }}
-              footer={
-                opt.isCustom ? (
-                  <div className="pt-2">
-                    {opt.editable ? (
-                      <Link
-                        href="/designs"
-                        className="font-dm-sans text-[11px] font-bold uppercase tracking-wide text-warm-black underline"
-                      >
-                        Edit in design builder
-                      </Link>
-                    ) : opt.designId ? (
-                      <span className="font-dm-sans text-[11px] text-warm-black/70">
-                        Approved — no longer editable
-                      </span>
-                    ) : (
-                      <Link
-                        href="/designs"
-                        className="font-dm-sans text-[11px] font-bold uppercase tracking-wide text-warm-black underline"
-                      >
-                        Build your own design
-                      </Link>
-                    )}
-                  </div>
-                ) : null
-              }
+              imageAction={<CustomDesignImageAction option={opt} />}
             />
           ))}
         </div>
