@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CustomerDashboardColumns } from "@/components/customer/dashboard/CustomerDashboardColumns";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
 import { DashboardKpiCard } from "@/components/customer/dashboard/DashboardKpiCard";
 import { DashboardWelcomeBanner } from "@/components/customer/dashboard/DashboardWelcomeBanner";
@@ -127,34 +128,37 @@ export default function CustomerDashboardPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.48fr)] xl:items-start">
-          <YourDesignsSection
-            options={designOptions?.options ?? []}
-            selectedKey={designOptions?.selectedKey ?? null}
-            locked={designOptions?.locked ?? false}
-            loading={optionsLoading}
-            savingKey={savingKey}
-            onSelect={(key) => void handleSelectDesign(key)}
-          />
-
-          <ProjectTimeline
-            activeStepIndex={timelineActiveIndex}
-            steps={timelineSteps}
-            loading={journeyLoading}
-            meta={
-              journey
-                ? `${journey.completedCount} of ${journey.totalCount} done`
-                : undefined
-            }
-            footer={
-              <TimelineInstallerCard
-                initials={dashboard.installer.initials}
-                companyName={dashboard.installer.companyName}
-                subtitle={dashboard.installer.subtitle}
-              />
-            }
-          />
-        </div>
+        <CustomerDashboardColumns
+          main={
+            <YourDesignsSection
+              options={designOptions?.options ?? []}
+              selectedKey={designOptions?.selectedKey ?? null}
+              locked={designOptions?.locked ?? false}
+              loading={optionsLoading}
+              savingKey={savingKey}
+              onSelect={(key) => void handleSelectDesign(key)}
+            />
+          }
+          aside={
+            <ProjectTimeline
+              activeStepIndex={timelineActiveIndex}
+              steps={timelineSteps}
+              loading={journeyLoading}
+              meta={
+                journey
+                  ? `${journey.completedCount} of ${journey.totalCount} done`
+                  : undefined
+              }
+              footer={
+                <TimelineInstallerCard
+                  initials={dashboard.installer.initials}
+                  companyName={dashboard.installer.companyName}
+                  subtitle={dashboard.installer.subtitle}
+                />
+              }
+            />
+          }
+        />
       </main>
     </div>
   );

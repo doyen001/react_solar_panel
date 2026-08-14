@@ -1679,6 +1679,29 @@ button {
   background-color: var(--color-customer-draft-badge-bg);
   color: var(--color-customer-draft-badge-text);
 }
+.customer-panel-scroll {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.06);
+}
+.customer-panel-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.customer-panel-scroll::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.customer-panel-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.3);
+}
+.customer-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+.customer-skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: rgb(255 255 255 / 0.1);
+}
 .customer-bubble-incoming {
   background-color: var(--color-customer-bubble-incoming);
 }

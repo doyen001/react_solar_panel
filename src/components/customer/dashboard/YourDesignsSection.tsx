@@ -1,6 +1,10 @@
 "use client";
 
 import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
+import {
+  CustomerSectionMetaSkeleton,
+  DesignOptionsGridSkeleton,
+} from "./CustomerDashboardSkeletons";
 import { CustomDesignImageAction } from "./CustomDesignImageAction";
 import { DesignOptionCard } from "./DesignOptionCard";
 import {
@@ -43,15 +47,18 @@ export function YourDesignsSection({
   return (
     <section
       id="your-designs"
+      aria-busy={loading}
       className="customer-panel-bg customer-panel-border-accent overflow-hidden rounded-[14px] border"
     >
       <CustomerSectionHeader
         variant="dark"
         title="Your System Designs"
         meta={
-          loading
-            ? "Loading…"
-            : `${options.length} options · ${selectedCount} selected`
+          loading ? (
+            <CustomerSectionMetaSkeleton />
+          ) : (
+            `${options.length} options · ${selectedCount} selected`
+          )
         }
       />
 
@@ -63,9 +70,7 @@ export function YourDesignsSection({
       ) : null}
 
       {loading ? (
-        <p className="p-4 font-dm-sans text-sm customer-text-muted">
-          Loading your design options…
-        </p>
+        <DesignOptionsGridSkeleton />
       ) : options.length === 0 ? (
         <p className="p-4 font-dm-sans text-sm customer-text-muted">
           No design options are available yet.

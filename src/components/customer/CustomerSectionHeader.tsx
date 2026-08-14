@@ -40,14 +40,14 @@ export function CustomerSectionHeader({
         </h2>
       </div>
       {meta ? (
-        <p
+        <div
           className={`shrink-0 font-dm-sans text-[11px] font-normal leading-[16.5px] ${
             isDark ? "customer-text-subtle" : "text-warm-gray"
           }`}
           style={{ fontVariationSettings: "'opsz' 9" }}
         >
           {meta}
-        </p>
+        </div>
       ) : null}
       {action ? (
         <div className="flex shrink-0 items-center">{action}</div>
