@@ -24,23 +24,23 @@ export function DesignOptionCard({
 }: Props) {
   return (
     <div
-      className={`group w-full overflow-hidden rounded-[14px] text-left transition-[box-shadow,border-color] ${
+      className={`group flex h-full w-full flex-col overflow-hidden rounded-[14px] border-[3px] text-left transition-[box-shadow,border-color] ${
         selected
-          ? "border-[3px] border-orange-amber"
-          : "customer-card-border border hover:border-customer-border-strong"
+          ? "border-orange-amber"
+          : "customer-card-border hover:border-customer-border-strong"
       }`}
     >
-      <div className="relative">
+      <div className="relative flex min-h-0 flex-1 flex-col">
         <button
           type="button"
           onClick={onSelect}
           disabled={disabled}
           aria-pressed={selected}
-          className={`block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-amber focus-visible:ring-offset-2 focus-visible:ring-offset-customer-page-bg ${
+          className={`flex min-h-0 w-full flex-1 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-amber focus-visible:ring-offset-2 focus-visible:ring-offset-customer-page-bg ${
             disabled ? "cursor-not-allowed opacity-70" : ""
           }`}
         >
-          <div className="bg-customer-design-image-bg">
+          <div className="shrink-0 bg-customer-design-image-bg">
             <div className="relative aspect-[436/80] w-full">
               <Image
                 src={option.imageSrc}
@@ -53,7 +53,7 @@ export function DesignOptionCard({
             </div>
           </div>
 
-          <div className="customer-gradient-accent-h px-4 pb-3 pt-3">
+          <div className="customer-gradient-accent-h flex min-h-0 flex-1 flex-col px-4 pb-3 pt-3">
             <div className="flex items-start justify-between gap-2">
               <p className="font-inter text-sm font-semibold leading-[21px] tracking-[-0.15px] text-warm-ink">
                 {option.title}
