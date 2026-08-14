@@ -654,6 +654,11 @@ body {
   background-color: var(--color-navy-800);
 }
 
+.solar-maint-hero-root--below-header {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
 .solar-maint-hero-photo {
   position: absolute;
   inset: 0;
@@ -1697,6 +1702,25 @@ button {
 }
 .customer-panel-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.45);
+}
+.customer-cream-scroll {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(120 113 108 / 0.35) rgb(120 113 108 / 0.12);
+}
+.customer-cream-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.customer-cream-scroll::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  background: rgb(120 113 108 / 0.08);
+}
+.customer-cream-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgb(120 113 108 / 0.28);
+}
+.customer-cream-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(120 113 108 / 0.4);
 }
 .customer-skeleton {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;

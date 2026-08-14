@@ -18,7 +18,7 @@ export function CustomerPanelCard({
 }: Props) {
   return (
     <section
-      className={`customer-cream-card-bg customer-cream-card-border flex min-h-0 flex-col overflow-hidden rounded-[10px] border ${className}`}
+      className={`customer-cream-card-bg customer-cream-card-border flex h-full min-h-0 flex-col overflow-hidden rounded-[10px] border ${className}`}
     >
       <CustomerSectionHeader
         variant="cream"

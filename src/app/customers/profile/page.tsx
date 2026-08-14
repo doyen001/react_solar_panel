@@ -74,7 +74,7 @@ export default function CustomerProfilePage() {
       />
 
       <main className="customer-panel-bg flex-1 px-4 py-5 md:px-5">
-        <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:items-start">
+        <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
           <CustomerPanelCard
             title="My Profile"
             icon={
@@ -258,86 +258,98 @@ export default function CustomerProfilePage() {
               />
             }
           >
-            <div className="flex flex-col gap-3">
-              <PreferenceToggle
-                id="pref-email"
-                label="Email Notifications"
-                checked={prefs.emailNotifications}
-                onChange={(v) =>
-                  setPrefs((p) => ({ ...p, emailNotifications: v }))
-                }
-              />
-              <PreferenceToggle
-                id="pref-sms"
-                label="SMS Alerts"
-                checked={prefs.smsAlerts}
-                onChange={(v) => setPrefs((p) => ({ ...p, smsAlerts: v }))}
-              />
-              <PreferenceToggle
-                id="pref-project"
-                label="Project Updates"
-                checked={prefs.projectUpdates}
-                onChange={(v) =>
-                  setPrefs((p) => ({ ...p, projectUpdates: v }))
-                }
-              />
-              <PreferenceToggle
-                id="pref-marketing"
-                label="Marketing Emails"
-                checked={prefs.marketingEmails}
-                onChange={(v) =>
-                  setPrefs((p) => ({ ...p, marketingEmails: v }))
-                }
-              />
-              <PreferenceToggle
-                id="pref-product"
-                label="Product Alerts"
-                checked={prefs.productAlerts}
-                onChange={(v) =>
-                  setPrefs((p) => ({ ...p, productAlerts: v }))
-                }
-              />
-            </div>
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex shrink-0 flex-col gap-3">
+                <PreferenceToggle
+                  id="pref-email"
+                  label="Email Notifications"
+                  checked={prefs.emailNotifications}
+                  onChange={(v) =>
+                    setPrefs((p) => ({ ...p, emailNotifications: v }))
+                  }
+                />
+                <PreferenceToggle
+                  id="pref-sms"
+                  label="SMS Alerts"
+                  checked={prefs.smsAlerts}
+                  onChange={(v) => setPrefs((p) => ({ ...p, smsAlerts: v }))}
+                />
+                <PreferenceToggle
+                  id="pref-project"
+                  label="Project Updates"
+                  checked={prefs.projectUpdates}
+                  onChange={(v) =>
+                    setPrefs((p) => ({ ...p, projectUpdates: v }))
+                  }
+                />
+                <PreferenceToggle
+                  id="pref-marketing"
+                  label="Marketing Emails"
+                  checked={prefs.marketingEmails}
+                  onChange={(v) =>
+                    setPrefs((p) => ({ ...p, marketingEmails: v }))
+                  }
+                />
+                <PreferenceToggle
+                  id="pref-product"
+                  label="Product Alerts"
+                  checked={prefs.productAlerts}
+                  onChange={(v) =>
+                    setPrefs((p) => ({ ...p, productAlerts: v }))
+                  }
+                />
+              </div>
 
-            <div className="mt-4 border-t customer-cream-card-border pt-4">
-              <p
-                className="font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray"
-                style={{ fontVariationSettings: "'opsz' 9" }}
-              >
-                Documents
-              </p>
-              <div className="mt-3 flex flex-col gap-3">
-                {documentsLoading ? (
-                  <p
-                    className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
-                    style={{ fontVariationSettings: "'opsz' 9" }}
+              <div className="mt-4 flex min-h-0 flex-1 flex-col border-t customer-cream-card-border pt-4">
+                <p
+                  className="shrink-0 font-dm-sans text-[9px] font-normal uppercase leading-[13.5px] tracking-[0.3px] text-warm-gray"
+                  style={{ fontVariationSettings: "'opsz' 9" }}
+                >
+                  Documents
+                </p>
+                <div className="relative mt-3 min-h-0 flex-1">
+                  <div
+                    className="customer-cream-scroll flex h-full min-h-[7.5rem] max-h-[min(220px,36vh)] flex-col gap-3 overflow-y-auto overscroll-y-contain pr-1 lg:max-h-none"
+                    role="region"
+                    aria-label="Shared documents"
                   >
-                    Loading documents…
-                  </p>
-                ) : documentsError ? (
-                  <p
-                    className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-red-600"
-                    style={{ fontVariationSettings: "'opsz' 9" }}
-                  >
-                    {documentsError}
-                  </p>
-                ) : documents.length > 0 ? (
-                  documents.map((doc) => (
-                    <ProfileDocumentRow
-                      key={doc.id}
-                      name={doc.fileName}
-                      sizeLabel={formatDocumentSize(doc.sizeBytes)}
-                      url={doc.url}
-                    />
-                  ))
-                ) : (
-                  <p
-                    className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
-                    style={{ fontVariationSettings: "'opsz' 9" }}
-                  >
-                    No documents shared yet.
-                  </p>
-                )}
+                    {documentsLoading ? (
+                      <p
+                        className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
+                        style={{ fontVariationSettings: "'opsz' 9" }}
+                      >
+                        Loading documents…
+                      </p>
+                    ) : documentsError ? (
+                      <p
+                        className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-red-600"
+                        style={{ fontVariationSettings: "'opsz' 9" }}
+                      >
+                        {documentsError}
+                      </p>
+                    ) : documents.length > 0 ? (
+                      documents.map((doc) => (
+                        <ProfileDocumentRow
+                          key={doc.id}
+                          name={doc.fileName}
+                          sizeLabel={formatDocumentSize(doc.sizeBytes)}
+                          url={doc.url}
+                        />
+                      ))
+                    ) : (
+                      <p
+                        className="font-dm-sans text-[11px] font-normal leading-[16.5px] text-warm-gray"
+                        style={{ fontVariationSettings: "'opsz' 9" }}
+                      >
+                        No documents shared yet.
+                      </p>
+                    )}
+                  </div>
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-[var(--color-cream-50)] to-transparent"
+                    aria-hidden
+                  />
+                </div>
               </div>
             </div>
           </CustomerPanelCard>
