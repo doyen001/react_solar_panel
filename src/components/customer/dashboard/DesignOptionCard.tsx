@@ -9,7 +9,6 @@ type Props = {
   option: DesignOption;
   selected: boolean;
   onSelect: () => void;
-  /** Set once the design is approved — the choice can no longer change. */
   disabled?: boolean;
   /** Shown on the image, top-left (opposite the Selected badge). */
   imageAction?: ReactNode;
