@@ -28,13 +28,14 @@ export function ServicesPricingSection() {
             const isFeatured = tier.featured;
 
             return (
-              <li key={tier.id} className="flex">
-                <ServicesReveal delayMs={index * 80} className="flex w-full">
+              <li key={tier.id} className="flex h-full">
+                <ServicesReveal
+                  delayMs={index * 80}
+                  className="flex h-full w-full flex-col"
+                >
                   <article
                     className={`svc-card svc-lift relative flex h-full w-full flex-col gap-6 rounded-3xl p-7 sm:p-8 ${
-                      isFeatured
-                        ? "border-svc-gold bg-svc-ink lg:-mt-4 lg:mb-4"
-                        : ""
+                      isFeatured ? "border-svc-gold bg-svc-ink" : ""
                     }`}
                   >
                     {badge ? (
@@ -107,8 +108,8 @@ export function ServicesPricingSection() {
                       ariaLabel={`${tier.ctaLabel} for the ${tier.name} package`}
                       className={
                         isFeatured
-                          ? "svc-cta-primary inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
-                          : "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-svc-accent bg-white px-6 font-outfit text-base font-semibold text-svc-accent-text transition hover:bg-svc-accent-soft"
+                          ? "svc-cta-primary mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
+                          : "mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-svc-accent bg-white px-6 font-outfit text-base font-semibold text-svc-accent-text transition hover:bg-svc-accent-soft"
                       }
                     >
                       {tier.ctaLabel}

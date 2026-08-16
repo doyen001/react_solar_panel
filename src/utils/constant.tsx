@@ -4125,7 +4125,7 @@ export const SERVICES_PAGE = {
       {
         id: "starter",
         name: "Starter Website",
-        priceLabel: "From $2,400",
+        priceLabel: "From $500",
         cadence: "one-off project",
         summary:
           "A credible, fast presence for a new business or a single service line.",
