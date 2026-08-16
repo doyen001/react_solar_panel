@@ -28,7 +28,7 @@ export function ServicesHeroSection() {
         <div className="mt-8 grid items-center gap-12 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:gap-14">
           <div className="flex flex-col gap-7">
             <ServicesReveal className="flex flex-col gap-6">
-              <span className="svc-eyebrow-dark inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em] backdrop-blur-md">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-svc-dark-border bg-svc-glass px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em] text-svc-dark-body backdrop-blur-md">
                 <Icon name="Sparkles" className="size-3.5 text-yellow-lemon" />
                 {hero.badge}
               </span>

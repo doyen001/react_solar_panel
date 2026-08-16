@@ -14,7 +14,7 @@ export function ServicesWhyChooseSection() {
     >
       <div className="mx-auto grid w-full max-w-[1226px] gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-16 lg:px-8">
         <ServicesReveal className="flex flex-col gap-5 lg:sticky lg:top-28 lg:self-start">
-          <span className="svc-eyebrow-light inline-flex w-fit items-center rounded-full border px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em]">
+          <span className="inline-flex w-fit items-center rounded-full border border-svc-border bg-svc-accent-soft px-3.5 py-1.5 font-inter text-xs font-semibold uppercase tracking-[0.12em] text-svc-accent-text">
             {whyChooseUs.eyebrow}
           </span>
           <h2

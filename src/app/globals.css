@@ -592,34 +592,35 @@
   --color-sm-wizard-combo-shadow: rgb(0 0 0 / 0.1);
 
   /* Services — Website Design & Development page (`/services`) */
-  --color-svc-page-bg: #fdf8ef;
+  --color-svc-page-bg: #f6fafd;
   --color-svc-surface: #ffffff;
-  --color-svc-surface-alt: #faf3e3;
+  --color-svc-surface-alt: #f1f7fb;
   --color-svc-ink: #09234a;
   --color-svc-body: #45556c;
-  --color-svc-muted: #7a6b52;
-  --color-svc-border: #ead9b8;
-  --color-svc-border-soft: #f5ebd6;
-  --color-svc-accent: #ffc105;
-  --color-svc-accent-strong: #efad06;
-  /* 6.2:1 on white — safe for small text */
-  --color-svc-accent-text: #8a5a00;
-  --color-svc-accent-soft: #fff5d6;
+  --color-svc-muted: #62748e;
+  --color-svc-border: #dbe7f0;
+  --color-svc-border-soft: #eaf2f8;
+  --color-svc-accent: #05afd1;
+  --color-svc-accent-strong: #0284c5;
+  --color-svc-accent-text: #01698a;
+  --color-svc-accent-soft: #e4f6fb;
   --color-svc-gold: #ffef62;
   --color-svc-gold-deep: #f78d00;
-  --color-svc-track: #f0e0c0;
-  --color-svc-shadow: rgb(92 62 10 / 0.08);
-  --color-svc-shadow-lift: rgb(92 62 10 / 0.16);
-  --color-svc-focus: #d97706;
+  --color-svc-gold-soft: #fff8d6;
+  --color-svc-gold-text: #7a5200;
+  --color-svc-track: #cfe3ef;
+  --color-svc-shadow: rgb(9 35 74 / 0.08);
+  --color-svc-shadow-lift: rgb(9 35 74 / 0.16);
+  --color-svc-focus: #0b63b0;
 
   /* Dark hero / final CTA surfaces */
   --color-svc-dark: #071b38;
-  --color-svc-dark-2: #122a4a;
-  --color-svc-dark-body: #d4c4a8;
-  --color-svc-dark-muted: #b8a688;
-  --color-svc-dark-border: rgb(255 239 98 / 0.22);
-  --color-svc-glass: rgb(255 239 98 / 0.08);
-  --color-svc-glass-strong: rgb(255 239 98 / 0.14);
+  --color-svc-dark-2: #0b2b52;
+  --color-svc-dark-body: #b9cbe0;
+  --color-svc-dark-muted: #93a9c4;
+  --color-svc-dark-border: rgb(255 255 255 / 0.14);
+  --color-svc-glass: rgb(255 255 255 / 0.07);
+  --color-svc-glass-strong: rgb(255 255 255 / 0.12);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -4113,12 +4114,6 @@ button {
     background-color: var(--color-svc-page-bg);
   }
 
-  .svc-section-warm {
-    background:
-      linear-gradient(180deg, rgb(255 239 98 / 0.1) 0%, transparent 220px),
-      var(--color-svc-page-bg);
-  }
-
   /* Anchor jumps must clear the 80px fixed landing header. */
   .svc-anchor {
     scroll-margin-top: 6.5rem;
@@ -4169,10 +4164,8 @@ button {
   .svc-lift:hover,
   .svc-lift:focus-within {
     transform: translateY(-6px);
-    border-color: var(--color-svc-accent-strong);
-    box-shadow:
-      0 18px 40px -18px var(--color-svc-shadow-lift),
-      0 0 0 1px rgb(255 193 5 / 0.12);
+    border-color: var(--color-svc-accent);
+    box-shadow: 0 18px 40px -18px var(--color-svc-shadow-lift);
   }
 
   .svc-scale-target {
@@ -4194,23 +4187,18 @@ button {
     background:
       radial-gradient(
         circle at 14% 18%,
-        rgb(255 239 98 / 0.34) 0%,
+        rgb(5 175 209 / 0.28) 0%,
         transparent 46%
       ),
       radial-gradient(
         circle at 86% 8%,
-        rgb(255 193 5 / 0.3) 0%,
+        rgb(32 148 243 / 0.22) 0%,
         transparent 44%
       ),
       radial-gradient(
         circle at 72% 92%,
-        rgb(247 141 0 / 0.22) 0%,
+        rgb(255 239 98 / 0.12) 0%,
         transparent 42%
-      ),
-      radial-gradient(
-        circle at 48% 52%,
-        rgb(5 175 209 / 0.1) 0%,
-        transparent 55%
       ),
       linear-gradient(
         168deg,
@@ -4222,8 +4210,8 @@ button {
 
   .svc-grid-lines {
     background-image:
-      linear-gradient(rgb(255 239 98 / 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 239 98 / 0.06) 1px, transparent 1px);
+      linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
     background-size: 56px 56px;
     mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 72%);
     -webkit-mask-image: radial-gradient(
@@ -4236,9 +4224,9 @@ button {
   .svc-gradient-text {
     background: linear-gradient(
       100deg,
-      var(--color-yellow-lemon) 0%,
-      var(--color-svc-accent) 45%,
-      var(--color-svc-gold-deep) 100%
+      var(--color-svc-accent) 0%,
+      var(--color-brand-teal) 42%,
+      var(--color-svc-gold) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -4269,23 +4257,18 @@ button {
     background:
       radial-gradient(
         circle at 12% 20%,
-        rgb(255 239 98 / 0.32) 0%,
+        rgb(5 175 209 / 0.36) 0%,
         transparent 50%
       ),
       radial-gradient(
         circle at 88% 78%,
-        rgb(255 193 5 / 0.28) 0%,
+        rgb(255 239 98 / 0.16) 0%,
         transparent 48%
-      ),
-      radial-gradient(
-        circle at 50% 100%,
-        rgb(247 141 0 / 0.16) 0%,
-        transparent 42%
       ),
       linear-gradient(
         120deg,
         var(--color-svc-dark) 0%,
-        #152d52 52%,
+        #0d3566 52%,
         var(--color-svc-dark) 100%
       );
   }
@@ -4293,27 +4276,11 @@ button {
   .svc-icon-well {
     background: linear-gradient(
       135deg,
-      var(--color-svc-accent-soft) 0%,
-      rgb(255 239 98 / 0.35) 100%
+      var(--color-svc-gold-soft) 0%,
+      rgb(255 239 98 / 0.42) 100%
     );
-    color: var(--color-svc-accent-text);
-    border: 1px solid rgb(255 193 5 / 0.22);
-  }
-
-  .svc-eyebrow-light {
-    border-color: rgb(255 193 5 / 0.35);
-    background: linear-gradient(
-      90deg,
-      rgb(255 239 98 / 0.28) 0%,
-      rgb(245 159 10 / 0.1) 100%
-    );
-    color: var(--color-svc-accent-text);
-  }
-
-  .svc-eyebrow-dark {
-    border-color: var(--color-svc-dark-border);
-    background: rgb(255 239 98 / 0.1);
-    color: var(--color-yellow-lemon);
+    color: var(--color-svc-gold-text);
+    border: 1px solid rgb(255 193 5 / 0.28);
   }
 
   /* --- Process timeline ---------------------------------------------------- */
@@ -4339,9 +4306,9 @@ button {
     height: 0;
     background: linear-gradient(
       to bottom,
-      var(--color-yellow-lemon) 0%,
+      var(--color-brand-blue) 0%,
       var(--color-svc-accent) 55%,
-      var(--color-svc-gold-deep) 100%
+      var(--color-brand-teal) 100%
     );
   }
 
@@ -4354,9 +4321,9 @@ button {
     width: 0;
     background: linear-gradient(
       to right,
-      var(--color-yellow-lemon) 0%,
+      var(--color-brand-blue) 0%,
       var(--color-svc-accent) 55%,
-      var(--color-svc-gold-deep) 100%
+      var(--color-brand-teal) 100%
     );
   }
 
@@ -4372,8 +4339,8 @@ button {
     width: 10px;
     height: 10px;
     border-radius: 9999px;
-    background-color: var(--color-svc-accent-strong);
-    box-shadow: 0 0 16px 4px rgb(255 193 5 / 0.65);
+    background-color: var(--color-svc-accent);
+    box-shadow: 0 0 16px 4px rgb(5 175 209 / 0.7);
     opacity: 0;
   }
 
@@ -4411,7 +4378,7 @@ button {
 
   .svc-step-pulse {
     opacity: 0;
-    background-color: var(--color-svc-accent);
+    background-color: var(--color-orange-amber);
   }
 
   .svc-process.is-running .svc-step-pulse {
@@ -4437,7 +4404,7 @@ button {
     transform: scale(1.14);
     box-shadow:
       0 0 0 6px var(--color-svc-page-bg),
-      0 10px 26px -8px rgb(255 193 5 / 0.75);
+      0 10px 26px -8px rgb(247 141 0 / 0.55);
   }
 
   .svc-step-body {
