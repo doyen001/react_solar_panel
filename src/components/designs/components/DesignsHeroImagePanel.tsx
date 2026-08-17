@@ -12,15 +12,14 @@ export function DesignsHeroImagePanel({
 }: DesignsHeroImagePanelProps) {
   return (
     <div
-      className={`relative w-full max-w-[634px] shrink-0 overflow-hidden rounded-[30px] ${className ?? ""}`}
-      style={{ aspectRatio: "634 / 411" }}
+      className={`relative aspect-[634/411] w-full min-w-0 overflow-hidden rounded-[30px] ${className ?? ""}`}
     >
       <Image
         src={PANEL_IMG}
         alt="Solar home with EasyLink Solar"
         fill
         className="object-cover"
-        sizes="(min-width: 1024px) 634px, 100vw"
+        sizes="(min-width: 1024px) 634px, (min-width: 640px) 90vw, 100vw"
       />
       <DesignsHeroBadgeOverlay />
     </div>

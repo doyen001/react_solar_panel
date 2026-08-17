@@ -29,7 +29,6 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 const MAP_CONTAINER: React.CSSProperties = {
   width: "100%",
   height: "100%",
-  minHeight: "525px",
   borderRadius: "25px",
 };
 
@@ -1107,11 +1106,11 @@ export const DesignsSolarPanelStepContent = forwardRef<
   );
 
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
-      <div className="flex w-full max-w-[1278px] flex-1 flex-col items-center justify-center gap-6 lg:flex-row lg:items-stretch lg:justify-between lg:gap-[58px]">
+    <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col justify-center px-4 py-6 sm:px-8 sm:py-8 lg:px-[81px] lg:py-8">
+      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:aspect-[1278/525] lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[58px]">
         {/* ── Left panel ── */}
-        <div className="flex min-h-[525px] w-full max-w-[591px] shrink-0 items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-8 py-12 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 lg:px-[46px] lg:py-[56px]">
-          <div className="mx-auto flex w-full max-w-[514px] flex-col items-center gap-[32px]">
+        <div className="flex w-full min-w-0 items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[46px] lg:py-[56px]">
+          <div className="mx-auto flex w-full max-w-[514px] flex-col items-center gap-6 sm:gap-[32px]">
             {/* Title + description */}
             <div className="flex max-w-[498px] flex-col items-center gap-[10px] text-center">
               <h2
@@ -1194,13 +1193,13 @@ export const DesignsSolarPanelStepContent = forwardRef<
         </div>
 
         {/* ── Right panel: map ── */}
-        <div className="w-full max-w-[649px] shrink-0 overflow-hidden rounded-[28px] border-[3px] border-design-accent-cyan shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]">
+        <div className="w-full min-w-0 overflow-hidden rounded-[28px] border-[3px] border-design-accent-cyan shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] lg:h-full">
           {/* Outer wrapper: overlays (RGB/Panels/Save) sit outside capture ref */}
-          <div className="relative min-h-[525px] w-full h-full overflow-hidden rounded-[25px]">
+          <div className="relative aspect-[649/525] h-full w-full min-h-[280px] overflow-hidden rounded-[25px] lg:aspect-auto lg:min-h-0">
             {/* Capture target = satellite map + roof/panel overlays only (no UI chrome) */}
             <div
               ref={mapCaptureRef}
-              className="relative min-h-[525px] w-full overflow-hidden rounded-[25px]"
+              className="relative h-full w-full overflow-hidden rounded-[25px]"
             >
               {isLoaded ? (
                 <>
@@ -1287,7 +1286,7 @@ export const DesignsSolarPanelStepContent = forwardRef<
                   </GoogleMap>
                 </>
               ) : (
-                <div className="flex h-full min-h-[525px] items-center justify-center rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)]">
+                <div className="flex h-full min-h-[280px] items-center justify-center rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)]">
                   <p className="px-8 text-center font-source-sans text-[20px] font-medium text-white/60">
                     Loading map...
                   </p>

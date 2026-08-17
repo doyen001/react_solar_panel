@@ -20,7 +20,6 @@ import { useAppSelector } from "@/lib/store/hooks";
 const MAP_CONTAINER: React.CSSProperties = {
   width: "100%",
   height: "100%",
-  minHeight: "525px",
   borderRadius: "25px",
 };
 
@@ -338,11 +337,11 @@ export const DesignsLocationStepContent = forwardRef<
   /* ── render ───────────────────────────────────────────────── */
 
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
-      <div className="flex w-full max-w-[1278px] flex-1 flex-col items-center justify-center gap-6 lg:flex-row lg:items-stretch lg:justify-between lg:gap-[38px]">
+    <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col justify-center px-4 py-6 sm:px-8 sm:py-8 lg:px-[81px] lg:py-8">
+      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:aspect-[1278/525] lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[38px]">
         {/* ── Left panel ── */}
-        <div className="flex min-h-[525px] w-full max-w-[591px] shrink-0 flex-col items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-8 py-12 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 lg:px-[46px]">
-          <div className="flex w-full max-w-[505px] flex-1 flex-col justify-center gap-[48px]">
+        <div className="flex w-full min-w-0 flex-col items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[46px]">
+          <div className="flex w-full max-w-[505px] flex-1 flex-col justify-center gap-8 sm:gap-[48px]">
             <h2
               className="w-full max-w-[495px] text-center font-source-sans text-[clamp(28px,4.8vw,40px)] font-bold capitalize leading-tight text-white"
               style={{ letterSpacing: "0.248px" }}
@@ -411,8 +410,8 @@ export const DesignsLocationStepContent = forwardRef<
         <div ref={mapDivRef} className="hidden" />
 
         {/* ── Right panel: map ── */}
-        <div className="w-full max-w-[649px] shrink-0 overflow-hidden rounded-[28px] border-[3px] border-design-accent-cyan shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)]">
-          <div className="relative h-full min-h-[525px] w-full">
+        <div className="w-full min-w-0 overflow-hidden rounded-[28px] border-[3px] border-design-accent-cyan shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] lg:h-full">
+          <div className="relative aspect-[649/525] h-full w-full min-h-[280px] lg:aspect-auto lg:min-h-0">
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={MAP_CONTAINER}
@@ -428,7 +427,7 @@ export const DesignsLocationStepContent = forwardRef<
                 }}
               />
             ) : (
-              <div className="flex h-full min-h-[525px] items-center justify-center rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)]">
+              <div className="flex h-full min-h-[280px] items-center justify-center rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)]">
                 <p className="px-8 text-center font-source-sans text-[20px] font-medium text-white/60">
                   Loading map...
                 </p>

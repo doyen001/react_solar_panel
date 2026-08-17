@@ -367,16 +367,16 @@ export function DesignsHeroSection({
         </div>
       ) : null}
 
-      <div className="flex items-center flex-1">
+      <div className="flex min-h-0 flex-1 items-center overflow-y-auto">
         {hydrating ? (
           <p className="relative z-10 mx-auto px-4 font-source-sans text-[16px] text-white/80">
             Loading your design…
           </p>
         ) : activeScreen === "start" ? (
-          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col gap-[29px] px-4 pt-8 sm:px-8 lg:px-[81px]">
-            <div className="flex w-full max-w-[1283px] flex-col items-stretch gap-5 lg:flex-row">
-              <DesignsSavingsPromoCard className="lg:w-[629px]" />
-              <DesignsHeroImagePanel className="lg:w-[634px]" />
+          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col justify-center gap-6 px-4 py-6 sm:px-8 sm:py-8 lg:gap-[29px] lg:px-[81px] lg:py-8">
+            <div className="mx-auto grid w-full max-w-[1283px] grid-cols-1 gap-5 lg:grid-cols-[629fr_634fr] lg:items-stretch">
+              <DesignsSavingsPromoCard />
+              <DesignsHeroImagePanel />
             </div>
             <DesignsHeroTagline />
           </div>
