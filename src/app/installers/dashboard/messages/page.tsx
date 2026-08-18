@@ -16,10 +16,10 @@ export default function InstallerMessagesPage() {
   }, [user?.firstName, user?.lastName]);
 
   return (
-    <div className="min-h-screen bg-surface-50">
+    <div className="flex min-h-screen flex-col bg-surface-50">
       <InstallerHeader activeNav="messages" userInitials={initials} />
 
-      <div className="mx-auto flex overflow-hidden max-w-[1440px] flex-col gap-4 px-4 py-5 md:gap-5 md:px-5 lg:py-8">
+      <div className="mx-auto flex min-h-0 max-w-[1440px] flex-1 flex-col gap-4 overflow-hidden px-4 py-5 md:gap-5 md:px-5 lg:py-8">
         <PortalRealtimeMessagesPanel
           portal="installer"
           sessionFetch={fetchWithInstallerSession}

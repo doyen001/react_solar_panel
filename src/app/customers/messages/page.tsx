@@ -16,7 +16,7 @@ export default function CustomerMessagesPage() {
         activeNav="messages"
       />
 
-      <main className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-4 px-4 py-5 md:gap-5 md:px-5">
+      <main className="mx-auto flex w-full max-w-[1440px] min-h-0 flex-1 flex-col gap-4 px-4 py-5 md:gap-5 md:px-5">
         <PortalRealtimeMessagesPanel
           portal="customer"
           sessionFetch={fetchWithCustomerSession}

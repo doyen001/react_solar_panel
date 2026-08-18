@@ -6,6 +6,7 @@ import { ChatThreadHeader } from "@/components/customer/messages/ChatThreadHeade
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
 import { ChatThreadMessageRow } from "@/components/customer/messages/ChatThreadMessageRow";
 import { LiveKitCallOverlay } from "@/components/messages/LiveKitCallOverlay";
+import { ChatThreadScrollPane } from "@/components/messages/ChatThreadScrollPane";
 import type { CustomerUser } from "@/lib/store/customerAuthSlice";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
@@ -77,8 +78,10 @@ export function PortalRealtimeMessagesPanel({
 
   const activeTabId = chat.activePeerId ?? chat.contacts[0]?.id ?? "";
 
+  const threadScrollKey = `${activeTabId}:${chat.messages.length}:${chat.messages.at(-1)?.id ?? ""}`;
+
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <LiveKitCallOverlay
         callState={chat.voiceCall.callState}
         peerName={chat.activeContactName}
@@ -106,14 +109,13 @@ export function PortalRealtimeMessagesPanel({
         onSelect={chat.setActivePeerId}
       />
 
-      <section className="customer-cream-card-bg customer-cream-card-border flex h-[min(28rem,calc(100vh-14rem))] min-h-[16rem] flex-1 flex-col overflow-hidden rounded-[10px] border md:h-[28rem]">
+      <section className="customer-cream-card-bg customer-cream-card-border flex min-h-[16rem] max-h-[min(28rem,calc(100dvh-11rem))] flex-1 flex-col overflow-hidden rounded-[10px] border sm:max-h-[min(32rem,calc(100dvh-11rem))]">
         <ChatThreadHeader
           title={threadHeading}
           online={chat.wsState === "open"}
         />
 
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-4">
-          <div className="flex flex-col gap-3">
+        <ChatThreadScrollPane scrollKey={threadScrollKey}>
           {!chat.conversationReady ? (
             <p className="text-center font-dm-sans text-xs text-warm-gray">
               Starting conversation…
@@ -149,8 +151,7 @@ export function PortalRealtimeMessagesPanel({
               );
             })
           )}
-          </div>
-        </div>
+        </ChatThreadScrollPane>
 
         <div className="shrink-0 border-t customer-cream-card-border px-4 pb-4 pt-3">
           <MessageRichComposer
@@ -170,6 +171,6 @@ export function PortalRealtimeMessagesPanel({
           />
         </div>
       </section>
-    </>
+    </div>
   );
 }
