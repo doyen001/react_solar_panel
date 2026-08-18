@@ -249,6 +249,14 @@ export function MessageRichComposer({
 
   const toolsDisabled = disabled || sending || uploadBusy;
 
+  const handleSend = useCallback(() => {
+    const text = draft.trim();
+    if (!text || disabled || sending) return;
+    void Promise.resolve(onSend?.(text)).then(() => {
+      setDraft("");
+    });
+  }, [draft, disabled, onSend, sending]);
+
   return (
     <div className="flex flex-col gap-3 border-t border-warm-border pt-3">
       <input
@@ -275,6 +283,12 @@ export function MessageRichComposer({
         id="customer-message-input"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
         rows={3}
         placeholder={placeholder}
         disabled={disabled}
@@ -380,13 +394,7 @@ export function MessageRichComposer({
           <button
             type="button"
             disabled={disabled || sending || !draft.trim()}
-            onClick={() => {
-              const text = draft.trim();
-              if (!text || disabled || sending) return;
-              void Promise.resolve(onSend?.(text)).then(() => {
-                setDraft("");
-              });
-            }}
+            onClick={handleSend}
             className="inline-flex h-7 min-w-[76px] items-center justify-center gap-2 rounded-lg font-dm-sans text-[11px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             style={{
               fontVariationSettings: "'opsz' 14",
