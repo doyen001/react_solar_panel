@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
+import { CustomerEditProfileModal } from "@/components/customer/profile/CustomerEditProfileModal";
 import { CustomerPanelCard } from "@/components/customer/profile/CustomerPanelCard";
 import { PreferenceToggle } from "@/components/customer/profile/PreferenceToggle";
 import { ProfileContactField } from "@/components/customer/profile/ProfileContactField";
@@ -11,20 +13,30 @@ import { ProfileDocumentRow } from "@/components/customer/profile/ProfileDocumen
 import { ProfileEntityRow } from "@/components/customer/profile/ProfileEntityRow";
 import { profileAssets } from "@/components/customer/profile/profileAssets";
 import { StatusBadge } from "@/components/customer/profile/StatusBadge";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { setUser } from "@/lib/store/customerAuthSlice";
 import Icon from "@/components/ui/Icons";
 import {
   fetchCustomerDocuments,
   formatDocumentSize,
   type CustomerDocument,
 } from "@/lib/customers/documents";
+import {
+  fetchCustomerProfile,
+  profileDiff,
+  updateCustomerProfile,
+} from "@/lib/customers/profile";
 
 export default function CustomerProfilePage() {
+  const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.customerAuth.user);
 
   const [documents, setDocuments] = useState<CustomerDocument[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(true);
   const [documentsError, setDocumentsError] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -44,6 +56,12 @@ export default function CustomerProfilePage() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    void fetchCustomerProfile().then((profile) => {
+      if (profile) dispatch(setUser(profile));
+    });
+  }, [dispatch]);
+
   const displayName = useMemo(() => {
     const fn = user?.firstName?.trim();
     const ln = user?.lastName?.trim();
@@ -54,8 +72,56 @@ export default function CustomerProfilePage() {
   }, [user]);
 
   const email = user?.email ?? "james.wilson@email.com";
-  const phone = "0412 345 678";
-  const address = user?.address?.trim() || "42 Bondi Rd, Bondi, NSW 2026";
+  const phone =
+    user?.phone?.trim() || (user ? "Not provided" : "0412 345 678");
+  const address =
+    user?.address?.trim() ||
+    (user ? "Not provided" : "42 Bondi Rd, Bondi, NSW 2026");
+
+  const editInitial = useMemo(
+    () => ({
+      name:
+        [user?.firstName?.trim(), user?.lastName?.trim()]
+          .filter(Boolean)
+          .join(" ") || displayName,
+      phone: user?.phone?.trim() ?? "",
+      address: user?.address?.trim() ?? "",
+      email: user?.email ?? email,
+    }),
+    [displayName, email, user],
+  );
+
+  const handleSaveProfile = useCallback(
+    async (values: { name: string; phone: string; address: string }) => {
+      if (!user || savingProfile) return;
+      setSavingProfile(true);
+      setSaveError(null);
+      try {
+        const update = profileDiff(user, {
+          name: values.name,
+          phoneNumber: values.phone,
+          address: values.address,
+        });
+
+        if (Object.keys(update).length === 0) {
+          setEditOpen(false);
+          return;
+        }
+
+        const saved = await updateCustomerProfile(update);
+        dispatch(setUser({ ...user, ...saved }));
+        toast.success("Profile updated.");
+        setEditOpen(false);
+      } catch (e) {
+        setSaveError(
+          e instanceof Error ? e.message : "Could not save your profile",
+        );
+      } finally {
+        setSavingProfile(false);
+      }
+    },
+    [dispatch, savingProfile, user],
+  );
 
   const [prefs, setPrefs] = useState({
     emailNotifications: true,
@@ -89,6 +155,10 @@ export default function CustomerProfilePage() {
                 type="button"
                 className="flex items-center gap-1 font-dm-sans text-[10px] font-semibold leading-[15px] text-orange-amber"
                 style={{ fontVariationSettings: "'opsz' 14" }}
+                onClick={() => {
+                  setSaveError(null);
+                  setEditOpen(true);
+                }}
               >
                 <Icon
                   name="Pencil"
@@ -355,6 +425,17 @@ export default function CustomerProfilePage() {
           </CustomerPanelCard>
         </div>
       </main>
+
+      <CustomerEditProfileModal
+        open={editOpen}
+        initial={editInitial}
+        saving={savingProfile}
+        error={saveError}
+        onClose={() => {
+          if (!savingProfile) setEditOpen(false);
+        }}
+        onSubmit={handleSaveProfile}
+      />
     </div>
   );
 }

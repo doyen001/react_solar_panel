@@ -7,6 +7,7 @@ export type CustomerUser = {
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string | null;
   address: string | null;
   role: string;
   emailVerified: boolean;

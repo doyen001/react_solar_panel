@@ -55,8 +55,13 @@ export function normalizePhone(phone: string): string {
 
 /** Only the fields that actually differ, so an unchanged save is a no-op. */
 export function profileDiff(
-  current: { firstName?: string | null; lastName?: string | null; phone?: string | null },
-  next: { name?: string; phoneNumber?: string },
+  current: {
+    firstName?: string | null;
+    lastName?: string | null;
+    phone?: string | null;
+    address?: string | null;
+  },
+  next: { name?: string; phoneNumber?: string; address?: string },
 ): CustomerProfileUpdate {
   const update: CustomerProfileUpdate = {};
 
@@ -70,10 +75,17 @@ export function profileDiff(
     }
   }
 
-  if (next.phoneNumber?.trim()) {
+  if (next.phoneNumber !== undefined) {
     const phone = normalizePhone(next.phoneNumber);
-    if (phone && phone !== (current.phone ?? "")) {
-      update.phone = phone;
+    if (phone !== (current.phone ?? "")) {
+      update.phone = phone || undefined;
+    }
+  }
+
+  if (next.address !== undefined) {
+    const address = next.address.trim();
+    if (address !== (current.address ?? "")) {
+      update.address = address;
     }
   }
 
