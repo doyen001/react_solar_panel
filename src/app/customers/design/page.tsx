@@ -15,7 +15,6 @@ import {
 } from "@/lib/customers/design-pdf";
 import { CustomerDashboardHeader } from "@/components/customer/dashboard/CustomerDashboardHeader";
 import { DesignComparisonTable } from "@/components/customer/design/DesignComparisonTable";
-import { DesignPageToolbar } from "@/components/customer/design/DesignPageToolbar";
 import { ReferralProgramCard } from "@/components/customer/design/ReferralProgramCard";
 import { SelectedDesignPanel } from "@/components/customer/design/SelectedDesignPanel";
 import { ShareJourneyCard } from "@/components/customer/design/ShareJourneyCard";
@@ -181,7 +180,6 @@ export default function CustomerDesignPage() {
         firstName={user?.firstName}
         lastName={user?.lastName}
         activeNav="designs"
-        headerAccessory={<DesignPageToolbar />}
       />
 
       <main className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-4 px-4 py-5 md:gap-5 md:px-5">
