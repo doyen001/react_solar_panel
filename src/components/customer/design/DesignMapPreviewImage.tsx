@@ -6,28 +6,44 @@ import { DEFAULT_DESIGN_MAP_IMAGE } from "./designAssets";
 
 type DesignMapPreviewImageProps = {
   src?: string | null;
+  defaultSrc?: string;
+  alt?: string;
+  sizes?: string;
+  priority?: boolean;
 };
 
-function resolveMapImageSrc(src?: string | null): string {
+function resolveMapImageSrc(
+  src: string | null | undefined,
+  defaultSrc: string,
+): string {
   const trimmed = src?.trim();
-  return trimmed ? trimmed : DEFAULT_DESIGN_MAP_IMAGE;
+  return trimmed ? trimmed : defaultSrc;
 }
 
-export function DesignMapPreviewImage({ src }: DesignMapPreviewImageProps) {
+export function DesignMapPreviewImage({
+  src,
+  defaultSrc = DEFAULT_DESIGN_MAP_IMAGE,
+  alt = "Aerial view of property with solar design",
+  sizes = "(max-width: 1024px) 100vw, 33vw",
+  priority = false,
+}: DesignMapPreviewImageProps) {
   const [failed, setFailed] = useState(false);
-  const imageSrc = failed ? DEFAULT_DESIGN_MAP_IMAGE : resolveMapImageSrc(src);
+  const imageSrc = failed
+    ? defaultSrc
+    : resolveMapImageSrc(src, defaultSrc);
 
   useEffect(() => {
     setFailed(false);
-  }, [src]);
+  }, [src, defaultSrc]);
 
   return (
     <Image
       src={imageSrc}
-      alt="Aerial view of property with solar design"
+      alt={alt}
       fill
       className="object-cover"
-      sizes="(max-width: 1024px) 100vw, 33vw"
+      sizes={sizes}
+      priority={priority}
       unoptimized
       onError={() => setFailed(true)}
     />

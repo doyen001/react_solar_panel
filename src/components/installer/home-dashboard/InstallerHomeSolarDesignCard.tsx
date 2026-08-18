@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/ui/Icons";
+import { DesignMapPreviewImage } from "@/components/customer/design/DesignMapPreviewImage";
+import { designMapScreenshotUrl } from "@/lib/designs/map-screenshot";
 import type { InstallerCustomerDesign } from "@/lib/installers/designs";
 
 /** Figma node 3:8616 — rooftop preview asset (expires on MCP host after ~7 days). */
@@ -227,11 +228,10 @@ export function InstallerHomeSolarDesignCard({
         {/* Image frame: golden border (3:8705–3:8706) */}
         <div className="flex shrink-0 flex-col overflow-hidden rounded-[11px] border-[1.157px] border-amber-soft p-[1.157px] lg:max-w-[375px]">
           <div className="relative aspect-373/174 w-full overflow-hidden rounded-[9.89px] bg-cream-200">
-            <Image
-              src={INSTALLER_SOLAR_DESIGN_PREVIEW_URL}
+            <DesignMapPreviewImage
+              src={designMapScreenshotUrl(design)}
+              defaultSrc={INSTALLER_SOLAR_DESIGN_PREVIEW_URL}
               alt="Solar roof design preview"
-              fill
-              className="object-cover"
               sizes="(max-width: 1024px) 100vw, 375px"
               priority
             />
