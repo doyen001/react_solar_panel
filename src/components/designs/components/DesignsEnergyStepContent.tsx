@@ -222,26 +222,58 @@ function EnergyBillInput({
   const displayAmount = Math.round(
     currentMonthlyAmount * periodMultiplier(billPeriod),
   );
+  const [draftAmount, setDraftAmount] = useState<string | null>(null);
+
+  const inputValue =
+    draftAmount ?? displayAmount.toLocaleString("en-AU");
+
+  const commitPeriodAmount = (raw: string) => {
+    const digits = raw.replace(/\D/g, "");
+    if (!digits) {
+      onBillRatePercentChange(sliderPercentFromMonthlyBill(BILL_MONTHLY_MIN));
+      return;
+    }
+
+    const periodAmount = Number.parseInt(digits, 10);
+    const monthly = Math.round(periodAmount / periodMultiplier(billPeriod));
+    const clampedMonthly = Math.min(
+      BILL_MONTHLY_MAX,
+      Math.max(BILL_MONTHLY_MIN, monthly),
+    );
+    onBillRatePercentChange(sliderPercentFromMonthlyBill(clampedMonthly));
+  };
 
   return (
     <div className="w-full">
       <div className="flex items-center gap-[16px]">
-        <div className="relative h-[58.063px] flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4">
+        <div className="relative h-[58.063px] flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4 pr-10">
           <input
             type="text"
-            value={displayAmount.toLocaleString("en-AU")}
-            readOnly
+            inputMode="numeric"
+            value={inputValue}
+            onFocus={() => setDraftAmount(String(displayAmount))}
+            onChange={(event) => {
+              setDraftAmount(event.target.value.replace(/\D/g, ""));
+            }}
+            onBlur={() => {
+              if (draftAmount !== null) {
+                commitPeriodAmount(draftAmount);
+              }
+              setDraftAmount(null);
+            }}
+            aria-label="Energy bill amount"
             className="size-full bg-transparent font-source-sans text-[24px] font-bold tracking-[0.0703px] text-[#101828] outline-none"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 font-source-sans text-[16px] font-medium tracking-[-0.3125px] text-[#111]">
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-source-sans text-[16px] font-medium tracking-[-0.3125px] text-[#111]">
             $
           </span>
         </div>
         <select
           value={billPeriod}
-          onChange={(e) =>
-            onBillPeriodChange(parseBillPeriod(e.target.value))
-          }
+          onChange={(e) => {
+            setDraftAmount(null);
+            onBillPeriodChange(parseBillPeriod(e.target.value));
+          }}
           aria-label="Bill amount period"
           className="h-[52.936px] w-[127.984px] shrink-0 cursor-pointer appearance-none rounded-[10px] border border-[#E5E7EB] bg-white pl-3 pr-8 font-source-sans text-[14px] font-semibold tracking-[-0.2px] text-[#101828] outline-none focus-visible:ring-2 focus-visible:ring-design-accent-cyan"
           style={{
@@ -260,7 +292,10 @@ function EnergyBillInput({
       <div className="mt-[24px] flex flex-col items-end gap-[24px]">
         <SingleScrollBar
           value={billRatePercent}
-          onChange={onBillRatePercentChange}
+          onChange={(percent) => {
+            setDraftAmount(null);
+            onBillRatePercentChange(percent);
+          }}
           min={0}
           max={100}
           ariaLabel="Energy bill rate"
