@@ -1,7 +1,6 @@
-import Image from "next/image";
 import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import type { SpecLine } from "./designConstants";
-import { designAssets } from "./designAssets";
+import { DesignMapPreviewImage } from "./DesignMapPreviewImage";
 import { DesignSpecRow } from "./DesignSpecRow";
 import Icon from "@/components/ui/Icons";
 
@@ -13,6 +12,8 @@ type Props = {
   statusApproved?: boolean;
   designSpecs: SpecLine[];
   performanceEstimates: SpecLine[];
+  /** Saved map screenshot from the design builder; falls back to placeholder. */
+  mapImageSrc?: string | null;
   /** Opens the proposal PDF in a viewer tab. */
   onViewPdf?: () => void;
   onDownloadPdf?: () => void;
@@ -28,6 +29,7 @@ export function SelectedDesignPanel({
   statusApproved = false,
   designSpecs,
   performanceEstimates,
+  mapImageSrc,
   onViewPdf,
   onDownloadPdf,
   pdfBusy = false,
@@ -61,14 +63,7 @@ export function SelectedDesignPanel({
         <div className="flex min-w-0 flex-col gap-2">
           <div className="relative overflow-hidden rounded-[10px] border border-amber-soft">
             <div className="relative aspect-[377/198] w-full overflow-hidden">
-              <Image
-                src={designAssets.mapHero}
-                alt="Aerial view of property with solar design"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 33vw"
-                unoptimized
-              />
+              <DesignMapPreviewImage src={mapImageSrc} />
             </div>
             <div className="absolute bottom-3 right-3 flex flex-wrap justify-end gap-1.5">
               <button

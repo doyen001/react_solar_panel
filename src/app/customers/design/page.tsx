@@ -25,6 +25,7 @@ import {
   buildDesignSpecs,
   buildEquipmentCards,
   buildPerformanceEstimates,
+  designMapScreenshotUrl,
   designStatusLabel,
   formatDesignUpdatedAt,
   formatSavingsLabel,
@@ -223,6 +224,7 @@ export default function CustomerDesignPage() {
               statusApproved={primaryDesign.status === "COMPLETED"}
               designSpecs={buildDesignSpecs(primaryDesign)}
               performanceEstimates={buildPerformanceEstimates(primaryDesign)}
+              mapImageSrc={designMapScreenshotUrl(primaryDesign)}
               onViewPdf={() => void handleViewPdf()}
               onDownloadPdf={() => void handleDownloadPdf()}
               pdfBusy={pdfBusy}

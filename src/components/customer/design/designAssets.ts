@@ -1,7 +1,9 @@
+/** Local fallback when a design has no saved map screenshot. */
+export const DEFAULT_DESIGN_MAP_IMAGE = "/images/home/solar-panel-design.png";
+
 /** Figma MCP assets for My Design — remote URLs (refresh from design if expired). */
 export const designAssets = {
-  mapHero:
-    "https://www.figma.com/api/mcp/asset/77d689eb-86cc-4732-8c49-29a5b1711d5d",
+  mapHero: DEFAULT_DESIGN_MAP_IMAGE,
   sun: "https://www.figma.com/api/mcp/asset/33309993-0a7a-4cc1-998c-98c3607b7b78",
   sunHeader:
     "https://www.figma.com/api/mcp/asset/f037b85b-d9e5-45b0-a393-2fa422c8e704",

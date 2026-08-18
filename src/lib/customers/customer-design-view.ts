@@ -8,6 +8,7 @@ import type {
   CustomerDesign,
   CustomerDesignProduct,
 } from "@/lib/customers/designs";
+import type { DesignProposalState } from "@/lib/store/designProposalSlice";
 import {
   batteryCapacityKwh,
   cecApprovedLabel,
@@ -84,6 +85,13 @@ function wizardField(design: CustomerDesign, key: string): string | undefined {
   if (typeof value === "string" && value.trim()) return value.trim();
   if (typeof value === "number" && Number.isFinite(value)) return String(value);
   return undefined;
+}
+
+/** Saved solar-step map capture (roof outline + panel layout), when present. */
+export function designMapScreenshotUrl(design: CustomerDesign): string | null {
+  const stored = design.wizardData as DesignProposalState | null | undefined;
+  const url = stored?.solarDesign?.mapScreenshotDataUrl;
+  return typeof url === "string" && url.startsWith("data:image/") ? url : null;
 }
 
 /**
