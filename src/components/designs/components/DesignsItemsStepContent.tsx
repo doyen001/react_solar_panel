@@ -1,15 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
 import {
   brandsOf,
-  fetchBuilderCatalogue,
   modelsOf,
   type BuilderProduct,
   type BuilderProductCategory,
 } from "@/lib/designs/catalogue";
+import { selectBuilderCatalogue } from "@/lib/store/builderCatalogueSlice";
 import {
   batteryCapacityKwh,
   inverterRatedKw,
@@ -391,54 +391,24 @@ export const DesignsItemsStepContent = forwardRef<
   // Seed from the store so editing an existing design shows its real equipment
   // instead of the placeholder specs.
   const storedEquipment = useAppSelector((s) => s.designProposal.equipment);
+  const groupedCatalogue = useAppSelector(selectBuilderCatalogue);
   const [itemsValue, setItemsValue] = useState(() =>
     seedItemsValue(storedEquipment),
   );
 
-  // The real catalogue backs both dropdowns, so a selection yields a product id
-  // the save can persist as a DesignProduct row.
-  const [catalogue, setCatalogue] = useState<
-    Record<SectionKey, BuilderProduct[]>
-  >({ solarPanel: [], battery: [], equipment: [] });
-
-  /** Captured once: the fetch must not re-run as the customer changes selection. */
-  const [pinnedProductIds] = useState(() =>
-    [
-      storedEquipment.solarPanelProductId,
-      storedEquipment.inverterProductId,
-      storedEquipment.batteryProductId,
-    ].filter((id): id is string => Boolean(id)),
+  const catalogue = useMemo(
+    () => ({
+      solarPanel: groupedCatalogue[SECTION_CATEGORY.solarPanel],
+      battery: groupedCatalogue[SECTION_CATEGORY.battery],
+      equipment: groupedCatalogue[SECTION_CATEGORY.equipment],
+    }),
+    [groupedCatalogue],
   );
-
-  useEffect(() => {
-    let cancelled = false;
-
-    // One request for all three categories, pinning whatever this design
-    // already has so those options exist and can show as selected.
-    void fetchBuilderCatalogue(pinnedProductIds)
-      .then((grouped) => {
-        if (cancelled) return;
-        setCatalogue({
-          solarPanel: grouped[SECTION_CATEGORY.solarPanel],
-          battery: grouped[SECTION_CATEGORY.battery],
-          equipment: grouped[SECTION_CATEGORY.equipment],
-        });
-      })
-      .catch(() => {
-        // Non-fatal: the dropdowns simply offer no options.
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [pinnedProductIds]);
 
   /**
    * What the two selects show. Derived rather than synced into state: a card
    * seeded from a saved design knows only its product id, and resolving that
    * against the catalogue at render time avoids a setState-in-effect cascade.
-   * Only a product id can match reliably — a stored display name like
-   * "AE Solar GmbH AE400MD-108" is not a catalogue key.
    */
   const selectionFor = (key: SectionKey) => {
     const section = itemsValue[key];

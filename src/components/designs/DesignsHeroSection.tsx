@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   mergeProposalData,
   selectDesignProposal,
 } from "@/lib/store/designProposalSlice";
+import { loadBuilderCatalogue } from "@/lib/store/builderCatalogueSlice";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -119,6 +120,26 @@ export function DesignsHeroSection({
       })
       .finally(() => setHydrating(false));
   }, [customerUser, dispatch, editingDesignId]);
+
+  const pinnedProductIds = useMemo(
+    () =>
+      [
+        proposal.equipment.solarPanelProductId,
+        proposal.equipment.inverterProductId,
+        proposal.equipment.batteryProductId,
+      ].filter((id): id is string => Boolean(id)),
+    [
+      proposal.equipment.solarPanelProductId,
+      proposal.equipment.inverterProductId,
+      proposal.equipment.batteryProductId,
+    ],
+  );
+
+  const pinnedProductIdsKey = pinnedProductIds.join(",");
+
+  useEffect(() => {
+    void dispatch(loadBuilderCatalogue(pinnedProductIds));
+  }, [dispatch, pinnedProductIdsKey]);
 
   const [activeScreen, setActiveScreen] = useState<
     | "start"
