@@ -98,6 +98,25 @@ export const FILTERS_BY_CATEGORY: Record<ProductCategoryKey, FilterChipDef[]> = 
 export const PRODUCTS_BY_CATEGORY: Record<ProductCategoryKey, Product[]> = {
   batteries: [
     {
+      id: "bluetti-ep2000-stack",
+      categoryKey: "batteries",
+      segment: "residential",
+      specValue: 21.3,
+      badge: "Best Seller",
+      brand: "Bluetti",
+      name: "EP2000 21.3kWh Stack",
+      model: "EP2000-HV800-B700x2/24",
+      rating: 4.9,
+      hasDatasheet: true,
+      inStock: true,
+      features: ["10yr warranty", "Modular expansion", "Whole-home backup"],
+      price: 15990,
+      photo: {
+        background: "/images/products/bluetti-lifestyle.jpg",
+        image: "/images/products/bluetti-stack.png",
+      },
+    },
+    {
       id: "foxess-eq4880",
       categoryKey: "batteries",
       segment: "residential",

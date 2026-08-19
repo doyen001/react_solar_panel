@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import classNames from "classnames";
 import Icon from "@/components/ui/Icons";
 import { downloadDatasheet } from "@/components/pages/products/downloadDatasheet";
@@ -50,15 +51,28 @@ export function ProductCard({
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-warm-border bg-white shadow-sm transition-shadow hover:shadow-md">
       <div
-        className="relative flex h-44 w-full items-center justify-center overflow-hidden"
-        style={{
-          backgroundImage:
-            "linear-gradient(160deg, #f3ead6 0%, #e9dcc0 100%)",
-        }}
+        className="relative flex h-72 w-full items-center justify-center overflow-hidden"
+        style={
+          product.photo
+            ? undefined
+            : { backgroundImage: "linear-gradient(160deg, #f3ead6 0%, #e9dcc0 100%)" }
+        }
       >
-        <span className="font-dm-sans text-[12px] font-medium text-warm-gray">
-          {CATEGORY_PHOTO_LABEL[product.categoryKey]}
-        </span>
+        {product.photo ? (
+          <>
+            <Image
+              src={product.photo.background}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, 33vw"
+            />
+          </>
+        ) : (
+          <span className="font-dm-sans text-[12px] font-medium text-warm-gray">
+            {CATEGORY_PHOTO_LABEL[product.categoryKey]}
+          </span>
+        )}
         {product.badge ? (
           <span
             className={classNames(

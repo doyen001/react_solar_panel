@@ -35,6 +35,13 @@ export type ProductSegment = "residential" | "commercial";
 
 export type ProductBadge = "Popular" | "Best Value" | "Best Seller" | "New";
 
+export type ProductPhoto = {
+  /** Full-bleed backdrop behind the cutout, e.g. an in-situ lifestyle shot. */
+  background: string;
+  /** Foreground product cutout, rendered centered over the backdrop. */
+  image: string;
+};
+
 export type Product = {
   id: string;
   categoryKey: ProductCategoryKey;
@@ -51,4 +58,5 @@ export type Product = {
   features: string[];
   price: number;
   compareInitially?: boolean;
+  photo?: ProductPhoto;
 };
