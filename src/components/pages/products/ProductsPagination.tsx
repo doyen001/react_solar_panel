@@ -16,7 +16,7 @@ export function ProductsPagination({ page, totalPages, onPageChange }: Props) {
   return (
     <nav
       aria-label="Product pagination"
-      className="mx-auto flex w-full max-w-[1120px] items-center justify-center gap-2"
+      className="flex w-full items-center justify-center gap-2"
     >
       <button
         type="button"

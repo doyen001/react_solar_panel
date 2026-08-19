@@ -2,19 +2,12 @@
 
 import { ProductCard } from "@/components/pages/products/ProductCard";
 import { ProductsPagination } from "@/components/pages/products/ProductsPagination";
+import { matchesFilter } from "@/components/pages/products/matchesFilter";
 import {
   MAX_COMPARE_PRODUCTS,
   PRODUCTS_PAGE_SIZE,
 } from "@/components/pages/products/productsData";
 import type { FilterChipDef, Product } from "@/components/pages/products/types";
-
-function matchesFilter(product: Product, filter: FilterChipDef | undefined) {
-  if (!filter || filter.kind === "all") return true;
-  if (filter.kind === "segment") return product.segment === filter.segment;
-  const aboveMin = filter.min === undefined || product.specValue >= filter.min;
-  const belowMax = filter.max === undefined || product.specValue < filter.max;
-  return aboveMin && belowMax;
-}
 
 type Props = {
   products: Product[];
@@ -42,7 +35,7 @@ export function ProductsCatalogList({
 
   if (visibleProducts.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-[1120px] rounded-2xl border border-dashed border-warm-border bg-white px-6 py-12 text-center">
+      <div className="w-full rounded-2xl border border-dashed border-warm-border bg-white px-6 py-12 text-center">
         <p className="font-inter text-[15px] font-semibold text-warm-ink">
           No matching products
         </p>
@@ -60,7 +53,7 @@ export function ProductsCatalogList({
   const compareFull = compareIds.size >= MAX_COMPARE_PRODUCTS;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
+    <div className="flex w-full flex-col gap-5">
       <p className="font-dm-sans text-[12px] text-warm-ink/70">
         Showing {pageStart + 1}–{Math.min(pageStart + PRODUCTS_PAGE_SIZE, visibleProducts.length)} of{" "}
         {visibleProducts.length} products

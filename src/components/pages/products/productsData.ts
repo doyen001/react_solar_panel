@@ -444,6 +444,14 @@ export const SPEC_UNIT_BY_CATEGORY: Record<ProductCategoryKey, string> = {
   "heat-pumps": "kW",
 };
 
+export const BAND_GROUP_LABEL: Record<ProductCategoryKey, string> = {
+  batteries: "Capacity Range",
+  "solar-panels": "Wattage Range",
+  inverters: "Power Range",
+  "ev-chargers": "Charge Rate",
+  "heat-pumps": "Capacity Range",
+};
+
 export const MAX_COMPARE_PRODUCTS = 3;
 
 export const PRODUCTS_PAGE_SIZE = 6;

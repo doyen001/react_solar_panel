@@ -11,7 +11,7 @@ type Props = {
 
 export function ProductsFilterChips({ filters, activeFilterKey, onSelect }: Props) {
   return (
-    <div className="mx-auto flex w-full max-w-[1120px] flex-wrap gap-2 overflow-x-auto">
+    <div className="flex w-full flex-wrap gap-2 overflow-x-auto">
       {filters.map((filter) => {
         const active = filter.key === activeFilterKey;
         return (

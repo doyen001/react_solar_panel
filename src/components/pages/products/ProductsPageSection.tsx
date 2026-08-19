@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ProductsSystemStepper } from "@/components/pages/products/ProductsSystemStepper";
+import { ProductsSidebar } from "@/components/pages/products/ProductsSidebar";
 import { ProductsCategoryCards } from "@/components/pages/products/ProductsCategoryCards";
 import { ProductsFilterChips } from "@/components/pages/products/ProductsFilterChips";
 import { ProductsCatalogList } from "@/components/pages/products/ProductsCatalogList";
@@ -76,7 +77,7 @@ export function ProductsPageSection() {
   };
 
   return (
-    <section className="bg-linear-to-br from-gold-2 to-orange-amber py-10 sm:py-14">
+    <section className="bg-linear-to-br from-yellow-lemon to-orange-amber py-10 sm:py-14">
       <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-3 px-4 sm:px-6">
         <h1 className="font-inter text-[22px] font-extrabold uppercase leading-[28px] tracking-[0.02em] text-warm-ink sm:text-[26px]">
           Build Your System
@@ -91,25 +92,34 @@ export function ProductsPageSection() {
         <ProductsSystemStepper />
       </div>
 
-      <div className="mt-8 flex flex-col gap-6 px-4 sm:px-6">
-        <ProductsCategoryCards
+      <div className="mx-auto mt-8 flex w-full max-w-[1360px] flex-col gap-6 px-4 sm:px-6 lg:flex-row">
+        <ProductsSidebar
           activeCategory={activeCategory}
-          onSelect={handleSelectCategory}
-        />
-        <ProductsFilterChips
-          filters={filters}
           activeFilterKey={activeFilterKey}
-          onSelect={handleSelectFilter}
+          onSelectCategory={handleSelectCategory}
+          onSelectFilter={handleSelectFilter}
         />
-        <ProductsCatalogList
-          products={products}
-          filters={filters}
-          activeFilterKey={activeFilterKey}
-          compareIds={compareIds}
-          onToggleCompare={handleToggleCompare}
-          page={page}
-          onPageChange={setPage}
-        />
+
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <ProductsCategoryCards
+            activeCategory={activeCategory}
+            onSelect={handleSelectCategory}
+          />
+          <ProductsFilterChips
+            filters={filters}
+            activeFilterKey={activeFilterKey}
+            onSelect={handleSelectFilter}
+          />
+          <ProductsCatalogList
+            products={products}
+            filters={filters}
+            activeFilterKey={activeFilterKey}
+            compareIds={compareIds}
+            onToggleCompare={handleToggleCompare}
+            page={page}
+            onPageChange={setPage}
+          />
+        </div>
       </div>
 
       {compareProducts.length > 0 ? <div className="h-20" aria-hidden /> : null}
