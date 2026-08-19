@@ -4251,9 +4251,9 @@ export const SERVICES_PAGE = {
     contact: {
       title: "Prefer to talk first?",
       items: [
-        { id: "phone", iconId: "Phone" as const, label: "1300 000 000", href: "tel:1300000000" },
+        { id: "phone", iconId: "Phone" as const, label: "+61 2 9099 5815", href: "tel:61290995815" },
         { id: "email", iconId: "Mail" as const, label: "sales@easylinkplus.com", href: "mailto:sales@easylinkplus.com" },
-        { id: "address", iconId: "Pin" as const, label: "Sydney, NSW, Australia", href: null },
+        { id: "address", iconId: "Pin" as const, label: "Sydney Australia, Mexico, India", href: null },
       ],
       social: [
         { id: "linkedin", label: "LinkedIn", href: "#" },
