@@ -4252,7 +4252,7 @@ export const SERVICES_PAGE = {
       title: "Prefer to talk first?",
       items: [
         { id: "phone", iconId: "Phone" as const, label: "1300 000 000", href: "tel:1300000000" },
-        { id: "email", iconId: "Mail" as const, label: "hello@easylinksolar.com.au", href: "mailto:hello@easylinksolar.com.au" },
+        { id: "email", iconId: "Mail" as const, label: "sales@easylinkplus.com", href: "mailto:sales@easylinkplus.com" },
         { id: "address", iconId: "Pin" as const, label: "Sydney, NSW, Australia", href: null },
       ],
       social: [
