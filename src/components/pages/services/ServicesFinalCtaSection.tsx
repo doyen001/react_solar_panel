@@ -50,12 +50,12 @@ export function ServicesFinalCtaSection() {
         </ServicesReveal>
 
         <ServicesReveal delayMs={120}>
-          <div className="mt-14 grid gap-8 border-t border-svc-dark-border pt-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-12">
+          <div className="mt-14 grid gap-8 border-t border-svc-dark-border pt-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)] lg:gap-16">
             <div className="flex flex-col gap-4">
               <h3 className="font-outfit text-base font-semibold leading-6 text-white">
                 {finalCta.contact.title}
               </h3>
-              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="flex flex-wrap gap-x-6 gap-y-3">
                 {finalCta.contact.items.map((item) => {
                   const content = (
                     <>
@@ -63,7 +63,7 @@ export function ServicesFinalCtaSection() {
                         name={item.iconId}
                         className="size-4 shrink-0 text-yellow-lemon"
                       />
-                      <span className="truncate">{item.label}</span>
+                      <span className="whitespace-nowrap">{item.label}</span>
                     </>
                   );
 

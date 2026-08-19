@@ -195,6 +195,9 @@ const MyDesignGift = createDynamicSvgIcon(
 const ProductHeart = createDynamicSvgIcon(
   () => import("./product-heart.svg?component"),
 );
+const HeatPump = createDynamicSvgIcon(
+  () => import("./heat-pump.svg?component"),
+);
 export type IconType =
   | "Search"
   | "Shield"
@@ -288,7 +291,8 @@ export type IconType =
   | "MyDesignSun"
   | "MyDesignsBattery"
   | "MyDesignsInverter"
-  | "MyDesignGift";
+  | "MyDesignGift"
+  | "HeatPump";
 
 type IconProps = {
   name: IconType | undefined;
@@ -395,6 +399,7 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     MyDesignsInverter,
     MyDesignGift,
     Shield,
+    HeatPump,
   };
 
   const CurrentIcon = icons[name];

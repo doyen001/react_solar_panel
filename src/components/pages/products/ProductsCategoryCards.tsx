@@ -1,0 +1,54 @@
+"use client";
+
+import classNames from "classnames";
+import Icon from "@/components/ui/Icons";
+import { PRODUCT_CATEGORIES } from "@/components/pages/products/productsData";
+import type { ProductCategoryKey } from "@/components/pages/products/types";
+
+type Props = {
+  activeCategory: ProductCategoryKey;
+  onSelect: (category: ProductCategoryKey) => void;
+};
+
+export function ProductsCategoryCards({ activeCategory, onSelect }: Props) {
+  return (
+    <div className="mx-auto grid w-full max-w-[1120px] grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      {PRODUCT_CATEGORIES.map((category) => {
+        const active = category.key === activeCategory;
+        return (
+          <button
+            key={category.key}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onSelect(category.key)}
+            className={classNames(
+              "flex flex-col items-start gap-3 rounded-2xl border-2 px-4 py-4 text-left shadow-sm transition-all",
+              active
+                ? "border-orange-amber bg-linear-to-b from-white to-[#fff3df] shadow-[0_8px_20px_rgba(247,141,0,0.18)]"
+                : "border-transparent bg-white hover:border-warm-border",
+            )}
+          >
+            <div
+              className={classNames(
+                "flex size-11 items-center justify-center rounded-xl border-2",
+                active
+                  ? "border-orange-amber bg-white text-orange-amber"
+                  : "border-warm-border bg-cream-50 text-warm-ink",
+              )}
+            >
+              <Icon name={category.iconName} className="size-5" />
+            </div>
+            <div>
+              <p className="font-inter text-[14px] font-bold leading-[18px] text-warm-ink">
+                {category.label}
+              </p>
+              <p className="mt-0.5 font-dm-sans text-[12px] leading-[16px] text-warm-gray">
+                {category.count.toLocaleString("en-AU")} products
+              </p>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
