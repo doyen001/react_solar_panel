@@ -82,17 +82,20 @@ export function ProductsPageSection() {
         <h1 className="font-inter text-[22px] font-extrabold uppercase leading-[28px] tracking-[0.02em] text-warm-ink sm:text-[26px]">
           Build Your System
         </h1>
-        <p className="max-w-[560px] font-dm-sans text-[13px] leading-[19px] text-warm-ink/80 sm:text-[14px]">
-          Batteries require an inverter and solar panels to complete a working
-          system.
-        </p>
       </div>
 
       <div className="mt-8 px-4 sm:px-6">
         <ProductsSystemStepper />
       </div>
 
-      <div className="mx-auto mt-8 flex w-full max-w-[1360px] flex-col gap-6 px-4 sm:px-6 lg:flex-row">
+      <div className="mx-auto mt-8 w-full max-w-[1360px] px-4 sm:px-6">
+        <ProductsCategoryCards
+          activeCategory={activeCategory}
+          onSelect={handleSelectCategory}
+        />
+      </div>
+
+      <div className="mx-auto mt-6 flex w-full max-w-[1360px] flex-col gap-6 px-4 sm:px-6 lg:flex-row">
         <ProductsSidebar
           activeCategory={activeCategory}
           activeFilterKey={activeFilterKey}
@@ -101,10 +104,6 @@ export function ProductsPageSection() {
         />
 
         <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <ProductsCategoryCards
-            activeCategory={activeCategory}
-            onSelect={handleSelectCategory}
-          />
           <ProductsFilterChips
             filters={filters}
             activeFilterKey={activeFilterKey}

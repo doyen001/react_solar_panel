@@ -12,7 +12,7 @@ type Props = {
 
 export function ProductsCategoryCards({ activeCategory, onSelect }: Props) {
   return (
-    <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3">
+    <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {PRODUCT_CATEGORIES.map((category) => {
         const active = category.key === activeCategory;
         return (
