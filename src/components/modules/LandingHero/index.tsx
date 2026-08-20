@@ -6,6 +6,7 @@ import searchIcon from "@/components/ui/Icons/search.svg";
 import userIcon from "@/components/ui/Icons/user.svg";
 import shopIcon from "@/components/ui/Icons/shop.svg";
 import { LANDING_NAV_ITEMS } from "@/utils/constant";
+import { RainbowButton } from "@/components/ui/RainbowButton";
 
 /** Shared by the desktop and mobile account menus. `block` so `w-full` applies. */
 const PORTAL_LINK_CLASS =
@@ -79,12 +80,13 @@ export function Header() {
               <Image src={shopIcon} alt="Cart" width={26} height={24} />
             </button>
 
-            <Link
+            <RainbowButton
               href="/contact-us"
-              className="rounded-xl border-2 border-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-cyan-50 xl:px-5"
+              shape="rounded"
+              className="bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-50 xl:px-5"
             >
               Contact Us
-            </Link>
+            </RainbowButton>
             <button className="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500 xl:px-5">
               Buy Now
             </button>
