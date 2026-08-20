@@ -1,7 +1,7 @@
 "use client";
 
+import Image from "next/image";
 import classNames from "classnames";
-import Icon from "@/components/ui/Icons";
 import { PRODUCT_CATEGORIES } from "@/components/pages/products/productsData";
 import type { ProductCategoryKey } from "@/components/pages/products/types";
 
@@ -30,13 +30,21 @@ export function ProductsCategoryCards({ activeCategory, onSelect }: Props) {
           >
             <div
               className={classNames(
-                "flex size-11 items-center justify-center rounded-xl border-2",
+                "flex size-11 items-center justify-center overflow-hidden rounded-xl border-2",
                 active
                   ? "border-orange-amber bg-white text-orange-amber"
                   : "border-warm-border bg-cream-50 text-warm-ink",
               )}
             >
-              <Icon name={category.iconName} className="size-5" />
+              <div className="relative size-7 shrink-0">
+                <Image
+                  src={category.iconSrc}
+                  alt={category.label}
+                  fill
+                  sizes="28px"
+                  className="object-contain"
+                />
+              </div>
             </div>
             <div>
               <p className="font-inter text-[14px] font-bold leading-[18px] text-warm-ink">

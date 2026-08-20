@@ -1,5 +1,5 @@
+import Image from "next/image";
 import classNames from "classnames";
-import Icon from "@/components/ui/Icons";
 import {
   SYSTEM_STEPS,
   SYSTEM_STEP_CONNECTORS,
@@ -7,17 +7,16 @@ import {
 import type { SystemStepStatus } from "@/components/pages/products/types";
 
 const CIRCLE_CLASS: Record<SystemStepStatus, string> = {
-  required: "size-14 border-2 border-brand-blue bg-white text-brand-blue sm:size-16",
+  required: "size-14 border-2 border-brand-blue bg-white sm:size-16",
   current:
-    "size-20 border-[3px] border-white bg-brand-blue text-white shadow-[0_0_0_5px_rgba(32,148,243,0.3)] sm:size-24",
-  optional:
-    "size-14 border-2 border-dashed border-gold bg-white/50 text-gold sm:size-16",
+    "size-20 border-[3px] border-brand-blue bg-white shadow-[0_0_0_5px_rgba(32,148,243,0.3)] sm:size-24",
+  optional: "size-14 border-2 border-dashed border-gold bg-white sm:size-16",
 };
 
-const ICON_SIZE_CLASS: Record<SystemStepStatus, string> = {
-  required: "size-6 sm:size-7",
-  current: "size-8 sm:size-9",
-  optional: "size-6 sm:size-7",
+const ICON_WRAPPER_CLASS: Record<SystemStepStatus, string> = {
+  required: "size-7",
+  current: "size-10",
+  optional: "size-7",
 };
 
 const LABEL_CLASS: Record<SystemStepStatus, string> = {
@@ -52,14 +51,24 @@ export function ProductsSystemStepper() {
                 <div className="flex h-20 items-center justify-center sm:h-24">
                   <div
                     className={classNames(
-                      "flex items-center justify-center rounded-full",
+                      "flex items-center justify-center overflow-hidden rounded-full",
                       CIRCLE_CLASS[step.status],
                     )}
                   >
-                    <Icon
-                      name={step.iconName}
-                      className={ICON_SIZE_CLASS[step.status]}
-                    />
+                    <div
+                      className={classNames(
+                        "relative shrink-0",
+                        ICON_WRAPPER_CLASS[step.status],
+                      )}
+                    >
+                      <Image
+                        src={step.iconSrc}
+                        alt={step.label}
+                        fill
+                        sizes="40px"
+                        className="object-contain"
+                      />
+                    </div>
                   </div>
                 </div>
                 <p

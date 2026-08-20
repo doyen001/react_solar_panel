@@ -1,11 +1,9 @@
-import type { IconType } from "@/components/ui/Icons";
-
 export type SystemStepStatus = "required" | "current" | "optional";
 
 export type SystemStep = {
   key: string;
   label: string;
-  iconName: IconType;
+  iconSrc: string;
   status: SystemStepStatus;
   statusLabel: string;
 };
@@ -22,7 +20,7 @@ export type ProductCategoryKey =
 export type ProductCategory = {
   key: ProductCategoryKey;
   label: string;
-  iconName: IconType;
+  iconSrc: string;
   count: number;
 };
 

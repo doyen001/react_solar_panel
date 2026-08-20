@@ -11,28 +11,28 @@ export const SYSTEM_STEPS: SystemStep[] = [
   {
     key: "solar-panels",
     label: "Solar Panels",
-    iconName: "Sun",
+    iconSrc: "/images/products/header/layer-solar-panel-icon.png",
     status: "required",
     statusLabel: "REQUIRED",
   },
   {
     key: "inverter",
     label: "Inverter",
-    iconName: "Cpu",
+    iconSrc: "/images/products/header/layer-inverter-icon.png",
     status: "required",
     statusLabel: "REQUIRED",
   },
   {
     key: "batteries",
     label: "Batteries",
-    iconName: "Battery",
+    iconSrc: "/images/products/header/layer-battery-icon.png",
     status: "current",
     statusLabel: "YOU'RE HERE",
   },
   {
     key: "ev-charger",
     label: "EV Charger",
-    iconName: "Zap",
+    iconSrc: "/images/products/header/layer-ev-charger-icon.png",
     status: "optional",
     statusLabel: "ADD-ON",
   },
@@ -45,11 +45,36 @@ export const SYSTEM_STEP_CONNECTORS: SystemStepConnector[] = [
 ];
 
 export const PRODUCT_CATEGORIES: ProductCategory[] = [
-  { key: "batteries", label: "Batteries", iconName: "Battery", count: 842 },
-  { key: "solar-panels", label: "Solar Panels", iconName: "Sun", count: 1120 },
-  { key: "inverters", label: "Inverters", iconName: "Cpu", count: 610 },
-  { key: "ev-chargers", label: "EV Chargers", iconName: "Zap", count: 240 },
-  { key: "heat-pumps", label: "Heat Pumps", iconName: "HeatPump", count: 188 },
+  {
+    key: "batteries",
+    label: "Batteries",
+    iconSrc: "/images/products/header/layer-battery-icon.png",
+    count: 842,
+  },
+  {
+    key: "solar-panels",
+    label: "Solar Panels",
+    iconSrc: "/images/products/header/layer-solar-panel-icon.png",
+    count: 1120,
+  },
+  {
+    key: "inverters",
+    label: "Inverters",
+    iconSrc: "/images/products/header/layer-inverter-icon.png",
+    count: 610,
+  },
+  {
+    key: "ev-chargers",
+    label: "EV Chargers",
+    iconSrc: "/images/products/header/layer-ev-charger-icon.png",
+    count: 240,
+  },
+  {
+    key: "heat-pumps",
+    label: "Heat Pumps",
+    iconSrc: "/images/products/header/layer-heat-pump-icon.png",
+    count: 188,
+  },
 ];
 
 export const FILTERS_BY_CATEGORY: Record<ProductCategoryKey, FilterChipDef[]> = {
