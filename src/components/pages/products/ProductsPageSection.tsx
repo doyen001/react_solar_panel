@@ -85,7 +85,10 @@ export function ProductsPageSection() {
       </div>
 
       <div className="mt-8 px-4 sm:px-6">
-        <ProductsSystemStepper />
+        <ProductsSystemStepper
+          activeCategory={activeCategory}
+          onSelectCategory={handleSelectCategory}
+        />
       </div>
 
       <div className="mx-auto mt-8 w-full max-w-[1360px] px-4 sm:px-6">

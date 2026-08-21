@@ -7,42 +7,46 @@ import type {
   SystemStepConnector,
 } from "./types";
 
+/** Ordered by dependency chain: each step requires the one before it. */
 export const SYSTEM_STEPS: SystemStep[] = [
   {
     key: "solar-panels",
     label: "Solar Panels",
     iconSrc: "/images/products/header/layer-solar-panel-icon.png",
-    status: "required",
-    statusLabel: "REQUIRED",
   },
   {
     key: "inverter",
     label: "Inverter",
     iconSrc: "/images/products/header/layer-inverter-icon.png",
-    status: "required",
-    statusLabel: "REQUIRED",
   },
   {
     key: "batteries",
     label: "Batteries",
     iconSrc: "/images/products/header/layer-battery-icon.png",
-    status: "current",
-    statusLabel: "YOU'RE HERE",
   },
   {
     key: "ev-charger",
     label: "EV Charger",
     iconSrc: "/images/products/header/layer-ev-charger-icon.png",
-    status: "optional",
-    statusLabel: "ADD-ON",
   },
 ];
+
+/** Default step to treat as "current" when the active category isn't one of the four steps above. */
+export const DEFAULT_SYSTEM_STEP_KEY = "batteries";
 
 export const SYSTEM_STEP_CONNECTORS: SystemStepConnector[] = [
   "requires",
   "requires",
   "dotted",
 ];
+
+/** Step keys are diagram-flow labels ("Inverter"), category keys are plural catalog slugs. */
+export const SYSTEM_STEP_CATEGORY: Record<string, ProductCategoryKey> = {
+  "solar-panels": "solar-panels",
+  inverter: "inverters",
+  batteries: "batteries",
+  "ev-charger": "ev-chargers",
+};
 
 export const PRODUCT_CATEGORIES: ProductCategory[] = [
   {

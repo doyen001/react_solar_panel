@@ -4,8 +4,6 @@ export type SystemStep = {
   key: string;
   label: string;
   iconSrc: string;
-  status: SystemStepStatus;
-  statusLabel: string;
 };
 
 export type SystemStepConnector = "requires" | "dotted";

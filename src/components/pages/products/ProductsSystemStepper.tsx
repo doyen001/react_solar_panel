@@ -1,10 +1,15 @@
 import Image from "next/image";
 import classNames from "classnames";
 import {
+  DEFAULT_SYSTEM_STEP_KEY,
   SYSTEM_STEPS,
+  SYSTEM_STEP_CATEGORY,
   SYSTEM_STEP_CONNECTORS,
 } from "@/components/pages/products/productsData";
-import type { SystemStepStatus } from "@/components/pages/products/types";
+import type {
+  ProductCategoryKey,
+  SystemStepStatus,
+} from "@/components/pages/products/types";
 
 /** Solar Panels -> Inverter points forward; Inverter <- Batteries <- EV Charger point back at what they require. */
 const CONNECTOR_ARROW_DIRECTION: ("left" | "right")[] = ["right", "left", "left"];
@@ -64,6 +69,12 @@ const ICON_WRAPPER_CLASS: Record<SystemStepStatus, string> = {
   optional: "size-10",
 };
 
+const PULSE_CLASS: Record<SystemStepStatus, string> = {
+  required: "bg-brand-blue/30",
+  current: "bg-brand-blue/35",
+  optional: "bg-gold/30",
+};
+
 const LABEL_CLASS: Record<SystemStepStatus, string> = {
   required: "text-warm-ink",
   current: "text-warm-ink",
@@ -76,7 +87,23 @@ const STATUS_TEXT_CLASS: Record<SystemStepStatus, string> = {
   optional: "text-warm-ink/50",
 };
 
-export function ProductsSystemStepper() {
+const STATUS_LABEL: Record<SystemStepStatus, string> = {
+  required: "REQUIRED",
+  current: "YOU'RE HERE",
+  optional: "ADD-ON",
+};
+
+type Props = {
+  activeCategory?: ProductCategoryKey;
+  onSelectCategory?: (category: ProductCategoryKey) => void;
+};
+
+export function ProductsSystemStepper({ activeCategory, onSelectCategory }: Props) {
+  const selectedKey =
+    SYSTEM_STEPS.find((step) => SYSTEM_STEP_CATEGORY[step.key] === activeCategory)
+      ?.key ?? DEFAULT_SYSTEM_STEP_KEY;
+  const selectedIndex = SYSTEM_STEPS.findIndex((step) => step.key === selectedKey);
+
   return (
     <div className="mx-auto w-full max-w-[1120px]">
       <div className="flex items-start gap-1 overflow-x-auto px-1 pb-2 sm:justify-center sm:gap-2 sm:overflow-visible">
@@ -84,20 +111,46 @@ export function ProductsSystemStepper() {
           const connector = SYSTEM_STEP_CONNECTORS[index];
           const arrowDirection = CONNECTOR_ARROW_DIRECTION[index];
           const isLast = index === SYSTEM_STEPS.length - 1;
+          const stepCategory = SYSTEM_STEP_CATEGORY[step.key];
+          const isSelected = index === selectedIndex;
+          const status: SystemStepStatus =
+            index < selectedIndex
+              ? "required"
+              : index === selectedIndex
+                ? "current"
+                : "optional";
           return (
             <div key={step.key} className="flex shrink-0 items-start">
               <div className="flex w-[96px] shrink-0 flex-col items-center gap-2 sm:w-[116px]">
-                <div className="flex h-20 items-center justify-center sm:h-24">
-                  <div
+                <div className="relative flex h-20 items-center justify-center sm:h-24">
+                  {isSelected ? (
+                    <span
+                      aria-hidden
+                      className={classNames(
+                        "absolute inset-2 rounded-full motion-reduce:hidden sm:inset-3",
+                        "animate-[svc-step-pulse_2.4s_ease-out_infinite]",
+                        PULSE_CLASS[status],
+                      )}
+                    />
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={
+                      onSelectCategory
+                        ? () => onSelectCategory(stepCategory)
+                        : undefined
+                    }
+                    aria-pressed={isSelected}
+                    aria-label={`${step.label} — ${STATUS_LABEL[status]}`}
                     className={classNames(
-                      "flex items-center justify-center overflow-hidden rounded-full",
-                      CIRCLE_CLASS[step.status],
+                      "relative flex items-center justify-center overflow-hidden rounded-full transition-transform hover:scale-105 active:scale-95",
+                      CIRCLE_CLASS[status],
                     )}
                   >
                     <div
                       className={classNames(
                         "relative shrink-0",
-                        ICON_WRAPPER_CLASS[step.status],
+                        ICON_WRAPPER_CLASS[status],
                       )}
                     >
                       <Image
@@ -108,12 +161,12 @@ export function ProductsSystemStepper() {
                         className="object-contain"
                       />
                     </div>
-                  </div>
+                  </button>
                 </div>
                 <p
                   className={classNames(
                     "text-center font-inter text-[13px] font-bold leading-[16px]",
-                    LABEL_CLASS[step.status],
+                    LABEL_CLASS[status],
                   )}
                 >
                   {step.label}
@@ -121,10 +174,10 @@ export function ProductsSystemStepper() {
                 <p
                   className={classNames(
                     "text-center font-dm-sans text-[10px] font-bold uppercase tracking-[0.06em]",
-                    STATUS_TEXT_CLASS[step.status],
+                    STATUS_TEXT_CLASS[status],
                   )}
                 >
-                  {step.statusLabel}
+                  {STATUS_LABEL[status]}
                 </p>
               </div>
 
