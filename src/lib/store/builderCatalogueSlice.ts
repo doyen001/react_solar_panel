@@ -5,16 +5,11 @@ import {
 } from "@reduxjs/toolkit";
 import {
   BUILDER_CATEGORIES,
+  EMPTY_CATALOGUE,
   fetchBuilderCatalogue,
   type BuilderCatalogue,
 } from "@/lib/designs/catalogue";
 import type { RootState } from "./store";
-
-const EMPTY_CATALOGUE: BuilderCatalogue = {
-  "Solar Panel": [],
-  Inverter: [],
-  Battery: [],
-};
 
 export type BuilderCatalogueLoadState = "idle" | "loading" | "ready" | "error";
 

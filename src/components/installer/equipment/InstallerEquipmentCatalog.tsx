@@ -8,12 +8,12 @@ import {
   useInstallerProductsList,
 } from "@/lib/installers/products";
 
-type CategoryKey = "Solar Panel" | "Inverter" | "Battery";
+type CategoryKey = "Solar Panel" | "Inverter" | "Battery" | "EV Charger" | "Heat Pump";
 
 const CATEGORY_TABS: {
   key: CategoryKey;
   label: string;
-  iconName: "Sun" | "Cpu" | "Battery";
+  iconName: "Sun" | "Cpu" | "Battery" | "Zap" | "HeatPump";
   blurb: string;
 }[] = [
   {
@@ -34,7 +34,27 @@ const CATEGORY_TABS: {
     iconName: "Battery",
     blurb: "CEC-approved home battery systems",
   },
+  {
+    key: "EV Charger",
+    label: "EV Chargers",
+    iconName: "Zap",
+    blurb: "Home and workplace EV charging equipment",
+  },
+  {
+    key: "Heat Pump",
+    label: "Heat Pumps",
+    iconName: "HeatPump",
+    blurb: "Heat pump hot water systems",
+  },
 ];
+
+const SPEC_LABEL_BY_CATEGORY: Record<CategoryKey, string> = {
+  "Solar Panel": "Wattage",
+  Inverter: "Rated",
+  Battery: "Capacity",
+  "EV Charger": "Rated",
+  "Heat Pump": "Capacity",
+};
 
 const PAGE_SIZE = 24;
 
@@ -78,6 +98,17 @@ function getCapacityKwh(product: InstallerProductSummary): number | null {
   return null;
 }
 
+function getCapacityL(product: InstallerProductSummary): number | null {
+  const specs = specsRecord(product);
+  const v = specs.capacityL;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string") {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
 function getRatedKw(product: InstallerProductSummary): number | null {
   const specs = specsRecord(product);
   const v = specs.ratedKw;
@@ -109,12 +140,15 @@ function ProductCard({ product }: { product: InstallerProductSummary }) {
   let primaryFigure: string | null = null;
   if (category === "Solar Panel" && product.wattage) {
     primaryFigure = `${Math.round(product.wattage)} W`;
-  } else if (category === "Inverter") {
+  } else if (category === "Inverter" || category === "EV Charger") {
     const kw = getRatedKw(product) ?? (product.wattage ? product.wattage / 1000 : null);
     if (kw) primaryFigure = `${kw} kW`;
   } else if (category === "Battery") {
     const kwh = getCapacityKwh(product);
     if (kwh) primaryFigure = `${kwh} kWh`;
+  } else if (category === "Heat Pump") {
+    const litres = getCapacityL(product);
+    if (litres) primaryFigure = `${litres} L`;
   }
 
   return (
@@ -150,11 +184,7 @@ function ProductCard({ product }: { product: InstallerProductSummary }) {
         {primaryFigure ? (
           <div className="rounded-md bg-cream-50 px-2 py-1.5">
             <dt className="font-dm-sans text-[10px] uppercase tracking-[0.06em] text-warm-gray">
-              {category === "Solar Panel"
-                ? "Wattage"
-                : category === "Inverter"
-                  ? "Rated"
-                  : "Capacity"}
+              {SPEC_LABEL_BY_CATEGORY[category]}
             </dt>
             <dd className="font-inter text-[13px] font-semibold text-warm-ink">
               {primaryFigure}

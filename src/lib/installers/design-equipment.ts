@@ -1,4 +1,13 @@
-export type EquipmentCardKey = "solar" | "battery" | "equipment" | "site";
+export const EQUIPMENT_CARD_KEYS = [
+  "solar",
+  "battery",
+  "equipment",
+  "evCharger",
+  "heatPump",
+  "site",
+] as const;
+
+export type EquipmentCardKey = (typeof EQUIPMENT_CARD_KEYS)[number];
 
 export type EquipmentRow = { label: string; value: string };
 
@@ -19,7 +28,7 @@ export function parseDesignEquipmentWizardData(
 
   const parsedCards: Partial<Record<EquipmentCardKey, EquipmentRow[]>> = {};
   if (equipmentCards && typeof equipmentCards === "object") {
-    for (const key of ["solar", "battery", "equipment", "site"] as const) {
+    for (const key of EQUIPMENT_CARD_KEYS) {
       const rows = (equipmentCards as Record<string, unknown>)[key];
       if (Array.isArray(rows)) {
         parsedCards[key] = rows
@@ -39,12 +48,8 @@ export function parseDesignEquipmentWizardData(
   }
 
   const hidden = Array.isArray(equipmentCardsHidden)
-    ? equipmentCardsHidden.filter(
-        (key): key is EquipmentCardKey =>
-          key === "solar" ||
-          key === "battery" ||
-          key === "equipment" ||
-          key === "site",
+    ? equipmentCardsHidden.filter((key): key is EquipmentCardKey =>
+        (EQUIPMENT_CARD_KEYS as readonly string[]).includes(key as string),
       )
     : undefined;
 
@@ -61,12 +66,12 @@ export function mergeEquipmentWithWizardData(
   const parsed = parseDesignEquipmentWizardData(wizardData);
   const hidden = new Set(parsed.equipmentCardsHidden ?? []);
 
-  const equipment = {
-    solar: parsed.equipmentCards?.solar ?? base.solar,
-    battery: parsed.equipmentCards?.battery ?? base.battery,
-    equipment: parsed.equipmentCards?.equipment ?? base.equipment,
-    site: parsed.equipmentCards?.site ?? base.site,
-  };
+  const equipment = Object.fromEntries(
+    EQUIPMENT_CARD_KEYS.map((key) => [
+      key,
+      parsed.equipmentCards?.[key] ?? base[key],
+    ]),
+  ) as InstallerHomeEquipment;
 
   return { equipment, hidden };
 }

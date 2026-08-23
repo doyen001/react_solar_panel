@@ -4,7 +4,34 @@ import {
   buildFinancialProjectionFromProposal,
   type FinancialProjectionYearRow,
 } from "@/lib/proposal/financialProjection";
-import type { DesignProposalState } from "@/lib/store/designProposalSlice";
+import {
+  EQUIPMENT_CATEGORY_KEYS,
+  type DesignProposalState,
+  type EquipmentCategoryKey,
+} from "@/lib/store/designProposalSlice";
+
+const CATEGORY_ROW_LABEL: Record<EquipmentCategoryKey, string> = {
+  solarPanel: "Solar panels",
+  inverter: "Inverter",
+  battery: "Battery",
+  evCharger: "EV charger",
+  heatPump: "Heat pump",
+};
+
+/** One row per category with at least one item — omitted entirely otherwise. */
+export function equipmentRows(proposal: DesignProposalState): [string, string][] {
+  return EQUIPMENT_CATEGORY_KEYS.flatMap((key) => {
+    const items = proposal.equipment.items[key];
+    if (!items || items.length === 0) return [];
+    const text = items
+      .map((item) => {
+        const qty = item.quantity > 1 ? ` ×${item.quantity}` : "";
+        return `${item.name}${qty} (${item.ratingLabel})`;
+      })
+      .join(", ");
+    return [[CATEGORY_ROW_LABEL[key], text]] as [string, string][];
+  });
+}
 
 const PREPARED_BY = {
   name: "Sujay Salvi",
@@ -424,10 +451,8 @@ export async function generateProposalPdfBlob(
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   const rows: [string, string][] = [
-    ["Solar panels", `${proposal.equipment.solarPanelName} · ${proposal.equipment.solarPanelWatts}`],
+    ...equipmentRows(proposal),
     ["Panel count", proposal.summary.totalPanels],
-    ["Inverter", `${proposal.equipment.inverterName} · ${proposal.equipment.inverterWatts}`],
-    ["Battery", `${proposal.equipment.batteryName} · ${proposal.equipment.batteryWatts}`],
     ["CO2 offset", proposal.equipment.co2Offset],
     ["Payback", proposal.summary.payback],
     ["Monthly savings", proposal.pricing.monthlySavings],

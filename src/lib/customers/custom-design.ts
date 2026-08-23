@@ -1,15 +1,51 @@
 import { fetchWithCustomerSession } from "@/lib/customers/customer-fetch-client";
-import type { CustomerDesign } from "@/lib/customers/designs";
-import type {
-  DesignProposalPayload,
-  DesignProposalState,
+import type { CustomerDesign, CustomerDesignProduct } from "@/lib/customers/designs";
+import {
+  EQUIPMENT_CATEGORY_KEYS,
+  emptyEquipmentItems,
+  type DesignProposalPayload,
+  type DesignProposalState,
+  type EquipmentCategoryKey,
+  type EquipmentItem,
+  type EquipmentItemsByCategory,
 } from "@/lib/store/designProposalSlice";
 import {
   batteryCapacityKwh,
   inverterRatedKw,
+  numberSpec,
   productLabel,
+  productsByCategory,
   systemSizeKwFrom,
 } from "@/lib/designs/product-specs";
+
+/** design.products' category substring for each equipment category key. */
+const CATEGORY_SUBSTRING: Record<EquipmentCategoryKey, string> = {
+  solarPanel: "panel",
+  inverter: "inverter",
+  battery: "battery",
+  evCharger: "ev charger",
+  heatPump: "heat pump",
+};
+
+/** Mirrors the items step's ratingLabel(), but for a saved design's attached products. */
+function ratingLabelFor(
+  item: CustomerDesignProduct,
+  category: EquipmentCategoryKey,
+): string {
+  if (category === "solarPanel") {
+    return item.product?.wattage ? `${item.product.wattage} W` : "—";
+  }
+  if (category === "battery") {
+    const kwh = batteryCapacityKwh(item);
+    return kwh !== undefined ? `${kwh} kWh` : "—";
+  }
+  if (category === "heatPump") {
+    const litres = numberSpec(item.product, "capacityL");
+    return litres !== undefined ? `${litres} L` : "—";
+  }
+  const kw = inverterRatedKw(item);
+  return kw !== undefined ? `${kw} kW` : "—";
+}
 
 type ApiEnvelope<T> = {
   success?: boolean;
@@ -49,7 +85,8 @@ export type SaveCustomDesignInput = {
 };
 
 /**
- * The catalogue selections, as DesignProduct rows.
+ * The catalogue selections, as DesignProduct rows — every item across every
+ * category, not just one per category.
  *
  * Returns undefined when nothing was picked, so a save cannot wipe equipment
  * the installer attached just because the builder had no selection.
@@ -57,15 +94,19 @@ export type SaveCustomDesignInput = {
 function proposalProducts(
   proposal: DesignProposalState,
 ): SaveCustomDesignInput["products"] | undefined {
-  const panelCount = toPositiveInt(proposal.equipment.numberOfPanels) ?? 1;
+  const panelCount = toPositiveInt(proposal.equipment.numberOfPanels);
 
-  const picks = [
-    { productId: proposal.equipment.solarPanelProductId, quantity: panelCount },
-    { productId: proposal.equipment.inverterProductId, quantity: 1 },
-    { productId: proposal.equipment.batteryProductId, quantity: 1 },
-  ].filter(
-    (pick): pick is { productId: string; quantity: number } =>
-      Boolean(pick.productId) && pick.quantity > 0,
+  const picks = Object.entries(proposal.equipment.items).flatMap(
+    ([category, entries]) =>
+      entries.map((item) => ({
+        productId: item.productId,
+        // The panel count from the roof-layout step is more authoritative
+        // than a manually-added quantity for the first solar panel entry.
+        quantity:
+          category === "solarPanel" && entries[0] === item && panelCount
+            ? panelCount
+            : Math.max(item.quantity, 1),
+      })),
   );
 
   return picks.length > 0 ? picks : undefined;
@@ -124,9 +165,29 @@ function currency(value: number | null | undefined): string | undefined {
 }
 
 function productFor(design: CustomerDesign, category: string) {
-  return design.products?.find((item) =>
-    item.product?.category.toLowerCase().includes(category),
-  );
+  return productsByCategory(design.products, category)[0];
+}
+
+/** Every attached product, grouped into the five equipment categories. */
+function itemsFromDesign(design: CustomerDesign): EquipmentItemsByCategory {
+  const items = emptyEquipmentItems();
+  for (const key of EQUIPMENT_CATEGORY_KEYS) {
+    const matches = productsByCategory(design.products, CATEGORY_SUBSTRING[key]);
+    items[key] = matches
+      .filter((item): item is CustomerDesignProduct & { product: NonNullable<CustomerDesignProduct["product"]> } =>
+        Boolean(item.product),
+      )
+      .map(
+        (item): EquipmentItem => ({
+          productId: item.product.id,
+          brand: item.product.brand ?? "",
+          name: item.product.name,
+          quantity: item.quantity,
+          ratingLabel: ratingLabelFor(item, key),
+        }),
+      );
+  }
+  return items;
 }
 
 /**
@@ -196,6 +257,7 @@ function derivedFromDesign(design: CustomerDesign): DesignProposalPayload {
       ...(design.panelCount != null
         ? { numberOfPanels: String(design.panelCount) }
         : {}),
+      items: itemsFromDesign(design),
     },
     pricing: {
       ...(equipmentCost ? { totalSystemPrice: currency(equipmentCost)! } : {}),

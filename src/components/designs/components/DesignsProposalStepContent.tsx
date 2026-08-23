@@ -4,7 +4,11 @@ import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { selectDesignProposal } from "@/lib/store/designProposalSlice";
+import {
+  EQUIPMENT_CATEGORY_KEYS,
+  selectDesignProposal,
+  type EquipmentCategoryKey,
+} from "@/lib/store/designProposalSlice";
 import { setUser } from "@/lib/store/customerAuthSlice";
 import {
   profileDiff,
@@ -45,6 +49,14 @@ function ProposalStatCard({
     </div>
   );
 }
+
+const CATEGORY_DETAIL_LABEL: Record<EquipmentCategoryKey, string> = {
+  solarPanel: "Solar Panels",
+  inverter: "Inverter",
+  battery: "Battery",
+  evCharger: "EV Charger",
+  heatPump: "Heat Pump",
+};
 
 function ProposalDetailRow({ label, value }: { label: string; value: string }) {
   return (
@@ -223,18 +235,22 @@ export function DesignsProposalStepContent({
                 </div>
                 <hr className="h-px w-full max-w-[478.263px] border-0 bg-black/20" />
                 <div className="flex flex-col gap-[20px]">
-                  <ProposalDetailRow
-                    label="Solar Panels"
-                    value={`${proposal.equipment.solarPanelName} ${proposal.equipment.solarPanelWatts}`.trim()}
-                  />
-                  <ProposalDetailRow
-                    label="Inverter"
-                    value={`${proposal.equipment.inverterName} ${proposal.equipment.inverterWatts}`.trim()}
-                  />
-                  <ProposalDetailRow
-                    label="Battery"
-                    value={`${proposal.equipment.batteryName} ${proposal.equipment.batteryWatts}`.trim()}
-                  />
+                  {EQUIPMENT_CATEGORY_KEYS.map((key) => {
+                    const items = proposal.equipment.items[key];
+                    if (!items || items.length === 0) return null;
+                    const value = items
+                      .map((item) =>
+                        `${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ""} ${item.ratingLabel}`.trim(),
+                      )
+                      .join(", ");
+                    return (
+                      <ProposalDetailRow
+                        key={key}
+                        label={CATEGORY_DETAIL_LABEL[key]}
+                        value={value}
+                      />
+                    );
+                  })}
                 </div>
                 <hr className="h-px w-full max-w-[478.263px] border-0 bg-black/20" />
                 <div className="flex flex-col gap-[20px]">

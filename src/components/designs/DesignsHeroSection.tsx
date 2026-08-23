@@ -123,16 +123,10 @@ export function DesignsHeroSection({
 
   const pinnedProductIds = useMemo(
     () =>
-      [
-        proposal.equipment.solarPanelProductId,
-        proposal.equipment.inverterProductId,
-        proposal.equipment.batteryProductId,
-      ].filter((id): id is string => Boolean(id)),
-    [
-      proposal.equipment.solarPanelProductId,
-      proposal.equipment.inverterProductId,
-      proposal.equipment.batteryProductId,
-    ],
+      Object.values(proposal.equipment.items).flatMap((entries) =>
+        entries.map((item) => item.productId),
+      ),
+    [proposal.equipment.items],
   );
 
   const pinnedProductIdsKey = pinnedProductIds.join(",");
@@ -275,36 +269,33 @@ export function DesignsHeroSection({
     if (activeScreen === "items") {
       const itemsValues = itemsStepRef.current?.getValues();
       if (itemsValues) {
-        const solarPanelName =
-          itemsValues.solarPanel.summary.leftCol[0]?.value || "TRINA";
-        const solarPanelWatts =
-          itemsValues.solarPanel.summary.rightCol[0]?.value || "630 W";
-        const inverterName =
-          itemsValues.equipment.summary.leftCol[0]?.value || "BLUETTI";
-        const inverterWatts =
-          itemsValues.equipment.summary.rightCol[0]?.value || "7.6 kW";
-        const batteryName =
-          itemsValues.battery.summary.leftCol[0]?.value || "BLUETTI";
-        const batteryWatts =
-          itemsValues.battery.summary.rightCol[0]?.value || "7.6 kW";
+        const firstSolarPanel = itemsValues.items.solarPanel[0];
+        const firstInverter = itemsValues.items.inverter[0];
+        const firstBattery = itemsValues.items.battery[0];
 
         dispatch(
           mergeProposalData({
             equipment: {
-              solarPanelName,
-              solarPanelWatts,
-              inverterName,
-              inverterWatts,
-              batteryName,
-              batteryWatts,
-              numberOfPanels:
-                itemsValues.solarPanel.summary.rightCol[1]?.value ||
-                proposal.equipment.numberOfPanels,
+              // The singular fields describe only the first item of their
+              // category — kept for readers (PDF, summary rows) that only
+              // need one representative product. `items` below is the real
+              // source of truth for everything selected.
+              solarPanelName:
+                firstSolarPanel?.name || proposal.equipment.solarPanelName,
+              solarPanelWatts:
+                firstSolarPanel?.ratingLabel || proposal.equipment.solarPanelWatts,
+              inverterName: firstInverter?.name || proposal.equipment.inverterName,
+              inverterWatts:
+                firstInverter?.ratingLabel || proposal.equipment.inverterWatts,
+              batteryName: firstBattery?.name || proposal.equipment.batteryName,
+              batteryWatts:
+                firstBattery?.ratingLabel || proposal.equipment.batteryWatts,
               // Carried so the save can write real DesignProduct rows; the
               // display strings above cannot identify a catalogue product.
-              solarPanelProductId: itemsValues.solarPanel.productId,
-              batteryProductId: itemsValues.battery.productId,
-              inverterProductId: itemsValues.equipment.productId,
+              solarPanelProductId: firstSolarPanel?.productId,
+              batteryProductId: firstBattery?.productId,
+              inverterProductId: firstInverter?.productId,
+              items: itemsValues.items,
             },
           }),
         );

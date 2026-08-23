@@ -5,7 +5,12 @@
  * DesignProduct rows — without them a custom design has no equipment, which is
  * why its equipment cards used to read N/A while a package's showed real kit.
  */
-export type BuilderProductCategory = "Solar Panel" | "Inverter" | "Battery";
+export type BuilderProductCategory =
+  | "Solar Panel"
+  | "Inverter"
+  | "Battery"
+  | "EV Charger"
+  | "Heat Pump";
 
 export type BuilderProduct = {
   id: string;
@@ -55,6 +60,8 @@ export const BUILDER_CATEGORIES: readonly BuilderProductCategory[] = [
   "Solar Panel",
   "Inverter",
   "Battery",
+  "EV Charger",
+  "Heat Pump",
 ] as const;
 
 export type BuilderCatalogue = Record<
@@ -62,10 +69,12 @@ export type BuilderCatalogue = Record<
   BuilderProduct[]
 >;
 
-const EMPTY_CATALOGUE: BuilderCatalogue = {
+export const EMPTY_CATALOGUE: BuilderCatalogue = {
   "Solar Panel": [],
   Inverter: [],
   Battery: [],
+  "EV Charger": [],
+  "Heat Pump": [],
 };
 
 /**

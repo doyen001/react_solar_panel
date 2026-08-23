@@ -25,7 +25,14 @@ export function designToProposalState(
   return {
     summary: { ...DESIGN_PROPOSAL_DEFAULTS.summary, ...payload.summary },
     customer: { ...DESIGN_PROPOSAL_DEFAULTS.customer, ...payload.customer },
-    equipment: { ...DESIGN_PROPOSAL_DEFAULTS.equipment, ...payload.equipment },
+    equipment: {
+      ...DESIGN_PROPOSAL_DEFAULTS.equipment,
+      ...payload.equipment,
+      items: {
+        ...DESIGN_PROPOSAL_DEFAULTS.equipment.items,
+        ...payload.equipment?.items,
+      },
+    },
     pricing: { ...DESIGN_PROPOSAL_DEFAULTS.pricing, ...payload.pricing },
     solarDesign:
       payload.solarDesign ?? DESIGN_PROPOSAL_DEFAULTS.solarDesign ?? null,

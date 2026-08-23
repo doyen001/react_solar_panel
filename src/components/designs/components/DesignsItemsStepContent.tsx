@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import classNames from "classnames";
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { useAppSelector } from "@/lib/store/hooks";
+import Icon, { type IconType } from "@/components/ui/Icons";
 import {
   brandsOf,
   modelsOf,
@@ -12,23 +14,55 @@ import {
 import { selectBuilderCatalogue } from "@/lib/store/builderCatalogueSlice";
 import {
   batteryCapacityKwh,
+  cecApprovedLabel as cecApprovedLabelFor,
   inverterRatedKw,
+  numberSpec,
+  productType,
 } from "@/lib/designs/product-specs";
+import {
+  EQUIPMENT_CATEGORY_KEYS,
+  legacyEquipmentToItems,
+  type DesignProposalEquipment,
+  type EquipmentCategoryKey,
+  type EquipmentItem,
+  type EquipmentItemsByCategory,
+} from "@/lib/store/designProposalSlice";
 import {
   DesignsSelectField,
   type DesignsSelectOption,
 } from "./DesignsSelectField";
 
-type SectionKey = "solarPanel" | "battery" | "equipment";
-
-/** The third card is the inverter. */
-const SECTION_CATEGORY: Record<SectionKey, BuilderProductCategory> = {
+const SECTION_CATEGORY: Record<EquipmentCategoryKey, BuilderProductCategory> = {
   solarPanel: "Solar Panel",
+  inverter: "Inverter",
   battery: "Battery",
-  equipment: "Inverter",
+  evCharger: "EV Charger",
+  heatPump: "Heat Pump",
 };
 
-/** Panels advertise watts; batteries kWh; inverters rated kW. */
+const SECTION_TITLE: Record<EquipmentCategoryKey, string> = {
+  solarPanel: "Select Solar Panels",
+  inverter: "Select Inverter",
+  battery: "Select Battery",
+  evCharger: "Select EV Charger",
+  heatPump: "Select Heat Pump",
+};
+
+/** Photos exist only for the three original categories; the two new ones fall back to an icon glyph. */
+const SECTION_IMAGE: Partial<
+  Record<EquipmentCategoryKey, { src: string; width: number; height: number }>
+> = {
+  solarPanel: { src: "/images/designs/solarPanel.png", width: 67, height: 99 },
+  battery: { src: "/images/designs/battery.png", width: 57, height: 93 },
+  inverter: { src: "/images/designs/equipment.png", width: 47, height: 103 },
+};
+
+const SECTION_ICON: Partial<Record<EquipmentCategoryKey, IconType>> = {
+  evCharger: "Zap",
+  heatPump: "HeatPump",
+};
+
+/** Panels advertise watts; batteries kWh; inverters/EV chargers rated kW; heat pumps tank litres. */
 function ratingLabel(product: BuilderProduct): string {
   if (product.category === "Solar Panel") {
     return product.wattage ? `${product.wattage} W` : "—";
@@ -37,144 +71,83 @@ function ratingLabel(product: BuilderProduct): string {
     const kwh = batteryCapacityKwh({ quantity: 1, product });
     return kwh !== undefined ? `${kwh} kWh` : "—";
   }
+  if (product.category === "Heat Pump") {
+    const litres = numberSpec(product, "capacityL");
+    return litres !== undefined ? `${litres} L` : "—";
+  }
+  // Inverter and EV Charger both carry their rating as a "ratedKw" spec.
   const kw = inverterRatedKw({ quantity: 1, product });
   return kw !== undefined ? `${kw} kW` : "—";
 }
 
-function cecApprovedLabel(product: BuilderProduct): string {
-  const specs = product.specs;
-  if (specs && typeof specs === "object" && !Array.isArray(specs)) {
-    const approved = (specs as Record<string, unknown>).cecApproved;
-    if (typeof approved === "boolean") return approved ? "Yes" : "No";
-  }
-  return "—";
+type SpecLine = { label: string; value: string };
+
+/** An item plus a stable id assigned once at creation — lets the stack animate
+ *  reorders instead of remounting, without touching a ref during render. */
+type StackEntry = { key: string; item: EquipmentItem };
+
+function toEntry(item: EquipmentItem): StackEntry {
+  return { key: crypto.randomUUID(), item };
 }
 
-type SpecLine = { label: string; value: string };
-type SummarySpec = {
-  imageSrc: string;
-  imageWidth: number;
-  imageHeight: number;
-  imageAlt: string;
-  leftCol: SpecLine[];
-  rightCol: SpecLine[];
-};
-
-type ItemsSectionValue = {
-  brand: string;
-  /** Second dropdown: the chosen model, held as its catalogue id. */
-  size: string;
-  /** Catalogue id of the selected product; '' until one is picked. */
-  productId: string;
-  summary: SummarySpec;
-};
-
-export type DesignsItemsStepValue = {
-  solarPanel: ItemsSectionValue;
-  battery: ItemsSectionValue;
-  equipment: ItemsSectionValue;
-};
-
-const DEFAULT_ITEMS_STEP_VALUE: DesignsItemsStepValue = {
-  solarPanel: {
-    brand: "",
-    size: "",
-    productId: "",
-    summary: {
-      imageSrc: "/images/designs/solarPanel.png",
-      imageWidth: 67,
-      imageHeight: 99,
-      imageAlt: "",
-      leftCol: [
-        { label: "Brand -", value: "TRINA" },
-        { label: "Model -", value: "9823829302" },
-        { label: "Type -", value: "Mono Perc Bifacial" },
-        { label: "CEC Approved -", value: "Yes" },
-      ],
-      rightCol: [
-        { label: "Watts per Panel -", value: "630" },
-        { label: "Number of Panels -", value: "32" },
-      ],
-    },
-  },
-  battery: {
-    brand: "",
-    size: "",
-    productId: "",
-    summary: {
-      imageSrc: "/images/designs/battery.png",
-      imageWidth: 57,
-      imageHeight: 93,
-      imageAlt: "",
-      leftCol: [
-        { label: "Brand -", value: "BLUETTI" },
-        { label: "Model -", value: "9823829302" },
-        { label: "Type -", value: "High voltage" },
-        { label: "CEC Approved -", value: "Yes" },
-      ],
-      rightCol: [
-        { label: "Watts per Panel -", value: "7.6 kW" },
-        { label: "Number of Panels -", value: "8" },
-      ],
-    },
-  },
-  equipment: {
-    brand: "",
-    size: "",
-    productId: "",
-    summary: {
-      imageSrc: "/images/designs/equipment.png",
-      imageWidth: 47,
-      imageHeight: 103,
-      imageAlt: "",
-      leftCol: [
-        { label: "Brand -", value: "BLUETTI" },
-        { label: "Model -", value: "9823829302" },
-        { label: "Type -", value: "High voltage" },
-        { label: "CEC Approved -", value: "Yes" },
-      ],
-      rightCol: [
-        { label: "Watts per Panel -", value: "7.6 kW" },
-        { label: "Number of Panels -", value: "8" },
-      ],
-    },
-  },
-};
+/** What one stacked card shows — resolved at render time from the live catalogue, not stored on the item. */
+function itemToSummary(
+  item: EquipmentItem,
+  product: BuilderProduct | undefined,
+): { leftCol: SpecLine[]; rightCol: SpecLine[] } {
+  return {
+    leftCol: [
+      { label: "Brand -", value: item.brand },
+      { label: "Model -", value: item.name },
+      { label: "Type -", value: product ? productType({ quantity: 1, product }) ?? "—" : "—" },
+      {
+        label: "CEC Approved -",
+        value: product ? cecApprovedLabelFor({ quantity: 1, product }) ?? "—" : "—",
+      },
+    ],
+    rightCol: [
+      { label: "Rating -", value: item.ratingLabel || "—" },
+      { label: "Qty -", value: String(item.quantity) },
+    ],
+  };
+}
 
 /**
  * Figma 3:4448 — nested panel: 135px height, 10px radius, 2px #00b0f0 border,
  * gradient fill; inner row 309× centered, image 67×99 + 14px + text columns 119 / 111.
  */
 function DesignsItemProductSummary({
-  imageSrc,
-  imageWidth,
-  imageHeight,
-  imageAlt,
+  category,
   leftCol,
   rightCol,
+  onRemove,
 }: {
-  imageSrc: string;
-  imageWidth: number;
-  imageHeight: number;
-  imageAlt: string;
+  category: EquipmentCategoryKey;
   leftCol: SpecLine[];
   rightCol: SpecLine[];
+  onRemove?: () => void;
 }) {
-  const [wattsRow, countRow] = rightCol.slice(0, 2);
+  const image = SECTION_IMAGE[category];
+  const iconName = SECTION_ICON[category];
+  const [ratingRow, qtyRow] = rightCol.slice(0, 2);
 
   return (
-    <div className="relative h-[135px] w-full shrink-0 overflow-clip rounded-[10px] border-2 border-solid border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber">
+    <div className="relative h-[160px] w-full shrink-0 overflow-clip rounded-[10px] border-2 border-solid border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber">
       {/* 67 + 244 = 311 at spec; Figma frame is 309px — use min width so columns keep 119/111 */}
       <div className="absolute left-[calc(50%-0.19px)] top-1/2 flex w-[min(311px,calc(100%-16px))] -translate-x-1/2 -translate-y-1/2 items-center justify-between">
-        <div className="relative h-[99px] w-[67px] shrink-0 overflow-hidden">
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            width={imageWidth}
-            height={imageHeight}
-            className="h-full w-full object-contain object-left"
-            unoptimized
-          />
+        <div className="relative flex h-[99px] w-[67px] shrink-0 items-center justify-center overflow-hidden">
+          {image ? (
+            <Image
+              src={image.src}
+              alt=""
+              width={image.width}
+              height={image.height}
+              className="h-full w-full object-contain object-left"
+              unoptimized
+            />
+          ) : iconName ? (
+            <Icon name={iconName} className="size-10 text-white" />
+          ) : null}
         </div>
         <div className="flex shrink-0 gap-[14px]">
           <div className="flex h-[93px] w-[119px] flex-col gap-[14px] leading-0">
@@ -196,300 +169,350 @@ function DesignsItemProductSummary({
           </div>
           <div className="flex w-[111px] shrink-0 flex-col items-end justify-center gap-[33px] leading-0">
             <div className="flex h-[42px] w-full flex-col items-end gap-[14px] whitespace-nowrap font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]">
-              {wattsRow ? (
+              {ratingRow ? (
                 <p className="shrink-0">
-                  <span className="leading-normal">{wattsRow.label} </span>
+                  <span className="leading-normal">{ratingRow.label} </span>
                   <span className="leading-normal text-[#020202]">
-                    {wattsRow.value}
+                    {ratingRow.value}
                   </span>
                 </p>
               ) : null}
-              {countRow ? (
+              {qtyRow ? (
                 <p className="shrink-0">
-                  <span className="leading-normal">{countRow.label} </span>
+                  <span className="leading-normal">{qtyRow.label} </span>
                   <span className="leading-normal text-[#020202]">
-                    {countRow.value}
+                    {qtyRow.value}
                   </span>
                 </p>
               ) : null}
-            </div>
-            <div className="flex shrink-0 gap-[2px]">
-              <div className="flex items-center justify-center pb-[2px]">
-                <p className="font-inter text-[9px] font-medium uppercase leading-normal tracking-[-0.0714px] text-[#080808]">
-                  Datasheet
-                </p>
-              </div>
-              <div className="relative size-[18px] shrink-0" aria-hidden>
-                <svg
-                  viewBox="0 0 24 24"
-                  width={18}
-                  height={18}
-                  className="block size-full"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 3v12m0 0l4-4m-4 4l-4-4M5 19h14"
-                    stroke="#2094F3"
-                    strokeWidth={1.8}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
             </div>
           </div>
         </div>
       </div>
+      {onRemove ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemove();
+          }}
+          aria-label="Remove this item"
+          className="absolute bottom-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-white/90 text-[#020202] shadow-sm hover:bg-white"
+        >
+          <svg viewBox="0 0 16 16" width={10} height={10} fill="none" aria-hidden>
+            <path
+              d="M4 4l8 8M12 4l-8 8"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Stacked cards: newest on top, up to 2 older ones peeking behind it, capped
+ * with a "+N more" chip. Clicking a peeking card brings it to the front.
+ *
+ * Each card animates to its new `top`/`scale` on reorder rather than jumping,
+ * so bringing one forward reads as a physical shuffle. That only works if the
+ * same DOM node persists across the reorder, which needs a key independent of
+ * array position — `entry.key` is assigned once when the entry is created
+ * (see `toEntry`), not derived during render.
+ */
+function DesignsItemsStack({
+  category,
+  entries,
+  catalogueProducts,
+  onRemove,
+  onBringToFront,
+}: {
+  category: EquipmentCategoryKey;
+  entries: StackEntry[];
+  catalogueProducts: BuilderProduct[];
+  onRemove: (index: number) => void;
+  onBringToFront: (index: number) => void;
+}) {
+  if (entries.length === 0) return null;
+
+  const MAX_PEEKS = 2;
+  const orderedNewestFirst = entries
+    .map((entry, index) => ({ entry, index }))
+    .reverse();
+  const visible = orderedNewestFirst.slice(0, 1 + MAX_PEEKS);
+  const overflow = entries.length - visible.length;
+  // Must clear the remove button on the card behind (size-5 = 20px + its
+  // bottom-1.5 = 6px inset), or the card in front clips the button's top edge.
+  const PEEK_OFFSET = 30;
+  // 160 must match DesignsItemProductSummary's card height (h-[160px]).
+  const stackHeight = 160 + (visible.length - 1) * PEEK_OFFSET;
+
+  return (
+    <div className="relative" style={{ height: stackHeight }}>
+      {visible.map(({ entry, index }, stackPos) => {
+        const isFront = stackPos === 0;
+        const item = entry.item;
+        const product = catalogueProducts.find((p) => p.id === item.productId);
+        const { leftCol, rightCol } = itemToSummary(item, product);
+        return (
+          <div
+            key={entry.key}
+            role={isFront ? undefined : "button"}
+            tabIndex={isFront ? undefined : 0}
+            onClick={isFront ? undefined : () => onBringToFront(index)}
+            onKeyDown={
+              isFront
+                ? undefined
+                : (event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onBringToFront(index);
+                    }
+                  }
+            }
+            aria-label={isFront ? undefined : "Bring this item to the front"}
+            className={classNames(
+              "absolute inset-x-0 origin-top transition-[top,transform] duration-300 ease-out",
+              !isFront && "cursor-pointer hover:brightness-105",
+            )}
+            style={{
+              top: stackPos * PEEK_OFFSET,
+              transform: `scale(${1 - stackPos * 0.02})`,
+              zIndex: visible.length - stackPos,
+            }}
+          >
+            <DesignsItemProductSummary
+              category={category}
+              leftCol={leftCol}
+              rightCol={rightCol}
+              onRemove={() => onRemove(index)}
+            />
+          </div>
+        );
+      })}
+      {overflow > 0 ? (
+        <span className="absolute -top-2 right-2 z-20 rounded-full bg-warm-black px-2 py-0.5 font-dm-sans text-[10px] font-bold text-white shadow-sm">
+          +{overflow} more
+        </span>
+      ) : null}
     </div>
   );
 }
 
 function DesignsItemsGradientCard({
-  title,
+  category,
   firstSelectId,
   secondSelectId,
-  brand,
-  size,
+  draftBrand,
+  draftSize,
   brandOptions,
   modelOptions,
-  modelPlaceholder = "Select Model",
   onBrandChange,
   onSizeChange,
-  summary,
+  onAdd,
+  entries,
+  catalogueProducts,
+  onRemove,
+  onBringToFront,
 }: {
-  title: string;
+  category: EquipmentCategoryKey;
   firstSelectId: string;
   secondSelectId: string;
-  brand: string;
-  size: string;
-  /** Catalogue-driven, so the selection maps to a real product. */
+  draftBrand: string;
+  draftSize: string;
   brandOptions: DesignsSelectOption[];
   modelOptions: DesignsSelectOption[];
-  modelPlaceholder?: string;
   onBrandChange: (value: string) => void;
   onSizeChange: (value: string) => void;
-  summary: React.ReactNode;
+  onAdd: () => void;
+  entries: StackEntry[];
+  catalogueProducts: BuilderProduct[];
+  onRemove: (index: number) => void;
+  onBringToFront: (index: number) => void;
 }) {
+  const title = SECTION_TITLE[category];
+
   return (
-    <div className="designs-border-gradient z-10 rounded-[30px] min-w-0 max-w-[398.013px] w-full p-[3px]">
-      <div className="flex min-h-[353.565px] z-20 w-full shrink-0 flex-col rounded-[30px] bg-linear-to-r from-[#FFEF62] to-[#F78D00]">
-        <div className="flex w-full flex-col gap-[14px] px-[28.98px] pb-[28.98px] pt-[25.98px]">
+    <div className="designs-border-gradient z-10 w-full min-w-0 rounded-[24px] p-[3px] xl:rounded-[30px]">
+      <div className="z-20 flex min-h-[300px] w-full shrink-0 flex-col rounded-[24px] bg-linear-to-r from-[#FFEF62] to-[#F78D00] xl:min-h-[353.565px] xl:rounded-[30px]">
+        <div className="flex w-full flex-col gap-[14px] px-4 pb-5 pt-5 xl:px-[20px] xl:pb-[22px] xl:pt-[20px]">
           <div className="flex w-full flex-col gap-[16px]">
-            <h2 className="w-full text-center font-source-sans text-[24px] font-bold capitalize leading-normal tracking-[0.167px] text-white">
-              {title}
-            </h2>
+            <div className="flex w-full flex-wrap items-center justify-center gap-2">
+              <h2 className="text-center font-source-sans text-[19px] font-bold capitalize leading-normal tracking-[0.167px] text-white xl:text-[20px]">
+                {title}
+              </h2>
+              {entries.length > 0 ? (
+                <span className="rounded-full bg-white/25 px-2 py-0.5 font-inter text-[11px] font-semibold text-white">
+                  {entries.length} Selected
+                </span>
+              ) : null}
+            </div>
             <div className="flex w-full flex-col gap-[8px]">
               <DesignsSelectField
                 id={firstSelectId}
                 ariaLabel={`${title}: select brand`}
                 placeholder="Select Brand"
-                value={brand}
+                value={draftBrand}
                 onChange={onBrandChange}
                 options={brandOptions}
               />
               <DesignsSelectField
                 id={secondSelectId}
                 ariaLabel={`${title}: select model`}
-                placeholder={modelPlaceholder}
-                value={size}
+                placeholder="Select Model"
+                value={draftSize}
                 onChange={onSizeChange}
                 options={modelOptions}
               />
+              <button
+                type="button"
+                onClick={onAdd}
+                disabled={!draftSize}
+                className="flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-[10px] border-2 border-dashed border-white/70 px-2 py-2 text-center font-inter text-[13px] font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                + Add {title.replace("Select ", "")}
+              </button>
             </div>
           </div>
-          {summary}
+          <DesignsItemsStack
+            category={category}
+            entries={entries}
+            catalogueProducts={catalogueProducts}
+            onRemove={onRemove}
+            onBringToFront={onBringToFront}
+          />
         </div>
       </div>
     </div>
   );
 }
 
+export type DesignsItemsStepValue = {
+  items: EquipmentItemsByCategory;
+};
+
 export type DesignsItemsStepHandle = {
   getValues: () => DesignsItemsStepValue;
 };
 
-type ItemsSection = DesignsItemsStepValue[keyof DesignsItemsStepValue];
+type Draft = { brand: string; size: string };
+
+const EMPTY_DRAFTS: Record<EquipmentCategoryKey, Draft> = {
+  solarPanel: { brand: "", size: "" },
+  inverter: { brand: "", size: "" },
+  battery: { brand: "", size: "" },
+  evCharger: { brand: "", size: "" },
+  heatPump: { brand: "", size: "" },
+};
 
 /**
- * Overlays a saved product onto one card. Row 0 of each column is what
- * `DesignsHeroSection` reads back into Redux, so those rows must carry the real
- * values. The brand/model selects stay empty here — they are resolved from the
- * catalogue once it loads, since only a product id can match reliably.
- */
-function seedSection(
-  section: ItemsSection,
-  name: string | undefined,
-  size: string | undefined,
-  count?: string,
-  productId?: string,
-): ItemsSection {
-  if (!name && !size && !count && !productId) return section;
-
-  return {
-    ...section,
-    productId: productId ?? section.productId,
-    summary: {
-      ...section.summary,
-      leftCol: section.summary.leftCol.map((row, index) =>
-        index === 0 && name ? { ...row, value: name } : row,
-      ),
-      rightCol: section.summary.rightCol.map((row, index) => {
-        if (index === 0 && size) return { ...row, value: size };
-        if (index === 1 && count) return { ...row, value: count };
-        return row;
-      }),
-    },
-  };
-}
-
-function seedItemsValue(equipment: {
-  solarPanelName?: string;
-  solarPanelWatts?: string;
-  solarPanelProductId?: string;
-  batteryName?: string;
-  batteryWatts?: string;
-  batteryProductId?: string;
-  inverterName?: string;
-  inverterWatts?: string;
-  inverterProductId?: string;
-  numberOfPanels?: string;
-}): DesignsItemsStepValue {
-  return {
-    solarPanel: seedSection(
-      DEFAULT_ITEMS_STEP_VALUE.solarPanel,
-      equipment.solarPanelName,
-      equipment.solarPanelWatts,
-      equipment.numberOfPanels,
-      equipment.solarPanelProductId,
-    ),
-    battery: seedSection(
-      DEFAULT_ITEMS_STEP_VALUE.battery,
-      equipment.batteryName,
-      equipment.batteryWatts,
-      undefined,
-      equipment.batteryProductId,
-    ),
-    // The third card is the inverter.
-    equipment: seedSection(
-      DEFAULT_ITEMS_STEP_VALUE.equipment,
-      equipment.inverterName,
-      equipment.inverterWatts,
-      undefined,
-      equipment.inverterProductId,
-    ),
-  };
-}
-
-/**
- * Figma Screen 18 (3:4410) — three gradient cards, 45px gap; inner padding 28.98 / 25.98.
+ * Figma Screen 18 (3:4410) — gradient cards, 45px gap, wrapping on desktop
+ * now that there are five (was three, fixed side-by-side); inner padding
+ * 28.98 / 25.98 per card is unchanged.
  */
 export const DesignsItemsStepContent = forwardRef<
   DesignsItemsStepHandle,
   object
 >(function DesignsItemsStepContent(_, ref) {
   // Seed from the store so editing an existing design shows its real equipment
-  // instead of the placeholder specs.
-  const storedEquipment = useAppSelector((s) => s.designProposal.equipment);
+  // instead of the placeholder specs. `legacyEquipmentToItems` also covers
+  // designs saved before `items` existed (singular fields only).
+  const storedEquipment = useAppSelector(
+    (s) => s.designProposal.equipment,
+  ) as DesignProposalEquipment;
   const groupedCatalogue = useAppSelector(selectBuilderCatalogue);
-  const [itemsValue, setItemsValue] = useState(() =>
-    seedItemsValue(storedEquipment),
+  const [entriesByCategory, setEntriesByCategory] = useState<
+    Record<EquipmentCategoryKey, StackEntry[]>
+  >(() => {
+    const seeded = legacyEquipmentToItems(storedEquipment);
+    return Object.fromEntries(
+      EQUIPMENT_CATEGORY_KEYS.map((key) => [key, seeded[key].map(toEntry)]),
+    ) as Record<EquipmentCategoryKey, StackEntry[]>;
+  });
+  const [drafts, setDrafts] = useState<Record<EquipmentCategoryKey, Draft>>(
+    EMPTY_DRAFTS,
   );
 
   const catalogue = useMemo(
-    () => ({
-      solarPanel: groupedCatalogue[SECTION_CATEGORY.solarPanel],
-      battery: groupedCatalogue[SECTION_CATEGORY.battery],
-      equipment: groupedCatalogue[SECTION_CATEGORY.equipment],
-    }),
+    () =>
+      Object.fromEntries(
+        EQUIPMENT_CATEGORY_KEYS.map((key) => [
+          key,
+          groupedCatalogue[SECTION_CATEGORY[key]] ?? [],
+        ]),
+      ) as Record<EquipmentCategoryKey, BuilderProduct[]>,
     [groupedCatalogue],
   );
-
-  /**
-   * What the two selects show. Derived rather than synced into state: a card
-   * seeded from a saved design knows only its product id, and resolving that
-   * against the catalogue at render time avoids a setState-in-effect cascade.
-   */
-  const selectionFor = (key: SectionKey) => {
-    const section = itemsValue[key];
-    if (section.brand) return { brand: section.brand, size: section.size };
-
-    const product = catalogue[key].find((item) => item.id === section.productId);
-    return product
-      ? { brand: product.brand, size: product.id }
-      : { brand: "", size: "" };
-  };
 
   useImperativeHandle(
     ref,
     () => ({
-      getValues: () => itemsValue,
+      getValues: () => ({
+        items: Object.fromEntries(
+          EQUIPMENT_CATEGORY_KEYS.map((key) => [
+            key,
+            entriesByCategory[key].map((entry) => entry.item),
+          ]),
+        ) as EquipmentItemsByCategory,
+      }),
     }),
-    [itemsValue],
+    [entriesByCategory],
   );
 
-  /**
-   * Brand change clears the model: the previously chosen product belongs to the
-   * old brand, and keeping its id would silently save the wrong equipment.
-   */
-  const handleBrandChange = (key: SectionKey, brand: string) => {
-    setItemsValue((prev) => ({
+  /** Brand change clears the model draft: the previous model belongs to the old brand. */
+  const handleBrandChange = (key: EquipmentCategoryKey, brand: string) => {
+    setDrafts((prev) => ({ ...prev, [key]: { brand, size: "" } }));
+  };
+
+  const handleModelChange = (key: EquipmentCategoryKey, productId: string) => {
+    setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], size: productId } }));
+  };
+
+  /** Commits the draft into the category's list and resets the compose dropdowns. */
+  const handleAdd = (key: EquipmentCategoryKey) => {
+    const draft = drafts[key];
+    const product = catalogue[key].find((p) => p.id === draft.size);
+    if (!product) return;
+
+    const newItem: EquipmentItem = {
+      productId: product.id,
+      brand: product.brand,
+      name: product.name,
+      quantity: 1,
+      ratingLabel: ratingLabel(product),
+    };
+
+    setEntriesByCategory((prev) => ({
       ...prev,
-      [key]: {
-        ...prev[key],
-        brand,
-        size: "",
-        productId: "",
-        summary: {
-          ...prev[key].summary,
-          leftCol: prev[key].summary.leftCol.map((row, i) =>
-            i === 0 ? { ...row, value: brand } : row,
-          ),
-        },
-      },
+      [key]: [...prev[key], toEntry(newItem)],
+    }));
+    setDrafts((prev) => ({ ...prev, [key]: { brand: "", size: "" } }));
+  };
+
+  const handleRemove = (key: EquipmentCategoryKey, index: number) => {
+    setEntriesByCategory((prev) => ({
+      ...prev,
+      [key]: prev[key].filter((_, i) => i !== index),
     }));
   };
 
-  /** Model change is the real selection — it fixes the product id and specs. */
-  const handleModelChange = (key: SectionKey, productId: string) => {
-    const product = catalogue[key].find((item) => item.id === productId);
-
-    setItemsValue((prev) => {
-      const section = prev[key];
-      if (!product) {
-        return { ...prev, [key]: { ...section, size: productId, productId } };
-      }
-
-      const rating = ratingLabel(product);
-
-      return {
-        ...prev,
-        [key]: {
-          ...section,
-          size: productId,
-          productId,
-          summary: {
-            ...section.summary,
-            leftCol: section.summary.leftCol.map((row, i) => {
-              if (i === 0) return { ...row, value: product.brand };
-              if (i === 1) return { ...row, value: product.name };
-              if (i === 3) {
-                return { ...row, value: cecApprovedLabel(product) };
-              }
-              return row;
-            }),
-            rightCol: section.summary.rightCol.map((row, i) =>
-              i === 0 ? { ...row, value: rating } : row,
-            ),
-          },
-        },
-      };
+  /** "Front" is always the last array entry — moving one there is what surfaces it. */
+  const handleBringToFront = (key: EquipmentCategoryKey, index: number) => {
+    setEntriesByCategory((prev) => {
+      const list = prev[key];
+      const target = list[index];
+      if (!target) return prev;
+      const rest = list.filter((_, i) => i !== index);
+      return { ...prev, [key]: [...rest, target] };
     });
   };
 
-  const optionsFor = (key: SectionKey) => {
+  const optionsFor = (key: EquipmentCategoryKey) => {
     const products = catalogue[key];
-    const { brand } = selectionFor(key);
+    const brand = drafts[key].brand;
     return {
       brandOptions: brandsOf(products).map((value) => ({
         value,
@@ -504,70 +527,29 @@ export const DesignsItemsStepContent = forwardRef<
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
-      <div className="flex w-full flex-col items-center justify-center gap-[45px] lg:flex-row lg:items-start lg:justify-center">
-        <DesignsItemsGradientCard
-          title="Select Solar Panels"
-          firstSelectId="items-solar-brand"
-          secondSelectId="items-solar-size"
-          brand={selectionFor("solarPanel").brand}
-          size={selectionFor("solarPanel").size}
-          brandOptions={optionsFor("solarPanel").brandOptions}
-          modelOptions={optionsFor("solarPanel").modelOptions}
-          onBrandChange={(next) => handleBrandChange("solarPanel", next)}
-          onSizeChange={(next) => handleModelChange("solarPanel", next)}
-          summary={
-            <DesignsItemProductSummary
-              imageSrc={itemsValue.solarPanel.summary.imageSrc}
-              imageWidth={itemsValue.solarPanel.summary.imageWidth}
-              imageHeight={itemsValue.solarPanel.summary.imageHeight}
-              imageAlt={itemsValue.solarPanel.summary.imageAlt}
-              leftCol={itemsValue.solarPanel.summary.leftCol}
-              rightCol={itemsValue.solarPanel.summary.rightCol}
+      <div className="grid w-full grid-cols-1 items-start gap-6 sm:grid-cols-2 xl:grid-cols-5 xl:gap-4">
+        {EQUIPMENT_CATEGORY_KEYS.map((key) => {
+          const { brandOptions, modelOptions } = optionsFor(key);
+          return (
+            <DesignsItemsGradientCard
+              key={key}
+              category={key}
+              firstSelectId={`items-${key}-brand`}
+              secondSelectId={`items-${key}-size`}
+              draftBrand={drafts[key].brand}
+              draftSize={drafts[key].size}
+              brandOptions={brandOptions}
+              modelOptions={modelOptions}
+              onBrandChange={(next) => handleBrandChange(key, next)}
+              onSizeChange={(next) => handleModelChange(key, next)}
+              onAdd={() => handleAdd(key)}
+              entries={entriesByCategory[key]}
+              catalogueProducts={catalogue[key]}
+              onRemove={(index) => handleRemove(key, index)}
+              onBringToFront={(index) => handleBringToFront(key, index)}
             />
-          }
-        />
-        <DesignsItemsGradientCard
-          title="Select Battery"
-          firstSelectId="items-battery-brand"
-          secondSelectId="items-battery-size"
-          brand={selectionFor("battery").brand}
-          size={selectionFor("battery").size}
-          brandOptions={optionsFor("battery").brandOptions}
-          modelOptions={optionsFor("battery").modelOptions}
-          onBrandChange={(next) => handleBrandChange("battery", next)}
-          onSizeChange={(next) => handleModelChange("battery", next)}
-          summary={
-            <DesignsItemProductSummary
-              imageSrc={itemsValue.battery.summary.imageSrc}
-              imageWidth={itemsValue.battery.summary.imageWidth}
-              imageHeight={itemsValue.battery.summary.imageHeight}
-              imageAlt={itemsValue.battery.summary.imageAlt}
-              leftCol={itemsValue.battery.summary.leftCol}
-              rightCol={itemsValue.battery.summary.rightCol}
-            />
-          }
-        />
-        <DesignsItemsGradientCard
-          title="Select Equipment"
-          firstSelectId="items-equipment-brand"
-          secondSelectId="items-equipment-size"
-          brand={selectionFor("equipment").brand}
-          size={selectionFor("equipment").size}
-          brandOptions={optionsFor("equipment").brandOptions}
-          modelOptions={optionsFor("equipment").modelOptions}
-          onBrandChange={(next) => handleBrandChange("equipment", next)}
-          onSizeChange={(next) => handleModelChange("equipment", next)}
-          summary={
-            <DesignsItemProductSummary
-              imageSrc={itemsValue.equipment.summary.imageSrc}
-              imageWidth={itemsValue.equipment.summary.imageWidth}
-              imageHeight={itemsValue.equipment.summary.imageHeight}
-              imageAlt={itemsValue.equipment.summary.imageAlt}
-              leftCol={itemsValue.equipment.summary.leftCol}
-              rightCol={itemsValue.equipment.summary.rightCol}
-            />
-          }
-        />
+          );
+        })}
       </div>
     </div>
   );

@@ -72,6 +72,21 @@ describe("designToProposalState", () => {
     );
   });
 
+  it("builds a fully-shaped items record so the PDF's per-category loop never reads undefined", () => {
+    const state = designToProposalState(DESIGN);
+    expect(state.equipment.items.solarPanel).toHaveLength(1);
+    expect(state.equipment.items.solarPanel[0]).toMatchObject({
+      productId: "prod-panel",
+      name: "AE400MD-108",
+      ratingLabel: "400 W",
+    });
+    // Categories with nothing attached stay empty — the PDF omits their row
+    // entirely rather than printing a blank one.
+    expect(state.equipment.items.battery).toEqual([]);
+    expect(state.equipment.items.evCharger).toEqual([]);
+    expect(state.equipment.items.heatPump).toEqual([]);
+  });
+
   it("tolerates a design with no products or owner", () => {
     const bare = {
       ...DESIGN,

@@ -14,8 +14,10 @@ import {
   batteryCapacityKwh,
   cecApprovedLabel,
   inverterRatedKw,
+  numberSpec,
   productLabel,
   productSeries,
+  productsByCategory,
   systemSizeKwFrom,
   NOT_AVAILABLE,
   NO_VALUE,
@@ -49,9 +51,7 @@ function productByCategory(
   design: CustomerDesign,
   category: string,
 ): CustomerDesignProduct | undefined {
-  return design.products?.find((item) =>
-    item.product?.category.toLowerCase().includes(category),
-  );
+  return productsByCategory(design.products, category)[0];
 }
 
 /** One convention across the page: an unattached category always reads N/A. */
@@ -183,16 +183,40 @@ export function buildPerformanceEstimates(design: CustomerDesign): SpecLine[] {
   ];
 }
 
+/** "Model A, Model B ×2" — every attached item in a category, not just the first. */
+function joinedProductNames(items: CustomerDesignProduct[]): string {
+  if (items.length === 0) return NOT_AVAILABLE;
+  return items
+    .map((item) => {
+      const name = productLabel(item) ?? "—";
+      return item.quantity > 1 ? `${name} ×${item.quantity}` : name;
+    })
+    .join(", ");
+}
+
+function totalQuantity(items: CustomerDesignProduct[]): number {
+  return items.reduce((sum, item) => sum + (item.quantity ?? 0), 0);
+}
+
 export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[] {
-  const panel = productByCategory(design, "panel");
-  const inverter = productByCategory(design, "inverter");
-  const battery = productByCategory(design, "battery");
+  const panelItems = productsByCategory(design.products, "panel");
+  const inverterItems = productsByCategory(design.products, "inverter");
+  const batteryItems = productsByCategory(design.products, "battery");
+  const evChargerItems = productsByCategory(design.products, "ev charger");
+  const heatPumpItems = productsByCategory(design.products, "heat pump");
+
+  const panel = panelItems[0];
+  const inverter = inverterItems[0];
+  const battery = batteryItems[0];
+  const evCharger = evChargerItems[0];
+  const heatPump = heatPumpItems[0];
   const kw = systemSizeKw(design);
 
   // Every card is always rendered, but a category with nothing in the design's
   // products array reads N/A rather than a placeholder spec.
   const batteryKwh = batteryCapacityKwh(battery);
-  const inverterKw = inverterRatedKw(inverter);
+  const evChargerKw = inverterRatedKw(evCharger);
+  const heatPumpCapacityL = numberSpec(heatPump?.product, "capacityL");
 
   return [
     {
@@ -200,7 +224,7 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
       title: "Solar Panels",
       iconName: "MyDesignSun",
       rows: [
-        { label: "Model", value: productLabel(panel) ?? NOT_AVAILABLE },
+        { label: "Model", value: joinedProductNames(panelItems) },
         {
           label: "Watts",
           value: panel?.product?.wattage
@@ -212,8 +236,8 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
           value:
             design.panelCount != null
               ? String(design.panelCount)
-              : panel?.quantity != null
-                ? String(panel.quantity)
+              : panelItems.length
+                ? String(totalQuantity(panelItems))
                 : NO_VALUE,
         },
         { label: "Total", value: kw ? `${kw.toFixed(2)} kW` : NO_VALUE },
@@ -224,7 +248,7 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
       title: "Battery",
       iconName: "MyDesignsBattery",
       rows: [
-        { label: "Model", value: productLabel(battery) ?? NOT_AVAILABLE },
+        { label: "Model", value: joinedProductNames(batteryItems) },
         {
           label: "Capacity",
           value:
@@ -240,12 +264,38 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
       title: "Inverter",
       iconName: "MyDesignsInverter",
       rows: [
-        { label: "Model", value: productLabel(inverter) ?? NOT_AVAILABLE },
+        { label: "Model", value: joinedProductNames(inverterItems) },
         {
           label: "Type",
           value: productType(inverter) ?? NO_VALUE,
         },
         { label: "Monitoring", value: productType(inverter) ?? NO_VALUE },
+      ],
+    },
+    {
+      id: "ev-charger",
+      title: "EV Charger",
+      iconName: "Zap",
+      rows: [
+        { label: "Model", value: joinedProductNames(evChargerItems) },
+        {
+          label: "Rating",
+          value: evChargerKw !== undefined ? `${evChargerKw} kW` : NO_VALUE,
+        },
+        { label: "Qty", value: evChargerItems.length ? String(totalQuantity(evChargerItems)) : NO_VALUE },
+      ],
+    },
+    {
+      id: "heat-pump",
+      title: "Heat Pump",
+      iconName: "HeatPump",
+      rows: [
+        { label: "Model", value: joinedProductNames(heatPumpItems) },
+        {
+          label: "Capacity",
+          value: heatPumpCapacityL !== undefined ? `${heatPumpCapacityL} L` : NO_VALUE,
+        },
+        { label: "Qty", value: heatPumpItems.length ? String(totalQuantity(heatPumpItems)) : NO_VALUE },
       ],
     },
     {

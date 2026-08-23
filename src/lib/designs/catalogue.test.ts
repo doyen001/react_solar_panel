@@ -44,8 +44,14 @@ describe("brandsOf", () => {
 });
 
 describe("BUILDER_CATEGORIES", () => {
-  it("covers the three builder cards and matches the API keys", () => {
-    expect(BUILDER_CATEGORIES).toEqual(["Solar Panel", "Inverter", "Battery"]);
+  it("covers the five builder cards and matches the API keys", () => {
+    expect(BUILDER_CATEGORIES).toEqual([
+      "Solar Panel",
+      "Inverter",
+      "Battery",
+      "EV Charger",
+      "Heat Pump",
+    ]);
   });
 });
 

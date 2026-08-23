@@ -79,6 +79,20 @@ const PACKAGE_DESIGN = {
         },
       },
     },
+    {
+      id: "p4",
+      quantity: 1,
+      totalPrice: 990,
+      product: {
+        id: "prod-ev-charger",
+        name: "Wall Connector Gen 3",
+        brand: "Tesla",
+        category: "EV Charger",
+        wattage: null,
+        price: 990,
+        specs: { ratedKw: 11 },
+      },
+    },
   ],
 } as unknown as CustomerDesign;
 
@@ -152,7 +166,34 @@ describe("designToProposalPayload — package design (no wizardData)", () => {
 
   it("derives system size from the real panel wattage", () => {
     expect(payload.summary?.systemSize).toBe("6.4 kW");
-    expect(payload.pricing?.totalSystemPrice).toBe("$6,060");
+    // Sum of all attached products' totalPrice, including the EV charger.
+    expect(payload.pricing?.totalSystemPrice).toBe("$7,050");
+  });
+
+  it("builds a fully-shaped items record from the attached products", () => {
+    expect(payload.equipment?.items?.solarPanel).toEqual([
+      {
+        productId: "prod-panel",
+        brand: "AE Solar GmbH",
+        name: "AE400MD-108",
+        quantity: 16,
+        ratingLabel: "400 W",
+      },
+    ]);
+    expect(payload.equipment?.items?.inverter).toHaveLength(1);
+    expect(payload.equipment?.items?.battery).toHaveLength(1);
+    expect(payload.equipment?.items?.evCharger).toEqual([
+      {
+        productId: "prod-ev-charger",
+        brand: "Tesla",
+        name: "Wall Connector Gen 3",
+        quantity: 1,
+        ratingLabel: "11 kW",
+      },
+    ]);
+    // The design has no heat pump — the category exists but stays empty
+    // rather than being omitted.
+    expect(payload.equipment?.items?.heatPump).toEqual([]);
   });
 });
 
@@ -182,21 +223,43 @@ describe("designToProposalPayload — custom design (wizardData, no products)", 
     expect(payload.customer?.mapLat).toBe(-19.2589);
     expect(payload.solarDesign?.savedRoofs).toEqual([[]]);
   });
+
+  it("doesn't crash on wizardData saved before `items` existed, and shapes items as all-empty since the design has no products", () => {
+    expect(payload.equipment?.items).toEqual({
+      solarPanel: [],
+      battery: [],
+      inverter: [],
+      evCharger: [],
+      heatPump: [],
+    });
+  });
 });
 
 describe("proposalToDesignInput — equipment persistence", () => {
-  it("sends the selected products so equipment survives the save", () => {
+  it("sends every selected item across every category so equipment survives the save", () => {
     const input = proposalToDesignInput({
       ...DESIGN_PROPOSAL_DEFAULTS,
       equipment: {
         ...DESIGN_PROPOSAL_DEFAULTS.equipment,
         numberOfPanels: "16",
-        solarPanelProductId: "panel-1",
-        inverterProductId: "inverter-1",
-        batteryProductId: "battery-1",
+        items: {
+          solarPanel: [
+            { productId: "panel-1", brand: "Trina", name: "TSM-630", quantity: 1, ratingLabel: "630 W" },
+          ],
+          inverter: [
+            { productId: "inverter-1", brand: "Fronius", name: "Primo 5.0", quantity: 1, ratingLabel: "5 kW" },
+          ],
+          battery: [
+            { productId: "battery-1", brand: "BYD", name: "HVS", quantity: 1, ratingLabel: "10 kWh" },
+          ],
+          evCharger: [],
+          heatPump: [],
+        },
       },
     });
 
+    // The panel-count from the roof-layout step overrides the first solar
+    // panel entry's own quantity.
     expect(input.products).toEqual([
       { productId: "panel-1", quantity: 16 },
       { productId: "inverter-1", quantity: 1 },
@@ -211,17 +274,35 @@ describe("proposalToDesignInput — equipment persistence", () => {
     expect(input.products).toBeUndefined();
   });
 
-  it("skips categories with no selection", () => {
+  it("flattens multiple items within one category, and across categories that aren't just the original three", () => {
     const input = proposalToDesignInput({
       ...DESIGN_PROPOSAL_DEFAULTS,
       equipment: {
         ...DESIGN_PROPOSAL_DEFAULTS.equipment,
-        numberOfPanels: "12",
-        solarPanelProductId: "panel-1",
+        numberOfPanels: "",
+        items: {
+          solarPanel: [],
+          inverter: [],
+          battery: [
+            { productId: "battery-1", brand: "BYD", name: "HVS", quantity: 1, ratingLabel: "10 kWh" },
+            { productId: "battery-2", brand: "Tesla", name: "Powerwall 3", quantity: 2, ratingLabel: "13.5 kWh" },
+          ],
+          evCharger: [
+            { productId: "ev-1", brand: "Tesla", name: "Wall Connector", quantity: 1, ratingLabel: "11 kW" },
+          ],
+          heatPump: [
+            { productId: "hp-1", brand: "Sanden", name: "Eco Plus", quantity: 1, ratingLabel: "315 L" },
+          ],
+        },
       },
     });
 
-    expect(input.products).toEqual([{ productId: "panel-1", quantity: 12 }]);
+    expect(input.products).toEqual([
+      { productId: "battery-1", quantity: 1 },
+      { productId: "battery-2", quantity: 2 },
+      { productId: "ev-1", quantity: 1 },
+      { productId: "hp-1", quantity: 1 },
+    ]);
   });
 });
 

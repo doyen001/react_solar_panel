@@ -33,6 +33,47 @@ export type DesignProposalCustomer = {
   mapLng?: number;
 };
 
+/** Every category the items step can add products to, in card order. */
+export type EquipmentCategoryKey =
+  | "solarPanel"
+  | "battery"
+  | "inverter"
+  | "evCharger"
+  | "heatPump";
+
+export const EQUIPMENT_CATEGORY_KEYS: readonly EquipmentCategoryKey[] = [
+  "solarPanel",
+  "inverter",
+  "battery",
+  "evCharger",
+  "heatPump",
+];
+
+/** One product a customer added to a category — the items step can add several per category. */
+export type EquipmentItem = {
+  productId: string;
+  brand: string;
+  name: string;
+  quantity: number;
+  /** "630 W" / "7.6 kWh" / "7.6 kW" — whatever unit that category's spec uses. */
+  ratingLabel: string;
+};
+
+export type EquipmentItemsByCategory = Record<
+  EquipmentCategoryKey,
+  EquipmentItem[]
+>;
+
+export function emptyEquipmentItems(): EquipmentItemsByCategory {
+  return {
+    solarPanel: [],
+    battery: [],
+    inverter: [],
+    evCharger: [],
+    heatPump: [],
+  };
+}
+
 export type DesignProposalEquipment = {
   solarPanelName: string;
   solarPanelWatts: string;
@@ -46,11 +87,66 @@ export type DesignProposalEquipment = {
    * Catalogue ids for the chosen kit. Carried so the save can write real
    * DesignProduct rows — the display strings above cannot identify a product.
    * Empty when the customer has not picked from the catalogue.
+   *
+   * These singular ids describe only the FIRST item of their category — the
+   * source of truth for "everything selected" is `items` below. They're kept
+   * so PDF/summary reads that only need one representative product per
+   * category don't need to change.
    */
   solarPanelProductId?: string;
   inverterProductId?: string;
   batteryProductId?: string;
+  /** Every product added per category, including multiples. */
+  items: EquipmentItemsByCategory;
 };
+
+/**
+ * Old saved designs' `wizardData` predates `items` entirely (singular fields
+ * only, no EV Charger/Heat Pump). Synthesizes single-entry arrays from those
+ * legacy fields so every reader downstream can assume `items` is always
+ * fully-shaped, never undefined.
+ */
+export function legacyEquipmentToItems(
+  equipment: Partial<DesignProposalEquipment> | undefined,
+): EquipmentItemsByCategory {
+  if (equipment?.items) return equipment.items;
+
+  const items = emptyEquipmentItems();
+  if (equipment?.solarPanelProductId) {
+    items.solarPanel = [
+      {
+        productId: equipment.solarPanelProductId,
+        brand: equipment.solarPanelName ?? "",
+        name: equipment.solarPanelName ?? "",
+        quantity: 1,
+        ratingLabel: equipment.solarPanelWatts ?? "",
+      },
+    ];
+  }
+  if (equipment?.inverterProductId) {
+    items.inverter = [
+      {
+        productId: equipment.inverterProductId,
+        brand: equipment.inverterName ?? "",
+        name: equipment.inverterName ?? "",
+        quantity: 1,
+        ratingLabel: equipment.inverterWatts ?? "",
+      },
+    ];
+  }
+  if (equipment?.batteryProductId) {
+    items.battery = [
+      {
+        productId: equipment.batteryProductId,
+        brand: equipment.batteryName ?? "",
+        name: equipment.batteryName ?? "",
+        quantity: 1,
+        ratingLabel: equipment.batteryWatts ?? "",
+      },
+    ];
+  }
+  return items;
+}
 
 /** How the user expresses their grid bill amount on the energy step (stored alongside monthly-normalized figures). */
 export type DesignBillPeriod = "month" | "quarter" | "year";
@@ -74,7 +170,11 @@ export type DesignProposalState = {
 export type DesignProposalPayload = {
   summary?: Partial<DesignProposalSummary>;
   customer?: Partial<DesignProposalCustomer>;
-  equipment?: Partial<DesignProposalEquipment>;
+  // `items` merges per-category (see mergeProposalData), so a payload only
+  // needs to name the categories it's actually changing.
+  equipment?: Partial<Omit<DesignProposalEquipment, "items">> & {
+    items?: Partial<EquipmentItemsByCategory>;
+  };
   pricing?: Partial<DesignProposalPricing>;
   solarDesign?: DesignProposalSolarDesign | null;
 };
@@ -102,6 +202,7 @@ export const DESIGN_PROPOSAL_DEFAULTS: DesignProposalState = {
     batteryWatts: "7.6 kW",
     numberOfPanels: "16",
     co2Offset: "7.2 tonnes/year",
+    items: emptyEquipmentItems(),
   },
   pricing: {
     totalSystemPrice: "$11,200",
@@ -125,7 +226,16 @@ const designProposalSlice = createSlice({
         state.customer = { ...state.customer, ...action.payload.customer };
       }
       if (action.payload.equipment) {
-        state.equipment = { ...state.equipment, ...action.payload.equipment };
+        state.equipment = {
+          ...state.equipment,
+          ...action.payload.equipment,
+          // Per-category merge: a payload that sets `items.battery` replaces
+          // only that category's array, leaving other categories untouched.
+          items: {
+            ...state.equipment.items,
+            ...action.payload.equipment.items,
+          },
+        };
       }
       if (action.payload.pricing) {
         state.pricing = { ...state.pricing, ...action.payload.pricing };

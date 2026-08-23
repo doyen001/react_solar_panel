@@ -14,8 +14,10 @@ import {
   batteryCapacityKwh,
   cecApprovedLabel,
   inverterRatedKw,
+  numberSpec,
   productLabel,
   productSeries,
+  productsByCategory,
   systemSizeKwFrom,
   NOT_AVAILABLE,
   NO_VALUE,
@@ -56,18 +58,29 @@ function designProductsTotal(design?: InstallerCustomerDesign | null) {
   );
 }
 
+function productsForCategory(
+  design: InstallerCustomerDesign | null,
+  category: string,
+): InstallerDesignProduct[] {
+  return productsByCategory(design?.products, category);
+}
+
 function productByCategory(
   design: InstallerCustomerDesign | null,
   category: string,
 ): InstallerDesignProduct | undefined {
-  return design?.products?.find((item) =>
-    item.product?.category.toLowerCase().includes(category),
-  );
+  return productsForCategory(design, category)[0];
 }
 
-/** Same convention as the customer design page: unattached category reads N/A. */
-function productName(item?: InstallerDesignProduct) {
-  return productLabel(item) ?? NOT_AVAILABLE;
+/** "Model A, Model B ×2" — every attached item in a category, not just the first. */
+function joinedProductNames(items: InstallerDesignProduct[]): string {
+  if (items.length === 0) return NOT_AVAILABLE;
+  return items
+    .map((item) => {
+      const name = productLabel(item) ?? "—";
+      return item.quantity > 1 ? `${name} ×${item.quantity}` : name;
+    })
+    .join(", ");
 }
 
 function systemSizeKw(design?: InstallerCustomerDesign | null) {
@@ -80,17 +93,28 @@ function systemSizeKw(design?: InstallerCustomerDesign | null) {
 function buildEquipment(
   design: InstallerCustomerDesign | null,
 ): typeof INSTALLER_HOME_EQUIPMENT {
-  const panel = productByCategory(design, "panel");
-  const inverter = productByCategory(design, "inverter");
-  const battery = productByCategory(design, "battery");
+  const panelItems = productsForCategory(design, "panel");
+  const inverterItems = productsForCategory(design, "inverter");
+  const batteryItems = productsForCategory(design, "battery");
+  const evChargerItems = productsForCategory(design, "ev charger");
+  const heatPumpItems = productsForCategory(design, "heat pump");
+
+  const panel = panelItems[0];
+  const inverter = inverterItems[0];
+  const battery = batteryItems[0];
+  const evCharger = evChargerItems[0];
+  const heatPump = heatPumpItems[0];
+
   const kw = systemSizeKw(design);
   const batteryKwh = batteryCapacityKwh(battery);
   const inverterKw = inverterRatedKw(inverter);
+  const evChargerKw = inverterRatedKw(evCharger);
+  const heatPumpCapacityL = numberSpec(heatPump?.product, "capacityL");
 
   return {
     solar: [
       { label: "System Size", value: kw ? `${kw.toFixed(1)} kW` : "-" },
-      { label: "Panel Name", value: productName(panel) },
+      { label: "Panel Name", value: joinedProductNames(panelItems) },
       { label: "Model", value: panel?.product?.sku || "-" },
       {
         label: "Panel Watts",
@@ -99,7 +123,7 @@ function buildEquipment(
       { label: "Qty", value: String(design?.panelCount ?? panel?.quantity ?? "-") },
     ],
     battery: [
-      { label: "Battery Model", value: productName(battery) },
+      { label: "Battery Model", value: joinedProductNames(batteryItems) },
       {
         label: "Capacity",
         value:
@@ -109,13 +133,27 @@ function buildEquipment(
       { label: "CEC Approved", value: cecApprovedLabel(battery) ?? NO_VALUE },
     ],
     equipment: [
-      { label: "Inverter", value: productName(inverter) },
+      { label: "Inverter", value: joinedProductNames(inverterItems) },
       {
         label: "Rated Output",
         value:
           inverterKw !== undefined ? `${formatNumber(inverterKw)} kW` : NO_VALUE,
       },
       { label: "CEC Approved", value: cecApprovedLabel(inverter) ?? NO_VALUE },
+    ],
+    evCharger: [
+      { label: "Model", value: joinedProductNames(evChargerItems) },
+      {
+        label: "Rating",
+        value: evChargerKw !== undefined ? `${formatNumber(evChargerKw)} kW` : NO_VALUE,
+      },
+    ],
+    heatPump: [
+      { label: "Model", value: joinedProductNames(heatPumpItems) },
+      {
+        label: "Capacity",
+        value: heatPumpCapacityL !== undefined ? `${heatPumpCapacityL} L` : NO_VALUE,
+      },
     ],
     site: [
       { label: "Address", value: design?.address || "-" },

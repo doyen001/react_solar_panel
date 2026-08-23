@@ -70,6 +70,16 @@ const CARD_CONFIG: {
     icon: <IconCpu className="text-warm-ink" />,
   },
   {
+    key: "evCharger",
+    title: "EV Charger",
+    icon: <Icon name="Zap" className="text-warm-ink" />,
+  },
+  {
+    key: "heatPump",
+    title: "Heat Pump",
+    icon: <Icon name="HeatPump" className="text-warm-ink" />,
+  },
+  {
     key: "site",
     title: "Site Details",
     icon: <Icon name="LocationPin" className="text-warm-ink" />,

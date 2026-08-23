@@ -7,7 +7,6 @@ type Props = {
 };
 
 export function YourEquipmentSection({ cards }: Props) {
-  console.log("cards", cards);
   return (
     <section className="customer-panel-border-dark overflow-hidden rounded-[10px] border bg-customer-panel-alt">
       <CustomerSectionHeader variant="dark" title="Your Equipment" />

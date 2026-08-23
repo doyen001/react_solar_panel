@@ -5,6 +5,7 @@ import {
   inverterRatedKw,
   productLabel,
   productSeries,
+  productsByCategory,
   systemSizeKwFrom,
 } from "./product-specs";
 
@@ -159,6 +160,41 @@ describe("systemSizeKwFrom", () => {
 
   it("is undefined when the count is missing or zero", () => {
     expect(systemSizeKwFrom({ ...panelItem, quantity: 0 }, 0)).toBeUndefined();
+  });
+});
+
+describe("productsByCategory", () => {
+  const evChargerItem = {
+    quantity: 1,
+    product: { name: "Wall Connector", category: "EV Charger", specs: { ratedKw: 11 } },
+  };
+  const items = [panelItem, batteryItem, evChargerItem];
+
+  it("returns every match, not just the first", () => {
+    const batteries = [
+      batteryItem,
+      { quantity: 1, product: { name: "HVS 5.1", category: "Battery" } },
+    ];
+    expect(productsByCategory(batteries, "battery")).toHaveLength(2);
+  });
+
+  it("matches the item's category case-insensitively as a substring", () => {
+    // The query itself is expected lowercase, matching how every real call
+    // site passes it (e.g. "ev charger", never "EV Charger").
+    expect(productsByCategory(items, "ev charger")).toEqual([evChargerItem]);
+    expect(productsByCategory(items, "charger")).toEqual([evChargerItem]);
+  });
+
+  it("returns an empty array when nothing matches or items is missing", () => {
+    expect(productsByCategory(items, "heat pump")).toEqual([]);
+    expect(productsByCategory(undefined, "battery")).toEqual([]);
+    expect(productsByCategory(null, "battery")).toEqual([]);
+  });
+
+  it("skips entries with no attached product", () => {
+    expect(
+      productsByCategory([{ quantity: 1, product: null }, panelItem], "panel"),
+    ).toEqual([panelItem]);
   });
 });
 

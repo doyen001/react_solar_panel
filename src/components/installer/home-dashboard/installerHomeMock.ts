@@ -60,6 +60,14 @@ export const INSTALLER_HOME_EQUIPMENT = {
     { label: "Optimizer", value: "N/A" },
     { label: "Monitoring", value: "Fronius Solar.web" },
   ],
+  evCharger: [
+    { label: "Model", value: "N/A" },
+    { label: "Rating", value: "-" },
+  ],
+  heatPump: [
+    { label: "Model", value: "N/A" },
+    { label: "Capacity", value: "-" },
+  ],
   site: [
     { label: "Annual Bill", value: "$2,400" },
     { label: "Retailer", value: "AGL Energy" },

@@ -33,7 +33,7 @@ function specsOf(product: SpecProduct): SpecRecord | undefined {
   return specs as SpecRecord;
 }
 
-function numberSpec(product: SpecProduct, key: string): number | undefined {
+export function numberSpec(product: SpecProduct, key: string): number | undefined {
   const value = specsOf(product)?.[key];
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
@@ -100,6 +100,16 @@ export function productSeries(item: SpecLineItem): string | undefined {
  * the panel product or its wattage is missing, rather than assuming a wattage —
  * an assumed figure would silently misstate the size of the system.
  */
+/** Every item in `items` whose product's category matches (case-insensitive substring). */
+export function productsByCategory<T extends { product?: SpecProduct }>(
+  items: T[] | null | undefined,
+  category: string,
+): T[] {
+  return (items ?? []).filter((item) =>
+    item?.product?.category.toLowerCase().includes(category),
+  );
+}
+
 export function systemSizeKwFrom(
   panelItem: SpecLineItem,
   panelCount: number | null | undefined,
