@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import classNames from "classnames";
-import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
-import { useAppSelector } from "@/lib/store/hooks";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import Icon, { type IconType } from "@/components/ui/Icons";
 import {
   brandsOf,
@@ -22,6 +22,7 @@ import {
 import {
   EQUIPMENT_CATEGORY_KEYS,
   legacyEquipmentToItems,
+  mergeProposalData,
   type DesignProposalEquipment,
   type EquipmentCategoryKey,
   type EquipmentItem,
@@ -90,6 +91,17 @@ function toEntry(item: EquipmentItem): StackEntry {
   return { key: crypto.randomUUID(), item };
 }
 
+function entriesToItems(
+  entriesByCategory: Record<EquipmentCategoryKey, StackEntry[]>,
+): EquipmentItemsByCategory {
+  return Object.fromEntries(
+    EQUIPMENT_CATEGORY_KEYS.map((key) => [
+      key,
+      entriesByCategory[key].map((entry) => entry.item),
+    ]),
+  ) as EquipmentItemsByCategory;
+}
+
 /** What one stacked card shows — resolved at render time from the live catalogue, not stored on the item. */
 function itemToSummary(
   item: EquipmentItem,
@@ -133,9 +145,11 @@ function DesignsItemProductSummary({
 
   return (
     <div className="relative h-[160px] w-full shrink-0 overflow-clip rounded-[10px] border-2 border-solid border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber">
-      {/* 67 + 244 = 311 at spec; Figma frame is 309px — use min width so columns keep 119/111 */}
-      <div className="absolute left-[calc(50%-0.19px)] top-1/2 flex w-[min(311px,calc(100%-16px))] -translate-x-1/2 -translate-y-1/2 items-center justify-between">
-        <div className="relative flex h-[99px] w-[67px] shrink-0 items-center justify-center overflow-hidden">
+      {/* Fixed-width Figma columns (67 image + 119 + 111) overflowed once cards
+          got narrower than ~330px in the 5-column layout — leftCol/rightCol now
+          flex to the available width instead, with ellipsis absorbing the rest. */}
+      <div className="absolute inset-0 flex items-center justify-between gap-2 px-3">
+        <div className="relative flex h-[99px] w-[50px] shrink-0 items-center justify-center overflow-hidden">
           {image ? (
             <Image
               src={image.src}
@@ -149,16 +163,13 @@ function DesignsItemProductSummary({
             <Icon name={iconName} className="size-10 text-white" />
           ) : null}
         </div>
-        <div className="flex shrink-0 gap-[14px]">
-          <div className="flex h-[93px] w-[119px] flex-col gap-[14px] leading-0">
-            {leftCol.map((row, i) => (
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <div className="flex h-[93px] min-w-0 flex-1 flex-col justify-center gap-[14px] leading-0">
+            {leftCol.map((row) => (
               <p
                 key={row.label}
-                className={
-                  i === 0
-                    ? "min-w-full w-min shrink-0 font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]"
-                    : "shrink-0 whitespace-nowrap font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]"
-                }
+                title={`${row.label} ${row.value}`}
+                className="w-full min-w-0 truncate font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]"
               >
                 <span className="leading-normal">{row.label} </span>
                 <span className="leading-normal text-[#121212]">
@@ -167,10 +178,10 @@ function DesignsItemProductSummary({
               </p>
             ))}
           </div>
-          <div className="flex w-[111px] shrink-0 flex-col items-end justify-center gap-[33px] leading-0">
-            <div className="flex h-[42px] w-full flex-col items-end gap-[14px] whitespace-nowrap font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]">
+          <div className="flex w-[70px] shrink-0 flex-col items-end justify-center gap-[33px] leading-0">
+            <div className="flex h-[42px] w-full flex-col items-end gap-[14px] font-inter text-[10px] font-medium not-italic tracking-[-0.1504px] text-[#382bd6]">
               {ratingRow ? (
-                <p className="shrink-0">
+                <p className="w-full min-w-0 truncate text-right" title={`${ratingRow.label} ${ratingRow.value}`}>
                   <span className="leading-normal">{ratingRow.label} </span>
                   <span className="leading-normal text-[#020202]">
                     {ratingRow.value}
@@ -178,7 +189,7 @@ function DesignsItemProductSummary({
                 </p>
               ) : null}
               {qtyRow ? (
-                <p className="shrink-0">
+                <p className="w-full min-w-0 truncate text-right" title={`${qtyRow.label} ${qtyRow.value}`}>
                   <span className="leading-normal">{qtyRow.label} </span>
                   <span className="leading-normal text-[#020202]">
                     {qtyRow.value}
@@ -336,19 +347,32 @@ function DesignsItemsGradientCard({
   const title = SECTION_TITLE[category];
 
   return (
-    <div className="designs-border-gradient z-10 w-full min-w-0 rounded-[24px] p-[3px] xl:rounded-[30px]">
-      <div className="z-20 flex min-h-[300px] w-full shrink-0 flex-col rounded-[24px] bg-linear-to-r from-[#FFEF62] to-[#F78D00] xl:min-h-[353.565px] xl:rounded-[30px]">
+    <div className="relative z-10 h-full w-full min-w-0 overflow-hidden rounded-[24px] p-[3px] xl:rounded-[30px]">
+      {/* Animated cycling border: an oversized spinning conic-gradient, clipped to a
+          3px ring by the opaque card content covering everything but the padding gap. */}
+      <span
+        aria-hidden
+        className="absolute inset-[-80%] motion-reduce:animate-none [animation:rainbow-trace-spin_5s_linear_infinite]"
+        style={{
+          backgroundImage:
+            "conic-gradient(from 0deg, #FFEF62, #6BD6FF, #6BFF78, #BF61FF, #E7D95D, #FFEF62)",
+        }}
+      />
+      <div className="relative z-20 flex h-full min-h-[300px] w-full shrink-0 flex-col rounded-[22px] bg-linear-to-r from-[#FFEF62] to-[#F78D00] xl:min-h-[353.565px] xl:rounded-[27px]">
+        {entries.length > 0 ? (
+          <span
+            className="absolute right-3 top-3 z-30 rounded-full border border-[#FF7A1A]/60 bg-[#2a1000]/40 px-2 py-0.5 font-inter text-[11px] font-semibold text-[#FF7A1A]"
+            style={{ textShadow: "0 0 8px rgba(255, 122, 26, 0.8)" }}
+          >
+            {entries.length} Selected
+          </span>
+        ) : null}
         <div className="flex w-full flex-col gap-[14px] px-4 pb-5 pt-5 xl:px-[20px] xl:pb-[22px] xl:pt-[20px]">
           <div className="flex w-full flex-col gap-[16px]">
-            <div className="flex w-full flex-wrap items-center justify-center gap-2">
+            <div className="flex w-full flex-col items-center gap-2">
               <h2 className="text-center font-source-sans text-[19px] font-bold capitalize leading-normal tracking-[0.167px] text-white xl:text-[20px]">
                 {title}
               </h2>
-              {entries.length > 0 ? (
-                <span className="rounded-full bg-white/25 px-2 py-0.5 font-inter text-[11px] font-semibold text-white">
-                  {entries.length} Selected
-                </span>
-              ) : null}
             </div>
             <div className="flex w-full flex-col gap-[8px]">
               <DesignsSelectField
@@ -420,6 +444,7 @@ export const DesignsItemsStepContent = forwardRef<
   // Seed from the store so editing an existing design shows its real equipment
   // instead of the placeholder specs. `legacyEquipmentToItems` also covers
   // designs saved before `items` existed (singular fields only).
+  const dispatch = useAppDispatch();
   const storedEquipment = useAppSelector(
     (s) => s.designProposal.equipment,
   ) as DesignProposalEquipment;
@@ -436,6 +461,25 @@ export const DesignsItemsStepContent = forwardRef<
     EMPTY_DRAFTS,
   );
 
+  /**
+   * Keeps Redux in sync with every add/remove/reorder, not just on Next.
+   * The wizard's Back button navigates away without calling `getValues()` the
+   * way Next does, so without this, items added and then left via Back were
+   * silently lost — the step remounts from stale Redux state next time.
+   */
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    dispatch(
+      mergeProposalData({
+        equipment: { items: entriesToItems(entriesByCategory) },
+      }),
+    );
+  }, [dispatch, entriesByCategory]);
+
   const catalogue = useMemo(
     () =>
       Object.fromEntries(
@@ -450,14 +494,7 @@ export const DesignsItemsStepContent = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      getValues: () => ({
-        items: Object.fromEntries(
-          EQUIPMENT_CATEGORY_KEYS.map((key) => [
-            key,
-            entriesByCategory[key].map((entry) => entry.item),
-          ]),
-        ) as EquipmentItemsByCategory,
-      }),
+      getValues: () => ({ items: entriesToItems(entriesByCategory) }),
     }),
     [entriesByCategory],
   );
@@ -526,8 +563,14 @@ export const DesignsItemsStepContent = forwardRef<
   };
 
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
-      <div className="grid w-full grid-cols-1 items-start gap-6 sm:grid-cols-2 xl:grid-cols-5 xl:gap-4">
+    <div className="relative isolate flex flex-1 flex-col">
+      {/* Navy radial-gradient backdrop, scoped to this step only. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+      />
+      <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col px-4 pt-8 sm:px-8 sm:pt-10 lg:px-[81px] lg:pt-[37px]">
+        <div className="grid w-full grid-cols-1 items-stretch gap-6 sm:grid-cols-2 xl:grid-cols-5 xl:gap-4">
         {EQUIPMENT_CATEGORY_KEYS.map((key) => {
           const { brandOptions, modelOptions } = optionsFor(key);
           return (
@@ -550,6 +593,7 @@ export const DesignsItemsStepContent = forwardRef<
             />
           );
         })}
+        </div>
       </div>
     </div>
   );
