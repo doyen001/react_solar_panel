@@ -183,19 +183,29 @@ export function buildPerformanceEstimates(design: CustomerDesign): SpecLine[] {
   ];
 }
 
-/** "Model A, Model B ×2" — every attached item in a category, not just the first. */
-function joinedProductNames(items: CustomerDesignProduct[]): string {
-  if (items.length === 0) return NOT_AVAILABLE;
-  return items
-    .map((item) => {
-      const name = productLabel(item) ?? "—";
-      return item.quantity > 1 ? `${name} ×${item.quantity}` : name;
-    })
-    .join(", ");
-}
-
-function totalQuantity(items: CustomerDesignProduct[]): number {
-  return items.reduce((sum, item) => sum + (item.quantity ?? 0), 0);
+/**
+ * One card per attached product in the category, so two different battery
+ * models show as two cards instead of one card with a joined "A, B" string.
+ * A category with nothing attached still renders a single placeholder card
+ * (N/A rows) so all five categories stay visible either way.
+ */
+function cardsForCategory(
+  idPrefix: string,
+  title: string,
+  iconName: EquipmentCardData["iconName"],
+  items: CustomerDesignProduct[],
+  buildRows: (item: CustomerDesignProduct) => SpecLine[],
+  placeholderRows: SpecLine[],
+): EquipmentCardData[] {
+  if (items.length === 0) {
+    return [{ id: idPrefix, title, iconName, rows: placeholderRows }];
+  }
+  return items.map((item, index) => ({
+    id: `${idPrefix}-${item.product?.id ?? item.id ?? index}`,
+    title,
+    iconName,
+    rows: buildRows(item),
+  }));
 }
 
 export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[] {
@@ -205,99 +215,105 @@ export function buildEquipmentCards(design: CustomerDesign): EquipmentCardData[]
   const evChargerItems = productsByCategory(design.products, "ev charger");
   const heatPumpItems = productsByCategory(design.products, "heat pump");
 
-  const panel = panelItems[0];
-  const inverter = inverterItems[0];
-  const battery = batteryItems[0];
-  const evCharger = evChargerItems[0];
-  const heatPump = heatPumpItems[0];
-  const kw = systemSizeKw(design);
-
-  // Every card is always rendered, but a category with nothing in the design's
-  // products array reads N/A rather than a placeholder spec.
-  const batteryKwh = batteryCapacityKwh(battery);
-  const evChargerKw = inverterRatedKw(evCharger);
-  const heatPumpCapacityL = numberSpec(heatPump?.product, "capacityL");
-
   return [
-    {
-      id: "panels",
-      title: "Solar Panels",
-      iconName: "MyDesignSun",
-      rows: [
-        { label: "Model", value: joinedProductNames(panelItems) },
+    ...cardsForCategory(
+      "panels",
+      "Solar Panels",
+      "MyDesignSun",
+      panelItems,
+      (item) => [
+        { label: "Model", value: productDisplayName(item) },
         {
           label: "Watts",
-          value: panel?.product?.wattage
-            ? `${panel.product.wattage}W`
-            : NO_VALUE,
+          value: item.product?.wattage ? `${item.product.wattage}W` : NO_VALUE,
         },
-        {
-          label: "Qty",
-          value:
-            design.panelCount != null
-              ? String(design.panelCount)
-              : panelItems.length
-                ? String(totalQuantity(panelItems))
-                : NO_VALUE,
-        },
-        { label: "Total", value: kw ? `${kw.toFixed(2)} kW` : NO_VALUE },
+        { label: "Qty", value: String(item.quantity) },
       ],
-    },
-    {
-      id: "battery",
-      title: "Battery",
-      iconName: "MyDesignsBattery",
-      rows: [
-        { label: "Model", value: joinedProductNames(batteryItems) },
-        {
-          label: "Capacity",
-          value:
-            batteryKwh !== undefined
-              ? `${formatNumber(batteryKwh)} kWh`
-              : NO_VALUE,
-        },
-        { label: "Type", value: productType(battery) ?? NO_VALUE },
+      [
+        { label: "Model", value: NOT_AVAILABLE },
+        { label: "Watts", value: NO_VALUE },
+        { label: "Qty", value: NO_VALUE },
       ],
-    },
-    {
-      id: "inverter",
-      title: "Inverter",
-      iconName: "MyDesignsInverter",
-      rows: [
-        { label: "Model", value: joinedProductNames(inverterItems) },
-        {
-          label: "Type",
-          value: productType(inverter) ?? NO_VALUE,
-        },
-        { label: "Monitoring", value: productType(inverter) ?? NO_VALUE },
+    ),
+    ...cardsForCategory(
+      "battery",
+      "Battery",
+      "MyDesignsBattery",
+      batteryItems,
+      (item) => {
+        const kwh = batteryCapacityKwh(item);
+        return [
+          { label: "Model", value: productDisplayName(item) },
+          {
+            label: "Capacity",
+            value: kwh !== undefined ? `${formatNumber(kwh)} kWh` : NO_VALUE,
+          },
+          { label: "Type", value: productType(item) ?? NO_VALUE },
+        ];
+      },
+      [
+        { label: "Model", value: NOT_AVAILABLE },
+        { label: "Capacity", value: NO_VALUE },
+        { label: "Type", value: NO_VALUE },
       ],
-    },
-    {
-      id: "ev-charger",
-      title: "EV Charger",
-      iconName: "Zap",
-      rows: [
-        { label: "Model", value: joinedProductNames(evChargerItems) },
-        {
-          label: "Rating",
-          value: evChargerKw !== undefined ? `${evChargerKw} kW` : NO_VALUE,
-        },
-        { label: "Qty", value: evChargerItems.length ? String(totalQuantity(evChargerItems)) : NO_VALUE },
+    ),
+    ...cardsForCategory(
+      "inverter",
+      "Inverter",
+      "MyDesignsInverter",
+      inverterItems,
+      (item) => [
+        { label: "Model", value: productDisplayName(item) },
+        { label: "Type", value: productType(item) ?? NO_VALUE },
+        { label: "Monitoring", value: productType(item) ?? NO_VALUE },
       ],
-    },
-    {
-      id: "heat-pump",
-      title: "Heat Pump",
-      iconName: "HeatPump",
-      rows: [
-        { label: "Model", value: joinedProductNames(heatPumpItems) },
-        {
-          label: "Capacity",
-          value: heatPumpCapacityL !== undefined ? `${heatPumpCapacityL} L` : NO_VALUE,
-        },
-        { label: "Qty", value: heatPumpItems.length ? String(totalQuantity(heatPumpItems)) : NO_VALUE },
+      [
+        { label: "Model", value: NOT_AVAILABLE },
+        { label: "Type", value: NO_VALUE },
+        { label: "Monitoring", value: NO_VALUE },
       ],
-    },
+    ),
+    ...cardsForCategory(
+      "ev-charger",
+      "EV Charger",
+      "Zap",
+      evChargerItems,
+      (item) => {
+        const kw = inverterRatedKw(item);
+        return [
+          { label: "Model", value: productDisplayName(item) },
+          { label: "Rating", value: kw !== undefined ? `${kw} kW` : NO_VALUE },
+          { label: "Qty", value: String(item.quantity) },
+        ];
+      },
+      [
+        { label: "Model", value: NOT_AVAILABLE },
+        { label: "Rating", value: NO_VALUE },
+        { label: "Qty", value: NO_VALUE },
+      ],
+    ),
+    ...cardsForCategory(
+      "heat-pump",
+      "Heat Pump",
+      "HeatPump",
+      heatPumpItems,
+      (item) => {
+        const litres = numberSpec(item.product, "capacityL");
+        return [
+          { label: "Model", value: productDisplayName(item) },
+          {
+            label: "Capacity",
+            value: litres !== undefined ? `${litres} L` : NO_VALUE,
+          },
+          { label: "Qty", value: String(item.quantity) },
+        ];
+      },
+      [
+        { label: "Model", value: NOT_AVAILABLE },
+        { label: "Capacity", value: NO_VALUE },
+        { label: "Qty", value: NO_VALUE },
+      ],
+    ),
     {
       id: "site",
       title: "Site Details",

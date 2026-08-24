@@ -6,15 +6,35 @@ import { createPortal } from "react-dom";
 import Icon from "@/components/ui/Icons";
 import { useInstallerConfirm } from "@/components/installer/home-dashboard/InstallerConfirmDialog";
 import {
+  brandsOf,
+  fetchBuilderCatalogue,
+  modelsOf,
+  type BuilderCatalogue,
+  type BuilderProduct,
+  type BuilderProductCategory,
+} from "@/lib/designs/catalogue";
+import {
+  batteryCapacityKwh,
+  cecApprovedLabel,
+  inverterRatedKw,
+  numberSpec,
+  productLabel,
+  productSeries,
+  productsByCategory,
+  NO_VALUE,
+} from "@/lib/designs/product-specs";
+import {
   buildEquipmentWizardPatch,
   mergeEquipmentWithWizardData,
-  type EquipmentCardKey,
   type EquipmentRow,
   type InstallerHomeEquipment,
 } from "@/lib/installers/design-equipment";
 import {
+  addProductToInstallerDesign,
+  removeProductFromInstallerDesign,
   updateInstallerDesign,
   type InstallerCustomerDesign,
+  type InstallerDesignProduct,
 } from "@/lib/installers/designs";
 
 function IconBattery({ className }: { className?: string }) {
@@ -49,42 +69,103 @@ function IconCpu({ className }: { className?: string }) {
   );
 }
 
-const CARD_CONFIG: {
-  key: EquipmentCardKey;
+type ProductCardKey = "solar" | "battery" | "equipment" | "evCharger" | "heatPump";
+
+/** category substring for `productsByCategory`, and the catalogue category the "+ Add" picker fetches from. */
+const PRODUCT_CARD_CONFIG: {
+  key: ProductCardKey;
   title: string;
   icon: ReactNode;
+  categorySubstring: string;
+  builderCategory: BuilderProductCategory;
 }[] = [
   {
     key: "solar",
-    title: "Solar System",
+    title: "Solar Panels",
     icon: <Icon name="Sun" className="text-warm-ink" />,
+    categorySubstring: "panel",
+    builderCategory: "Solar Panel",
   },
   {
     key: "battery",
-    title: "Battery System",
+    title: "Battery",
     icon: <IconBattery className="text-warm-ink" />,
+    categorySubstring: "battery",
+    builderCategory: "Battery",
   },
   {
     key: "equipment",
-    title: "Equipment",
+    title: "Inverter",
     icon: <IconCpu className="text-warm-ink" />,
+    categorySubstring: "inverter",
+    builderCategory: "Inverter",
   },
   {
     key: "evCharger",
     title: "EV Charger",
     icon: <Icon name="Zap" className="text-warm-ink" />,
+    categorySubstring: "ev charger",
+    builderCategory: "EV Charger",
   },
   {
     key: "heatPump",
     title: "Heat Pump",
     icon: <Icon name="HeatPump" className="text-warm-ink" />,
-  },
-  {
-    key: "site",
-    title: "Site Details",
-    icon: <Icon name="LocationPin" className="text-warm-ink" />,
+    categorySubstring: "heat pump",
+    builderCategory: "Heat Pump",
   },
 ];
+
+const SITE_CARD = {
+  title: "Site Details",
+  icon: <Icon name="LocationPin" className="text-warm-ink" />,
+};
+
+/** One spec-row set per category, built from a single attached product. */
+function specRowsFor(key: ProductCardKey, item: InstallerDesignProduct): EquipmentRow[] {
+  const model = productLabel(item) ?? NO_VALUE;
+  switch (key) {
+    case "solar":
+      return [
+        { label: "Model", value: model },
+        {
+          label: "Watts",
+          value: item.product?.wattage ? `${item.product.wattage}W` : NO_VALUE,
+        },
+      ];
+    case "battery": {
+      const kwh = batteryCapacityKwh(item);
+      return [
+        { label: "Model", value: model },
+        { label: "Capacity", value: kwh !== undefined ? `${kwh} kWh` : NO_VALUE },
+        { label: "Series", value: productSeries(item) ?? NO_VALUE },
+        { label: "CEC Approved", value: cecApprovedLabel(item) ?? NO_VALUE },
+      ];
+    }
+    case "equipment": {
+      const kw = inverterRatedKw(item);
+      return [
+        { label: "Model", value: model },
+        { label: "Rated Output", value: kw !== undefined ? `${kw} kW` : NO_VALUE },
+        { label: "CEC Approved", value: cecApprovedLabel(item) ?? NO_VALUE },
+      ];
+    }
+    case "evCharger": {
+      const kw = inverterRatedKw(item);
+      return [
+        { label: "Model", value: model },
+        { label: "Rating", value: kw !== undefined ? `${kw} kW` : NO_VALUE },
+      ];
+    }
+    case "heatPump": {
+      const litres = numberSpec(item.product, "capacityL");
+      return [
+        { label: "Model", value: model },
+        { label: "Capacity", value: litres !== undefined ? `${litres} L` : NO_VALUE },
+      ];
+    }
+  }
+}
 
 function EquipmentSpecRow({ label, value }: EquipmentRow) {
   return (
@@ -99,6 +180,296 @@ function EquipmentSpecRow({ label, value }: EquipmentRow) {
         {value}
       </span>
     </div>
+  );
+}
+
+function CardShell({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative min-w-0 overflow-hidden rounded-[11px] border-[1.157px] border-warm-border bg-cream-50 p-[13.24px]">
+      <div className="flex items-center gap-[8.825px] pr-[52px]">
+        <span className="flex size-[30.907px] shrink-0 items-center justify-center rounded-[8.833px] bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-ink [&_svg]:size-[15.445px]">
+          {icon}
+        </span>
+        <h4 className="min-w-0 truncate font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.33px] text-warm-ink">
+          {title}
+        </h4>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function ProductEquipmentCard({
+  cardKey,
+  title,
+  icon,
+  item,
+  disabled,
+  onChangeQuantity,
+  onRemove,
+}: {
+  cardKey: ProductCardKey;
+  title: string;
+  icon: ReactNode;
+  item: InstallerDesignProduct;
+  disabled?: boolean;
+  onChangeQuantity: (quantity: number) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <CardShell title={title} icon={icon}>
+      <div className="absolute right-[13.24px] top-[8.83px]">
+        <button
+          type="button"
+          className="flex size-[22.082px] items-center justify-center rounded-[4.417px] text-danger hover:bg-black/5 disabled:opacity-50"
+          aria-label={`Remove ${title}`}
+          disabled={disabled}
+          onClick={onRemove}
+        >
+          <Icon name="Trash" className="size-[13.24px]" />
+        </button>
+      </div>
+      <div className="mt-[13px] flex flex-col gap-[4.413px]">
+        {specRowsFor(cardKey, item).map((row) => (
+          <EquipmentSpecRow key={row.label} label={row.label} value={row.value} />
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-between gap-2 border-t border-warm-border pt-2">
+        <span className="font-dm-sans text-[11px] text-warm-gray">Qty</span>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            aria-label="Decrease quantity"
+            disabled={disabled || item.quantity <= 1}
+            onClick={() => onChangeQuantity(item.quantity - 1)}
+            className="flex size-6 items-center justify-center rounded-md border border-warm-border text-warm-ink hover:bg-white disabled:opacity-40"
+          >
+            −
+          </button>
+          <span className="w-5 text-center font-dm-sans text-[13px] font-semibold text-warm-ink">
+            {item.quantity}
+          </span>
+          <button
+            type="button"
+            aria-label="Increase quantity"
+            disabled={disabled}
+            onClick={() => onChangeQuantity(item.quantity + 1)}
+            className="flex size-6 items-center justify-center rounded-md border border-warm-border text-warm-ink hover:bg-white disabled:opacity-40"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </CardShell>
+  );
+}
+
+function AddProductTile({
+  title,
+  icon,
+  disabled,
+  onClick,
+}: {
+  title: string;
+  icon: ReactNode;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="flex min-h-[100px] min-w-0 flex-col items-center justify-center gap-1.5 rounded-[11px] border border-dashed border-warm-border bg-white text-warm-gray hover:bg-cream-50 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <span className="flex size-[26px] items-center justify-center rounded-full border border-warm-border [&_svg]:size-3">
+        {icon}
+      </span>
+      <span className="font-dm-sans text-[12px] font-medium">+ Add {title}</span>
+    </button>
+  );
+}
+
+function AddProductModal({
+  open,
+  category,
+  catalogue,
+  loadingCatalogue,
+  saving,
+  error,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  category: (typeof PRODUCT_CARD_CONFIG)[number] | null;
+  catalogue: BuilderCatalogue | null;
+  loadingCatalogue: boolean;
+  saving: boolean;
+  error: string | null;
+  onClose: () => void;
+  onSubmit: (productId: string, quantity: number) => void;
+}) {
+  const titleId = useId();
+  // Freshly initialized on every open: the parent remounts this component
+  // (via a `key` on the JSX below) each time it opens, rather than resetting
+  // state in an effect.
+  const [brand, setBrand] = useState("");
+  const [productId, setProductId] = useState("");
+  const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !saving) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, open, saving]);
+
+  if (!open || !category || typeof document === "undefined") return null;
+
+  const products = catalogue?.[category.builderCategory] ?? [];
+  const brandOptions = brandsOf(products);
+  const modelOptions: BuilderProduct[] = modelsOf(products, brand);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8"
+      role="presentation"
+    >
+      <button
+        type="button"
+        aria-label="Close dialog"
+        className="absolute inset-0 bg-[rgba(47,47,47,0.67)] backdrop-blur-[1px]"
+        onClick={() => {
+          if (!saving) onClose();
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative z-[1] flex w-full max-w-[420px] flex-col overflow-hidden rounded-[12px] border border-warm-border bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+      >
+        <div className="border-b border-warm-border bg-linear-to-b from-yellow-lemon to-orange-amber px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 id={titleId} className="font-inter text-[14px] font-bold leading-[21px] text-warm-black">
+              Add {category.title}
+            </h2>
+            <button
+              type="button"
+              className="flex size-6 items-center justify-center rounded-full bg-[rgba(28,26,23,0.1)] text-warm-black hover:bg-[rgba(28,26,23,0.18)]"
+              onClick={onClose}
+              disabled={saving}
+              aria-label="Close"
+            >
+              <Icon name="X" className="size-[14px]" />
+            </button>
+          </div>
+        </div>
+
+        <form
+          className="flex flex-col gap-3 p-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!productId) return;
+            onSubmit(productId, quantity);
+          }}
+        >
+          {loadingCatalogue ? (
+            <p className="font-dm-sans text-sm text-warm-gray">Loading catalogue…</p>
+          ) : (
+            <>
+              <label className="block">
+                <span className="mb-1 block font-dm-sans text-[10px] font-semibold uppercase tracking-wide text-warm-gray">
+                  Brand
+                </span>
+                <select
+                  value={brand}
+                  onChange={(e) => {
+                    setBrand(e.target.value);
+                    setProductId("");
+                  }}
+                  disabled={saving}
+                  className="w-full rounded-lg border border-warm-border bg-white px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
+                >
+                  <option value="" disabled>
+                    Select brand
+                  </option>
+                  {brandOptions.map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block font-dm-sans text-[10px] font-semibold uppercase tracking-wide text-warm-gray">
+                  Model
+                </span>
+                <select
+                  value={productId}
+                  onChange={(e) => setProductId(e.target.value)}
+                  disabled={saving || !brand}
+                  className="w-full rounded-lg border border-warm-border bg-white px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue disabled:opacity-60"
+                >
+                  <option value="" disabled>
+                    Select model
+                  </option>
+                  {modelOptions.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block font-dm-sans text-[10px] font-semibold uppercase tracking-wide text-warm-gray">
+                  Quantity
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+                  disabled={saving}
+                  className="w-full rounded-lg border border-warm-border bg-white px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
+                />
+              </label>
+            </>
+          )}
+
+          {error ? <p className="font-dm-sans text-sm text-red-600">{error}</p> : null}
+
+          <div className="mt-1 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="rounded-lg border border-warm-border px-4 py-2 font-dm-sans text-sm font-medium text-warm-ink hover:bg-cream-50 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !productId}
+              className="rounded-lg bg-linear-to-b from-yellow-lemon to-orange-amber px-4 py-2 font-dm-sans text-sm font-bold uppercase tracking-wide text-warm-black hover:opacity-95 disabled:opacity-60"
+            >
+              {saving ? "Adding…" : "Add"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -274,7 +645,7 @@ function EditEquipmentModal({
   );
 }
 
-function EquipmentCard({
+function SiteDetailsCard({
   title,
   icon,
   rows,
@@ -292,18 +663,7 @@ function EquipmentCard({
   onDelete: () => void;
 }) {
   return (
-    <div
-      className="relative min-w-0 overflow-hidden rounded-[11px] border-[1.157px] border-warm-border bg-cream-50 p-[13.24px]"
-      data-node-id="3:8717"
-    >
-      <div className="flex items-center gap-[8.825px] pr-[52px]">
-        <span className="flex size-[30.907px] shrink-0 items-center justify-center rounded-[8.833px] bg-linear-to-b from-yellow-lemon to-orange-amber text-warm-ink [&_svg]:size-[15.445px]">
-          {icon}
-        </span>
-        <h4 className="min-w-0 truncate font-inter text-[13.25px] font-bold uppercase leading-[19.875px] tracking-[0.33px] text-warm-ink">
-          {title}
-        </h4>
-      </div>
+    <CardShell title={title} icon={icon}>
       <div className="absolute right-[13.24px] top-[8.83px] flex gap-[4.413px]">
         <button
           type="button"
@@ -326,14 +686,10 @@ function EquipmentCard({
       </div>
       <div className="mt-[13px] flex flex-col gap-[4.413px]">
         {rows.map((row) => (
-          <EquipmentSpecRow
-            key={row.label}
-            label={row.label}
-            value={row.value}
-          />
+          <EquipmentSpecRow key={row.label} label={row.label} value={row.value} />
         ))}
       </div>
-    </div>
+    </CardShell>
   );
 }
 
@@ -342,6 +698,28 @@ type Props = {
   baseEquipment: InstallerHomeEquipment;
   onDesignUpdated: (design: InstallerCustomerDesign) => void;
 };
+
+/** Patches one product in/out of a design's product list without a full refetch. */
+function withProduct(
+  design: InstallerCustomerDesign,
+  next: InstallerDesignProduct,
+): InstallerCustomerDesign {
+  const products = design.products ?? [];
+  const withoutExisting = products.filter(
+    (item) => item.product?.id !== next.product?.id,
+  );
+  return { ...design, products: [...withoutExisting, next] };
+}
+
+function withoutProduct(
+  design: InstallerCustomerDesign,
+  productId: string,
+): InstallerCustomerDesign {
+  return {
+    ...design,
+    products: (design.products ?? []).filter((item) => item.product?.id !== productId),
+  };
+}
 
 export function InstallerHomeEquipmentSection({
   design,
@@ -352,25 +730,96 @@ export function InstallerHomeEquipmentSection({
     () => mergeEquipmentWithWizardData(baseEquipment, design?.wizardData),
     [baseEquipment, design?.wizardData],
   );
+  const siteHidden = hidden.has("site");
 
-  const visibleCards = useMemo(
-    () => CARD_CONFIG.filter((card) => !hidden.has(card.key)),
-    [hidden],
-  );
+  const [catalogue, setCatalogue] = useState<BuilderCatalogue | null>(null);
+  const [loadingCatalogue, setLoadingCatalogue] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingCatalogue(true);
+    fetchBuilderCatalogue()
+      .then((result) => {
+        if (!cancelled) setCatalogue(result);
+      })
+      .catch(() => {
+        // The add-product picker just shows empty options; not fatal to the page.
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingCatalogue(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const [editingKey, setEditingKey] = useState<EquipmentCardKey | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deletingKey, setDeletingKey] = useState<EquipmentCardKey | null>(null);
+  const [pendingProductId, setPendingProductId] = useState<string | null>(null);
+  const [addingCategoryKey, setAddingCategoryKey] = useState<ProductCardKey | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [addSaving, setAddSaving] = useState(false);
+
+  const [editingSite, setEditingSite] = useState(false);
+  const [siteFormError, setSiteFormError] = useState<string | null>(null);
+  const [siteSaving, setSiteSaving] = useState(false);
+  const [siteDeleting, setSiteDeleting] = useState(false);
+
   const { confirm, confirmDialog } = useInstallerConfirm();
 
-  const editingCard = editingKey
-    ? CARD_CONFIG.find((card) => card.key === editingKey)
-    : null;
+  async function handleChangeQuantity(
+    item: InstallerDesignProduct,
+    quantity: number,
+  ) {
+    if (!design?.id || !item.product?.id) return;
+    setPendingProductId(item.product.id);
+    try {
+      const updated = await addProductToInstallerDesign(design.id, {
+        productId: item.product.id,
+        quantity,
+      });
+      onDesignUpdated(withProduct(design, updated));
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Failed to update quantity");
+    } finally {
+      setPendingProductId(null);
+    }
+  }
 
-  async function persistWizardData(
-    wizardData: Record<string, unknown>,
-  ): Promise<void> {
+  async function handleRemoveProduct(item: InstallerDesignProduct, categoryTitle: string) {
+    if (!design?.id || !item.product?.id) return;
+    const confirmed = await confirm({
+      title: `Remove ${categoryTitle}`,
+      description: `Remove "${productLabel(item) ?? categoryTitle}" from this customer's design?`,
+      confirmLabel: "Remove",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    setPendingProductId(item.product.id);
+    try {
+      await removeProductFromInstallerDesign(design.id, item.product.id);
+      onDesignUpdated(withoutProduct(design, item.product.id));
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Failed to remove product");
+    } finally {
+      setPendingProductId(null);
+    }
+  }
+
+  async function handleAddProduct(productId: string, quantity: number) {
+    if (!design?.id) return;
+    setAddSaving(true);
+    setAddError(null);
+    try {
+      const updated = await addProductToInstallerDesign(design.id, { productId, quantity });
+      onDesignUpdated(withProduct(design, updated));
+      setAddingCategoryKey(null);
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : "Failed to add product");
+    } finally {
+      setAddSaving(false);
+    }
+  }
+
+  async function persistSiteWizardData(wizardData: Record<string, unknown>): Promise<void> {
     if (!design?.id) {
       throw new Error("Save a customer design before editing equipment.");
     }
@@ -378,98 +827,138 @@ export function InstallerHomeEquipmentSection({
     onDesignUpdated(updated);
   }
 
-  async function handleSaveEdit(rows: EquipmentRow[]) {
-    if (!editingKey || !design) return;
-    setSaving(true);
-    setFormError(null);
+  async function handleSaveSite(rows: EquipmentRow[]) {
+    if (!design) return;
+    setSiteSaving(true);
+    setSiteFormError(null);
     try {
       const wizardData = buildEquipmentWizardPatch(design.wizardData, {
-        cardKey: editingKey,
+        cardKey: "site",
         rows,
       });
-      await persistWizardData(wizardData);
-      setEditingKey(null);
+      await persistSiteWizardData(wizardData);
+      setEditingSite(false);
     } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : "Failed to save equipment",
-      );
+      setSiteFormError(err instanceof Error ? err.message : "Failed to save equipment");
     } finally {
-      setSaving(false);
+      setSiteSaving(false);
     }
   }
 
-  async function handleDelete(cardKey: EquipmentCardKey, title: string) {
+  async function handleDeleteSite() {
     if (!design?.id) return;
     const confirmed = await confirm({
       title: "Remove equipment",
-      description: `Remove "${title}" from this customer?`,
+      description: `Remove "${SITE_CARD.title}" from this customer?`,
       confirmLabel: "Remove",
       tone: "danger",
     });
     if (!confirmed) return;
 
-    setDeletingKey(cardKey);
+    setSiteDeleting(true);
     try {
       const wizardData = buildEquipmentWizardPatch(design.wizardData, {
-        hideCardKey: cardKey,
+        hideCardKey: "site",
       });
-      await persistWizardData(wizardData);
+      await persistSiteWizardData(wizardData);
     } catch (err) {
-      window.alert(
-        err instanceof Error ? err.message : "Failed to delete equipment card",
-      );
+      window.alert(err instanceof Error ? err.message : "Failed to delete equipment card");
     } finally {
-      setDeletingKey(null);
+      setSiteDeleting(false);
     }
   }
 
+  const addingCategory = addingCategoryKey
+    ? PRODUCT_CARD_CONFIG.find((cfg) => cfg.key === addingCategoryKey) ?? null
+    : null;
+
   return (
-    <section className="mt-5">
-      {visibleCards.length === 0 ? (
-        <div className="rounded-[11px] border border-dashed border-warm-border bg-cream-50 px-4 py-6 text-center font-dm-sans text-sm text-warm-gray">
-          All equipment cards are hidden for this customer.
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {visibleCards.map((card) => (
-            <EquipmentCard
-              key={card.key}
-              title={card.title}
-              icon={card.icon}
-              rows={equipment[card.key]}
-              disabled={!design?.id || saving}
-              deleting={deletingKey === card.key}
-              onEdit={() => {
-                setFormError(null);
-                setEditingKey(card.key);
+    <section className="mt-5 space-y-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {PRODUCT_CARD_CONFIG.flatMap((cfg) => {
+          const items = productsByCategory(design?.products, cfg.categorySubstring);
+          return [
+            ...items.map((item) => (
+              <ProductEquipmentCard
+                key={`${cfg.key}-${item.product?.id ?? item.id}`}
+                cardKey={cfg.key}
+                title={cfg.title}
+                icon={cfg.icon}
+                item={item}
+                disabled={!design?.id || pendingProductId === item.product?.id}
+                onChangeQuantity={(quantity) => void handleChangeQuantity(item, quantity)}
+                onRemove={() => void handleRemoveProduct(item, cfg.title)}
+              />
+            )),
+            <AddProductTile
+              key={`${cfg.key}-add`}
+              title={cfg.title}
+              icon={cfg.icon}
+              disabled={!design?.id}
+              onClick={() => {
+                setAddError(null);
+                setAddingCategoryKey(cfg.key);
               }}
-              onDelete={() => void handleDelete(card.key, card.title)}
-            />
-          ))}
+            />,
+          ];
+        })}
+      </div>
+
+      {!siteHidden ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <SiteDetailsCard
+            title={SITE_CARD.title}
+            icon={SITE_CARD.icon}
+            rows={equipment.site}
+            disabled={!design?.id || siteSaving}
+            deleting={siteDeleting}
+            onEdit={() => {
+              setSiteFormError(null);
+              setEditingSite(true);
+            }}
+            onDelete={() => void handleDeleteSite()}
+          />
         </div>
-      )}
+      ) : null}
 
       <button
         type="button"
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-warm-border bg-cream-50 py-3 font-inter text-sm font-medium text-warm-ink hover:bg-cream-100"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-warm-border bg-cream-50 py-3 font-inter text-sm font-medium text-warm-ink hover:bg-cream-100"
       >
         <span className="text-lg leading-none">+</span>
         Create New Deal / System
       </button>
 
-      <EditEquipmentModal
-        open={editingKey != null}
-        cardTitle={editingCard?.title ?? "Equipment"}
-        rows={editingKey ? equipment[editingKey] : []}
-        saving={saving}
-        error={formError}
+      <AddProductModal
+        key={addingCategoryKey ?? "none"}
+        open={addingCategoryKey != null}
+        category={addingCategory}
+        catalogue={catalogue}
+        loadingCatalogue={loadingCatalogue}
+        saving={addSaving}
+        error={addError}
         onClose={() => {
-          if (!saving) {
-            setEditingKey(null);
-            setFormError(null);
+          if (!addSaving) {
+            setAddingCategoryKey(null);
+            setAddError(null);
           }
         }}
-        onSubmit={(rows) => void handleSaveEdit(rows)}
+        onSubmit={(productId, quantity) => void handleAddProduct(productId, quantity)}
+      />
+
+      <EditEquipmentModal
+        open={editingSite}
+        cardTitle={SITE_CARD.title}
+        rows={equipment.site}
+        saving={siteSaving}
+        error={siteFormError}
+        onClose={() => {
+          if (!siteSaving) {
+            setEditingSite(false);
+            setSiteFormError(null);
+          }
+        }}
+        onSubmit={(rows) => void handleSaveSite(rows)}
       />
 
       {confirmDialog}

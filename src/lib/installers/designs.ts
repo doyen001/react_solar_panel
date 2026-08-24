@@ -114,3 +114,47 @@ export async function updateInstallerDesign(
   }
   return json.data;
 }
+
+/**
+ * Adds a real catalogue product to a design, or updates its quantity if
+ * already attached — the backend upserts on (designId, productId).
+ */
+export async function addProductToInstallerDesign(
+  designId: string,
+  input: { productId: string; quantity: number },
+  init?: RequestInit,
+): Promise<InstallerDesignProduct> {
+  const res = await fetchWithInstallerSession(
+    `/api/installers/designs/${designId}/products`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+      cache: "no-store",
+      ...init,
+    },
+  );
+  const json = (await res.json()) as ApiEnvelope<InstallerDesignProduct>;
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to add product to design");
+  }
+  if (!json.data) {
+    throw new Error("Failed to add product to design");
+  }
+  return json.data;
+}
+
+export async function removeProductFromInstallerDesign(
+  designId: string,
+  productId: string,
+  init?: RequestInit,
+): Promise<void> {
+  const res = await fetchWithInstallerSession(
+    `/api/installers/designs/${designId}/products/${productId}`,
+    { method: "DELETE", cache: "no-store", ...init },
+  );
+  if (!res.ok) {
+    const json = (await res.json().catch(() => ({}))) as ApiEnvelope<unknown>;
+    throw new Error(json.message || "Failed to remove product from design");
+  }
+}
