@@ -1,43 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import Icon from "@/components/ui/Icons";
 
 const reviews = [
   {
-    logo: "/images/home/review-logo.svg",
+    name: "Dalton Tolentino Sandico",
+    rating: 5,
     quote:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam, quis nostrud",
-    name: "Sameer Rai",
-    title: "Product Head",
-    avatar: "/images/home/review-avatar.png",
-    videoSrc: "/videos/EvanYangSolar.mp4",
+      "I'm happy with the service that i have received from Easylink Solar. Highly Recommended!!",
+    image: "/images/feedback/1.jpg",
   },
   {
-    logo: "/images/home/review-logo.svg",
+    name: "Joy-cris Tan",
+    rating: 5,
     quote:
-      "Easylink Solar made the entire process seamless. From the initial consultation to final installation, everything was handled professionally and efficiently.",
-    name: "Sarah Chen",
-    title: "Homeowner",
-    avatar: "/images/home/review-avatar.png",
-    videoSrc: "/videos/HemantTidkeVideo.mp4",
+      "Hi Sujay and team, thank you for helping me save power cost thru a proper and professional way of solar system installation. I highly recommend this company if you want to save and earn power credits. The after sales program is awesome! Give them a call now! Thanks again.",
+    image: "/images/feedback/2.jpg",
   },
   {
-    logo: "/images/home/review-logo.svg",
+    name: "Cha Chie",
+    rating: 5,
     quote:
-      "The quality of the BLUETTI products and the installation service exceeded our expectations. Highly recommend Easylink Solar to anyone considering solar energy.",
-    name: "Michael Torres",
-    title: "Business Owner",
-    avatar: "/images/home/review-avatar.png",
-    videoSrc: "/videos/AndrewKeshwanSolar.mp4",
+      "Sales representative Sujay is very transparent, a man of his words and will help you all the way, doesn't miss a call and messages. Very optimistic and professional. I've got a single phase main switch but the inverter I've chosen is a 3 phase inverter, they actually convert my single phase main switch to 3 phase free of charge! As for the team of installers led by David, exceptional as well. Very professional and installs the system neatly! Very happy with the experience! Thank you Easylink Solar!",
+    image: "/images/feedback/3.jpg",
+  },
+  {
+    name: "Verified Customer",
+    rating: 5,
+    quote:
+      "Another successful installation at Kariong, for Ms. Kim and Mr. Robert - 13.3kW and 15kW inverter with future system upgrade capacity and battery.",
+    image: "/images/feedback/4.png",
+  },
+  {
+    name: "Saad Abood",
+    rating: 5,
+    quote: "Very accurate. Good panels and inverters. Professional installation.",
+    image: "/images/feedback/5.png",
   },
 ];
+
+const AUTO_ADVANCE_MS = 5000;
 
 export function CustomerReviewsSection() {
   const [current, setCurrent] = useState(0);
 
   const prev = () => setCurrent((c) => (c === 0 ? reviews.length - 1 : c - 1));
   const next = () => setCurrent((c) => (c === reviews.length - 1 ? 0 : c + 1));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((c) => (c === reviews.length - 1 ? 0 : c + 1));
+    }, AUTO_ADVANCE_MS);
+    return () => clearInterval(timer);
+  }, [current]);
 
   const review = reviews[current];
 
@@ -72,54 +89,40 @@ export function CustomerReviewsSection() {
             <div className="flex flex-col gap-8 p-8 sm:p-10 lg:flex-row lg:gap-[59px]">
               {/* Photo */}
               <div className="relative mx-auto h-[280px] w-[280px] shrink-0 overflow-hidden rounded-xl sm:h-[332px] sm:w-[338px] lg:mx-0">
-              <video
-                className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
-                autoPlay
-                muted
-                playsInline
-                preload="metadata"
-                aria-label={review.videoSrc}
-              >
-                <source src={review.videoSrc} type="video/mp4" />
-              </video>
-                {/* Play button overlay */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Image
-                    src="/images/home/review-play.svg"
-                    alt="Play"
-                    width={57}
-                    height={56}
-                  />
-                </div>
+                <Image
+                  key={review.image}
+                  src={review.image}
+                  alt={`Solar installation for ${review.name}`}
+                  fill
+                  sizes="(min-width: 640px) 338px, 280px"
+                  className="object-cover"
+                />
               </div>
 
               {/* Content */}
               <div className="flex flex-col justify-between">
                 <div className="flex flex-col gap-7">
-                  <Image
-                    src={review.logo}
-                    alt="Feedspace"
-                    width={145}
-                    height={29}
-                  />
+                  <div
+                    className="flex items-center gap-1"
+                    role="img"
+                    aria-label={`Rated ${review.rating} out of 5`}
+                  >
+                    {Array.from({ length: review.rating }, (_, star) => (
+                      <Icon
+                        key={star}
+                        name="Star"
+                        className="size-5 text-gold"
+                      />
+                    ))}
+                  </div>
                   <p className="font-source-sans text-base leading-relaxed text-dusk sm:text-lg">
                     &ldquo;{review.quote}&rdquo;
                   </p>
                 </div>
                 <div className="mt-8 flex items-end gap-4 lg:mt-0">
-                  <Image
-                    src={review.avatar}
-                    alt={review.name}
-                    width={55}
-                    height={55}
-                    className="rounded-full"
-                  />
                   <div>
                     <p className="font-source-sans text-lg font-bold text-indigo-night">
                       {review.name}
-                    </p>
-                    <p className="font-source-sans text-lg text-dusk">
-                      {review.title}
                     </p>
                   </div>
                 </div>
@@ -128,12 +131,7 @@ export function CustomerReviewsSection() {
           </div>
 
           {/* Right arrow */}
-          {/* <button
-            onClick={next}
-            className="order-3 mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-primary transition hover:bg-teal-bright lg:mx-0"
-            aria-label="Next review"
-          > */}
-          <button onClick={next}>
+          <button onClick={next} aria-label="Next review">
             <Image
               src="/images/home/review-arrow-right.svg"
               alt=""
@@ -141,7 +139,6 @@ export function CustomerReviewsSection() {
               height={48}
             />
           </button>
-          {/* </button> */}
         </div>
       </div>
     </section>
