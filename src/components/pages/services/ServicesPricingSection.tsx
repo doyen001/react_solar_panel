@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { ServicesReveal } from "@/components/pages/services/ServicesReveal";
 import { ServicesRippleLink } from "@/components/pages/services/ServicesRippleLink";
 import { ServicesSectionHeading } from "@/components/pages/services/ServicesSectionHeading";
@@ -5,8 +8,14 @@ import Icon from "@/components/ui/Icons";
 import { SERVICES_PAGE } from "@/utils/constant";
 
 const { pricing } = SERVICES_PAGE;
+const DEFAULT_DARK_INDEX = pricing.tiers.findIndex((tier) => tier.featured);
 
 export function ServicesPricingSection() {
+  // Exactly one card looks "dark" at a time: the featured one by default,
+  // or whichever card is currently hovered/focused — so lighting up a
+  // light card also turns the previously-dark card back to light.
+  const [activeIndex, setActiveIndex] = useState(DEFAULT_DARK_INDEX);
+
   return (
     <section
       id="pricing"
@@ -26,6 +35,7 @@ export function ServicesPricingSection() {
             // Only the featured tier carries a badge, so the union needs a guard.
             const badge = "badge" in tier ? tier.badge : null;
             const isFeatured = tier.featured;
+            const isDark = index === activeIndex;
 
             return (
               <li key={tier.id} className="flex h-full">
@@ -34,9 +44,16 @@ export function ServicesPricingSection() {
                   className="flex h-full w-full flex-col"
                 >
                   <article
-                    className={`svc-card svc-lift relative flex h-full w-full flex-col gap-6 rounded-3xl p-7 sm:p-8 ${
-                      isFeatured ? "border-svc-gold bg-svc-ink" : ""
-                    }`}
+                    data-featured={isDark}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(DEFAULT_DARK_INDEX)}
+                    onFocus={() => setActiveIndex(index)}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                        setActiveIndex(DEFAULT_DARK_INDEX);
+                      }
+                    }}
+                    className="svc-card svc-lift svc-price-card relative flex h-full w-full flex-col gap-6 rounded-3xl p-7 sm:p-8"
                   >
                     {badge ? (
                       <span className="absolute -top-3 left-8 inline-flex items-center rounded-full bg-linear-to-b from-yellow-lemon to-orange-amber px-3 py-1 font-inter text-[11px] font-bold uppercase tracking-[0.1em] text-warm-black">
@@ -45,35 +62,19 @@ export function ServicesPricingSection() {
                     ) : null}
 
                     <div className="flex flex-col gap-2">
-                      <h3
-                        className={`font-outfit text-xl font-bold leading-7 ${
-                          isFeatured ? "text-white" : "text-svc-ink"
-                        }`}
-                      >
+                      <h3 className="font-outfit text-[color:var(--price-title)] text-xl font-bold leading-7">
                         {tier.name}
                       </h3>
-                      <p
-                        className={`font-dm-sans text-[14px] leading-6 ${
-                          isFeatured ? "text-svc-dark-body" : "text-svc-body"
-                        }`}
-                      >
+                      <p className="font-dm-sans text-[color:var(--price-body)] text-[14px] leading-6">
                         {tier.summary}
                       </p>
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <p
-                        className={`font-outfit text-[32px] font-bold leading-10 ${
-                          isFeatured ? "text-white" : "text-svc-ink"
-                        }`}
-                      >
+                      <p className="font-outfit text-[color:var(--price-title)] text-[32px] font-bold leading-10">
                         {tier.priceLabel}
                       </p>
-                      <p
-                        className={`font-inter text-[13px] leading-5 ${
-                          isFeatured ? "text-svc-dark-muted" : "text-svc-muted"
-                        }`}
-                      >
+                      <p className="font-inter text-[color:var(--price-muted)] text-[13px] leading-5">
                         {tier.cadence}
                       </p>
                     </div>
@@ -83,19 +84,11 @@ export function ServicesPricingSection() {
                         <li key={feature} className="flex items-start gap-2.5">
                           <span
                             aria-hidden="true"
-                            className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full ${
-                              isFeatured
-                                ? "bg-yellow-lemon/20 text-yellow-lemon"
-                                : "bg-svc-accent-soft text-svc-accent-text"
-                            }`}
+                            className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--price-check-bg)] text-[color:var(--price-check-text)]"
                           >
                             <Icon name="Check" className="size-3 text-current" />
                           </span>
-                          <span
-                            className={`font-dm-sans text-[14px] leading-6 ${
-                              isFeatured ? "text-svc-dark-body" : "text-svc-body"
-                            }`}
-                          >
+                          <span className="font-dm-sans text-[color:var(--price-body)] text-[14px] leading-6">
                             {feature}
                           </span>
                         </li>

@@ -4165,7 +4165,8 @@ button {
     transition:
       transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 300ms ease,
-      border-color 300ms ease;
+      border-color 300ms ease,
+      background-color 300ms ease;
   }
 
   .svc-lift:hover,
@@ -4173,6 +4174,31 @@ button {
     transform: translateY(-6px);
     border-color: var(--color-svc-accent);
     box-shadow: 0 18px 40px -18px var(--color-svc-shadow-lift);
+  }
+
+  /* Pricing cards: exactly one card looks "dark" at a time — the featured
+     one by default, or whichever card the pointer/focus is on. The parent
+     component tracks that as state and sets data-featured accordingly, so
+     hovering a light card turns it dark AND turns the previously-dark card
+     back to light in the same stroke. Text/icon colors read from these
+     custom properties so one set of Tailwind classes covers both looks. */
+  .svc-price-card {
+    --price-title: var(--color-svc-ink);
+    --price-body: var(--color-svc-body);
+    --price-muted: var(--color-svc-muted);
+    --price-check-bg: var(--color-svc-accent-soft);
+    --price-check-text: var(--color-svc-accent-text);
+    background-color: var(--color-svc-surface);
+  }
+
+  .svc-price-card[data-featured="true"] {
+    --price-title: #ffffff;
+    --price-body: var(--color-svc-dark-body);
+    --price-muted: var(--color-svc-dark-muted);
+    --price-check-bg: rgb(255 239 98 / 0.2);
+    --price-check-text: var(--color-svc-gold);
+    background-color: var(--color-svc-ink);
+    border-color: var(--color-svc-gold);
   }
 
   .svc-scale-target {
