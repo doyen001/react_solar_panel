@@ -4484,9 +4484,64 @@ html:has(.svc-page) {
   scroll-behavior: smooth;
 }
 
+/* EasyLink AI floating bot: pulsing glow behind the diamond badge, plus a
+   subtle idle bob so it reads as "alive" while sitting still. Dragging
+   suspends the bob (see .ai-bot-dragging) so it doesn't fight the pointer. */
+@keyframes ai-bot-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes ai-bot-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.ai-bot-glow {
+  position: absolute;
+  inset: -14px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.75) 0%,
+    rgba(168, 85, 247, 0.55) 45%,
+    rgba(168, 85, 247, 0) 72%
+  );
+  filter: blur(10px);
+  animation: ai-bot-glow-pulse 2.6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.ai-bot-bob {
+  animation: ai-bot-bob 3.4s ease-in-out infinite;
+}
+
+.ai-bot-dragging,
+.ai-bot-dragging .ai-bot-glow {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html:has(.svc-page) {
     scroll-behavior: auto;
+  }
+
+  .ai-bot-glow,
+  .ai-bot-bob {
+    animation: none !important;
   }
 
   .svc-reveal,

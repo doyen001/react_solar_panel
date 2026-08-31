@@ -15,6 +15,26 @@ const WELCOME: ChatTurn = {
     "Hi — I'm the EasyLink AI. Ask me about solar quotes, installers, our platform, or our website design and development services.",
 };
 
+// Draggable floating bot: pixel position of the button's top-left corner,
+// in viewport (`fixed`) coordinates. `null` means "use the default
+// bottom-right corner" (plain CSS, no inline position).
+type Pos = { x: number; y: number };
+
+const BOT_SIZE = 80;
+const VIEWPORT_MARGIN = 8;
+const POSITION_STORAGE_KEY = "easylink-ai-bot-position";
+const DRAG_THRESHOLD_PX = 6;
+
+function clampPos(pos: Pos): Pos {
+  if (typeof window === "undefined") return pos;
+  const maxX = Math.max(VIEWPORT_MARGIN, window.innerWidth - BOT_SIZE - VIEWPORT_MARGIN);
+  const maxY = Math.max(VIEWPORT_MARGIN, window.innerHeight - BOT_SIZE - VIEWPORT_MARGIN);
+  return {
+    x: Math.min(Math.max(pos.x, VIEWPORT_MARGIN), maxX),
+    y: Math.min(Math.max(pos.y, VIEWPORT_MARGIN), maxY),
+  };
+}
+
 export function EasylinkAiChatbot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatTurn[]>([WELCOME]);
@@ -23,6 +43,115 @@ export function EasylinkAiChatbot() {
   const [error, setError] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Drag-to-move state for the floating bot button.
+  const [pos, setPos] = useState<Pos | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{
+    pointerId: number;
+    startClientX: number;
+    startClientY: number;
+    startPosX: number;
+    startPosY: number;
+    moved: boolean;
+  } | null>(null);
+  const draggedRef = useRef(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(POSITION_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Partial<Pos>;
+      if (typeof parsed.x === "number" && typeof parsed.y === "number") {
+        setPos(clampPos({ x: parsed.x, y: parsed.y }));
+      }
+    } catch {
+      /* ignore malformed/blocked storage */
+    }
+  }, []);
+
+  useEffect(() => {
+    function onResize() {
+      setPos((p) => (p ? clampPos(p) : p));
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  function handlePointerDown(e: React.PointerEvent<HTMLButtonElement>) {
+    if (open || e.button !== 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      startPosX: pos?.x ?? rect.left,
+      startPosY: pos?.y ?? rect.top,
+      moved: false,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const dx = e.clientX - drag.startClientX;
+    const dy = e.clientY - drag.startClientY;
+    if (!drag.moved && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) {
+      drag.moved = true;
+      draggedRef.current = true;
+      setDragging(true);
+    }
+    if (drag.moved) {
+      setPos(clampPos({ x: drag.startPosX + dx, y: drag.startPosY + dy }));
+    }
+  }
+
+  function handlePointerUp(e: React.PointerEvent<HTMLButtonElement>) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    dragRef.current = null;
+    setDragging(false);
+    if (drag.moved) {
+      setPos((p) => {
+        if (p) {
+          try {
+            localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(p));
+          } catch {
+            /* ignore blocked storage */
+          }
+        }
+        return p;
+      });
+    }
+  }
+
+  function handleClick() {
+    // A drag ends with a click event right behind it; swallow that one so
+    // dropping the bot doesn't also toggle the chat open/closed.
+    if (draggedRef.current) {
+      draggedRef.current = false;
+      return;
+    }
+    setOpen((o) => !o);
+  }
+
+  function panelStyle(): React.CSSProperties | undefined {
+    if (!pos || typeof window === "undefined") return undefined;
+    const width = Math.min(window.innerWidth - 32, 400);
+    const height = Math.min(window.innerHeight - 112, 560);
+    const gap = 12;
+    const openUpward = pos.y > window.innerHeight / 2;
+    const top = openUpward
+      ? Math.max(VIEWPORT_MARGIN, pos.y - gap - height)
+      : Math.min(window.innerHeight - height - VIEWPORT_MARGIN, pos.y + BOT_SIZE + gap);
+    const left = Math.min(
+      Math.max(pos.x + BOT_SIZE / 2 - width / 2, VIEWPORT_MARGIN),
+      window.innerWidth - width - VIEWPORT_MARGIN,
+    );
+    return { left, top, right: "auto", bottom: "auto", width, height };
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -118,27 +247,40 @@ export function EasylinkAiChatbot() {
         type="button"
         aria-label={open ? "Close EasyLink assistant" : "Open EasyLink assistant"}
         aria-expanded={open}
+        style={
+          pos ? { left: pos.x, top: pos.y, right: "auto", bottom: "auto" } : undefined
+        }
         className={classNames(
-          "fixed bottom-6 right-6 z-[100] flex items-center justify-center transition",
+          "fixed z-[100] flex touch-none select-none items-center justify-center transition",
+          !pos && "bottom-6 right-6",
           open
             ? "size-14 bg-navy-800 text-white hover:bg-navy-900 shadow-lg rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
-            : "",
+            : "cursor-grab active:cursor-grabbing",
+          dragging && "ai-bot-dragging",
         )}
-        onClick={() => setOpen((o) => !o)}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onClick={handleClick}
       >
         {open ? (
           <span className="font-inter text-2xl leading-none" aria-hidden>
             ×
           </span>
         ) : (
-          <Image
-            src="/images/easyLinkAI.png"
-            alt="EasyLink AI"
-            unoptimized
-            width={80}
-            height={80}
-            className="rounded-full"
-          />
+          <span className="relative flex items-center justify-center">
+            <span className="ai-bot-glow" aria-hidden />
+            <Image
+              src="/images/easyLinkAI.png"
+              alt="EasyLink AI"
+              unoptimized
+              width={80}
+              height={80}
+              draggable={false}
+              className="ai-bot-bob relative"
+            />
+          </span>
         )}
       </button>
 
@@ -147,6 +289,7 @@ export function EasylinkAiChatbot() {
           ref={panelRef}
           role="dialog"
           aria-label="EasyLink Solar assistant"
+          style={panelStyle()}
           className="fixed bottom-24 right-6 z-[100] flex h-[min(560px,calc(100vh-7rem))] w-[min(100vw-2rem,400px)] flex-col overflow-hidden rounded-2xl border border-warm-border bg-cream-50 shadow-2xl"
         >
           <div className="border-b border-warm-border bg-navy-800 px-4 py-3">
