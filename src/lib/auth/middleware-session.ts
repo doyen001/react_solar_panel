@@ -18,6 +18,26 @@ export function decodeJwtExp(token: string): number | null {
   }
 }
 
+/** Decode JWT payload `role` claim. Edge-safe; no signature verification. */
+export function decodeJwtRole(token: string): string | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = parts[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "=",
+    );
+    const json = atob(padded);
+    const obj = JSON.parse(json) as { role?: unknown };
+    return typeof obj.role === "string" ? obj.role : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Uses JWT `exp` only; invalid/missing payload treated as expired. */
 export function isAccessTokenExpired(
   accessToken: string | undefined,

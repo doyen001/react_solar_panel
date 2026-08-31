@@ -129,11 +129,17 @@ export function ProductsCompareModal({ products, onClose, onRemove }: Props) {
                         Rating
                       </span>
                       <span className="flex items-center gap-1 font-inter text-[12px] font-semibold text-warm-ink">
-                        <Icon
-                          name="AboutUsStar"
-                          className="size-3 shrink-0 text-orange-amber"
-                        />
-                        {product.rating.toFixed(1)}
+                        {product.rating > 0 ? (
+                          <>
+                            <Icon
+                              name="AboutUsStar"
+                              className="size-3 shrink-0 text-orange-amber"
+                            />
+                            {product.rating.toFixed(1)}
+                          </>
+                        ) : (
+                          <span className="text-warm-gray">—</span>
+                        )}
                       </span>
                     </div>
 

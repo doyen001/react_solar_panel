@@ -2,9 +2,16 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { INSTALLER_ACCESS_COOKIE } from "@/lib/auth/installer-cookies";
 import { CUSTOMER_ACCESS_COOKIE } from "@/lib/auth/customer-cookies";
+import { ADMIN_ACCESS_COOKIE } from "@/lib/auth/admin-cookies";
 import { buildBackendUrl } from "@/lib/customers/backend";
 
-export type BackendPortal = "customer" | "installer";
+export type BackendPortal = "customer" | "installer" | "admin";
+
+const PORTAL_COOKIE: Record<BackendPortal, string> = {
+  customer: CUSTOMER_ACCESS_COOKIE,
+  installer: INSTALLER_ACCESS_COOKIE,
+  admin: ADMIN_ACCESS_COOKIE,
+};
 
 export async function backendAuthedFetch(
   portal: BackendPortal,
@@ -12,11 +19,7 @@ export async function backendAuthedFetch(
   init?: RequestInit,
 ): Promise<Response | NextResponse> {
   const jar = await cookies();
-  const cookieName =
-    portal === "customer"
-      ? CUSTOMER_ACCESS_COOKIE
-      : INSTALLER_ACCESS_COOKIE;
-  const token = jar.get(cookieName)?.value;
+  const token = jar.get(PORTAL_COOKIE[portal])?.value;
 
   if (!token) {
     return NextResponse.json({ message: "Unauthorized." }, { status: 401 });

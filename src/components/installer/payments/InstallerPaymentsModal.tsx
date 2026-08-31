@@ -392,6 +392,20 @@ export function InstallerPaymentsModal({ open, onClose, customer }: Props) {
                         >
                           {PAYMENT_STATUS_LABELS[payment.status]}
                         </span>
+                        {payment.status === "PAID" ? (
+                          <span
+                            className={classNames(
+                              "rounded-full px-2 py-0.5 font-dm-sans text-[10px] font-semibold uppercase tracking-wide",
+                              payment.payoutStatus === "PAID_OUT"
+                                ? "bg-emerald-500/10 text-emerald-700"
+                                : "bg-warm-black/5 text-warm-gray",
+                            )}
+                          >
+                            {payment.payoutStatus === "PAID_OUT"
+                              ? "Paid out"
+                              : "Awaiting payout"}
+                          </span>
+                        ) : null}
                       </div>
                     </li>
                   ))}

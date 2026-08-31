@@ -16,6 +16,9 @@ export type PaymentStatus =
   | "CANCELLED"
   | "REFUNDED";
 
+export type PaymentKind = "SERVICE" | "PRODUCT_ORDER";
+export type PayoutStatus = "NOT_PAID_OUT" | "PAID_OUT";
+
 export type InstallerPayment = {
   id: string;
   installerId: string;
@@ -35,6 +38,18 @@ export type InstallerPayment = {
   paidAt: string | null;
   createdAt: string;
   updatedAt: string;
+  kind: PaymentKind;
+  productId: string | null;
+  quantity: number | null;
+  payoutStatus: PayoutStatus;
+  payout: {
+    id: string;
+    amount: number;
+    amountMinor: number;
+    note: string | null;
+    paidByUserId: string;
+    paidAt: string;
+  } | null;
 };
 
 export type StripePaymentStatus = {

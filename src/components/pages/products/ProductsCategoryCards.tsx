@@ -8,9 +8,11 @@ import type { ProductCategoryKey } from "@/components/pages/products/types";
 type Props = {
   activeCategory: ProductCategoryKey;
   onSelect: (category: ProductCategoryKey) => void;
+  /** Real backend totals, keyed by category — falls back to the static estimate while loading. */
+  counts?: Partial<Record<ProductCategoryKey, number>>;
 };
 
-export function ProductsCategoryCards({ activeCategory, onSelect }: Props) {
+export function ProductsCategoryCards({ activeCategory, onSelect, counts }: Props) {
   return (
     <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {PRODUCT_CATEGORIES.map((category) => {
@@ -51,7 +53,8 @@ export function ProductsCategoryCards({ activeCategory, onSelect }: Props) {
                 {category.label}
               </p>
               <p className="mt-0.5 font-dm-sans text-[12px] leading-[16px] text-warm-gray">
-                {category.count.toLocaleString("en-AU")} products
+                {(counts?.[category.key] ?? category.count).toLocaleString("en-AU")}{" "}
+                products
               </p>
             </div>
           </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ProductsSystemStepper } from "@/components/pages/products/ProductsSystemStepper";
 import { ProductsSidebar } from "@/components/pages/products/ProductsSidebar";
 import { ProductsCategoryCards } from "@/components/pages/products/ProductsCategoryCards";
@@ -8,37 +8,104 @@ import { ProductsFilterChips } from "@/components/pages/products/ProductsFilterC
 import { ProductsCatalogList } from "@/components/pages/products/ProductsCatalogList";
 import { ProductsCompareBar } from "@/components/pages/products/ProductsCompareBar";
 import { ProductsCompareModal } from "@/components/pages/products/ProductsCompareModal";
+import { CustomerPaymentReturnNotice } from "@/components/customer/products/CustomerPaymentReturnNotice";
 import {
   FILTERS_BY_CATEGORY,
   MAX_COMPARE_PRODUCTS,
-  PRODUCT_BY_ID,
-  PRODUCTS_BY_CATEGORY,
 } from "@/components/pages/products/productsData";
-import type { ProductCategoryKey } from "@/components/pages/products/types";
-
-function initialCompareIds() {
-  const ids = new Set<string>();
-  for (const products of Object.values(PRODUCTS_BY_CATEGORY)) {
-    for (const product of products) {
-      if (product.compareInitially) ids.add(product.id);
-    }
-  }
-  return ids;
-}
+import type { Product, ProductCategoryKey } from "@/components/pages/products/types";
+import {
+  CATALOG_CATEGORY_TO_BACKEND,
+  fetchCatalogProducts,
+} from "@/lib/public/products";
 
 export function ProductsPageSection() {
   const [activeCategory, setActiveCategory] =
     useState<ProductCategoryKey>("batteries");
   const [activeFilterKey, setActiveFilterKey] = useState("all");
   const [page, setPage] = useState(1);
-  const [compareIds, setCompareIds] = useState<Set<string>>(initialCompareIds);
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
   const [compareModalOpen, setCompareModalOpen] = useState(false);
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  // Fetched products stay here across category switches so a product already
+  // added to comparison stays resolvable even after the active tab moves on.
+  const [productCache, setProductCache] = useState<Record<string, Product>>({});
+  const [categoryCounts, setCategoryCounts] = useState<
+    Partial<Record<ProductCategoryKey, number>>
+  >({});
+
   const filters = FILTERS_BY_CATEGORY[activeCategory];
-  const products = PRODUCTS_BY_CATEGORY[activeCategory];
   const compareProducts = Array.from(compareIds)
-    .map((id) => PRODUCT_BY_ID[id])
+    .map((id) => productCache[id])
     .filter((product): product is NonNullable<typeof product> => Boolean(product));
+
+  const loadCategory = useCallback(
+    async (categoryKey: ProductCategoryKey, signal: { cancelled: boolean }) => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const { products: fetched, total } = await fetchCatalogProducts({
+          categoryKey,
+        });
+        if (signal.cancelled) return;
+        setProducts(fetched);
+        setCategoryCounts((prev) => ({ ...prev, [categoryKey]: total }));
+        setProductCache((prev) => {
+          const next = { ...prev };
+          for (const product of fetched) next[product.id] = product;
+          return next;
+        });
+      } catch (err) {
+        if (signal.cancelled) return;
+        setProducts([]);
+        setLoadError(
+          err instanceof Error ? err.message : "Could not load products",
+        );
+      } finally {
+        if (!signal.cancelled) setLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const signal = { cancelled: false };
+    void loadCategory(activeCategory, signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [activeCategory, loadCategory]);
+
+  const loadCategoryCounts = useCallback(async (signal: { cancelled: boolean }) => {
+    const entries = await Promise.all(
+      (Object.keys(CATALOG_CATEGORY_TO_BACKEND) as ProductCategoryKey[]).map(
+        (categoryKey) =>
+          fetchCatalogProducts({ categoryKey, limit: 1 })
+            .then(({ total }) => [categoryKey, total] as const)
+            .catch(() => [categoryKey, undefined] as const),
+      ),
+    );
+    if (signal.cancelled) return;
+    setCategoryCounts((prev) => {
+      const next = { ...prev };
+      for (const [categoryKey, total] of entries) {
+        if (total !== undefined) next[categoryKey] = total;
+      }
+      return next;
+    });
+  }, []);
+
+  // Load the real per-category totals once, for the category cards.
+  useEffect(() => {
+    const signal = { cancelled: false };
+    void loadCategoryCounts(signal);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [loadCategoryCounts]);
 
   const handleSelectCategory = (category: ProductCategoryKey) => {
     setActiveCategory(category);
@@ -78,6 +145,9 @@ export function ProductsPageSection() {
 
   return (
     <section className="bg-linear-to-br from-yellow-lemon to-orange-amber py-10 sm:py-14">
+      <Suspense fallback={null}>
+        <CustomerPaymentReturnNotice />
+      </Suspense>
       <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-3 px-4 sm:px-6">
         <h1 className="font-inter text-[22px] font-extrabold uppercase leading-[28px] tracking-[0.02em] text-warm-ink sm:text-[26px]">
           Build Your System
@@ -95,6 +165,7 @@ export function ProductsPageSection() {
         <ProductsCategoryCards
           activeCategory={activeCategory}
           onSelect={handleSelectCategory}
+          counts={categoryCounts}
         />
       </div>
 
@@ -112,15 +183,32 @@ export function ProductsPageSection() {
             activeFilterKey={activeFilterKey}
             onSelect={handleSelectFilter}
           />
-          <ProductsCatalogList
-            products={products}
-            filters={filters}
-            activeFilterKey={activeFilterKey}
-            compareIds={compareIds}
-            onToggleCompare={handleToggleCompare}
-            page={page}
-            onPageChange={setPage}
-          />
+          {loading ? (
+            <div className="w-full rounded-2xl border border-dashed border-warm-border bg-white px-6 py-12 text-center">
+              <p className="font-dm-sans text-[13px] text-warm-gray">
+                Loading products…
+              </p>
+            </div>
+          ) : loadError ? (
+            <div className="w-full rounded-2xl border border-dashed border-danger/30 bg-danger/5 px-6 py-12 text-center">
+              <p className="font-inter text-[15px] font-semibold text-danger">
+                Could not load products
+              </p>
+              <p className="mt-1 font-dm-sans text-[12px] text-warm-gray">
+                {loadError}
+              </p>
+            </div>
+          ) : (
+            <ProductsCatalogList
+              products={products}
+              filters={filters}
+              activeFilterKey={activeFilterKey}
+              compareIds={compareIds}
+              onToggleCompare={handleToggleCompare}
+              page={page}
+              onPageChange={setPage}
+            />
+          )}
         </div>
       </div>
 

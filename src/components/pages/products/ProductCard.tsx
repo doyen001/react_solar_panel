@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import classNames from "classnames";
+import { toast } from "react-toastify";
 import Icon from "@/components/ui/Icons";
 import { downloadDatasheet } from "@/components/pages/products/downloadDatasheet";
+import { createProductCheckout } from "@/lib/customers/payments";
 import type {
   Product,
   ProductBadge,
@@ -46,7 +48,25 @@ export function ProductCard({
   onToggleCompare,
 }: Props) {
   const [quantity, setQuantity] = useState(1);
+  const [buying, setBuying] = useState(false);
   const inStock = product.inStock ?? true;
+
+  async function handleBuyNow() {
+    setBuying(true);
+    try {
+      const session = await createProductCheckout({
+        productId: product.id,
+        quantity,
+      });
+      toast.info("Redirecting to Stripe secure checkout…");
+      window.location.assign(session.checkoutUrl);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not start checkout";
+      toast.error(message);
+      setBuying(false);
+    }
+  }
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-warm-border bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -106,12 +126,14 @@ export function ProductCard({
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1">
-            <span className="flex items-center gap-1">
-              <Icon name="AboutUsStar" className="size-3.5 shrink-0 text-orange-amber" />
-              <span className="font-dm-sans text-[12px] font-bold text-warm-ink">
-                {product.rating.toFixed(1)}
+            {product.rating > 0 ? (
+              <span className="flex items-center gap-1">
+                <Icon name="AboutUsStar" className="size-3.5 shrink-0 text-orange-amber" />
+                <span className="font-dm-sans text-[12px] font-bold text-warm-ink">
+                  {product.rating.toFixed(1)}
+                </span>
               </span>
-            </span>
+            ) : null}
             {product.hasDatasheet ? (
               <button
                 type="button"
@@ -194,15 +216,21 @@ export function ProductCard({
             </button>
             <button
               type="button"
-              disabled={!inStock}
-              aria-label="Add to cart"
+              disabled={!inStock || buying}
+              aria-label="Buy now"
+              title="Buy now"
+              onClick={() => void handleBuyNow()}
               className="flex size-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
               style={{
                 backgroundImage:
                   "linear-gradient(121.47deg, rgb(32, 148, 243) 0%, rgb(23, 207, 207) 100%)",
               }}
             >
-              <Icon name="ProductCart" className="size-4" />
+              {buying ? (
+                <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              ) : (
+                <Icon name="ProductCart" className="size-4" />
+              )}
             </button>
           </div>
         </div>

@@ -7,6 +7,8 @@ import {
   setInstallerSessionCookies,
 } from "@/lib/auth/installer-cookies";
 import { executeTokenRefresh } from "@/lib/auth/execute-token-refresh";
+import { decodeJwtRole } from "@/lib/auth/middleware-session";
+import { setAdminSessionCookies } from "@/lib/auth/admin-cookies";
 
 const refreshBodySchema = z.object({
   refreshToken: z.string().min(1),
@@ -59,6 +61,23 @@ export async function POST(request: Request) {
     accessToken: outcome.accessToken,
     refreshToken: outcome.refreshToken,
   });
+
+  /**
+   * Admin logins duplicate their JWT into the installer cookie slot (see
+   * /api/admin/login) so master-portal pages can reuse installer-facing
+   * proxies. That means an admin's session gets refreshed here too — if we
+   * only rotated the installer cookie pair, the admin cookie pair (used by
+   * admin-only endpoints via backendAuthedFetch("admin", ...)) would keep
+   * the old, now-rotated-out refresh token and silently die later. Mirror
+   * the refreshed tokens into the admin cookie pair whenever the token's
+   * own role claim says ADMIN.
+   */
+  if (decodeJwtRole(outcome.accessToken) === "ADMIN") {
+    setAdminSessionCookies(res, {
+      accessToken: outcome.accessToken,
+      refreshToken: outcome.refreshToken,
+    });
+  }
 
   return res;
 }

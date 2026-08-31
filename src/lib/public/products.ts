@@ -3,6 +3,10 @@ import type {
   SolarProduct,
   SolarProductCategory,
 } from "@/components/customer/products/types";
+import type {
+  Product as CatalogProduct,
+  ProductCategoryKey,
+} from "@/components/pages/products/types";
 
 type ApiEnvelope<T> = {
   success?: boolean;
@@ -57,6 +61,132 @@ export async function fetchPublicProducts(): Promise<SolarProduct[]> {
   const json = (await res.json()) as ApiEnvelope<BackendProduct[]>;
   if (!res.ok) throw new Error(json.message || "Failed to load products");
   return Array.isArray(json.data) ? json.data.map(toSolarProduct) : [];
+}
+
+// ---------------------------------------------------------------------------
+// /products (the full "Build Your System" catalog page) — richer product
+// shape than the SolarProduct summary above, backed by the same real
+// backend Product rows.
+// ---------------------------------------------------------------------------
+
+type CatalogApiEnvelope<T> = {
+  success?: boolean;
+  message?: string;
+  data?: T;
+  meta?: { pagination?: { page: number; limit: number; total: number; totalPages: number } };
+};
+
+type BackendCatalogRow = {
+  id: string;
+  name: string;
+  brand: string | null;
+  category: string;
+  wattage: number | null;
+  basePrice: number;
+  sku: string | null;
+  retailPrice: number | null;
+  wholesalePrice: number | null;
+  rating: number | null;
+  reviewCount: number | null;
+  bestSeller: boolean | null;
+  imageUrl: string | null;
+  active: boolean;
+  specs: Record<string, unknown> | null;
+};
+
+export const CATALOG_CATEGORY_TO_BACKEND: Record<ProductCategoryKey, string> = {
+  batteries: "Battery",
+  "solar-panels": "Solar Panel",
+  inverters: "Inverter",
+  "ev-chargers": "EV Charger",
+  "heat-pumps": "Heat Pump",
+};
+
+function catalogSpecValue(categoryKey: ProductCategoryKey, row: BackendCatalogRow): number {
+  const specs = row.specs ?? {};
+  switch (categoryKey) {
+    case "solar-panels":
+      return row.wattage ?? 0;
+    case "inverters":
+      return typeof specs.ratedKw === "number"
+        ? specs.ratedKw
+        : row.wattage != null
+          ? row.wattage / 1000
+          : 0;
+    case "batteries":
+      return typeof specs.usableCapacityKwh === "number"
+        ? specs.usableCapacityKwh
+        : typeof specs.nominalCapacityKwh === "number"
+          ? specs.nominalCapacityKwh
+          : 0;
+    case "ev-chargers":
+      return typeof specs.ratedKw === "number" ? specs.ratedKw : 0;
+    case "heat-pumps":
+      // No comparable kW rating captured for heat pumps yet — band filters
+      // for this category won't match anything until that data exists.
+      return 0;
+    default:
+      return 0;
+  }
+}
+
+function catalogFeatures(row: BackendCatalogRow): string[] {
+  const specs = row.specs ?? {};
+  const features: string[] = [];
+  if (specs.cecApproved) features.push("CEC approved");
+  if (typeof specs.connector === "string") features.push(`${specs.connector} connector`);
+  if (typeof specs.cop === "number") features.push(`COP ${specs.cop}`);
+  if (typeof specs.capacityL === "number") features.push(`${specs.capacityL}L tank`);
+  if (typeof specs.series === "string" && specs.series !== "NA") features.push(specs.series);
+  return features.slice(0, 3);
+}
+
+function toCatalogProduct(
+  categoryKey: ProductCategoryKey,
+  row: BackendCatalogRow,
+): CatalogProduct {
+  const specs = row.specs ?? {};
+  return {
+    id: row.id,
+    categoryKey,
+    segment: "residential",
+    specValue: catalogSpecValue(categoryKey, row),
+    badge: row.bestSeller ? "Best Seller" : undefined,
+    brand: row.brand?.trim() || "Unbranded",
+    name: row.name,
+    model: row.sku || (typeof specs.series === "string" ? specs.series : row.name),
+    rating: row.rating ?? 0,
+    hasDatasheet: false,
+    inStock: row.active,
+    features: catalogFeatures(row),
+    price: row.retailPrice ?? row.basePrice,
+  };
+}
+
+export type CatalogPage = {
+  products: CatalogProduct[];
+  total: number;
+};
+
+/** One category's page of the real product catalog, mapped into the /products display shape. */
+export async function fetchCatalogProducts(params: {
+  categoryKey: ProductCategoryKey;
+  limit?: number;
+}): Promise<CatalogPage> {
+  const sp = new URLSearchParams();
+  sp.set("category", CATALOG_CATEGORY_TO_BACKEND[params.categoryKey]);
+  sp.set("limit", String(params.limit ?? 60));
+  sp.set("active", "true");
+
+  const res = await fetch(`/api/products?${sp.toString()}`, { cache: "no-store" });
+  const json = (await res.json()) as CatalogApiEnvelope<BackendCatalogRow[]>;
+  if (!res.ok) throw new Error(json.message || "Failed to load products");
+
+  const rows = Array.isArray(json.data) ? json.data : [];
+  return {
+    products: rows.map((row) => toCatalogProduct(params.categoryKey, row)),
+    total: json.meta?.pagination?.total ?? rows.length,
+  };
 }
 
 export function selectedDesignProductsFromCatalog(products: SolarProduct[]): DesignSummaryItem[] {
