@@ -4563,9 +4563,9 @@ html:has(.svc-page) {
   border-radius: 9999px;
   background: radial-gradient(
     circle,
-    rgba(56, 189, 248, 0.75) 0%,
-    rgba(168, 85, 247, 0.55) 45%,
-    rgba(168, 85, 247, 0) 72%
+    rgba(255, 239, 98, 0.85) 0%,
+    rgba(247, 141, 0, 0.6) 45%,
+    rgba(247, 141, 0, 0) 72%
   );
   filter: blur(10px);
   animation: ai-bot-glow-pulse 2.6s ease-in-out infinite;
