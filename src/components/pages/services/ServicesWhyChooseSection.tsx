@@ -1,6 +1,6 @@
 import { ServicesReveal } from "@/components/pages/services/ServicesReveal";
-import { ServicesRippleLink } from "@/components/pages/services/ServicesRippleLink";
 import Icon from "@/components/ui/Icons";
+import { RainbowButton } from "@/components/ui/RainbowButton";
 import { SERVICES_PAGE } from "@/utils/constant";
 
 const { whyChooseUs } = SERVICES_PAGE;
@@ -26,13 +26,14 @@ export function ServicesWhyChooseSection() {
           <p className="font-dm-sans text-base leading-7 text-svc-body sm:text-lg">
             {whyChooseUs.subtitle}
           </p>
-          <ServicesRippleLink
+          <RainbowButton
             href={whyChooseUs.cta.href}
-            className="svc-cta-primary mt-2 inline-flex h-12 w-fit items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
+            shape="rounded"
+            className="svc-cta-primary mt-2 h-12 w-fit px-6 font-outfit text-base font-semibold text-warm-black"
           >
             {whyChooseUs.cta.label}
             <Icon name="ArrowRight" className="size-[18px] text-current" />
-          </ServicesRippleLink>
+          </RainbowButton>
         </ServicesReveal>
 
         <ul className="grid gap-x-8 gap-y-7 sm:grid-cols-2">

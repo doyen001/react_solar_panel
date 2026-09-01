@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { AboutUsHeroFeatureBar } from "@/components/pages/about-us/AboutUsHeroFeatureBar";
+import { RainbowButton } from "@/components/ui/RainbowButton";
 import { VideoSlider } from "@/components/ui/VideoSlider";
 import { ABOUT_US_PAGE } from "@/utils/constant";
 
@@ -42,12 +43,14 @@ export function AboutUsHeroSection() {
               >
                 {ABOUT_US_PAGE.hero.primaryCta.label}
               </Link>
-              <Link
+              <RainbowButton
                 href={ABOUT_US_PAGE.hero.secondaryCta.href}
-                className="inline-flex h-12 min-w-[188.56px] items-center justify-center rounded-xl border-2 border-about-hero-cta-secondary-border bg-about-hero-cta-secondary-bg px-8 font-source-sans text-base font-semibold leading-6 text-about-hero-cta-secondary-text"
+                shape="rounded"
+                variant="outline"
+                className="h-12 min-w-[188.56px] bg-about-hero-cta-secondary-bg px-8 font-source-sans text-base font-semibold leading-6 text-about-hero-cta-secondary-text"
               >
                 {ABOUT_US_PAGE.hero.secondaryCta.label}
-              </Link>
+              </RainbowButton>
             </div>
           </div>
           <AboutUsHeroFeatureBar />

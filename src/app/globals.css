@@ -644,6 +644,28 @@
   }
 }
 
+/*
+ * Used by RainbowButton's `variant="outline"` ring: animates the conic
+ * gradient's own start angle rather than rotating a background plane behind
+ * a mask. Rotating a plane needs it to be oversized enough to always cover
+ * every point of the ring at every angle, including the corners of a
+ * rounded rect — easy to get subtly wrong and end up with the gradient
+ * momentarily not reaching one edge (a visible unpainted gap). Animating
+ * the angle itself paints fresh within the exact ring box every frame, so
+ * there's no coverage math to get wrong.
+ */
+@property --rainbow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes rainbow-angle-spin {
+  to {
+    --rainbow-angle: 360deg;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

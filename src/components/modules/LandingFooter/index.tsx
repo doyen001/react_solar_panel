@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import Icon, { type IconType } from "@/components/ui/Icons";
+import { RainbowButton } from "@/components/ui/RainbowButton";
 import { LANDING_FOOTER_COLUMNS } from "@/utils/constant";
 
 export type FooterCustomCta = {
@@ -75,12 +76,18 @@ export function FooterSection({
               BLUETTI products.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <button className="rounded-xl bg-linear-to-r from-fuchsia-500 to-red-400 px-7 py-3 text-sm font-semibold text-white">
+              <RainbowButton
+                shape="rounded"
+                className="bg-linear-to-r from-fuchsia-500 to-red-400 px-7 py-3 text-sm font-semibold text-white"
+              >
                 Get Your Quote
-              </button>
-              <button className="rounded-xl border border-sky-300 px-7 py-3 text-sm font-semibold text-slate-900">
+              </RainbowButton>
+              <RainbowButton
+                shape="rounded"
+                className="px-7 py-3 text-sm font-semibold text-slate-900"
+              >
                 Contact Sales
-              </button>
+              </RainbowButton>
             </div>
           </div>
         ) : null}
