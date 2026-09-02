@@ -25,7 +25,14 @@ const KIND_OPTIONS: { id: PaymentKind | "all"; label: string }[] = [
   { id: "all", label: "All kinds" },
   { id: "SERVICE", label: "Installer service" },
   { id: "PRODUCT_ORDER", label: "Product order" },
+  { id: "AD_QUOTE", label: "Ad site quote" },
 ];
+
+const KIND_LABEL: Record<PaymentKind, string> = {
+  SERVICE: "Service",
+  PRODUCT_ORDER: "Product order",
+  AD_QUOTE: "Ad site quote",
+};
 
 const STATUS_STYLES: Record<PaymentStatus, string> = {
   PAID: "bg-emerald-500/10 text-emerald-700",
@@ -70,6 +77,7 @@ function buildStatCards(payments: MasterPayment[]): StatCard[] {
   );
   const pendingPayoutAmount = pendingPayouts.reduce((sum, p) => sum + p.amount, 0);
   const productOrders = paid.filter((p) => p.kind === "PRODUCT_ORDER").length;
+  const adQuotes = paid.filter((p) => p.kind === "AD_QUOTE").length;
 
   return [
     {
@@ -91,6 +99,11 @@ function buildStatCards(payments: MasterPayment[]): StatCard[] {
       label: "Service payments",
       value: String(paid.filter((p) => p.kind === "SERVICE").length),
       icon: "CheckCircle",
+    },
+    {
+      label: "Ad site quotes",
+      value: String(adQuotes),
+      icon: "Package",
     },
   ];
 }
@@ -297,7 +310,7 @@ export function MasterPaymentsContent() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-cream-50 px-2 py-0.5 font-dm-sans text-[11px] font-semibold text-warm-ink">
-                        {payment.kind === "SERVICE" ? "Service" : "Product order"}
+                        {KIND_LABEL[payment.kind]}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-dm-sans text-sm font-semibold text-warm-ink">

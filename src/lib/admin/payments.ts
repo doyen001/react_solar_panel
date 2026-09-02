@@ -7,7 +7,7 @@ type ApiEnvelope<T> = {
 };
 
 export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELLED" | "REFUNDED";
-export type PaymentKind = "SERVICE" | "PRODUCT_ORDER";
+export type PaymentKind = "SERVICE" | "PRODUCT_ORDER" | "AD_QUOTE";
 
 export type MasterPayout = {
   id: string;
