@@ -3479,6 +3479,7 @@ export type CustomerPortalNavKey =
   | "maintenance"
   | "messages"
   | "products"
+  | "payments"
   | "profile";
 
 export const CUSTOMER_PORTAL = {
@@ -3493,6 +3494,7 @@ export const CUSTOMER_PORTAL = {
     },
     { href: "/customers/messages", label: "Messages", key: "messages" as const },
     { href: "/customers/products", label: "Products", key: "products" as const },
+    { href: "/customers/payments", label: "Payments", key: "payments" as const },
     { href: "/customers/profile", label: "Profile", key: "profile" as const },
   ],
   dashboard: {

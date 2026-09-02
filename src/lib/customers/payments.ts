@@ -85,3 +85,42 @@ export async function refreshCustomerPayment(
   );
   return readEnvelope<CustomerPayment>(res, "Could not refresh payment");
 }
+
+/**
+ * The signed-in customer's own payment history — product orders they've
+ * bought directly, and any installer service charge billed to them.
+ */
+export async function fetchCustomerPayments(params?: {
+  limit?: number;
+}): Promise<CustomerPayment[]> {
+  const sp = new URLSearchParams();
+  if (params?.limit != null) sp.set("limit", String(params.limit));
+  const qs = sp.toString();
+
+  const res = await fetchWithCustomerSession(
+    `/api/customers/payments${qs ? `?${qs}` : ""}`,
+  );
+  return readEnvelope<CustomerPayment[]>(res, "Could not load your payments");
+}
+
+export function formatPaymentAmount(payment: {
+  amount: number;
+  currency: string;
+}): string {
+  try {
+    return new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency: payment.currency,
+    }).format(payment.amount);
+  } catch {
+    return `${payment.amount.toFixed(2)} ${payment.currency}`;
+  }
+}
+
+export const CUSTOMER_PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  PENDING: "Awaiting payment",
+  PAID: "Paid",
+  FAILED: "Failed",
+  CANCELLED: "Cancelled",
+  REFUNDED: "Refunded",
+};
