@@ -502,8 +502,6 @@ export const BAND_GROUP_LABEL: Record<ProductCategoryKey, string> = {
 
 export const MAX_COMPARE_PRODUCTS = 3;
 
-export const PRODUCTS_PAGE_SIZE = 6;
-
 export const ALL_PRODUCTS: Product[] = Object.values(PRODUCTS_BY_CATEGORY).flat();
 
 export const PRODUCT_BY_ID: Record<string, Product> = Object.fromEntries(

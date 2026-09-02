@@ -166,26 +166,40 @@ function toCatalogProduct(
 export type CatalogPage = {
   products: CatalogProduct[];
   total: number;
+  totalPages: number;
+  page: number;
 };
 
-/** One category's page of the real product catalog, mapped into the /products display shape. */
+/**
+ * One page of one category's real product catalog, mapped into the
+ * /products display shape. Backed by the backend's own page/limit/search —
+ * categories run to thousands of rows, so this must stay a real server-side
+ * page, not a client-side slice of some larger pre-fetched batch.
+ */
 export async function fetchCatalogProducts(params: {
   categoryKey: ProductCategoryKey;
+  page?: number;
   limit?: number;
+  search?: string;
 }): Promise<CatalogPage> {
   const sp = new URLSearchParams();
   sp.set("category", CATALOG_CATEGORY_TO_BACKEND[params.categoryKey]);
-  sp.set("limit", String(params.limit ?? 60));
+  sp.set("page", String(params.page ?? 1));
+  sp.set("limit", String(params.limit ?? 12));
   sp.set("active", "true");
+  if (params.search?.trim()) sp.set("search", params.search.trim());
 
   const res = await fetch(`/api/products?${sp.toString()}`, { cache: "no-store" });
   const json = (await res.json()) as CatalogApiEnvelope<BackendCatalogRow[]>;
   if (!res.ok) throw new Error(json.message || "Failed to load products");
 
   const rows = Array.isArray(json.data) ? json.data : [];
+  const pagination = json.meta?.pagination;
   return {
     products: rows.map((row) => toCatalogProduct(params.categoryKey, row)),
-    total: json.meta?.pagination?.total ?? rows.length,
+    total: pagination?.total ?? rows.length,
+    totalPages: pagination?.totalPages ?? 1,
+    page: pagination?.page ?? params.page ?? 1,
   };
 }
 
