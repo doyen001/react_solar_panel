@@ -7,13 +7,99 @@ import userIcon from "@/components/ui/Icons/user.svg";
 import shopIcon from "@/components/ui/Icons/shop.svg";
 import { LANDING_NAV_ITEMS } from "@/utils/constant";
 import { RainbowButton } from "@/components/ui/RainbowButton";
+import { useAppSelector } from "@/lib/store/hooks";
+import { usePortalLogout, type PortalLogoutKind } from "@/hooks/usePortalLogout";
 
 /** Shared by the desktop and mobile account menus. `block` so `w-full` applies. */
 const PORTAL_LINK_CLASS =
   "block w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-white/90 hover:bg-white/10";
 
+const PORTAL_LABEL: Record<PortalLogoutKind, string> = {
+  customer: "Customer",
+  installer: "Installer",
+  admin: "Distributor",
+};
+
+const PORTAL_DASHBOARD_HREF: Record<PortalLogoutKind, string> = {
+  customer: "/customers/dashboard",
+  installer: "/installers/dashboard/home",
+  admin: "/master/dashboard",
+};
+
+/**
+ * Which signed-in session (if any) is active, so the header can stop
+ * showing "Customer login / Installer login / Distributor login" to
+ * someone who is already logged in — previously this dropdown never
+ * checked auth state at all, so a signed-in visitor had no way to tell
+ * from the header that they were logged in, or as whom.
+ */
+function useActivePortalSession() {
+  const customer = useAppSelector((s) => s.customerAuth.user);
+  const installer = useAppSelector((s) => s.installerAuth.user);
+  const admin = useAppSelector((s) => s.adminAuth.user);
+
+  const { logout: logoutCustomer, pending: customerPending } = usePortalLogout("customer");
+  const { logout: logoutInstaller, pending: installerPending } = usePortalLogout("installer");
+  const { logout: logoutAdmin, pending: adminPending } = usePortalLogout("admin");
+
+  if (customer) {
+    return { kind: "customer" as const, user: customer, logout: logoutCustomer, pending: customerPending };
+  }
+  if (installer) {
+    return { kind: "installer" as const, user: installer, logout: logoutInstaller, pending: installerPending };
+  }
+  if (admin) {
+    return { kind: "admin" as const, user: admin, logout: logoutAdmin, pending: adminPending };
+  }
+  return null;
+}
+
+type ActivePortalSession = ReturnType<typeof useActivePortalSession>;
+
+function AccountMenuContent({ session }: { session: ActivePortalSession }) {
+  if (!session) {
+    return (
+      <>
+        <Link href="/customers/auth" className={PORTAL_LINK_CLASS}>
+          Customer login
+        </Link>
+        <Link href="/installers/auth" className={PORTAL_LINK_CLASS}>
+          Installer login
+        </Link>
+        <Link href="/admin/auth" className={PORTAL_LINK_CLASS}>
+          Distributor login
+        </Link>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="px-3 py-2">
+        <p className="truncate text-sm font-semibold text-white">
+          {session.user.firstName} {session.user.lastName}
+        </p>
+        <p className="text-xs text-white/60">Signed in as {PORTAL_LABEL[session.kind]}</p>
+      </div>
+      <div className="my-1 h-px bg-white/10" />
+      <Link href={PORTAL_DASHBOARD_HREF[session.kind]} className={PORTAL_LINK_CLASS}>
+        Go to dashboard
+      </Link>
+      <button
+        type="button"
+        onClick={() => void session.logout()}
+        disabled={session.pending}
+        className={`${PORTAL_LINK_CLASS} disabled:opacity-60`}
+      >
+        {session.pending ? "Signing out…" : "Sign out"}
+      </button>
+    </>
+  );
+}
+
 export function Header() {
   const pathname = usePathname();
+  const session = useActivePortalSession();
   return (
     <header className="fixed top-0 z-30 w-full bg-white/75 backdrop-blur-md">
       <div className="mx-auto flex h-20 w-full max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -55,21 +141,19 @@ export function Header() {
             </button>
             <details className="relative">
               <summary
-                aria-label="Account"
+                aria-label={session ? `Account — signed in as ${session.user.firstName}` : "Account"}
                 className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-full text-slate-900 transition hover:bg-slate-900/10 marker:content-['']"
               >
-                <Image src={userIcon} alt="Account" width={16} height={16} />
+                {session ? (
+                  <span className="flex size-8 items-center justify-center rounded-full bg-linear-to-br from-yellow-lemon to-orange-amber text-xs font-bold text-warm-black">
+                    {session.user.firstName.charAt(0).toUpperCase()}
+                  </span>
+                ) : (
+                  <Image src={userIcon} alt="Account" width={16} height={16} />
+                )}
               </summary>
               <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl">
-                <Link href="/customers/auth" className={PORTAL_LINK_CLASS}>
-                  Customer login
-                </Link>
-                <Link href="/installers/auth" className={PORTAL_LINK_CLASS}>
-                  Installer login
-                </Link>
-                <Link href="/admin/auth" className={PORTAL_LINK_CLASS}>
-                  Distributor login
-                </Link>
+                <AccountMenuContent session={session} />
               </div>
             </details>
             <button
@@ -102,27 +186,19 @@ export function Header() {
         <div className="flex items-center gap-2 lg:hidden">
           <details className="relative">
             <summary
-              aria-label="Account"
+              aria-label={session ? `Account — signed in as ${session.user.firstName}` : "Account"}
               className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-full text-slate-900 transition hover:bg-slate-900/10 marker:content-['']"
             >
-              <Image src={userIcon} alt="Account" width={16} height={16} />
+              {session ? (
+                <span className="flex size-8 items-center justify-center rounded-full bg-linear-to-br from-yellow-lemon to-orange-amber text-xs font-bold text-warm-black">
+                  {session.user.firstName.charAt(0).toUpperCase()}
+                </span>
+              ) : (
+                <Image src={userIcon} alt="Account" width={16} height={16} />
+              )}
             </summary>
             <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl">
-              <Link
-                href="/customers/auth?portal=customer"
-                className={PORTAL_LINK_CLASS}
-              >
-                Customer login
-              </Link>
-              <Link
-                href="/installers/auth?portal=installer"
-                className={PORTAL_LINK_CLASS}
-              >
-                Installer login
-              </Link>
-              <Link href="/admin/auth" className={PORTAL_LINK_CLASS}>
-                Distributor login
-              </Link>
+              <AccountMenuContent session={session} />
             </div>
           </details>
 
