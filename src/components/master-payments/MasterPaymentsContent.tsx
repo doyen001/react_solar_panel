@@ -25,13 +25,13 @@ const KIND_OPTIONS: { id: PaymentKind | "all"; label: string }[] = [
   { id: "all", label: "All kinds" },
   { id: "SERVICE", label: "Installer service" },
   { id: "PRODUCT_ORDER", label: "Product order" },
-  { id: "AD_QUOTE", label: "Ad site quote" },
+  { id: "AD_QUOTE", label: "Website quote" },
 ];
 
 const KIND_LABEL: Record<PaymentKind, string> = {
   SERVICE: "Service",
   PRODUCT_ORDER: "Product order",
-  AD_QUOTE: "Ad site quote",
+  AD_QUOTE: "Website quote",
 };
 
 const STATUS_STYLES: Record<PaymentStatus, string> = {
@@ -101,7 +101,7 @@ function buildStatCards(payments: MasterPayment[]): StatCard[] {
       icon: "CheckCircle",
     },
     {
-      label: "Ad site quotes",
+      label: "Website quotes",
       value: String(adQuotes),
       icon: "Package",
     },

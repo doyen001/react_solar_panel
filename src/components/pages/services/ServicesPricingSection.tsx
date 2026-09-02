@@ -1,20 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { ServicesReveal } from "@/components/pages/services/ServicesReveal";
 import { ServicesRippleLink } from "@/components/pages/services/ServicesRippleLink";
 import { ServicesSectionHeading } from "@/components/pages/services/ServicesSectionHeading";
+import { PaymentConfirmationDialog } from "@/components/pages/services/PaymentConfirmationDialog";
+import { PricingCheckoutModal } from "@/components/pages/services/PricingCheckoutModal";
 import Icon from "@/components/ui/Icons";
+import type { AdQuoteTierId } from "@/lib/public/adQuoteCheckout";
 import { SERVICES_PAGE } from "@/utils/constant";
 
 const { pricing } = SERVICES_PAGE;
 const DEFAULT_DARK_INDEX = pricing.tiers.findIndex((tier) => tier.featured);
+
+/** Only these two tiers have a fixed price a Stripe Checkout can charge — the
+ * enterprise tier is "Let's scope it" and keeps going to the contact form. */
+const CHECKOUT_TIER_IDS = new Set<AdQuoteTierId>(["starter", "business"]);
+
+function isCheckoutTierId(id: string): id is AdQuoteTierId {
+  return CHECKOUT_TIER_IDS.has(id as AdQuoteTierId);
+}
 
 export function ServicesPricingSection() {
   // Exactly one card looks "dark" at a time: the featured one by default,
   // or whichever card is currently hovered/focused — so lighting up a
   // light card also turns the previously-dark card back to light.
   const [activeIndex, setActiveIndex] = useState(DEFAULT_DARK_INDEX);
+  const [checkoutTier, setCheckoutTier] = useState<{
+    id: AdQuoteTierId;
+    name: string;
+    priceLabel: string;
+  } | null>(null);
 
   return (
     <section
@@ -22,6 +38,9 @@ export function ServicesPricingSection() {
       aria-labelledby="services-pricing-title"
       className="svc-anchor border-y border-svc-border-soft bg-white py-16 sm:py-20 lg:py-28"
     >
+      <Suspense fallback={null}>
+        <PaymentConfirmationDialog />
+      </Suspense>
       <div className="mx-auto w-full max-w-[1226px] px-4 sm:px-6 lg:px-8">
         <ServicesSectionHeading
           eyebrow={pricing.eyebrow}
@@ -36,6 +55,7 @@ export function ServicesPricingSection() {
             const badge = "badge" in tier ? tier.badge : null;
             const isFeatured = tier.featured;
             const isDark = index === activeIndex;
+            const tierId = tier.id;
 
             return (
               <li key={tier.id} className="flex h-full">
@@ -95,19 +115,41 @@ export function ServicesPricingSection() {
                       ))}
                     </ul>
 
-                    <ServicesRippleLink
-                      href={tier.ctaHref}
-                      onDark={isFeatured}
-                      ariaLabel={`${tier.ctaLabel} for the ${tier.name} package`}
-                      className={
-                        isFeatured
-                          ? "svc-cta-primary mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
-                          : "mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-svc-accent bg-white px-6 font-outfit text-base font-semibold text-svc-accent-text transition hover:bg-svc-accent-soft"
-                      }
-                    >
-                      {tier.ctaLabel}
-                      <Icon name="ArrowRight" className="size-[18px] text-current" />
-                    </ServicesRippleLink>
+                    {isCheckoutTierId(tierId) ? (
+                      <button
+                        type="button"
+                        aria-label={`${tier.ctaLabel} for the ${tier.name} package`}
+                        onClick={() =>
+                          setCheckoutTier({
+                            id: tierId,
+                            name: tier.name,
+                            priceLabel: tier.priceLabel,
+                          })
+                        }
+                        className={
+                          isFeatured
+                            ? "svc-cta-primary mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
+                            : "mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-svc-accent bg-white px-6 font-outfit text-base font-semibold text-svc-accent-text transition hover:bg-svc-accent-soft"
+                        }
+                      >
+                        {tier.ctaLabel}
+                        <Icon name="ArrowRight" className="size-[18px] text-current" />
+                      </button>
+                    ) : (
+                      <ServicesRippleLink
+                        href={tier.ctaHref}
+                        onDark={isFeatured}
+                        ariaLabel={`${tier.ctaLabel} for the ${tier.name} package`}
+                        className={
+                          isFeatured
+                            ? "svc-cta-primary mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-6 font-outfit text-base font-semibold text-warm-black"
+                            : "mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-svc-accent bg-white px-6 font-outfit text-base font-semibold text-svc-accent-text transition hover:bg-svc-accent-soft"
+                        }
+                      >
+                        {tier.ctaLabel}
+                        <Icon name="ArrowRight" className="size-[18px] text-current" />
+                      </ServicesRippleLink>
+                    )}
                   </article>
                 </ServicesReveal>
               </li>
@@ -119,6 +161,15 @@ export function ServicesPricingSection() {
           {pricing.footnote}
         </p>
       </div>
+
+      {checkoutTier ? (
+        <PricingCheckoutModal
+          tierId={checkoutTier.id}
+          tierName={checkoutTier.name}
+          priceLabel={checkoutTier.priceLabel}
+          onClose={() => setCheckoutTier(null)}
+        />
+      ) : null}
     </section>
   );
 }
