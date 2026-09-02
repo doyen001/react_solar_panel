@@ -125,7 +125,7 @@ export default function AdminAuthPage() {
       </div>
       <DesignTopBar />
 
-      <div className="relative z-10 flex min-h-[calc(100vh-92px)] items-center justify-center px-5 py-12">
+      <div className="relative z-10 flex min-h-[calc(100vh-92px)] items-center justify-center px-5">
         <AuthCard className="w-[min(490px,calc(100%-40px))]">
           <div className="flex h-full w-full items-center justify-center px-[32px] py-[20px]">
             <form

@@ -419,7 +419,7 @@ export default function InstallerAuthPage() {
       </div>
       <DesignTopBar />
 
-      <div className="relative z-10 flex min-h-[calc(100vh-92px)] items-center justify-center px-5 py-12">
+      <div className="relative z-10 flex min-h-[calc(100vh-92px)] items-center justify-center px-5">
         <AuthCard className={cardSize}>
           <Suspense
             fallback={
