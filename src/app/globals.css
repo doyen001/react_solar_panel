@@ -666,6 +666,21 @@
   }
 }
 
+/*
+ * Same sweep as rainbow-angle-spin, but starting from the top-left corner
+ * (-45deg) instead of straight up (0deg) — used by the About Us value
+ * cards. -45deg and 315deg are the same visual angle, so the loop restarts
+ * with no visible jump.
+ */
+@keyframes value-card-ring-spin {
+  from {
+    --rainbow-angle: -45deg;
+  }
+  to {
+    --rainbow-angle: 315deg;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

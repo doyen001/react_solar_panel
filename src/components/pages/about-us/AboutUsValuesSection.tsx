@@ -2,6 +2,20 @@ import Image from "next/image";
 
 import { ABOUT_US_PAGE } from "@/utils/constant";
 
+// These cards have a translucent/gradient background (by design — the hero
+// photo shows through), so RainbowButton's usual trick (a big rotating
+// plane hidden behind a smaller *opaque* cutout) doesn't work here: the
+// plane shows through the whole translucent face instead of staying
+// confined to the border. Masking the gradient down to just the ring band,
+// and animating its own angle (not rotating the masked element), keeps the
+// rotation confined to a thin border regardless of what's under it. Needs
+// opacity variation, not flat white, or a rotating uniform color would
+// show no visible motion.
+const WHITE_RING_GRADIENT_ANIMATED =
+  "conic-gradient(from var(--rainbow-angle), rgba(255,255,255,0.95), rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.95))";
+const RING_WIDTH = 2;
+const RING_MASK_LAYERS = "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)";
+
 export function AboutUsValuesSection() {
   const rows = [
     ABOUT_US_PAGE.values.items.slice(0, 5),
@@ -54,20 +68,35 @@ function AboutUsValueCard({
   const isVariantB = item.variant === "b";
 
   return (
-    <article
-      className={`flex min-h-[180px] items-center justify-center rounded-[20px] px-4 py-8 sm:min-h-[234px] ${
-        isVariantB
-          ? "bg-linear-to-r from-about-values-card-bg-b-from to-about-values-card-bg-b-to"
-          : "bg-about-values-card-bg-a"
-      }`}
-    >
-      <p className="text-center font-source-sans text-lg font-medium leading-normal tracking-[-0.4395px] text-about-values-text sm:text-xl">
-        {labelLines.map((line) => (
-          <span key={line} className="block">
-            {line}
-          </span>
-        ))}
-      </p>
-    </article>
+    <div className="relative overflow-hidden rounded-[20px] shadow-sm">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 motion-reduce:animate-none [animation:value-card-ring-spin_5s_linear_infinite]"
+        style={{
+          padding: RING_WIDTH,
+          borderRadius: "inherit",
+          backgroundImage: WHITE_RING_GRADIENT_ANIMATED,
+          WebkitMask: RING_MASK_LAYERS,
+          mask: RING_MASK_LAYERS,
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude",
+        }}
+      />
+      <article
+        className={`relative flex min-h-[180px] items-center justify-center rounded-[20px] px-4 py-8 sm:min-h-[234px] ${
+          isVariantB
+            ? "bg-linear-to-r from-about-values-card-bg-b-from to-about-values-card-bg-b-to"
+            : "bg-about-values-card-bg-a"
+        }`}
+      >
+        <p className="text-center font-source-sans text-lg font-medium leading-normal tracking-[-0.4395px] text-about-values-text sm:text-xl">
+          {labelLines.map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))}
+        </p>
+      </article>
+    </div>
   );
 }
