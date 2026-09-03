@@ -27,7 +27,7 @@ export function AboutUsPortfolioSection() {
               className="grid grid-cols-1 justify-items-center gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-5"
             >
               {row.map((item) => (
-                <BlogPostCard key={item.id} post={item} />
+                <BlogPostCard key={item.id} post={item} variant="light" />
               ))}
             </div>
           ))}
