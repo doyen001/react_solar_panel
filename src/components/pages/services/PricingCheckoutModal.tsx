@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/Icons";
-import { createAdQuoteCheckout, type AdQuoteTierId } from "@/lib/public/adQuoteCheckout";
+import {
+  createAdQuoteCheckout,
+  fetchAdQuoteTiers,
+  type AdQuotePaymentMethod,
+  type AdQuoteTierId,
+  type AdQuoteTiers,
+} from "@/lib/public/adQuoteCheckout";
 import { renderGoogleSignInButton } from "@/lib/public/googleIdentity";
 
 type Props = {
@@ -12,15 +18,53 @@ type Props = {
   onClose: () => void;
 };
 
+type PayOption = Exclude<AdQuotePaymentMethod, "auto">;
+
+const PAY_OPTIONS: {
+  id: PayOption;
+  label: string;
+  blurb: string;
+}[] = [
+  { id: "card", label: "Card", blurb: "Pay in full — Visa, Mastercard, Amex" },
+  { id: "afterpay", label: "Afterpay", blurb: "4 interest-free instalments" },
+];
+
+function formatMoney(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${amount} ${currency}`;
+  }
+}
+
 /**
  * "Sign in with Google, then straight to Stripe" — no account, no password.
  * The Google button itself hands us a signed ID token; we send that straight
  * to the backend, which verifies it and creates the Checkout session.
+ *
+ * Afterpay runs through the same Stripe Checkout, so the flow is unchanged —
+ * the chosen method only decides which payment screen Stripe opens on. It is
+ * offered only for packages inside Afterpay's order-value limits, which the
+ * backend reports (this site holds price *labels*, not the real amounts).
  */
 export function PricingCheckoutModal({ tierId, tierName, priceLabel, onClose }: Props) {
   const buttonHostRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [method, setMethod] = useState<PayOption>("card");
+  const [tiers, setTiers] = useState<AdQuoteTiers | null>(null);
+
+  // The Google button's callback is registered once and never re-registered
+  // (re-rendering it would flicker and lose the iframe), so it reads the
+  // current choice through a ref rather than a stale closure.
+  const methodRef = useRef<PayOption>(method);
+  useEffect(() => {
+    methodRef.current = method;
+  }, [method]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -31,6 +75,20 @@ export function PricingCheckoutModal({ tierId, tierName, priceLabel, onClose }: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitting]);
 
+  // Failing to load this is not fatal — it only means the Afterpay option
+  // stays hidden and the card flow works exactly as it did before.
+  useEffect(() => {
+    let active = true;
+    void fetchAdQuoteTiers()
+      .then((data) => {
+        if (active) setTiers(data);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
   useEffect(() => {
     const host = buttonHostRef.current;
     if (!host) return;
@@ -40,7 +98,11 @@ export function PricingCheckoutModal({ tierId, tierName, priceLabel, onClose }: 
     void renderGoogleSignInButton(host, clientId, (idToken) => {
       setSubmitting(true);
       setError(null);
-      void createAdQuoteCheckout({ tierId, googleIdToken: idToken })
+      void createAdQuoteCheckout({
+        tierId,
+        googleIdToken: idToken,
+        paymentMethod: methodRef.current,
+      })
         .then((session) => {
           window.location.assign(session.checkoutUrl);
         })
@@ -54,6 +116,25 @@ export function PricingCheckoutModal({ tierId, tierName, priceLabel, onClose }: 
       );
     });
   }, [tierId]);
+
+  const tier = tiers?.tiers.find((t) => t.id === tierId) ?? null;
+  const afterpayAvailable = tier?.afterpayEligible ?? false;
+  const limits = tiers?.afterpayLimits ?? null;
+  const currency = tiers?.currency ?? "AUD";
+
+  // Only meaningful once the tiers have loaded — before that we show nothing
+  // rather than guess at why Afterpay is missing.
+  const afterpayNote =
+    tier && !afterpayAvailable && limits
+      ? `Afterpay is available on orders between ${formatMoney(
+          limits.min,
+          currency,
+        )} and ${formatMoney(limits.max, currency)}, so it can't be used for this package.`
+      : null;
+
+  const options = PAY_OPTIONS.filter(
+    (option) => option.id !== "afterpay" || afterpayAvailable,
+  );
 
   return (
     <div
@@ -95,10 +176,70 @@ export function PricingCheckoutModal({ tierId, tierName, priceLabel, onClose }: 
           </button>
         </div>
 
+        {options.length > 1 ? (
+          <fieldset className="mt-5" disabled={submitting}>
+            <legend className="font-dm-sans text-sm font-semibold text-svc-ink">
+              How would you like to pay?
+            </legend>
+            <div
+              role="radiogroup"
+              aria-label="Payment method"
+              className="mt-2.5 flex flex-col gap-2"
+            >
+              {options.map((option) => {
+                const selected = method === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => setMethod(option.id)}
+                    className={`flex items-center gap-3 rounded-xl border-2 px-3.5 py-3 text-left transition disabled:opacity-50 ${
+                      selected
+                        ? "border-svc-accent bg-svc-accent-soft"
+                        : "border-svc-border-soft bg-white hover:border-svc-accent"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                        selected
+                          ? "border-svc-accent bg-svc-accent text-white"
+                          : "border-svc-border-soft"
+                      }`}
+                    >
+                      {selected ? (
+                        <Icon name="Check" className="size-3 text-current" />
+                      ) : null}
+                    </span>
+                    <span className="flex flex-col">
+                      <span className="font-outfit text-sm font-semibold text-svc-ink">
+                        {option.label}
+                      </span>
+                      <span className="font-dm-sans text-[13px] leading-5 text-svc-muted">
+                        {option.blurb}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : null}
+
+        {afterpayNote ? (
+          <p className="mt-3 font-inter text-[13px] leading-5 text-svc-muted">
+            {afterpayNote}
+          </p>
+        ) : null}
+
         <p className="mt-4 font-dm-sans text-sm leading-6 text-svc-body">
           Sign in with Google to confirm who to send the receipt and project
-          updates to, then you&apos;ll go straight to Stripe&apos;s secure
-          checkout to pay.
+          updates to, then you&apos;ll go straight to
+          {method === "afterpay"
+            ? " Stripe's secure checkout to pay with Afterpay."
+            : " Stripe's secure checkout to pay."}
         </p>
 
         {error ? (

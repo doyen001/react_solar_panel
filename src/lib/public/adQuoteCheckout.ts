@@ -59,10 +59,41 @@ async function readEnvelope<T>(res: Response, fallback: string): Promise<T> {
   return json.data;
 }
 
+/**
+ * How the buyer chose to pay. Both go through Stripe Checkout — "afterpay"
+ * simply opens it on Afterpay's four-instalment flow instead of the card form.
+ */
+export type AdQuotePaymentMethod = "auto" | "card" | "afterpay";
+
+export type AdQuoteTier = {
+  id: AdQuoteTierId;
+  label: string;
+  amount: number;
+  /** False when the package price falls outside Afterpay's order-value limits. */
+  afterpayEligible: boolean;
+};
+
+export type AdQuoteTiers = {
+  currency: string;
+  afterpayLimits: { min: number; max: number } | null;
+  tiers: AdQuoteTier[];
+};
+
+/**
+ * Package prices and their Afterpay eligibility. The pricing cards hold only
+ * display labels ("A$500"), never the real numbers, so eligibility has to come
+ * from the backend that actually charges the amount.
+ */
+export async function fetchAdQuoteTiers(): Promise<AdQuoteTiers> {
+  const res = await fetch(`${backendBaseUrl()}/payments/ad-quote/tiers`);
+  return readEnvelope<AdQuoteTiers>(res, "Could not load payment options");
+}
+
 /** Starts a Stripe Checkout for one of the fixed-price website packages. */
 export async function createAdQuoteCheckout(input: {
   tierId: AdQuoteTierId;
   googleIdToken: string;
+  paymentMethod?: AdQuotePaymentMethod;
 }): Promise<AdQuoteCheckoutSession> {
   const res = await fetch(`${backendBaseUrl()}/payments/ad-quote/checkout`, {
     method: "POST",

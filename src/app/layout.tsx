@@ -10,6 +10,7 @@ import {
 import { EasylinkAiChatbot } from "@/components/ai-chat/EasylinkAiChatbot";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import { TopProgressBar } from "@/components/providers/TopProgressBar";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
@@ -64,6 +65,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ReduxProvider>
+          <TopProgressBar />
           {children}
           <EasylinkAiChatbot />
           <ToastProvider />
