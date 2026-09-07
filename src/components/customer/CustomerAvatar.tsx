@@ -33,6 +33,13 @@ export function CustomerAvatar({
   className = "",
   "aria-label": ariaLabel,
 }: Props) {
+  // No name to work with — during the brief window where the session is valid
+  // but the profile has not loaded back into Redux yet, and for any record
+  // genuinely missing a name. A silhouette reads as "your account" where the
+  // helper's literal "??" reads as a bug.
+  const hasName = Boolean(
+    initialsOverride?.trim() || firstName?.trim() || lastName?.trim(),
+  );
   const raw =
     initialsOverride?.trim() || initialsFromPersonName(firstName, lastName);
   const text = raw.slice(0, 2).toUpperCase();
@@ -40,10 +47,21 @@ export function CustomerAvatar({
   return (
     <div
       className={`flex shrink-0 items-center justify-center rounded-full font-inter ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
-      aria-label={ariaLabel ?? `Avatar ${text}`}
+      aria-label={ariaLabel ?? (hasName ? `Avatar ${text}` : "Your account")}
       role="img"
     >
-      {text}
+      {hasName ? (
+        text
+      ) : (
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+          className="size-[60%] opacity-80"
+        >
+          <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5Z" />
+        </svg>
+      )}
     </div>
   );
 }
