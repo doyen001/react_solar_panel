@@ -28,17 +28,23 @@ import {
   type CustomerUser,
 } from "@/lib/store/customerAuthSlice";
 import { navigateWithSessionRefresh } from "@/lib/auth/app-router-navigation";
+import { safeReturnPath } from "@/lib/auth/return-path";
+import {
+  CUSTOMER_AUTH_PATH,
+  CUSTOMER_HOME_PATH,
+} from "@/lib/auth/portal-paths";
 import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
 
-const CUSTOMER_HOME = "/customers/dashboard";
-
+/**
+ * Any in-app page is a valid place to come back to — a signed-out Buy click on
+ * the public `/products` catalogue is the common one — so this no longer
+ * insists the origin was under `/customers`. `safeReturnPath` still rejects
+ * off-site targets and the auth page itself.
+ */
 function safeCustomerFrom(from: string | null): string {
-  if (!from) return CUSTOMER_HOME;
-  if (!from.startsWith("/customers")) return CUSTOMER_HOME;
-  if (from.startsWith("/customers/auth")) return CUSTOMER_HOME;
-  return from;
+  return safeReturnPath(from, CUSTOMER_AUTH_PATH, CUSTOMER_HOME_PATH);
 }
 
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {

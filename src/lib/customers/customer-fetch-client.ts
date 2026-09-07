@@ -1,6 +1,8 @@
 "use client";
 
 import { navigateWithSessionRefresh } from "@/lib/auth/app-router-navigation";
+import { isSafeReturnPath } from "@/lib/auth/return-path";
+import { CUSTOMER_AUTH_PATH } from "@/lib/auth/portal-paths";
 import { store } from "@/lib/store/store";
 import { clearUser } from "@/lib/store/customerAuthSlice";
 
@@ -26,10 +28,13 @@ function customerAuthHref(fromPath?: string): string {
     (typeof window !== "undefined"
       ? `${window.location.pathname}${window.location.search}`
       : "");
-  if (path.startsWith("/customers") && !path.startsWith("/customers/auth")) {
-    return `/customers/auth?from=${encodeURIComponent(path)}`;
+  // Any in-app page can raise a 401, not just `/customers/*` — the public
+  // `/products` catalogue does it the moment a signed-out visitor hits Buy —
+  // and all of them are worth returning to afterwards.
+  if (isSafeReturnPath(path, CUSTOMER_AUTH_PATH)) {
+    return `${CUSTOMER_AUTH_PATH}?from=${encodeURIComponent(path)}`;
   }
-  return "/customers/auth";
+  return CUSTOMER_AUTH_PATH;
 }
 
 async function logoutClientAndRedirect() {
