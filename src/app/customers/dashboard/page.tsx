@@ -137,6 +137,9 @@ export default function CustomerDashboardPage() {
               loading={optionsLoading}
               savingKey={savingKey}
               onSelect={(key) => void handleSelectDesign(key)}
+              hasCompletedDesignWizard={
+                designOptions?.hasCompletedDesignWizard ?? true
+              }
             />
           }
           aside={

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CustomerSectionHeader } from "@/components/customer/CustomerSectionHeader";
 import {
   CustomerSectionMetaSkeleton,
@@ -20,6 +21,8 @@ type Props = {
   loading?: boolean;
   savingKey?: string | null;
   onSelect: (key: string) => void;
+  /** True once the customer has been through the /designs wizard at least once. */
+  hasCompletedDesignWizard?: boolean;
 };
 
 function formatKw(kw: number): string {
@@ -41,8 +44,10 @@ export function YourDesignsSection({
   loading = false,
   savingKey = null,
   onSelect,
+  hasCompletedDesignWizard = true,
 }: Props) {
   const selectedCount = selectedKey ? 1 : 0;
+  const needsDesignWizard = !loading && !hasCompletedDesignWizard;
 
   return (
     <section
@@ -56,7 +61,7 @@ export function YourDesignsSection({
         meta={
           loading ? (
             <CustomerSectionMetaSkeleton />
-          ) : (
+          ) : needsDesignWizard ? undefined : (
             `${options.length} options · ${selectedCount} selected`
           )
         }
@@ -71,6 +76,19 @@ export function YourDesignsSection({
 
       {loading ? (
         <DesignOptionsGridSkeleton />
+      ) : needsDesignWizard ? (
+        <div className="flex flex-col items-start gap-3 p-4">
+          <p className="font-dm-sans text-sm customer-text-muted">
+            You haven&apos;t built a solar design yet. Run the Solar Design
+            Platform with your address to see system options here.
+          </p>
+          <Link
+            href="/designs"
+            className="rounded-[8px] bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)] px-4 py-2 font-inter text-[13px] font-semibold text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:opacity-90"
+          >
+            Start Solar Design Platform
+          </Link>
+        </div>
       ) : options.length === 0 ? (
         <p className="p-4 font-dm-sans text-sm customer-text-muted">
           No design options are available yet.

@@ -27,6 +27,8 @@ export type DesignOptions = {
   selectedDesignId: string | null;
   /** True once the chosen design is approved — the choice can no longer change. */
   locked: boolean;
+  /** True once the customer has been through the /designs wizard at least once. */
+  hasCompletedDesignWizard: boolean;
 };
 
 type ApiEnvelope<T> = {
