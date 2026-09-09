@@ -67,7 +67,7 @@ function EnergyBreakdownChart() {
       </h3>
 
       <div className="mt-[18px]">
-        <div className="relative flex h-[182px] items-end gap-[10px] border-b border-dashed border-[#D9D9D9] px-[8px] pb-[6px]">
+        <div className="relative flex h-[140px] items-end gap-[10px] border-b border-dashed border-[#D9D9D9] px-[8px] pb-[6px]">
           {USAGE_WITHOUT_SOLAR.map((withoutSolar, index) => {
             const withSolar = USAGE_WITH_SOLAR[index];
 
@@ -289,7 +289,7 @@ function EnergyBillInput({
         </select>
       </div>
 
-      <div className="mt-[24px] flex flex-col items-end gap-[24px]">
+      <div className="mt-[16px] flex flex-col items-end gap-[12px]">
         <SingleScrollBar
           value={billRatePercent}
           onChange={(percent) => {
@@ -351,8 +351,8 @@ export const DesignsEnergyStepContent = forwardRef<
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col justify-center px-4 py-6 sm:px-8 sm:py-8 lg:px-[81px] lg:py-8">
-      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:aspect-[1278/525] lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[58px]">
-        <div className="flex w-full min-w-0 items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[49px] lg:py-[48px]">
+      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[58px]">
+        <div className="flex w-full min-w-0 items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[49px] lg:py-[30px]">
           <div className="mx-auto flex w-full max-w-[448px] flex-col items-center">
             <h2
               className="w-full text-center font-source-sans text-[clamp(28px,4.6vw,40px)] font-bold capitalize leading-[1.2] text-white"
@@ -363,7 +363,7 @@ export const DesignsEnergyStepContent = forwardRef<
               Energy Bill you pay
             </h2>
 
-            <div className="mt-6 w-full sm:mt-[34px]">
+            <div className="mt-6 w-full sm:mt-[12px]">
                 <EnergyBillInput
                   billRatePercent={billRatePercent}
                   onBillRatePercentChange={setBillRatePercent}
@@ -393,7 +393,7 @@ export const DesignsEnergyStepContent = forwardRef<
 
         <div className="designs-border-gradient w-full min-w-0 rounded-[28px] p-[3px] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] lg:h-full">
           <div className="flex aspect-[649/525] h-full min-h-[320px] w-full flex-col overflow-y-auto rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)] px-4 py-5 backdrop-blur-[17.8px] sm:min-h-[360px] sm:px-[42px] sm:py-[20px] lg:aspect-auto lg:min-h-0">
-            <div className="mt-6 flex flex-col gap-4 sm:mt-[44px] sm:gap-[18px]">
+            <div className="mt-6 flex flex-col gap-4 sm:mt-[20px] sm:gap-[12px]">
               <EnergyLegendItem
                 colorClass="bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]"
                 label="Bill without Solar"

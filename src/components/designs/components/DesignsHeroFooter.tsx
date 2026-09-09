@@ -24,12 +24,12 @@ export function DesignsHeroFooter({
 }: DesignsHeroFooterProps) {
   return (
     <div
-      className={`relative z-10 mt-auto w-full pb-8 pt-10 sm:pb-10 ${className ?? ""}`}
+      className={`relative z-10 mt-auto w-full pb-8 sm:pb-2 ${className ?? ""}`}
     >
       <div className="mx-auto w-full max-w-[1446px] px-4 sm:px-8 lg:px-[81px]">
         <DesignsHeroProgressBar fillPercent={fillPercent} />
         {(showBack || showNext) && (
-          <div className="mt-7 flex items-center justify-between gap-4">
+          <div className="mt-2 flex items-center justify-between gap-4">
             <div>
               {showBack && (
                 <button

@@ -1162,9 +1162,9 @@ export const DesignsSolarPanelStepContent = forwardRef<
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col justify-center px-4 py-6 sm:px-8 sm:py-8 lg:px-[81px] lg:py-8">
-      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:aspect-[1278/525] lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[58px]">
+      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[58px]">
         {/* ── Left panel ── */}
-        <div className="flex w-full min-w-0 items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[46px] lg:py-[56px]">
+        <div className="flex w-full min-w-0 items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[30px] lg:py-[30px]">
           <div className="mx-auto flex w-full max-w-[514px] flex-col items-center gap-6 sm:gap-[32px]">
             {/* Title + description */}
             <div className="flex max-w-[498px] flex-col items-center gap-[10px] text-center">

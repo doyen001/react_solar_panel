@@ -12,7 +12,7 @@ export function DesignsHeroImagePanel({
 }: DesignsHeroImagePanelProps) {
   return (
     <div
-      className={`relative aspect-[634/411] w-full min-w-0 overflow-hidden rounded-[30px] ${className ?? ""}`}
+      className={`relative w-full min-w-0 overflow-hidden rounded-[30px] ${className ?? ""}`}
     >
       <Image
         src={PANEL_IMG}

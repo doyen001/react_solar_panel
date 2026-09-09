@@ -360,7 +360,7 @@ export function DesignsHeroSection({
   };
 
   return (
-    <section className="relative flex min-h-dvh flex-col overflow-hidden">
+    <section className="relative flex h-screen flex-col overflow-hidden">
       <DesignsHeroBackground />
       <DesignTopBar />
 
@@ -396,7 +396,7 @@ export function DesignsHeroSection({
             Loading your design…
           </p>
         ) : activeScreen === "start" ? (
-          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col justify-center gap-6 px-4 py-6 sm:px-8 sm:py-8 lg:gap-[29px] lg:px-[81px] lg:py-8">
+          <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-col justify-center gap-6 px-4 py-2 sm:px-8 lg:gap-[29px] lg:px-[81px]">
             <div className="mx-auto grid w-full max-w-[1283px] grid-cols-1 gap-5 lg:grid-cols-[629fr_634fr] lg:items-stretch">
               <DesignsSavingsPromoCard />
               <DesignsHeroImagePanel />

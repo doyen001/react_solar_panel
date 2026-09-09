@@ -338,10 +338,10 @@ export const DesignsLocationStepContent = forwardRef<
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col justify-center px-4 py-6 sm:px-8 sm:py-8 lg:px-[81px] lg:py-8">
-      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:aspect-[1278/525] lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[38px]">
+      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[38px]">
         {/* ── Left panel ── */}
         <div className="flex w-full min-w-0 flex-col items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[46px]">
-          <div className="flex w-full max-w-[505px] flex-1 flex-col justify-center gap-8 sm:gap-[48px]">
+          <div className="flex w-full max-w-[505px] flex-1 flex-col justify-center gap-6 sm:gap-[48px]">
             <h2
               className="w-full max-w-[495px] text-center font-source-sans text-[clamp(28px,4.8vw,40px)] font-bold capitalize leading-tight text-white"
               style={{ letterSpacing: "0.248px" }}
