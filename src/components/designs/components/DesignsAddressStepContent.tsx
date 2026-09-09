@@ -32,15 +32,13 @@ export const DesignsRegisterStepContent = forwardRef<
   }
 >(function DesignsRegisterStepContent({ lockEmail = false }, ref) {
   const defaults = DESIGNS_REGISTER_STEP.defaultValues;
-  // Seed from the store so an existing design shows its customer details
-  // instead of empty placeholders. Falls back to the blank defaults for the
-  // anonymous create flow.
+  // Seed from the store so an existing design shows its customer details.
+  // A brand-new design starts genuinely empty — `defaults` below are shown
+  // as placeholder hint text only, never as real pre-filled values.
   const stored = useAppSelector((s) => s.designProposal.customer);
-  const [name, setName] = useState<string>(stored.name || defaults.name);
-  const [email, setEmail] = useState<string>(stored.email || defaults.email);
-  const [phone, setPhone] = useState<string>(
-    stored.phoneNumber || defaults.phone,
-  );
+  const [name, setName] = useState<string>(stored.name || "");
+  const [email, setEmail] = useState<string>(stored.email || "");
+  const [phone, setPhone] = useState<string>(stored.phoneNumber || "");
 
   useImperativeHandle(ref, () => ({
     getValues: () => ({ name, email, phone }),
@@ -96,6 +94,9 @@ export const DesignsRegisterStepContent = forwardRef<
                     <input
                       type={field.type}
                       value={field.id === "name" ? name : email}
+                      placeholder={
+                        field.id === "name" ? defaults.name : defaults.email
+                      }
                       readOnly={emailLocked}
                       aria-describedby={
                         emailLocked ? "designs-email-locked" : undefined

@@ -1,5 +1,4 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { DESIGNS_REGISTER_STEP } from "@/utils/constant";
 import type { SolarPanel } from "@/types/solar";
 import type { RootState } from "./store";
 
@@ -187,9 +186,13 @@ export const DESIGN_PROPOSAL_DEFAULTS: DesignProposalState = {
     payback: "7.1 yrs",
   },
   customer: {
-    name: DESIGNS_REGISTER_STEP.defaultValues.name,
-    email: DESIGNS_REGISTER_STEP.defaultValues.email,
-    phoneNumber: DESIGNS_REGISTER_STEP.defaultValues.phone,
+    // Real Redux initial state for a brand-new design — must start empty,
+    // not the register step's placeholder-hint copy (DESIGNS_REGISTER_STEP.
+    // defaultValues), which is display-only text and was never meant to be
+    // used as actual data.
+    name: "",
+    email: "",
+    phoneNumber: "",
     address: "42 Bondi Rd, Bondi, NSW 2026",
     property: "Residential",
   },

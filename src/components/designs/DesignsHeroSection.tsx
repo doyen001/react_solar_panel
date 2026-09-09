@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   mergeProposalData,
@@ -182,17 +183,27 @@ export function DesignsHeroSection({
   const onNext = () => {
     if (activeScreen === "register") {
       const register = registerStepRef.current?.getValues();
-      if (register) {
-        dispatch(
-          mergeProposalData({
-            customer: {
-              name: register.name,
-              email: register.email,
-              phoneNumber: register.phone,
-            },
-          }),
+      const name = register?.name.trim() ?? "";
+      const email = register?.email.trim() ?? "";
+      const phoneDigits = (register?.phone ?? "").replace(/\D/g, "");
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!name || !email || !emailPattern.test(email) || phoneDigits.length < 8) {
+        toast.error(
+          "Please fill in your name, a valid email, and phone number to continue.",
         );
+        return;
       }
+
+      dispatch(
+        mergeProposalData({
+          customer: {
+            name,
+            email,
+            phoneNumber: register?.phone ?? "",
+          },
+        }),
+      );
     }
     if (activeScreen === "second") {
       const property = propertyStepRef.current?.getValues();
