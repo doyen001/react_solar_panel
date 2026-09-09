@@ -205,6 +205,8 @@ function generatePanelsForRoofPolygon(
   polygon: google.maps.LatLngLiteral[],
   panelDimensions: { heightM: number; widthM: number },
   segmentIndex: number,
+  /** Force every panel on this roof to one orientation; omit to auto-pick whichever fits more panels. */
+  orientationOverride?: "LANDSCAPE" | "PORTRAIT",
 ): SolarPanel[] {
   if (polygon.length < 3) return [];
 
@@ -294,7 +296,11 @@ function generatePanelsForRoofPolygon(
 
   let bestPanels: SolarPanel[] = [];
 
-  for (const isLandscape of [true, false]) {
+  const orientationsToTry = orientationOverride
+    ? [orientationOverride === "LANDSCAPE"]
+    : [true, false];
+
+  for (const isLandscape of orientationsToTry) {
     const pw = panelW(isLandscape);
     const ph = panelH(isLandscape);
     const orientation: "PORTRAIT" | "LANDSCAPE" = isLandscape
@@ -462,7 +468,12 @@ function useImperativeRoofOutline(
 
 /* ── Roof-polygon editing helpers ───────────────────────────── */
 
-type RoofPolygon = { id: number; paths: google.maps.LatLngLiteral[] };
+/** `undefined` = auto-pick whichever orientation fits the most panels. */
+type RoofPolygon = {
+  id: number;
+  paths: google.maps.LatLngLiteral[];
+  orientation?: "LANDSCAPE" | "PORTRAIT";
+};
 
 function makeDefaultPolygon(
   center: { lat: number; lng: number },
@@ -891,10 +902,39 @@ export const DesignsSolarPanelStepContent = forwardRef<
     });
   }, [selectedRoofId]);
 
+  /** Cycles the selected roof's panel orientation: auto → landscape → portrait → auto. */
+  const handleRotatePanels = useCallback(() => {
+    if (selectedRoofId === null) return;
+    setEditingRoofs((prev) =>
+      prev.map((r) => {
+        if (r.id !== selectedRoofId) return r;
+        const next =
+          r.orientation === undefined
+            ? "LANDSCAPE"
+            : r.orientation === "LANDSCAPE"
+              ? "PORTRAIT"
+              : undefined;
+        return { ...r, orientation: next };
+      }),
+    );
+  }, [selectedRoofId]);
+
+  const selectedRoofOrientation = useMemo(
+    () => editingRoofs.find((r) => r.id === selectedRoofId)?.orientation,
+    [editingRoofs, selectedRoofId],
+  );
+
   const handleSave = useCallback(() => {
     /* Read final paths from imperative polygon refs (user may have dragged vertices) */
     const currentPaths = getCurrentEditingPaths();
-    const validPaths = currentPaths.filter((p) => p.length >= 3);
+    /* Pair each path with its roof's orientation override before filtering, so indices stay aligned. */
+    const validRoofs = editingRoofs
+      .map((roof, index) => ({
+        path: currentPaths[index],
+        orientation: roof.orientation,
+      }))
+      .filter((r) => r.path.length >= 3);
+    const validPaths = validRoofs.map((r) => r.path);
     setSavedRoofs(validPaths);
 
     if (validPaths.length === 0) {
@@ -935,8 +975,13 @@ export const DesignsSolarPanelStepContent = forwardRef<
     try {
       if (data?.panelDimensions) {
         panelsToPersist = dedupeSolarPanels(
-          validPaths.flatMap((roof, index) =>
-            generatePanelsForRoofPolygon(roof, data.panelDimensions, index),
+          validRoofs.flatMap((roof, index) =>
+            generatePanelsForRoofPolygon(
+              roof.path,
+              data.panelDimensions,
+              index,
+              roof.orientation,
+            ),
           ),
         );
         setGeneratedPanels(panelsToPersist);
@@ -999,6 +1044,7 @@ export const DesignsSolarPanelStepContent = forwardRef<
   }, [
     data?.panelDimensions,
     dispatch,
+    editingRoofs,
     getCurrentEditingPaths,
     selectedLocation,
   ]);
@@ -1009,7 +1055,16 @@ export const DesignsSolarPanelStepContent = forwardRef<
   const onMapLoad = useCallback((map: google.maps.Map) => {
     map.setTilt(0);
     map.setHeading(0);
-    setMapReady(map);
+    // `onLoad` fires as soon as the `google.maps.Map` instance exists — not
+    // once its projection/viewport has actually finished initialising.
+    // Overlays (our roof Polygon included) attached before that can silently
+    // fail to render: `map.getBounds()` returns undefined until the map is
+    // truly ready. `'idle'` fires once the map has finished rendering
+    // (including projection setup), so we gate `mapReady` — and therefore
+    // every overlay that depends on it — on that instead.
+    google.maps.event.addListenerOnce(map, "idle", () => {
+      setMapReady(map);
+    });
   }, []);
 
   /* layer visibility */
@@ -1236,8 +1291,11 @@ export const DesignsSolarPanelStepContent = forwardRef<
                       </OverlayView>
                     )}
 
-                    {/* Editable roof polygons (edit mode) */}
-                    {isEditing &&
+                    {/* Editable roof polygons (edit mode) — gated on mapReady
+                        (now 'idle'-confirmed) so the Polygon never attaches
+                        before the map's projection is ready to render it. */}
+                    {!!mapReady &&
+                      !!isEditing &&
                       editingRoofs.map((roof) => {
                         const isSelected = roof.id === selectedRoofId;
                         return (
@@ -1246,10 +1304,16 @@ export const DesignsSolarPanelStepContent = forwardRef<
                             paths={roof.paths}
                             options={{
                               fillColor: "#51FF00",
-                              fillOpacity: isSelected ? 0.26 : 0.18,
-                              strokeColor: isSelected ? "#FBBF24" : "#51FF00",
-                              strokeOpacity: 0.95,
-                              strokeWeight: isSelected ? 4 : 2.5,
+                              fillOpacity: isSelected ? 0.26 : 0.22,
+                              // Cyan (unselected) vs. amber (selected) are both
+                              // far from typical rooftop colours (gray/white/
+                              // brown), so the outline stays visible regardless
+                              // of what's underneath — a same-hue green stroke
+                              // at low opacity could disappear into bright or
+                              // reflective roofing.
+                              strokeColor: isSelected ? "#FBBF24" : "#00E5FF",
+                              strokeOpacity: 1,
+                              strokeWeight: isSelected ? 4 : 3.5,
                               clickable: true,
                               zIndex: isSelected ? 12 : 10,
                             }}
@@ -1267,7 +1331,8 @@ export const DesignsSolarPanelStepContent = forwardRef<
                       })}
 
                     {/* Saved roof outlines (view mode) */}
-                    {!isEditing &&
+                    {!!mapReady &&
+                      !isEditing &&
                       savedRoofs.map((paths, idx) => (
                         <Polygon
                           key={`saved-${idx}`}
@@ -1301,6 +1366,27 @@ export const DesignsSolarPanelStepContent = forwardRef<
                 <>
                   <button
                     type="button"
+                    onClick={handleRotatePanels}
+                    disabled={isGeneratingPanels || selectedRoofId === null}
+                    aria-label="Rotate the selected roof's panels (landscape / portrait)"
+                    title={`Panel orientation: ${
+                      selectedRoofOrientation === "LANDSCAPE"
+                        ? "Landscape"
+                        : selectedRoofOrientation === "PORTRAIT"
+                          ? "Portrait"
+                          : "Auto"
+                    } — click to cycle`}
+                    className="flex h-[33px] items-center gap-[6px] rounded-[6px] bg-white/90 px-[14px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-[#2094F3] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    <Icon name="RotateCw" className="size-[14px]" />
+                    {selectedRoofOrientation === "LANDSCAPE"
+                      ? "Landscape"
+                      : selectedRoofOrientation === "PORTRAIT"
+                        ? "Portrait"
+                        : "Auto"}
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleAddRoof}
                     disabled={isGeneratingPanels}
                     className="h-[33px] rounded-[6px] bg-white/90 px-[14px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-[#2094F3] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:bg-white"
@@ -1323,10 +1409,21 @@ export const DesignsSolarPanelStepContent = forwardRef<
                   <button
                     type="button"
                     onClick={handleSave}
-                    disabled={isGeneratingPanels}
-                    className="h-[33px] rounded-[6px] bg-[linear-gradient(126deg,#22c55e_0%,#16a34a_100%)] px-[18px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] disabled:opacity-60"
+                    disabled={
+                      isGeneratingPanels || loading || !data?.panelDimensions
+                    }
+                    aria-label={
+                      loading || !data?.panelDimensions
+                        ? "Waiting for solar data to finish loading before you can save"
+                        : undefined
+                    }
+                    className="h-[33px] rounded-[6px] bg-[linear-gradient(126deg,#22c55e_0%,#16a34a_100%)] px-[18px] font-inter text-[13px] font-semibold tracking-[-0.1504px] text-white shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isGeneratingPanels ? "Saving..." : "Save Roof"}
+                    {isGeneratingPanels
+                      ? "Saving..."
+                      : loading || !data?.panelDimensions
+                        ? "Loading solar data..."
+                        : "Save Roof"}
                   </button>
                 </>
               ) : (

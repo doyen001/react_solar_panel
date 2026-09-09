@@ -2,14 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GeoTiffOverlay, GeoTiffMaskOverlay } from "@/utils/geotiff";
-
-interface DataLayersResponse {
-  rgbUrl: string;
-  maskUrl: string;
-  annualFluxUrl: string;
-  dsmUrl: string;
-  imageryQuality: string;
-}
+import {
+  fetchCombinedSolarData,
+  type DataLayersResult,
+} from "./solarCombinedFetch";
 
 export type SolarLayerType = "rgb" | "mask" | "flux";
 
@@ -21,29 +17,17 @@ export interface SolarLayersState {
   error: string | null;
 }
 
+/**
+ * Goes through the combined estimate+data-layers endpoint (see
+ * solarCombinedFetch) so it shares one request with useSolarEstimate instead
+ * of hitting solarLimiter on its own.
+ */
 async function fetchDataLayersMeta(
   lat: number,
   lng: number,
-  signal: AbortSignal,
-): Promise<DataLayersResponse> {
-  const res = await fetch("/api/solar/data-layers", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ latitude: lat, longitude: lng }),
-    signal,
-  });
-
-  const json = (await res.json()) as {
-    success?: boolean;
-    data?: DataLayersResponse;
-    message?: string;
-  };
-
-  if (!res.ok || !json.data) {
-    throw new Error(json.message ?? "Failed to fetch data layers.");
-  }
-
-  return json.data;
+): Promise<DataLayersResult> {
+  const { dataLayers } = await fetchCombinedSolarData(lat, lng);
+  return dataLayers;
 }
 
 async function fetchAndParseLayer(
@@ -100,7 +84,8 @@ export function useSolarLayers(
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
-        const meta = await fetchDataLayersMeta(lat, lng, controller.signal);
+        const meta = await fetchDataLayersMeta(lat, lng);
+        if (controller.signal.aborted) return;
 
         const urlMap: Partial<Record<SolarLayerType, string>> = {};
         if (layers.includes("rgb") && meta.rgbUrl) urlMap.rgb = meta.rgbUrl;

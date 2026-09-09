@@ -3,6 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /** Hide the bottom-right “Compiling / Rendering” dev badge; compile status stays in the terminal. */
   devIndicators: false,
+  /**
+   * Off: React's dev-only double-mount/double-effect was doubling every
+   * client-side effect (solar API calls, imperative Google Maps setup, etc.)
+   * on every dev page load. Doesn't affect production — StrictMode's extra
+   * checks never run in a production build regardless of this setting.
+   */
+  reactStrictMode: false,
   /** pdf-parse → pdfjs-dist must not be webpacked; it throws at load time in the RSC bundle. */
   serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
   turbopack: {},

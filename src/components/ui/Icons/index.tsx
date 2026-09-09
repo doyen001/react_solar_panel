@@ -68,6 +68,9 @@ const LocationPin = createDynamicSvgIcon(
 );
 const Pencil = createDynamicSvgIcon(() => import("./pencil.svg?component"));
 const Trash = createDynamicSvgIcon(() => import("./trash.svg?component"));
+const RotateCw = createDynamicSvgIcon(
+  () => import("./rotate-cw.svg?component"),
+);
 const LayoutGrid = createDynamicSvgIcon(
   () => import("./layout-grid.svg?component"),
 );
@@ -292,7 +295,8 @@ export type IconType =
   | "MyDesignsBattery"
   | "MyDesignsInverter"
   | "MyDesignGift"
-  | "HeatPump";
+  | "HeatPump"
+  | "RotateCw";
 
 type IconProps = {
   name: IconType | undefined;
@@ -339,6 +343,7 @@ const Icon: React.FC<IconProps> = ({ name, className, style }) => {
     LocationPin,
     Pencil,
     Trash,
+    RotateCw,
     LayoutGrid,
     Menu,
     Zap,

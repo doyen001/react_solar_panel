@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SolarEstimateResult } from "@/types/solar";
+import { fetchCombinedSolarData } from "./solarCombinedFetch";
 
 type SolarEstimateState = {
   data: SolarEstimateResult | null;
@@ -9,31 +10,20 @@ type SolarEstimateState = {
   error: string | null;
 };
 
-type SolarEstimateApiResponse = {
-  success?: boolean;
-  data?: SolarEstimateResult;
-  message?: string;
-};
-
+/**
+ * Kept for anything expecting this named export. Internally now goes through
+ * the combined estimate+data-layers endpoint (see solarCombinedFetch) so it
+ * shares one request with useSolarLayers instead of hitting solarLimiter on
+ * its own — this fetches the full combined payload just to read `.estimate`
+ * off it, which is wasteful if `useSolarLayers` isn't also being called for
+ * the same location; prefer `useSolarEstimate` directly in that case.
+ */
 export async function fetchSolarEstimate(
   lat: number,
   lng: number,
-  signal?: AbortSignal,
 ): Promise<SolarEstimateResult> {
-  const res = await fetch("/api/solar/estimate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ latitude: lat, longitude: lng }),
-    signal,
-  });
-
-  const json = (await res.json()) as SolarEstimateApiResponse;
-
-  if (!res.ok || !json.data) {
-    throw new Error(json.message ?? "Failed to fetch solar estimate.");
-  }
-
-  return json.data;
+  const { estimate } = await fetchCombinedSolarData(lat, lng);
+  return estimate;
 }
 
 export function useSolarEstimate(location: {
@@ -57,9 +47,11 @@ export function useSolarEstimate(location: {
       setState({ data: null, loading: true, error: null });
 
       try {
-        const data = await fetchSolarEstimate(lat, lng, controller.signal);
-        setState({ data, loading: false, error: null });
+        const { estimate } = await fetchCombinedSolarData(lat, lng);
+        if (controller.signal.aborted) return;
+        setState({ data: estimate, loading: false, error: null });
       } catch (err) {
+        if (controller.signal.aborted) return;
         if (err instanceof DOMException && err.name === "AbortError") return;
         setState({
           data: null,
