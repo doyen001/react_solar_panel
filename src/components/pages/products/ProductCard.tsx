@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import classNames from "classnames";
 import { toast } from "react-toastify";
 import Icon from "@/components/ui/Icons";
 import { downloadDatasheet } from "@/components/pages/products/downloadDatasheet";
 import { createProductCheckout } from "@/lib/customers/payments";
+import {
+  fetchAfterpayConfig,
+  isAfterpayPayable,
+  type AfterpayConfig,
+} from "@/lib/public/afterpayConfig";
 import type {
   Product,
   ProductBadge,
@@ -51,14 +56,37 @@ export function ProductCard({
   const [buying, setBuying] = useState(false);
   const inStock = product.inStock ?? true;
 
-  async function handleBuyNow() {
+  // Afterpay is offered only when this product's total is inside Afterpay's
+  // real order-value range. Most panels and batteries sit well above the cap,
+  // so showing the button unconditionally would mostly promise a checkout
+  // Afterpay refuses after the redirect.
+  const [afterpay, setAfterpay] = useState<AfterpayConfig | null>(null);
+  useEffect(() => {
+    let active = true;
+    void fetchAfterpayConfig().then((c) => {
+      if (active) setAfterpay(c);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const totalMinor = Math.round(product.price * 100) * quantity;
+  const afterpayAvailable = inStock && isAfterpayPayable(afterpay, totalMinor);
+
+  async function handleBuyNow(paymentMethod: "card" | "afterpay" = "card") {
     setBuying(true);
     try {
       const session = await createProductCheckout({
         productId: product.id,
         quantity,
+        paymentMethod,
       });
-      toast.info("Redirecting to Stripe secure checkout…");
+      toast.info(
+        paymentMethod === "afterpay"
+          ? "Redirecting to Afterpay…"
+          : "Redirecting to Stripe secure checkout…",
+      );
       window.location.assign(session.checkoutUrl);
     } catch (err) {
       const message =
@@ -219,7 +247,7 @@ export function ProductCard({
               disabled={!inStock || buying}
               aria-label="Buy now"
               title="Buy now"
-              onClick={() => void handleBuyNow()}
+              onClick={() => void handleBuyNow("card")}
               className="flex size-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
               style={{
                 backgroundImage:
@@ -232,6 +260,18 @@ export function ProductCard({
                 <Icon name="ProductCart" className="size-4" />
               )}
             </button>
+            {afterpayAvailable ? (
+              <button
+                type="button"
+                disabled={buying}
+                aria-label="Pay with Afterpay in 4 instalments"
+                title="Pay in 4 with Afterpay"
+                onClick={() => void handleBuyNow("afterpay")}
+                className="flex h-9 shrink-0 items-center justify-center rounded-full bg-[#b2fce4] px-3 text-[12px] font-semibold text-warm-ink shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Pay in 4
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

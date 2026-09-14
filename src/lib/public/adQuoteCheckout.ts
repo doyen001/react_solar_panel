@@ -60,8 +60,9 @@ async function readEnvelope<T>(res: Response, fallback: string): Promise<T> {
 }
 
 /**
- * How the buyer chose to pay. Both go through Stripe Checkout — "afterpay"
- * simply opens it on Afterpay's four-instalment flow instead of the card form.
+ * How the buyer chose to pay. "card" goes through Stripe Checkout; "afterpay"
+ * is a DIRECT Afterpay integration against Easylink's own merchant account,
+ * which redirects to Afterpay's site rather than to Stripe.
  */
 export type AdQuotePaymentMethod = "auto" | "card" | "afterpay";
 

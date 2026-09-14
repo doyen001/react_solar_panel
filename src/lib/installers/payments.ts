@@ -7,7 +7,16 @@ type ApiEnvelope<T> = {
 };
 
 /** Installer-facing groupings; the backend maps these to Stripe payment_method_types. */
-export type StripePaymentMethodGroup = "auto" | "card" | "paypal" | "bnpl";
+/**
+ * "afterpay" is the DIRECT Afterpay integration on Easylink's own merchant
+ * account, so it no longer appears inside the Stripe "bnpl" group.
+ */
+export type StripePaymentMethodGroup =
+  | "auto"
+  | "card"
+  | "paypal"
+  | "bnpl"
+  | "afterpay";
 
 export type PaymentStatus =
   | "PENDING"
@@ -196,14 +205,19 @@ export const INSTALLER_PAYMENT_BRANDS = [
     logos: [{ name: "PayPal", src: "/images/home/payment-paypal.png" }],
   },
   {
+    id: "afterpay",
+    label: "Afterpay",
+    logos: [{ name: "Afterpay", src: "/images/home/payment-afterpay.png" }],
+    note: "Paid in 4 instalments through Easylink's own Afterpay account. Subject to Afterpay's order-value limits.",
+  },
+  {
     id: "bnpl",
-    label: "Buy now, pay later",
+    label: "Other buy now, pay later",
     logos: [
-      { name: "Afterpay", src: "/images/home/payment-afterpay.png" },
       { name: "Klarna", src: "/images/home/payment-klarna.png" },
       { name: "Zip", src: "/images/home/payment-zip.png" },
     ],
-    note: "Afterpay, Klarna and Zip must be enabled in your Stripe Dashboard first.",
+    note: "Klarna and Zip must be enabled in your Stripe Dashboard first.",
   },
 ] as const satisfies ReadonlyArray<{
   id: StripePaymentMethodGroup;

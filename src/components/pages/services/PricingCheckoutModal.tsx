@@ -238,7 +238,7 @@ export function PricingCheckoutModal({ tierId, tierName, priceLabel, onClose }: 
           Sign in with Google to confirm who to send the receipt and project
           updates to, then you&apos;ll go straight to
           {method === "afterpay"
-            ? " Stripe's secure checkout to pay with Afterpay."
+            ? " Afterpay to approve your four instalments."
             : " Stripe's secure checkout to pay."}
         </p>
 
@@ -252,7 +252,9 @@ export function PricingCheckoutModal({ tierId, tierName, priceLabel, onClose }: 
           <div ref={buttonHostRef} />
           {submitting ? (
             <p className="font-dm-sans text-sm text-svc-muted">
-              Redirecting to Stripe secure checkout…
+              {method === "afterpay"
+                ? "Redirecting to Afterpay…"
+                : "Redirecting to Stripe secure checkout…"}
             </p>
           ) : null}
         </div>

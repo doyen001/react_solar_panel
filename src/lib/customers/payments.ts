@@ -53,6 +53,8 @@ async function readEnvelope<T>(res: Response, fallback: string): Promise<T> {
 export async function createProductCheckout(input: {
   productId: string;
   quantity: number;
+  /** "afterpay" redirects to Afterpay directly; anything else goes via Stripe. */
+  paymentMethod?: "auto" | "card" | "afterpay";
 }): Promise<ProductCheckoutSession> {
   const res = await fetchWithCustomerSession(
     "/api/customers/payments/products/checkout",
