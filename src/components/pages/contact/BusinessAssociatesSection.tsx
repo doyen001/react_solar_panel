@@ -1,5 +1,28 @@
 import Image from "next/image";
 import logoIcon from "@/components/ui/Icons/bluettiLogo.svg";
+
+/**
+ * Starter list — swap for real logo assets whenever they're supplied; until
+ * then this is a placeholder set the client asked us to seed and revise later.
+ */
+const TECH_PARTNER_NAMES = [
+  "Google",
+  "Microsoft",
+  "Amazon Web Services",
+  "Meta",
+  "Apple",
+  "NVIDIA",
+  "OpenAI",
+  "Anthropic",
+  "IBM",
+  "Salesforce",
+  "Oracle",
+  "Samsung",
+  "Intel",
+  "Qualcomm",
+  "Tesla",
+] as const;
+
 export function BusinessAssociatesSection() {
   return (
     <section>
@@ -15,21 +38,35 @@ export function BusinessAssociatesSection() {
           <div className="relative z-10 grid min-h-[414px] max-w-7xl mx-auto items-center gap-10 py-7 md:grid-cols-[1.1fr_1.9fr]">
             <div>
               <p className="text-base text-cyan-300">Business Associates</p>
-              <h3 className="mt-2 text-3xl font-bold text-white">
-                BLUETTI Official Distributor
-              </h3>
               <div className="mt-8 inline-flex items-centerpy-2 text-xl font-semibold tracking-[0.25em] text-slate-200">
                 <Image src={logoIcon} alt="Logo" width={260} height={62} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 max-w-[828px]">
-              {Array.from({ length: 15 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-2xl border border-white/15 bg-white/8"
-                  style={{ aspectRatio: "148/76" }}
-                />
-              ))}
+            <div
+              className="max-w-[828px] overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+              aria-label="Partner and distributor logos"
+            >
+              <div className="ba-logo-track flex w-max gap-3">
+                {Array.from({ length: 2 }).map((_, trackIdx) => (
+                  <div
+                    key={trackIdx}
+                    aria-hidden={trackIdx === 1}
+                    className="grid grid-flow-col grid-rows-3 gap-3"
+                  >
+                    {TECH_PARTNER_NAMES.map((name) => (
+                      <div
+                        key={name}
+                        className="flex w-[148px] items-center justify-center px-2 text-center"
+                        style={{ aspectRatio: "148/76" }}
+                      >
+                        <span className="font-inter text-[20px] font-semibold leading-tight text-white/85">
+                          {name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

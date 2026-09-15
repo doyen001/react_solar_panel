@@ -4670,3 +4670,27 @@ html:has(.svc-page) {
     transform: none !important;
   }
 }
+
+/* Business Associates — continuous logo carousel (two duplicated tracks, seamless loop) */
+@keyframes ba-logo-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ba-logo-track {
+  animation: ba-logo-scroll 28s linear infinite;
+}
+
+.ba-logo-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ba-logo-track {
+    animation: none;
+  }
+}
