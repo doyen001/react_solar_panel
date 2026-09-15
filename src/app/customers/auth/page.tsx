@@ -84,7 +84,11 @@ async function hasExistingCustomerSession(): Promise<boolean> {
  * exchanges it for its own short-lived access token server-side.
  */
 async function completeReturn(target: string) {
+  // TEMP DEBUG: remove once diagnosed.
+  console.log("[auth sso] completeReturn target=", target);
   if (target.startsWith("/")) {
+    // TEMP DEBUG: remove once diagnosed.
+    console.log("[auth sso] in-app navigate to", target);
     navigateWithSessionRefresh(target);
     return;
   }
@@ -96,8 +100,18 @@ async function completeReturn(target: string) {
     });
     const json = (await res.json().catch(() => null)) as {
       data?: { code?: string };
+      message?: string;
     } | null;
     const code = json?.data?.code;
+    // TEMP DEBUG: remove once diagnosed.
+    console.log(
+      "[auth sso] /api/customers/sso/issue status=",
+      res.status,
+      "code=",
+      Boolean(code),
+      "message=",
+      json?.message,
+    );
 
     if (!code) {
       // No code, no safe way to prove identity to the other site — land the
@@ -108,8 +122,12 @@ async function completeReturn(target: string) {
 
     const url = new URL(target);
     url.searchParams.set("code", code);
+    // TEMP DEBUG: remove once diagnosed.
+    console.log("[auth sso] navigating to", url.toString());
     window.location.href = url.toString();
-  } catch {
+  } catch (err) {
+    // TEMP DEBUG: remove once diagnosed.
+    console.log("[auth sso] completeReturn error", err);
     window.location.href = target;
   }
 }
@@ -128,14 +146,31 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   // still shows the form as before.
   useEffect(() => {
     const from = searchParams.get("from");
+    // TEMP DEBUG: remove once diagnosed.
+    console.log("[auth sso] from=", from);
     if (!from || from.startsWith("/")) return;
     const target = safeCustomerFrom(from);
-    if (target.startsWith("/")) return; // not an allowlisted external target
+    // TEMP DEBUG: remove once diagnosed.
+    console.log(
+      "[auth sso] target=",
+      target,
+      "allowedOrigins=",
+      SSO_ALLOWED_ORIGINS,
+    );
+    if (target.startsWith("/")) {
+      // TEMP DEBUG: remove once diagnosed.
+      console.log(
+        "[auth sso] target resolved to an in-app path — not an allowlisted external target, skipping auto-continue",
+      );
+      return;
+    }
 
     let cancelled = false;
     setCheckingExistingSession(true);
     void hasExistingCustomerSession()
       .then((signedIn) => {
+        // TEMP DEBUG: remove once diagnosed.
+        console.log("[auth sso] hasExistingCustomerSession=", signedIn);
         if (cancelled || !signedIn) return;
         void completeReturn(target);
       })
@@ -402,9 +437,27 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       reset();
-      toast.success(
-        result?.message ?? "Account created successfully. You can now sign in.",
+
+      // A return context (from the SSO handoff, or any other `?from=`/`?ref=`
+      // caller) is only useful once the customer can actually sign in — new
+      // accounts still need email verification first, so this can't skip
+      // straight back there. Switching to sign-in keeps the same query string
+      // (mode is local state, not a URL change), so once they verify and sign
+      // in, the existing `from` handling completes the trip on its own.
+      const hasReturnContext = Boolean(
+        searchParams.get("from") || searchParams.get("ref"),
       );
+
+      toast.success(
+        result?.message ??
+          (hasReturnContext
+            ? "Account created — check your email to verify it, then sign in here to continue."
+            : "Account created successfully. You can now sign in."),
+      );
+
+      if (hasReturnContext) {
+        onSwitchMode();
+      }
     } catch {
       toast.error("Unable to reach the signup service. Please try again.");
     }
