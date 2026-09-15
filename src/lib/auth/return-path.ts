@@ -43,3 +43,40 @@ export function safeReturnPath(
 ): string {
   return isSafeReturnPath(from, authPrefix) ? from : fallback;
 }
+
+/**
+ * True for a *full URL* whose origin is explicitly allowlisted — the SSO
+ * handoff to another Easylink site (e.g. easylinkplus.com) after signing in
+ * here. Kept separate from `isSafeReturnPath`, which must keep rejecting
+ * every absolute URL for its own (in-app) callers.
+ */
+export function isSafeExternalReturnUrl(
+  from: string | null | undefined,
+  allowedOrigins: readonly string[],
+): from is string {
+  if (!from) return false;
+  if (CONTROL_CHARS.test(from)) return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(from);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+  return allowedOrigins.includes(parsed.origin);
+}
+
+/**
+ * The return target for the customer auth page: an in-app path, an
+ * allowlisted external site (SSO handoff), or `fallback`.
+ */
+export function safeReturnTarget(
+  from: string | null | undefined,
+  authPrefix: string,
+  fallback: string,
+  allowedExternalOrigins: readonly string[],
+): string {
+  if (isSafeReturnPath(from, authPrefix)) return from;
+  if (isSafeExternalReturnUrl(from, allowedExternalOrigins)) return from;
+  return fallback;
+}

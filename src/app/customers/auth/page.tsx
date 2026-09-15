@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthCard } from "@/components/ui/auth/AuthCard";
@@ -28,11 +28,13 @@ import {
   type CustomerUser,
 } from "@/lib/store/customerAuthSlice";
 import { navigateWithSessionRefresh } from "@/lib/auth/app-router-navigation";
-import { safeReturnPath } from "@/lib/auth/return-path";
+import { safeReturnTarget } from "@/lib/auth/return-path";
 import {
   CUSTOMER_AUTH_PATH,
   CUSTOMER_HOME_PATH,
+  SSO_ALLOWED_ORIGINS,
 } from "@/lib/auth/portal-paths";
+import { fetchCustomerProfile } from "@/lib/customers/profile";
 import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
@@ -40,17 +42,91 @@ type Mode = "signin" | "signup";
 /**
  * Any in-app page is a valid place to come back to — a signed-out Buy click on
  * the public `/products` catalogue is the common one — so this no longer
- * insists the origin was under `/customers`. `safeReturnPath` still rejects
- * off-site targets and the auth page itself.
+ * insists the origin was under `/customers`. Also allows a handoff back to
+ * another Easylink site (e.g. easylinkplus.com), gated to an explicit
+ * allowlist — see `isSafeExternalReturnUrl`.
  */
 function safeCustomerFrom(from: string | null): string {
-  return safeReturnPath(from, CUSTOMER_AUTH_PATH, CUSTOMER_HOME_PATH);
+  return safeReturnTarget(
+    from,
+    CUSTOMER_AUTH_PATH,
+    CUSTOMER_HOME_PATH,
+    SSO_ALLOWED_ORIGINS,
+  );
+}
+
+/**
+ * Finishes signing in and sends the customer to `target`. An in-app path
+ * navigates normally; a full URL means an SSO handoff to another Easylink
+ * site — we trade the session for a one-time code first (never the real
+ * access/refresh tokens) and hand that to the other site in the URL, which
+ * exchanges it for its own short-lived access token server-side.
+ */
+async function completeReturn(target: string) {
+  if (target.startsWith("/")) {
+    navigateWithSessionRefresh(target);
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/customers/sso/issue", {
+      method: "POST",
+      credentials: "include",
+    });
+    const json = (await res.json().catch(() => null)) as {
+      data?: { code?: string };
+    } | null;
+    const code = json?.data?.code;
+
+    if (!code) {
+      // No code, no safe way to prove identity to the other site — land the
+      // customer on the target anyway rather than stranding them here.
+      window.location.href = target;
+      return;
+    }
+
+    const url = new URL(target);
+    url.searchParams.set("code", code);
+    window.location.href = url.toString();
+  } catch {
+    window.location.href = target;
+  }
 }
 
 function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
+  const [checkingExistingSession, setCheckingExistingSession] =
+    useState(false);
+
+  // An SSO handoff (e.g. from easylinkplus.com's "Get Free Quote") should
+  // skip straight past the login form if this browser is already signed in
+  // here — that's the whole point of the redirect. Scoped to the external-
+  // handoff case only, so a plain visit to /customers/auth while signed in
+  // still shows the form as before.
+  useEffect(() => {
+    const from = searchParams.get("from");
+    if (!from || from.startsWith("/")) return;
+    const target = safeCustomerFrom(from);
+    if (target.startsWith("/")) return; // not an allowlisted external target
+
+    let cancelled = false;
+    setCheckingExistingSession(true);
+    void fetchCustomerProfile()
+      .then((profile) => {
+        if (cancelled || !profile) return;
+        void completeReturn(target);
+      })
+      .finally(() => {
+        if (!cancelled) setCheckingExistingSession(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     register,
@@ -134,11 +210,19 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
       }
 
       const target = safeCustomerFrom(searchParams.get("from"));
-      navigateWithSessionRefresh(target);
+      void completeReturn(target);
     } catch {
       toast.error("Unable to reach the login service. Please try again.");
     }
   };
+
+  if (checkingExistingSession) {
+    return (
+      <div className="flex min-h-[240px] w-full items-center justify-center px-[32px] py-[20px] font-source-sans text-[14px] text-(--color-auth-subtle-70)">
+        Signing you in…
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full items-center justify-center px-[32px] py-[20px]">

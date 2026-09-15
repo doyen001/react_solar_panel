@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isSafeReturnPath, safeReturnPath } from "@/lib/auth/return-path";
+import {
+  isSafeReturnPath,
+  isSafeExternalReturnUrl,
+  safeReturnPath,
+  safeReturnTarget,
+} from "@/lib/auth/return-path";
 
 const AUTH = "/customers/auth";
 const HOME = "/customers/dashboard";
@@ -50,5 +55,57 @@ describe("safeReturnPath", () => {
     expect(safeReturnPath(null, AUTH, HOME)).toBe(HOME);
     expect(safeReturnPath("//evil.com", AUTH, HOME)).toBe(HOME);
     expect(safeReturnPath(AUTH, AUTH, HOME)).toBe(HOME);
+  });
+});
+
+const ALLOWED = ["https://easylinkplus.com", "http://localhost:3002"];
+
+describe("isSafeExternalReturnUrl", () => {
+  it("accepts a full URL on an allowlisted origin", () => {
+    expect(
+      isSafeExternalReturnUrl("https://easylinkplus.com/services#pricing", ALLOWED),
+    ).toBe(true);
+    expect(
+      isSafeExternalReturnUrl("http://localhost:3002/services", ALLOWED),
+    ).toBe(true);
+  });
+
+  it("rejects an origin not on the allowlist", () => {
+    expect(isSafeExternalReturnUrl("https://evil.com", ALLOWED)).toBe(false);
+    // Same registrable domain, different origin — still rejected.
+    expect(
+      isSafeExternalReturnUrl("https://sub.easylinkplus.com", ALLOWED),
+    ).toBe(false);
+  });
+
+  it("rejects relative paths, missing values, and non-http(s) schemes", () => {
+    expect(isSafeExternalReturnUrl("/products", ALLOWED)).toBe(false);
+    expect(isSafeExternalReturnUrl(null, ALLOWED)).toBe(false);
+    expect(isSafeExternalReturnUrl("javascript:alert(1)", ALLOWED)).toBe(false);
+  });
+});
+
+describe("safeReturnTarget", () => {
+  it("prefers an in-app path", () => {
+    expect(safeReturnTarget("/products", AUTH, HOME, ALLOWED)).toBe(
+      "/products",
+    );
+  });
+
+  it("allows an allowlisted external target", () => {
+    expect(
+      safeReturnTarget(
+        "https://easylinkplus.com/services#pricing",
+        AUTH,
+        HOME,
+        ALLOWED,
+      ),
+    ).toBe("https://easylinkplus.com/services#pricing");
+  });
+
+  it("falls back to home for an unlisted external target", () => {
+    expect(safeReturnTarget("https://evil.com", AUTH, HOME, ALLOWED)).toBe(
+      HOME,
+    );
   });
 });
