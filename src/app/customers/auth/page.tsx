@@ -34,7 +34,6 @@ import {
   CUSTOMER_HOME_PATH,
   SSO_ALLOWED_ORIGINS,
 } from "@/lib/auth/portal-paths";
-import { fetchCustomerProfile } from "@/lib/customers/profile";
 import { DesignTopBar } from "../../../components/modules/DesignTopBar";
 
 type Mode = "signin" | "signup";
@@ -53,6 +52,28 @@ function safeCustomerFrom(from: string | null): string {
     CUSTOMER_HOME_PATH,
     SSO_ALLOWED_ORIGINS,
   );
+}
+
+/**
+ * True if this browser already has a valid customer session — checked as a
+ * plain, side-effect-free fetch. Deliberately NOT `fetchCustomerProfile`
+ * (which goes through `fetchWithCustomerSession`): a 401 here is the normal,
+ * expected case for most visitors landing on this page, and that helper
+ * treats a failed-refresh 401 as "log the user out and redirect to
+ * /customers/auth" — which, run from this page, computes that redirect
+ * without the `from` param (the auth page itself is excluded from
+ * `isSafeReturnPath`) and silently wipes it before the visitor ever gets to
+ * sign in.
+ */
+async function hasExistingCustomerSession(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/customers/profile", {
+      credentials: "include",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -113,9 +134,9 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
 
     let cancelled = false;
     setCheckingExistingSession(true);
-    void fetchCustomerProfile()
-      .then((profile) => {
-        if (cancelled || !profile) return;
+    void hasExistingCustomerSession()
+      .then((signedIn) => {
+        if (cancelled || !signedIn) return;
         void completeReturn(target);
       })
       .finally(() => {
