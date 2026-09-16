@@ -44,6 +44,13 @@ export const signUpSchema = z.object({
    * cannot block a signup.
    */
   referralCode: z.string().trim().min(4).max(32).optional(),
+  /**
+   * Return context the signup arrived with (the auth page's own `?from=`) —
+   * carried into the verification email so clicking it can eventually land
+   * the customer back where they started (e.g. easylinkplus.com's pricing
+   * page). Never a form field; rides along the same way `referralCode` does.
+   */
+  from: z.string().trim().max(2048).optional(),
 });
 
 export const forgotPasswordSchema = z.object({

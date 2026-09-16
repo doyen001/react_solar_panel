@@ -14,6 +14,14 @@ type VerifyState =
 export function VerifyEmailStatus() {
   const params = useSearchParams();
   const token = params.get("token");
+  // Carried from the signup form through the verification email (see
+  // buildVerificationEmail on the backend) — same return context the sign-in
+  // form honours, so completing verification can still finish an SSO handoff
+  // (e.g. back to easylinkplus.com) instead of stranding the customer here.
+  const from = params.get("from");
+  const signInHref = from
+    ? `/customers/auth?from=${encodeURIComponent(from)}`
+    : "/customers/auth";
   const handled = useRef<string | null>(null);
   const [state, setState] = useState<VerifyState>(
     token ? { kind: "loading" } : { kind: "error", message: "This link is missing a verification token." },
@@ -69,7 +77,7 @@ export function VerifyEmailStatus() {
             <h1 className="font-inter text-xl font-bold text-warm-ink">Email verified</h1>
             <p className="font-dm-sans text-sm text-warm-gray">{state.message}</p>
             <Link
-              href="/customers/auth"
+              href={signInHref}
               className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-linear-to-r from-yellow-lemon to-orange-amber px-6 font-inter text-sm font-bold text-warm-black"
             >
               Continue to sign in
@@ -83,7 +91,7 @@ export function VerifyEmailStatus() {
             <h1 className="font-inter text-xl font-bold text-warm-ink">Verification failed</h1>
             <p className="font-dm-sans text-sm text-warm-gray">{state.message}</p>
             <Link
-              href="/customers/auth"
+              href={signInHref}
               className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl border-2 border-warm-ink/20 px-6 font-inter text-sm font-bold text-warm-ink hover:bg-cream-50"
             >
               Back to sign in

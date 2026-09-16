@@ -345,6 +345,11 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   // credit. Never rendered as a field — it just rides along with the signup.
   const searchParams = useSearchParams();
   const referralCode = searchParams.get("ref")?.trim() || undefined;
+  // `?from=` is the same return context the sign-in form honours — carried
+  // into the verification email so clicking it can eventually complete an
+  // SSO handoff (e.g. back to easylinkplus.com) instead of stranding the new
+  // customer on a bare "email verified" page.
+  const from = searchParams.get("from")?.trim() || undefined;
 
   const {
     register,
@@ -372,9 +377,11 @@ function SignUpForm({ onSwitchMode }: { onSwitchMode: () => void }) {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(
-          referralCode ? { ...data, referralCode } : data,
-        ),
+        body: JSON.stringify({
+          ...data,
+          ...(referralCode ? { referralCode } : {}),
+          ...(from ? { from } : {}),
+        }),
       });
 
       const result = (await response.json().catch(() => null)) as {
