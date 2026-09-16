@@ -38,6 +38,7 @@ export function BusinessAssociatesSection() {
           <div className="relative z-10 grid min-h-[414px] max-w-7xl mx-auto items-center gap-10 py-7 md:grid-cols-[1.1fr_1.9fr]">
             <div>
               <p className="text-base text-cyan-300">Business Associates</p>
+              <h2 className="text-[24px] font-bold">BLUETTI Officaial Distributor</h2>
               <div className="mt-8 inline-flex items-centerpy-2 text-xl font-semibold tracking-[0.25em] text-slate-200">
                 <Image src={logoIcon} alt="Logo" width={260} height={62} />
               </div>
