@@ -14,6 +14,9 @@ import {
   setInstallerSessionCookies,
 } from "@/lib/auth/installer-cookies";
 import { isAccessTokenExpired } from "@/lib/auth/middleware-session";
+import { SSO_ALLOWED_ORIGINS } from "@/lib/auth/portal-paths";
+import { safeReturnTarget } from "@/lib/auth/return-path";
+import { requestBackendSsoCode } from "@/lib/customers/sso-issue-backend";
 
 const CUSTOMER_DASHBOARD = "/customers/dashboard";
 const CUSTOMER_LOGIN = "/customers/auth";
@@ -34,12 +37,55 @@ function installerLoginRedirect(request: NextRequest, fromPath: string) {
   return NextResponse.redirect(url);
 }
 
+/**
+ * Where an already-authenticated visitor to /customers/auth should land.
+ * Honours `?from=` the same way the sign-in form itself does (same allowlist,
+ * same SSO handoff to another Easylink site) — without this, an authenticated
+ * visitor never reaches page.tsx at all (this runs at the edge, before it),
+ * so `from` would otherwise be silently dropped in favour of the dashboard.
+ */
+async function resolveCustomerAuthDestination(
+  request: NextRequest,
+  accessToken: string,
+): Promise<URL> {
+  const from = request.nextUrl.searchParams.get("from");
+  const target = safeReturnTarget(
+    from,
+    CUSTOMER_LOGIN,
+    CUSTOMER_DASHBOARD,
+    SSO_ALLOWED_ORIGINS,
+  );
+
+  if (target.startsWith("/")) {
+    return new URL(target, request.url);
+  }
+
+  // External allowlisted target (e.g. easylinkplus.com) — trade the session
+  // for a one-time code rather than ever exposing the real tokens in a URL.
+  const backendBaseUrl = process.env.BACKEND_API_BASE_URL;
+  const code = backendBaseUrl
+    ? await requestBackendSsoCode(backendBaseUrl, accessToken)
+    : null;
+
+  if (!code) {
+    // No code, no safe way to prove identity to the other site — land the
+    // customer on the target anyway rather than stranding them here.
+    return new URL(target);
+  }
+
+  const url = new URL(target);
+  url.searchParams.set("code", code);
+  return url;
+}
+
 async function handleCustomerAuthPage(request: NextRequest): Promise<NextResponse> {
   const access = request.cookies.get(CUSTOMER_ACCESS_COOKIE)?.value;
   const refresh = request.cookies.get(CUSTOMER_REFRESH_COOKIE)?.value;
 
   if (access && !isAccessTokenExpired(access)) {
-    return NextResponse.redirect(new URL(CUSTOMER_DASHBOARD, request.url));
+    return NextResponse.redirect(
+      await resolveCustomerAuthDestination(request, access),
+    );
   }
 
   if (!refresh) {
@@ -49,7 +95,7 @@ async function handleCustomerAuthPage(request: NextRequest): Promise<NextRespons
   const outcome = await executeTokenRefresh(refresh);
   if (outcome.ok) {
     const redirect = NextResponse.redirect(
-      new URL(CUSTOMER_DASHBOARD, request.url),
+      await resolveCustomerAuthDestination(request, outcome.accessToken),
     );
     setCustomerSessionCookies(redirect, {
       accessToken: outcome.accessToken,

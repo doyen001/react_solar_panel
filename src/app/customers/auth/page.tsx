@@ -84,11 +84,7 @@ async function hasExistingCustomerSession(): Promise<boolean> {
  * exchanges it for its own short-lived access token server-side.
  */
 async function completeReturn(target: string) {
-  // TEMP DEBUG: remove once diagnosed.
-  console.log("[auth sso] completeReturn target=", target);
   if (target.startsWith("/")) {
-    // TEMP DEBUG: remove once diagnosed.
-    console.log("[auth sso] in-app navigate to", target);
     navigateWithSessionRefresh(target);
     return;
   }
@@ -100,18 +96,8 @@ async function completeReturn(target: string) {
     });
     const json = (await res.json().catch(() => null)) as {
       data?: { code?: string };
-      message?: string;
     } | null;
     const code = json?.data?.code;
-    // TEMP DEBUG: remove once diagnosed.
-    console.log(
-      "[auth sso] /api/customers/sso/issue status=",
-      res.status,
-      "code=",
-      Boolean(code),
-      "message=",
-      json?.message,
-    );
 
     if (!code) {
       // No code, no safe way to prove identity to the other site — land the
@@ -122,12 +108,8 @@ async function completeReturn(target: string) {
 
     const url = new URL(target);
     url.searchParams.set("code", code);
-    // TEMP DEBUG: remove once diagnosed.
-    console.log("[auth sso] navigating to", url.toString());
     window.location.href = url.toString();
-  } catch (err) {
-    // TEMP DEBUG: remove once diagnosed.
-    console.log("[auth sso] completeReturn error", err);
+  } catch {
     window.location.href = target;
   }
 }
@@ -146,31 +128,14 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
   // still shows the form as before.
   useEffect(() => {
     const from = searchParams.get("from");
-    // TEMP DEBUG: remove once diagnosed.
-    console.log("[auth sso] from=", from);
     if (!from || from.startsWith("/")) return;
     const target = safeCustomerFrom(from);
-    // TEMP DEBUG: remove once diagnosed.
-    console.log(
-      "[auth sso] target=",
-      target,
-      "allowedOrigins=",
-      SSO_ALLOWED_ORIGINS,
-    );
-    if (target.startsWith("/")) {
-      // TEMP DEBUG: remove once diagnosed.
-      console.log(
-        "[auth sso] target resolved to an in-app path — not an allowlisted external target, skipping auto-continue",
-      );
-      return;
-    }
+    if (target.startsWith("/")) return; // not an allowlisted external target
 
     let cancelled = false;
     setCheckingExistingSession(true);
     void hasExistingCustomerSession()
       .then((signedIn) => {
-        // TEMP DEBUG: remove once diagnosed.
-        console.log("[auth sso] hasExistingCustomerSession=", signedIn);
         if (cancelled || !signedIn) return;
         void completeReturn(target);
       })
