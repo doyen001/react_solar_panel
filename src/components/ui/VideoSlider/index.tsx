@@ -23,6 +23,7 @@ type VideoSliderProps = {
   overlayClassName?: string;
   dotsVariant?: "horizontal-bottom" | "vertical-right";
   navButtonClassName?: string;
+  needHeightFull?: boolean;
 };
 
 export function VideoSlider({
@@ -31,6 +32,7 @@ export function VideoSlider({
   overlayClassName,
   dotsVariant = "horizontal-bottom",
   navButtonClassName,
+  needHeightFull = false,
 }: VideoSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -100,7 +102,7 @@ export function VideoSlider({
         )}
       >
         {dotsVariant === "horizontal-bottom" ? (
-          <div className="flex flex-col gap-4">
+          <div className={classNames("flex flex-col gap-4", needHeightFull ? "h-full" : "")}>
             {children}
 
             <div className="flex items-center justify-center gap-2">

@@ -16,13 +16,14 @@ const heroSlides = ABOUT_US_PAGE.hero.slides.map((slide, index) => ({
 
 export function AboutUsHeroSection() {
   return (
-    <section className="relative h-[806px] w-full overflow-hidden pt-14">
+    <section className="relative h-fit lg:h-screen w-full overflow-hidden pt-14">
       <VideoSlider
         slides={heroSlides}
-        overlayClassName="!items-stretch !justify-between !pt-[120px] !pb-5"
+        overlayClassName="!items-stretch !justify-between !pb-5 !pt-8"
+        needHeightFull={true}
       >
         <div className="flex h-full flex-col justify-between">
-          <div className="flex max-w-[574px] flex-col gap-[51px] pb-20">
+          <div className="flex max-w-[574px] flex-col gap-[51px] pt-5 lg:pb-0 pb-5">
             <div className="flex flex-col gap-[17px]">
               <div className="flex flex-col gap-6">
                 <span className="inline-flex w-fit items-center rounded-full border border-about-hero-badge-border bg-about-hero-badge-bg px-[13px] py-[5px] font-inter text-sm font-medium leading-5 tracking-[-0.1504px] text-about-hero-badge-text">

@@ -2,7 +2,7 @@ import { ABOUT_US_PAGE } from "@/utils/constant";
 
 export function AboutUsMissionSection() {
   return (
-    <section className="relative min-h-[782px] w-full overflow-hidden py-16 lg:py-0 lg:min-h-[782px]">
+    <section className="relative w-full overflow-hidden py-16 lg:py-0 lg:h-screen h-full">
       <video
         className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
         autoPlay
@@ -14,7 +14,8 @@ export function AboutUsMissionSection() {
       >
         <source src={ABOUT_US_PAGE.mission.vidoSrc} type="video/mp4" />
       </video>
-      <div className="relative z-1 mx-auto flex w-full max-w-[1400px] px-8 flex-col items-center gap-10 py-10 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px] lg:pt-[398px]">
+      <div className="relative z-1 mx-auto w-full max-w-[1400px] px-8 h-full">
+      <div className="w-full h-full flex flex-col items-center gap-10 py-10 lg:flex-row lg:items-end lg:justify-between lg:gap-[120px]">
         {ABOUT_US_PAGE.mission.cards.map((card) => (
           <article
             key={card.title}
@@ -31,6 +32,8 @@ export function AboutUsMissionSection() {
           </article>
         ))}
       </div>
+      </div>
+      
     </section>
   );
 }

@@ -28,7 +28,7 @@ export function DesignsPropertyTypeCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full max-w-[407px] flex-col items-center gap-10 text-left transition ${selected ? "scale-[1.01]" : "hover:scale-[1.005]"} ${className ?? ""}`}
+      className={`flex w-full max-w-[407px] flex-col items-center gap-3 text-left transition ${selected ? "scale-[1.01]" : "hover:scale-[1.005]"} ${className ?? ""}`}
     >
       <div
         className={`relative w-full overflow-hidden rounded-2xl ${selected ? "ring-4 ring-design-accent-cyan/70" : ""}`}

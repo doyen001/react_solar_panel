@@ -23,7 +23,7 @@ export function AboutUsValuesSection() {
   ];
 
   return (
-    <section className="relative min-h-[879px] w-full overflow-hidden py-16 lg:py-[67px]">
+    <section className="relative h-fit log:h-screen w-full overflow-hidden py-16 lg:py-[67px]">
       <Image
         src={ABOUT_US_PAGE.values.backgroundImageSrc}
         alt={ABOUT_US_PAGE.values.backgroundImageAlt}
