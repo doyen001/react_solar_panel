@@ -8,8 +8,11 @@ import { AuthCard } from "@/components/ui/auth/AuthCard";
 
 type VerifyState =
   | { kind: "loading" }
-  | { kind: "success"; message: string }
+  | { kind: "success"; message: string; role?: string }
   | { kind: "error"; message: string };
+
+const CUSTOMER_AUTH_PATH = "/customers/auth";
+const INSTALLER_AUTH_PATH = "/installers/auth";
 
 export function VerifyEmailStatus() {
   const params = useSearchParams();
@@ -18,10 +21,8 @@ export function VerifyEmailStatus() {
   // buildVerificationEmail on the backend) — same return context the sign-in
   // form honours, so completing verification can still finish an SSO handoff
   // (e.g. back to easylinkplus.com) instead of stranding the customer here.
+  // Only meaningful for the customer flow — installers never carry one.
   const from = params.get("from");
-  const signInHref = from
-    ? `/customers/auth?from=${encodeURIComponent(from)}`
-    : "/customers/auth";
   const handled = useRef<string | null>(null);
   const [state, setState] = useState<VerifyState>(
     token ? { kind: "loading" } : { kind: "error", message: "This link is missing a verification token." },
@@ -35,7 +36,10 @@ export function VerifyEmailStatus() {
       const res = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`, {
         cache: "no-store",
       });
-      const json = (await res.json().catch(() => ({}))) as { message?: string };
+      const json = (await res.json().catch(() => ({}))) as {
+        message?: string;
+        role?: string;
+      };
       if (!res.ok) {
         setState({
           kind: "error",
@@ -43,7 +47,11 @@ export function VerifyEmailStatus() {
         });
         return;
       }
-      setState({ kind: "success", message: json.message || "Email verified successfully." });
+      setState({
+        kind: "success",
+        message: json.message || "Email verified successfully.",
+        role: json.role,
+      });
     } catch {
       setState({
         kind: "error",
@@ -55,6 +63,15 @@ export function VerifyEmailStatus() {
   useEffect(() => {
     onVerify();
   }, [token]);
+
+  // Only the customer portal is reachable via the ad-site SSO handoff, so
+  // `from` is dropped for an installer — it would only ever be stale/unused.
+  const isInstaller = state.kind === "success" && state.role === "INSTALLER";
+  const authPath = isInstaller ? INSTALLER_AUTH_PATH : CUSTOMER_AUTH_PATH;
+  const signInHref =
+    from && !isInstaller
+      ? `${authPath}?from=${encodeURIComponent(from)}`
+      : authPath;
 
   return (
     <AuthCard className="w-full max-w-[440px] p-[3px]">

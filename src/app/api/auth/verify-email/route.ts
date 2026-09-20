@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { buildBackendUrl, extractMessage } from "@/lib/customers/backend";
+import {
+  buildBackendUrl,
+  extractMessage,
+  unwrapApiData,
+} from "@/lib/customers/backend";
 
 /** Public — no session cookie involved, the token itself is the credential. */
 export async function GET(request: Request) {
@@ -47,8 +51,13 @@ export async function GET(request: Request) {
     );
   }
 
+  const data = unwrapApiData<{ role?: string }>(payload);
+
   return NextResponse.json(
-    { message: extractMessage(payload, "Email verified successfully.") },
+    {
+      message: extractMessage(payload, "Email verified successfully."),
+      role: data?.role,
+    },
     { status: 200 },
   );
 }
