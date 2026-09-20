@@ -23,6 +23,12 @@ export function VerifyEmailStatus() {
   // (e.g. back to easylinkplus.com) instead of stranding the customer here.
   // Only meaningful for the customer flow — installers never carry one.
   const from = params.get("from");
+  // Baked into the link itself (see buildVerificationEmail) rather than only
+  // read from the verify-email response — self-contained regardless of which
+  // half of the stack (frontend/backend) a later deploy has actually landed
+  // on. Older links sent before this existed have no `role` param, so the
+  // response is still read as a fallback for those.
+  const linkRole = params.get("role");
   const handled = useRef<string | null>(null);
   const [state, setState] = useState<VerifyState>(
     token ? { kind: "loading" } : { kind: "error", message: "This link is missing a verification token." },
@@ -64,9 +70,10 @@ export function VerifyEmailStatus() {
     onVerify();
   }, [token]);
 
+  const role = linkRole ?? (state.kind === "success" ? state.role : undefined);
   // Only the customer portal is reachable via the ad-site SSO handoff, so
   // `from` is dropped for an installer — it would only ever be stale/unused.
-  const isInstaller = state.kind === "success" && state.role === "INSTALLER";
+  const isInstaller = role === "INSTALLER";
   const authPath = isInstaller ? INSTALLER_AUTH_PATH : CUSTOMER_AUTH_PATH;
   const signInHref =
     from && !isInstaller
