@@ -253,7 +253,7 @@ function InstallerHomeDetail({
         </div>
       ) : null}
 
-      <InstallerHomeSolarDesignCard design={design} />
+      <InstallerHomeSolarDesignCard design={design} customer={customerForDisplay} />
 
       <InstallerHomeEquipmentSection
         design={design}

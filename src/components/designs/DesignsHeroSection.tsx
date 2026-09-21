@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   mergeProposalData,
+  resetProposalData,
   selectDesignProposal,
 } from "@/lib/store/designProposalSlice";
 import { loadBuilderCatalogue } from "@/lib/store/builderCatalogueSlice";
@@ -65,6 +66,28 @@ export function DesignsHeroSection({
   const customerUser = useAppSelector((s) => s.customerAuth.user);
   const searchParams = useSearchParams();
   const editingDesignId = searchParams.get("designId");
+  /**
+   * Set when an installer opens the Designer for a customer they've already
+   * registered (see InstallerHomeSolarDesignCard) — the contact-details step
+   * would just be re-asking for name/email/phone the installer already has
+   * on file, so it's skipped and pre-filled from these params instead.
+   */
+  const installerCustomerId = searchParams.get("customerId");
+
+  // The store is a live singleton for the whole tab, not reset on client-side
+  // navigation — so a customer's contact details entered on a previous visit
+  // to this page (e.g. an installer's prefill for a different customer, or a
+  // customer's own in-progress draft) would otherwise leak into a fresh visit
+  // that has no `designId`/`customerId` context of its own. Runs once, before
+  // the hydration/prefill effects below, so it never clobbers what they set.
+  const freshVisitResetRef = useRef(false);
+  useEffect(() => {
+    if (freshVisitResetRef.current) return;
+    freshVisitResetRef.current = true;
+    if (!editingDesignId && !installerCustomerId) {
+      dispatch(resetProposalData());
+    }
+  }, [dispatch, editingDesignId, installerCustomerId]);
 
   /**
    * Load the design being edited.
@@ -121,6 +144,34 @@ export function DesignsHeroSection({
       })
       .finally(() => setHydrating(false));
   }, [customerUser, dispatch, editingDesignId]);
+
+  // Pre-fills the contact details an installer already collected when
+  // registering this customer, so the (skipped) register step's data is
+  // correct even though its own form never renders. Runs once per visit —
+  // same reasoning as the editingDesignId hydration above.
+  const installerPrefillRef = useRef(false);
+  useEffect(() => {
+    if (installerPrefillRef.current || !installerCustomerId) return;
+    installerPrefillRef.current = true;
+
+    const firstName = searchParams.get("firstName") ?? "";
+    const lastName = searchParams.get("lastName") ?? "";
+    const name = `${firstName} ${lastName}`.trim();
+    const email = searchParams.get("email") ?? "";
+    const phone = searchParams.get("phone") ?? "";
+    const address = searchParams.get("address") ?? "";
+
+    dispatch(
+      mergeProposalData({
+        customer: {
+          ...(name ? { name } : {}),
+          ...(email ? { email } : {}),
+          ...(phone ? { phoneNumber: phone } : {}),
+          ...(address ? { address } : {}),
+        },
+      }),
+    );
+  }, [dispatch, installerCustomerId, searchParams]);
 
   const pinnedProductIds = useMemo(
     () =>
@@ -315,7 +366,9 @@ export function DesignsHeroSection({
 
     setActiveScreen((prev) => {
       if (prev === "start") return "second";
-      if (prev === "second") return "register";
+      // An installer already has this customer's contact details on file —
+      // skip straight past the step that would just re-collect them.
+      if (prev === "second") return installerCustomerId ? "address" : "register";
       if (prev === "register") return "address";
       if (prev === "address") return "solarPanel";
       if (prev === "solarPanel") return "energy";
@@ -325,7 +378,7 @@ export function DesignsHeroSection({
     });
     setFillPercent((prev) => {
       if (prev === 10) return 20;
-      if (prev === 20) return 30;
+      if (prev === 20) return installerCustomerId ? 40 : 30;
       if (prev === 30) return 40;
       if (prev === 40) return 50;
       if (prev === 50) return 70;
@@ -347,7 +400,9 @@ export function DesignsHeroSection({
               : prev === "solarPanel"
                 ? "address"
                 : prev === "address"
-                  ? "register"
+                  ? installerCustomerId
+                    ? "second"
+                    : "register"
                   : prev === "register"
                     ? "second"
                     : prev === "second"
