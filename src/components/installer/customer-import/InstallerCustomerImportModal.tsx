@@ -704,10 +704,16 @@ function PreviewTable({ rows }: { rows: PreviewRow[] }) {
               className="border-t border-warm-border/60"
             >
               <td className="px-2 py-1.5 text-warm-gray">{row.rowNumber}</td>
-              <td className="max-w-[140px] truncate px-2 py-1.5 text-warm-ink">
+              <td
+                className="max-w-[140px] truncate px-2 py-1.5 text-warm-ink"
+                data-clarity-mask="true"
+              >
                 {row.email}
               </td>
-              <td className="max-w-[120px] truncate px-2 py-1.5 text-warm-ink">
+              <td
+                className="max-w-[120px] truncate px-2 py-1.5 text-warm-ink"
+                data-clarity-mask="true"
+              >
                 {row.firstName !== "—"
                   ? `${row.firstName} ${row.lastName}`
                   : "—"}

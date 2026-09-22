@@ -42,11 +42,11 @@ export function MasterInstallerCustomersPanel({
         <div className="master-ins-expand-contacts">
           <span className="master-ins-expand-contact">
             <Icon name="Phone" className="master-ins-expand-contact-icon size-3" />
-            <span>{detail.phone}</span>
+            <span data-clarity-mask="true">{detail.phone}</span>
           </span>
           <span className="master-ins-expand-contact">
             <Icon name="Mail" className="master-ins-expand-contact-icon size-3" />
-            <span>{detail.email}</span>
+            <span data-clarity-mask="true">{detail.email}</span>
           </span>
           <a
             href={detail.websiteHref}
@@ -93,17 +93,25 @@ export function MasterInstallerCustomersPanel({
             <span className="master-ins-customer-avatar" aria-hidden>
               {c.initials}
             </span>
-            <span className="master-ins-customer-name">{c.name}</span>
+            <span className="master-ins-customer-name" data-clarity-mask="true">
+              {c.name}
+            </span>
             <span className="master-ins-customer-contact">
-              <span className="master-ins-customer-email">{c.email}</span>
-              <span className="master-ins-customer-phone">{c.phone}</span>
+              <span className="master-ins-customer-email" data-clarity-mask="true">
+                {c.email}
+              </span>
+              <span className="master-ins-customer-phone" data-clarity-mask="true">
+                {c.phone}
+              </span>
             </span>
             <span className="master-ins-customer-system">{c.systemSize}</span>
             <span className="master-ins-customer-stage-cell">
               <span className={stageClass(c.stage)}>{c.stage}</span>
             </span>
             <span className="master-ins-customer-price">{c.price}</span>
-            <span className="master-ins-customer-address">{c.address}</span>
+            <span className="master-ins-customer-address" data-clarity-mask="true">
+              {c.address}
+            </span>
             <span className="master-ins-customer-date">{c.date}</span>
           </div>
         ))}

@@ -8,6 +8,7 @@ import {
   Source_Sans_3,
 } from "next/font/google";
 import { EasylinkAiChatbot } from "@/components/ai-chat/EasylinkAiChatbot";
+import { ClarityAnalytics } from "@/components/analytics/ClarityAnalytics";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { TopProgressBar } from "@/components/providers/TopProgressBar";
@@ -70,6 +71,7 @@ export default function RootLayout({
           <EasylinkAiChatbot />
           <ToastProvider />
         </ReduxProvider>
+        <ClarityAnalytics />
       </body>
     </html>
   );

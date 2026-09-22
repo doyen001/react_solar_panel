@@ -184,6 +184,7 @@ export function InstallerRegisterCustomerModal({
                 required
                 disabled={submitting}
                 autoComplete="given-name"
+                data-clarity-mask="true"
                 className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
                 placeholder="First name"
               />
@@ -200,6 +201,7 @@ export function InstallerRegisterCustomerModal({
                 required
                 disabled={submitting}
                 autoComplete="family-name"
+                data-clarity-mask="true"
                 className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
                 placeholder="Last name"
               />
@@ -217,6 +219,7 @@ export function InstallerRegisterCustomerModal({
               required
               disabled={submitting}
               autoComplete="email"
+              data-clarity-mask="true"
               className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
               placeholder="customer@example.com"
             />
@@ -232,6 +235,7 @@ export function InstallerRegisterCustomerModal({
               onChange={(e) => updateField("phone", e.target.value)}
               disabled={submitting}
               autoComplete="tel"
+              data-clarity-mask="true"
               className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
               placeholder="Phone number"
             />
@@ -247,6 +251,7 @@ export function InstallerRegisterCustomerModal({
               onChange={(e) => updateField("address", e.target.value)}
               disabled={submitting}
               autoComplete="street-address"
+              data-clarity-mask="true"
               className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
               placeholder="Installation address"
             />

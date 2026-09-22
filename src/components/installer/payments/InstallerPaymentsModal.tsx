@@ -254,11 +254,19 @@ export function InstallerPaymentsModal({ open, onClose, customer }: Props) {
             <p className="font-dm-sans text-[10px] font-semibold uppercase tracking-wide text-warm-gray">
               Customer
             </p>
-            <p className="mt-1 font-dm-sans text-sm font-semibold text-warm-ink">
+            <p
+              className="mt-1 font-dm-sans text-sm font-semibold text-warm-ink"
+              data-clarity-mask="true"
+            >
               {customerName || "No customer selected"}
             </p>
             {customerEmail ? (
-              <p className="font-dm-sans text-xs text-warm-gray">{customerEmail}</p>
+              <p
+                className="font-dm-sans text-xs text-warm-gray"
+                data-clarity-mask="true"
+              >
+                {customerEmail}
+              </p>
             ) : null}
           </div>
 

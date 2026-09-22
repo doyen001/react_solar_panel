@@ -55,11 +55,14 @@ function ProfileDetailField({
   label,
   value,
   className,
+  mask,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   className?: string;
+  /** Set for fields carrying customer PII (phone/email) — hides the value from Clarity session recordings. */
+  mask?: boolean;
 }) {
   return (
     <div
@@ -75,7 +78,10 @@ function ProfileDetailField({
         <p className="font-dm-sans text-[11.042px] font-normal uppercase leading-[16.56px] tracking-[0.552px] text-warm-black/60">
           {label}
         </p>
-        <p className="font-dm-sans text-[13.25px] font-semibold leading-[19.875px] text-warm-black">
+        <p
+          className="font-dm-sans text-[13.25px] font-semibold leading-[19.875px] text-warm-black"
+          {...(mask ? { "data-clarity-mask": "true" } : {})}
+        >
           {value}
         </p>
       </div>
@@ -301,6 +307,7 @@ function ProfileEditModal({
               onChange={(e) => setName(e.target.value)}
               required
               disabled={saving}
+              data-clarity-mask="true"
               className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
               placeholder="Full name"
             />
@@ -316,6 +323,7 @@ function ProfileEditModal({
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 disabled={saving}
+                data-clarity-mask="true"
                 className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
                 placeholder="Phone number"
               />
@@ -331,6 +339,7 @@ function ProfileEditModal({
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={saving}
+                data-clarity-mask="true"
                 className="w-full rounded-lg border border-warm-border bg-cream-50 px-3 py-2 font-dm-sans text-sm text-warm-ink outline-none focus:border-brand-blue"
                 placeholder="Email address"
               />
@@ -570,7 +579,10 @@ export function InstallerHomeCustomerProfileStrip({
               />
             </div>
             <div className="min-w-0 pt-[2px]">
-              <h2 className="font-inter text-[19.875px] font-bold leading-[29.81px] text-warm-black">
+              <h2
+                className="font-inter text-[19.875px] font-bold leading-[29.81px] text-warm-black"
+                data-clarity-mask="true"
+              >
                 {profile.name}
               </h2>
               <p className="font-dm-sans text-[13.25px] font-medium leading-[19.875px] text-warm-black/70">
@@ -584,12 +596,14 @@ export function InstallerHomeCustomerProfileStrip({
               icon={<Icon name="Phone" className="text-warm-black" />}
               label="Phone"
               value={profile.phone}
+              mask
             />
             <ProfileDetailField
               icon={<Icon name="Mail" className="text-warm-black" />}
               label="Email"
               value={profile.email}
               className="min-w-0 max-w-[min(100%,280px)]"
+              mask
             />
             <ProfileDetailField
               icon={<IconBuilding className="text-warm-black" />}

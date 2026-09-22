@@ -58,13 +58,25 @@ const CATEGORY_DETAIL_LABEL: Record<EquipmentCategoryKey, string> = {
   heatPump: "Heat Pump",
 };
 
-function ProposalDetailRow({ label, value }: { label: string; value: string }) {
+function ProposalDetailRow({
+  label,
+  value,
+  mask,
+}: {
+  label: string;
+  value: string;
+  /** Set for rows carrying customer PII (name/address) — hides the value from Clarity session recordings. */
+  mask?: boolean;
+}) {
   return (
     <div className="flex w-full max-w-[478.263px] items-center justify-between gap-4 text-[14.412px] leading-[21.618px]">
       <span className="shrink-0 font-inter font-normal text-black/60">
         {label}
       </span>
-      <span className="min-w-0 text-right font-source-sans font-normal text-black">
+      <span
+        className="min-w-0 text-right font-source-sans font-normal text-black"
+        {...(mask ? { "data-clarity-mask": "true" } : {})}
+      >
         {value}
       </span>
     </div>
@@ -223,10 +235,12 @@ export function DesignsProposalStepContent({
                   <ProposalDetailRow
                     label="Customer"
                     value={displayCustomerName}
+                    mask
                   />
                   <ProposalDetailRow
                     label="Address"
                     value={proposal.customer.address}
+                    mask
                   />
                   <ProposalDetailRow
                     label="Property"

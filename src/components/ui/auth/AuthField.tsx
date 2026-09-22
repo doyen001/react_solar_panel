@@ -37,6 +37,7 @@ export const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(
             placeholder={placeholder}
             aria-invalid={hasError}
             aria-describedby={hasError ? `${id}-error` : undefined}
+            data-clarity-mask="true"
             className={`h-full w-full bg-transparent font-source-sans text-[14px] tracking-[-0.1504px] text-auth-title placeholder:text-auth-placeholder outline-none ${inputClassName ?? ""}`}
             {...rest}
           />

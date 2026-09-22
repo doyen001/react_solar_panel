@@ -118,6 +118,7 @@ export function CustomerEditProfileModal({
               onChange={(e) => setName(e.target.value)}
               required
               disabled={saving}
+              data-clarity-mask="true"
               className={inputClassName}
               placeholder="Your name"
             />
@@ -130,6 +131,7 @@ export function CustomerEditProfileModal({
               value={initial.email}
               readOnly
               disabled
+              data-clarity-mask="true"
               className={`${inputClassName} read-only:cursor-default read-only:opacity-70`}
               aria-describedby={`${titleId}-email-note`}
             />
@@ -148,6 +150,7 @@ export function CustomerEditProfileModal({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               disabled={saving}
+              data-clarity-mask="true"
               className={inputClassName}
               placeholder="Phone number"
             />
@@ -160,6 +163,7 @@ export function CustomerEditProfileModal({
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               disabled={saving}
+              data-clarity-mask="true"
               className={inputClassName}
               placeholder="Street address"
             />

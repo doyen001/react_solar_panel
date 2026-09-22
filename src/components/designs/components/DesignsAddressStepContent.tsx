@@ -101,6 +101,7 @@ export const DesignsRegisterStepContent = forwardRef<
                       aria-describedby={
                         emailLocked ? "designs-email-locked" : undefined
                       }
+                      data-clarity-mask="true"
                       onChange={(event) =>
                         field.id === "name"
                           ? setName(event.target.value)
@@ -138,6 +139,7 @@ export const DesignsRegisterStepContent = forwardRef<
                   buttonClass="designs-phone-button"
                   dropdownClass="designs-phone-dropdown"
                   specialLabel=""
+                  inputProps={{ "data-clarity-mask": "true" }}
                 />
               </label>
             </form>

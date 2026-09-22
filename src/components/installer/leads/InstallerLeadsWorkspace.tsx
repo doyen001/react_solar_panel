@@ -495,16 +495,25 @@ export function InstallerLeadsWorkspace() {
           ) : detail ? (
             <div className="flex flex-col gap-4">
               <div>
-                <h3 className="font-inter text-lg font-bold text-warm-ink">
+                <h3
+                  className="font-inter text-lg font-bold text-warm-ink"
+                  data-clarity-mask="true"
+                >
                   {detail.customerName}
                 </h3>
                 {detail.customerEmail ? (
-                  <p className="mt-1 font-dm-sans text-sm text-warm-gray">
+                  <p
+                    className="mt-1 font-dm-sans text-sm text-warm-gray"
+                    data-clarity-mask="true"
+                  >
                     {detail.customerEmail}
                   </p>
                 ) : null}
                 {detail.address ? (
-                  <p className="mt-1 font-dm-sans text-sm text-warm-ink">
+                  <p
+                    className="mt-1 font-dm-sans text-sm text-warm-ink"
+                    data-clarity-mask="true"
+                  >
                     {detail.address}
                   </p>
                 ) : null}

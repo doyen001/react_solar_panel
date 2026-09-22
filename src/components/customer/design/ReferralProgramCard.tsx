@@ -161,6 +161,7 @@ export function ReferralProgramCard({
               onChange={(event) => setEmail(event.target.value)}
               placeholder="friend@example.com"
               disabled={submitting}
+              data-clarity-mask="true"
               className="h-[34px] rounded-lg border border-warm-border bg-cream-50 px-3 font-dm-sans text-[11px] text-warm-ink outline-none focus:border-brand-blue"
             />
             <input
@@ -170,6 +171,7 @@ export function ReferralProgramCard({
               placeholder="Their name (optional)"
               maxLength={120}
               disabled={submitting}
+              data-clarity-mask="true"
               className="h-[34px] rounded-lg border border-warm-border bg-cream-50 px-3 font-dm-sans text-[11px] text-warm-ink outline-none focus:border-brand-blue"
             />
             <div className="flex gap-2">

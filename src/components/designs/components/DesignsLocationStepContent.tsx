@@ -371,6 +371,7 @@ export const DesignsLocationStepContent = forwardRef<
                       }}
                       placeholder={DESIGNS_LOCATION_STEP.inputPlaceholder}
                       autoComplete="off"
+                      data-clarity-mask="true"
                       className="h-full flex-1 border-0 bg-transparent font-inter text-[12px] font-medium tracking-[-0.1668px] text-[#191919] outline-none placeholder:text-[#878787]"
                     />
                   ) : (

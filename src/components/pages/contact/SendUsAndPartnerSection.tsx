@@ -118,6 +118,7 @@ export function SendUsAndPartnerSection() {
                     onChange={updateField("firstName")}
                     disabled={submitting}
                     required
+                    data-clarity-mask="true"
                   />
                 </label>
                 <label className="grid gap-2">
@@ -131,6 +132,7 @@ export function SendUsAndPartnerSection() {
                     onChange={updateField("lastName")}
                     disabled={submitting}
                     required
+                    data-clarity-mask="true"
                   />
                 </label>
                 <label className="grid gap-2">
@@ -144,6 +146,7 @@ export function SendUsAndPartnerSection() {
                     value={form.mobile}
                     onChange={updateField("mobile")}
                     disabled={submitting}
+                    data-clarity-mask="true"
                   />
                 </label>
                 <label className="grid gap-2">
@@ -158,6 +161,7 @@ export function SendUsAndPartnerSection() {
                     onChange={updateField("email")}
                     disabled={submitting}
                     required
+                    data-clarity-mask="true"
                   />
                 </label>
                 <label className="grid gap-2 sm:col-span-2">
@@ -170,6 +174,7 @@ export function SendUsAndPartnerSection() {
                     value={form.address}
                     onChange={updateField("address")}
                     disabled={submitting}
+                    data-clarity-mask="true"
                   />
                 </label>
                 <label className="grid gap-2 sm:col-span-2">
@@ -183,6 +188,7 @@ export function SendUsAndPartnerSection() {
                     onChange={updateField("message")}
                     disabled={submitting}
                     required
+                    data-clarity-mask="true"
                   />
                 </label>
                 <div className="pt-2 sm:col-span-2">

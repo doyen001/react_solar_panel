@@ -147,6 +147,7 @@ function PipelineEquipmentStrip() {
               <p
                 className="text-[9px] font-bold leading-[13.5px] text-warm-ink"
                 style={{ fontVariationSettings: "'opsz' 14" }}
+                data-clarity-mask="true"
               >
                 {p.name}
               </p>
@@ -154,12 +155,14 @@ function PipelineEquipmentStrip() {
             <p
               className="mt-[8px] text-[8px] leading-3 text-warm-gray"
               style={{ fontVariationSettings: "'opsz' 9" }}
+              data-clarity-mask="true"
             >
               {p.phone}
             </p>
             <p
               className="mt-0 text-[8px] leading-3 text-warm-gray"
               style={{ fontVariationSettings: "'opsz' 9" }}
+              data-clarity-mask="true"
             >
               {p.email}
             </p>
