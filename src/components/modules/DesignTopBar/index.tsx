@@ -11,7 +11,18 @@ const LANGUAGES: { value: Lang; label: string; flag: string }[] = [
   { value: "en-au", label: "Australia", flag: "/images/home/au-flag.png" },
 ];
 
-export function DesignTopBar() {
+export type DesignTopBarCenter = {
+  title: string;
+  subtitle: string;
+};
+
+type DesignTopBarProps = {
+  /** Step counter + title/subtitle shown between the logo and controls — kept
+   * outside the scrollable step content so it never needs scrolling to see. */
+  center?: DesignTopBarCenter;
+};
+
+export function DesignTopBar({ center }: DesignTopBarProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const [language, setLanguage] = useState<Lang>("en-uk");
@@ -36,16 +47,30 @@ export function DesignTopBar() {
   const isDesignPage = pathname === "/customers/design";
 
   return (
-    <div className="pt-[26px] flex w-[min(1284px,calc(100%-148px))] items-start justify-between mx-auto">
-      <Image
-        src={isDesignPage ? "/images/home/solar-design-logo.png" : "/images/home/solar-maintenance-logo.png"}
-        alt="EasyLink Solar"
-        width={ isDesignPage ? 66 : 80}
-        height={ isDesignPage ? 66 : 80}
-        className="opacity-90 cursor-pointer"
-        onClick={() => router.push("/")}
-      />
-      <div className="flex h-[40px] items-center gap-[16px] z-20">
+    <div
+      className={`flex w-[min(1284px,calc(100%-148px))] mx-auto ${
+        center ? "items-center justify-between gap-4" : "items-start justify-between"
+      }`}
+    >
+      <div className={center ? "flex shrink-0 items-center gap-3" : "contents"}>
+        <Image
+          src={isDesignPage ? "/images/home/solar-design-logo.png" : "/images/home/solar-maintenance-logo.png"}
+          alt="EasyLink Solar"
+          width={isDesignPage ? 66 : 80}
+          height={isDesignPage ? 66 : 80}
+          className="opacity-90 cursor-pointer"
+          onClick={() => router.push("/")}
+        />
+      </div>
+
+      {center ? (
+        <p className="min-w-0 flex-1 text-center font-source-sans text-[16px] leading-[22px] text-white relative">
+          <span className="font-bold text-white">{center.title}</span>
+          <span className="text-white/60"> — {center.subtitle}</span>
+        </p>
+      ) : null}
+
+      <div className="flex h-[40px] shrink-0 items-center gap-[16px] z-20">
         <button
           type="button"
           aria-label="Help"

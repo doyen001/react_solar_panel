@@ -97,6 +97,9 @@ export type DesignProposalEquipment = {
   batteryProductId?: string;
   /** Every product added per category, including multiples. */
   items: EquipmentItemsByCategory;
+  /** Proposal-step panel tier / battery capacity picks — see lib/designs/proposalOptions.ts. */
+  panelTierId?: string;
+  batteryCapacityId?: string;
 };
 
 /**
@@ -156,6 +159,12 @@ export type DesignProposalPricing = {
   currentBill: string;
   newBill: string;
   billPeriod: DesignBillPeriod;
+  /**
+   * `totalSystemPrice` before the proposal step's panel tier / battery
+   * add-ons. Captured the first time the proposal step loads so those
+   * selectors can adjust the total without compounding on re-selection.
+   */
+  equipmentBasePrice?: string;
 };
 
 export type DesignProposalState = {

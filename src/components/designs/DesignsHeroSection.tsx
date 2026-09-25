@@ -417,7 +417,16 @@ export function DesignsHeroSection({
   return (
     <section className="relative flex h-screen flex-col overflow-hidden">
       <DesignsHeroBackground />
-      <DesignTopBar />
+      <DesignTopBar
+        center={
+          activeScreen === "proposal"
+            ? {
+                title: "Your solar proposal",
+                subtitle: "Here's your personalized system design and pricing.",
+              }
+            : undefined
+        }
+      />
 
       {/*
         Two modes: anonymous visitors from the landing page create a new design,
