@@ -9,8 +9,27 @@ import {
   selectDesignProposal,
 } from "@/lib/store/designProposalSlice";
 
-const USAGE_WITHOUT_SOLAR = [58, 53, 47, 52, 52, 59, 61, 60, 47, 47, 47, 48];
-const USAGE_WITH_SOLAR = [39, 37, 34, 29, 24, 20, 17, 19, 29, 34, 37, 41];
+/** Retail rate the bill is converted to kWh with — also shown under the slider. */
+const GRID_RATE_PER_KWH = 0.36975;
+
+/** Sydney AC yield per kW installed, year 1. */
+const SOLAR_YIELD_KWH_PER_KW_YEAR = 1400;
+
+/** Fallback panel wattage when the system size can't be read (Standard tier). */
+const DEFAULT_PANEL_WATTS = 440;
+
+/**
+ * Relative monthly weights, normalized at use. Consumption peaks in the
+ * Sydney winter (heating) and again in high summer (cooling); generation is
+ * the opposite, peaking Dec-Jan and bottoming out in June.
+ */
+const CONSUMPTION_SEASONALITY = [
+  58, 53, 47, 52, 52, 59, 61, 60, 47, 47, 47, 48,
+];
+const GENERATION_SEASONALITY = [
+  128, 115, 105, 90, 74, 66, 71, 83, 97, 112, 122, 130,
+];
+
 const MONTH_LABELS = [
   "J",
   "F",
@@ -59,7 +78,66 @@ function EnergyLegendItem({
   );
 }
 
-function EnergyBreakdownChart() {
+type UsageMonth = {
+  /** kWh the home uses that month. */
+  consumption: number;
+  /** kWh of that consumption covered by the solar array. */
+  fromSolar: number;
+  /** Remainder still bought from the grid. */
+  fromGrid: number;
+};
+
+function spread(total: number, weights: number[]): number[] {
+  const sum = weights.reduce((acc, w) => acc + w, 0);
+  return weights.map((w) => (total * w) / sum);
+}
+
+/**
+ * Turns the two things the customer has actually told us — what they pay, and
+ * how big a system fits on their roof — into a 12-month usage split.
+ *
+ * Self-consumption is capped at that month's consumption: surplus generation
+ * is exported, not "used", so it must not inflate the solar bar.
+ */
+function buildUsageBreakdown(
+  monthlyBill: number,
+  systemKw: number,
+): UsageMonth[] {
+  const annualConsumption = (monthlyBill * 12) / GRID_RATE_PER_KWH;
+  const annualGeneration = systemKw * SOLAR_YIELD_KWH_PER_KW_YEAR;
+
+  const consumptionByMonth = spread(annualConsumption, CONSUMPTION_SEASONALITY);
+  const generationByMonth = spread(annualGeneration, GENERATION_SEASONALITY);
+
+  return consumptionByMonth.map((consumption, index) => {
+    const fromSolar = Math.min(generationByMonth[index], consumption);
+    return {
+      consumption,
+      fromSolar,
+      fromGrid: Math.max(0, consumption - fromSolar),
+    };
+  });
+}
+
+/** "7.2 kW" → 7.2, else panel count × default wattage, else 0. */
+function resolveSystemKw(systemSize: string, totalPanels: string): number {
+  const sized = systemSize.match(/([\d.]+)\s*kW/i);
+  if (sized) {
+    const kw = Number.parseFloat(sized[1]);
+    if (Number.isFinite(kw) && kw > 0) return kw;
+  }
+
+  const panels = Number.parseInt(totalPanels.replace(/\D/g, ""), 10);
+  if (Number.isFinite(panels) && panels > 0) {
+    return (panels * DEFAULT_PANEL_WATTS) / 1000;
+  }
+  return 0;
+}
+
+function EnergyBreakdownChart({ months }: { months: UsageMonth[] }) {
+  // Bars are scaled against the busiest month so their heights compare.
+  const peak = Math.max(...months.map((m) => m.consumption), 1);
+
   return (
     <div className="w-full rounded-[19.219px] border border-[#F3F4F6] bg-white px-[18px] pb-[20px] pt-[24px] shadow-[0px_1.201px_3.604px_0px_rgba(0,0,0,0.1),0px_1.201px_2.402px_0px_rgba(0,0,0,0.1)] sm:px-[28px] sm:pt-[28px]">
       <h3 className="font-source-sans text-[21.621px] font-bold tracking-[-0.5279px] text-[#101828]">
@@ -68,20 +146,26 @@ function EnergyBreakdownChart() {
 
       <div className="mt-[18px]">
         <div className="relative flex h-[140px] items-end gap-[10px] border-b border-dashed border-[#D9D9D9] px-[8px] pb-[6px]">
-          {USAGE_WITHOUT_SOLAR.map((withoutSolar, index) => {
-            const withSolar = USAGE_WITH_SOLAR[index];
+          {months.map((month, index) => {
+            const barHeight = (month.consumption / peak) * 100;
+            const solarShare =
+              month.consumption > 0
+                ? (month.fromSolar / month.consumption) * 100
+                : 0;
 
             return (
               <div
                 key={index}
                 className="flex flex-1 flex-col items-center justify-end gap-[10px]"
               >
-                <div className="flex h-[122px] w-full max-w-[26px] flex-col justify-end overflow-hidden rounded-t-[4px] bg-[#E3E6EC] sm:max-w-[28px]">
+                <div
+                  className="flex w-full max-w-[26px] flex-col justify-end overflow-hidden rounded-t-[4px] bg-[#E3E6EC] sm:max-w-[28px]"
+                  style={{ height: `${Math.max(barHeight, 2)}%` }}
+                  title={`${MONTH_LABELS[index]}: ${Math.round(month.consumption)} kWh — ${Math.round(month.fromSolar)} from solar, ${Math.round(month.fromGrid)} from grid`}
+                >
                   <div
                     className="w-full bg-[#FDE047]"
-                    style={{
-                      height: `${Math.min(withSolar, withoutSolar)}%`,
-                    }}
+                    style={{ height: `${solarShare}%` }}
                   />
                 </div>
                 <span className="font-inter text-[14.412px] font-normal leading-none text-[#666]">
@@ -120,9 +204,17 @@ export type DesignsEnergyStepValue = {
   billPeriod: DesignBillPeriod;
 };
 
-/** Monthly bill slider range ($/mo). Midpoint (50%) = $500 — matches former static default. */
+/**
+ * Monthly bill slider range ($/mo). The top end is what the period selector
+ * multiplies up to the advertised caps: $10k/month, $30k/quarter, $120k/year.
+ * The slider works in dollars (not a 0-100 percent) so a notch is $1 rather
+ * than ~$99 across this range.
+ */
 const BILL_MONTHLY_MIN = 100;
-const BILL_MONTHLY_MAX = 900;
+const BILL_MONTHLY_MAX = 10000;
+
+/** Used only when a design has no saved bill yet. */
+const BILL_MONTHLY_DEFAULT = 500;
 
 /** Relative to baseline ($500 → $368 new bill, $132 savings / mo from design defaults). */
 const NEW_BILL_RATIO = 368 / 500;
@@ -158,23 +250,8 @@ function formatAud(n: number): string {
   return `$${Math.round(n).toLocaleString("en-AU")}`;
 }
 
-function monthlyBillFromSliderPercent(percent: number): number {
-  const t = Math.min(100, Math.max(0, percent));
-  return Math.round(
-    BILL_MONTHLY_MIN +
-      (BILL_MONTHLY_MAX - BILL_MONTHLY_MIN) * (t / 100),
-  );
-}
-
-function sliderPercentFromMonthlyBill(monthly: number): number {
-  const clamped = Math.min(
-    BILL_MONTHLY_MAX,
-    Math.max(BILL_MONTHLY_MIN, monthly),
-  );
-  return Math.round(
-    ((clamped - BILL_MONTHLY_MIN) / (BILL_MONTHLY_MAX - BILL_MONTHLY_MIN)) *
-      100,
-  );
+function clampMonthlyBill(monthly: number): number {
+  return Math.min(BILL_MONTHLY_MAX, Math.max(BILL_MONTHLY_MIN, monthly));
 }
 
 function deriveEnergyValues(
@@ -206,18 +283,16 @@ export type DesignsEnergyStepHandle = {
 };
 
 function EnergyBillInput({
-  billRatePercent,
-  onBillRatePercentChange,
   billPeriod,
   onBillPeriodChange,
   currentMonthlyAmount,
+  onMonthlyAmountChange,
 }: {
-  billRatePercent: number;
-  onBillRatePercentChange: (percent: number) => void;
   billPeriod: DesignBillPeriod;
   onBillPeriodChange: (period: DesignBillPeriod) => void;
   /** Slider basis: normalized monthly AUD (Redux `currentBill` / projections use this). */
   currentMonthlyAmount: number;
+  onMonthlyAmountChange: (monthly: number) => void;
 }) {
   const displayAmount = Math.round(
     currentMonthlyAmount * periodMultiplier(billPeriod),
@@ -230,17 +305,13 @@ function EnergyBillInput({
   const commitPeriodAmount = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
     if (!digits) {
-      onBillRatePercentChange(sliderPercentFromMonthlyBill(BILL_MONTHLY_MIN));
+      onMonthlyAmountChange(BILL_MONTHLY_MIN);
       return;
     }
 
     const periodAmount = Number.parseInt(digits, 10);
     const monthly = Math.round(periodAmount / periodMultiplier(billPeriod));
-    const clampedMonthly = Math.min(
-      BILL_MONTHLY_MAX,
-      Math.max(BILL_MONTHLY_MIN, monthly),
-    );
-    onBillRatePercentChange(sliderPercentFromMonthlyBill(clampedMonthly));
+    onMonthlyAmountChange(clampMonthlyBill(monthly));
   };
 
   return (
@@ -291,19 +362,19 @@ function EnergyBillInput({
 
       <div className="mt-[16px] flex flex-col items-end gap-[12px]">
         <SingleScrollBar
-          value={billRatePercent}
-          onChange={(percent) => {
+          value={currentMonthlyAmount}
+          onChange={(monthly) => {
             setDraftAmount(null);
-            onBillRatePercentChange(percent);
+            onMonthlyAmountChange(clampMonthlyBill(monthly));
           }}
-          min={0}
-          max={100}
+          min={BILL_MONTHLY_MIN}
+          max={BILL_MONTHLY_MAX}
           ariaLabel="Energy bill rate"
         />
 
         <div className="inline-flex h-[30px] items-center gap-[8px] rounded-full border border-white px-[13px] py-px">
           <span className="font-source-sans text-[14px] font-normal tracking-[-0.1504px] text-white">
-            0.3697$ per kWh
+            {GRID_RATE_PER_KWH}$ per kWh
           </span>
           <span className="text-[12px] text-white">✎</span>
         </div>
@@ -318,20 +389,26 @@ export const DesignsEnergyStepContent = forwardRef<
 >(function DesignsEnergyStepContent(_, ref) {
   const proposal = useAppSelector(selectDesignProposal);
 
-  const [billRatePercent, setBillRatePercent] = useState(() => {
-    const saved = parseMoneyToNumber(proposal.pricing.currentBill);
-    const monthly =
-      saved ?? monthlyBillFromSliderPercent(50);
-    return sliderPercentFromMonthlyBill(monthly);
-  });
+  const [currentMonthly, setCurrentMonthly] = useState(() =>
+    clampMonthlyBill(
+      parseMoneyToNumber(proposal.pricing.currentBill) ?? BILL_MONTHLY_DEFAULT,
+    ),
+  );
 
   const [billPeriod, setBillPeriod] = useState<DesignBillPeriod>(() =>
     parseBillPeriod(proposal.pricing.billPeriod),
   );
 
-  const currentMonthly = useMemo(
-    () => monthlyBillFromSliderPercent(billRatePercent),
-    [billRatePercent],
+  const usageMonths = useMemo(
+    () =>
+      buildUsageBreakdown(
+        currentMonthly,
+        resolveSystemKw(
+          proposal.summary.systemSize,
+          proposal.summary.totalPanels,
+        ),
+      ),
+    [currentMonthly, proposal.summary.systemSize, proposal.summary.totalPanels],
   );
 
   const energyValues = useMemo(() => {
@@ -365,11 +442,10 @@ export const DesignsEnergyStepContent = forwardRef<
 
             <div className="mt-6 w-full sm:mt-[12px]">
                 <EnergyBillInput
-                  billRatePercent={billRatePercent}
-                  onBillRatePercentChange={setBillRatePercent}
                   billPeriod={billPeriod}
                   onBillPeriodChange={setBillPeriod}
                   currentMonthlyAmount={currentMonthly}
+                  onMonthlyAmountChange={setCurrentMonthly}
                 />
               </div>
 
@@ -405,7 +481,7 @@ export const DesignsEnergyStepContent = forwardRef<
             </div>
 
             <div className="mt-4 flex-1 sm:mt-[22px]">
-              <EnergyBreakdownChart />
+              <EnergyBreakdownChart months={usageMonths} />
             </div>
           </div>
         </div>
