@@ -4,6 +4,7 @@ import Link from "next/link";
 import Icon from "@/components/ui/Icons";
 import { DesignMapPreviewImage } from "@/components/customer/design/DesignMapPreviewImage";
 import { designMapScreenshotUrl } from "@/lib/designs/map-screenshot";
+import { designStaticMapUrl } from "@/lib/designs/static-map";
 import type { InstallerCustomerDesign } from "@/lib/installers/designs";
 import type { InstallerCustomerSummary } from "@/lib/installers/customers";
 
@@ -249,7 +250,10 @@ export function InstallerHomeSolarDesignCard({
         <div className="flex shrink-0 flex-col overflow-hidden rounded-[11px] border-[1.157px] border-amber-soft p-[1.157px] lg:max-w-[375px]">
           <div className="relative aspect-373/174 w-full overflow-hidden rounded-[9.89px] bg-cream-200">
             <DesignMapPreviewImage
-              src={designMapScreenshotUrl(design)}
+              // Saved panel-layout capture when the design has one, otherwise a
+              // real satellite view of the property — the stock rooftop is the
+              // last resort, for a design with no location at all.
+              src={designMapScreenshotUrl(design) ?? designStaticMapUrl(design)}
               defaultSrc={INSTALLER_SOLAR_DESIGN_PREVIEW_URL}
               alt="Solar roof design preview"
               sizes="(max-width: 1024px) 100vw, 375px"

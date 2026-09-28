@@ -121,6 +121,24 @@ const SITE_CARD = {
   icon: <Icon name="LocationPin" className="text-warm-ink" />,
 };
 
+/** Site row backed by `design.address` rather than the wizardData snapshot. */
+const SITE_ADDRESS_LABEL = "Address";
+/** Matches the placeholder the design card and the base site rows both use. */
+const SITE_ADDRESS_EMPTY = "-";
+
+function addressRowValue(address?: string | null) {
+  return address?.trim() || SITE_ADDRESS_EMPTY;
+}
+
+/** Placeholder dashes are "no address", not a literal value to store. */
+function addressFromRow(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === SITE_ADDRESS_EMPTY || trimmed === NO_VALUE) {
+    return null;
+  }
+  return trimmed;
+}
+
 /** One spec-row set per category, built from a single attached product. */
 function specRowsFor(key: ProductCardKey, item: InstallerDesignProduct): EquipmentRow[] {
   const model = productLabel(item) ?? NO_VALUE;
@@ -726,10 +744,23 @@ export function InstallerHomeEquipmentSection({
   baseEquipment,
   onDesignUpdated,
 }: Props) {
-  const { equipment, hidden } = useMemo(
-    () => mergeEquipmentWithWizardData(baseEquipment, design?.wizardData),
-    [baseEquipment, design?.wizardData],
-  );
+  const { equipment, hidden } = useMemo(() => {
+    const merged = mergeEquipmentWithWizardData(baseEquipment, design?.wizardData);
+    // The wizardData snapshot of the site card would otherwise freeze the
+    // address taken at edit time, drifting from `design.address` — which the
+    // solar design card shows. The design column is the single source.
+    return {
+      ...merged,
+      equipment: {
+        ...merged.equipment,
+        site: merged.equipment.site.map((row) =>
+          row.label === SITE_ADDRESS_LABEL
+            ? { ...row, value: addressRowValue(design?.address) }
+            : row,
+        ),
+      },
+    };
+  }, [baseEquipment, design?.wizardData, design?.address]);
   const siteHidden = hidden.has("site");
 
   const [catalogue, setCatalogue] = useState<BuilderCatalogue | null>(null);
@@ -819,11 +850,17 @@ export function InstallerHomeEquipmentSection({
     }
   }
 
-  async function persistSiteWizardData(wizardData: Record<string, unknown>): Promise<void> {
+  async function persistSiteWizardData(
+    wizardData: Record<string, unknown>,
+    address?: string | null,
+  ): Promise<void> {
     if (!design?.id) {
       throw new Error("Save a customer design before editing equipment.");
     }
-    const updated = await updateInstallerDesign(design.id, { wizardData });
+    const updated = await updateInstallerDesign(design.id, {
+      wizardData,
+      ...(address !== undefined ? { address } : {}),
+    });
     onDesignUpdated(updated);
   }
 
@@ -836,7 +873,11 @@ export function InstallerHomeEquipmentSection({
         cardKey: "site",
         rows,
       });
-      await persistSiteWizardData(wizardData);
+      // Address lives on the design record, not only in the card snapshot, so
+      // the solar design card above shows the same value.
+      const addressRow = rows.find((row) => row.label === SITE_ADDRESS_LABEL);
+      const address = addressRow ? addressFromRow(addressRow.value) : undefined;
+      await persistSiteWizardData(wizardData, address);
       setEditingSite(false);
     } catch (err) {
       setSiteFormError(err instanceof Error ? err.message : "Failed to save equipment");
