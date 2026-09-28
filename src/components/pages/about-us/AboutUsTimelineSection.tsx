@@ -1,6 +1,6 @@
 import { AboutUsTimelineCard } from "@/components/pages/about-us/AboutUsTimelineCard";
 import { ABOUT_US_PAGE } from "@/utils/constant";
-import { Fragment } from "react/jsx-runtime";
+import { Fragment } from "react";
 
 export function AboutUsTimelineSection() {
   return (
