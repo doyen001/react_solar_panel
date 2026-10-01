@@ -1,49 +1,146 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { SingleScrollBar } from "@/components/ui/SingleScrolllBar";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   type DesignBillPeriod,
+  mergeProposalData,
   selectDesignProposal,
 } from "@/lib/store/designProposalSlice";
+import {
+  BATTERY_CURVE_SIZES_KWH,
+  DAILY_SUPPLY_CHARGE,
+  FIT_RATE_PER_KWH,
+  GRID_RATE_PER_KWH,
+  MONTH_LABELS,
+  SOLAR_YIELD_KWH_PER_KW_YEAR,
+  findBatteryKnee,
+  resolveSystemKw,
+  simulateYear,
+  type BatteryMode,
+} from "@/lib/designs/energySimulation";
 
-/** Retail rate the bill is converted to kWh with — also shown under the slider. */
-const GRID_RATE_PER_KWH = 0.36975;
+type IconName =
+  | "zap"
+  | "trendingUp"
+  | "leaf"
+  | "home"
+  | "arrowUpRight"
+  | "receipt"
+  | "piggyBank"
+  | "barChart"
+  | "battery";
 
-/** Sydney AC yield per kW installed, year 1. */
-const SOLAR_YIELD_KWH_PER_KW_YEAR = 1400;
+const ICON_PATHS: Record<IconName, React.ReactNode> = {
+  zap: <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />,
+  trendingUp: (
+    <>
+      <path d="m3 17 6-6 4 4 8-8" />
+      <path d="M15 7h6v6" />
+    </>
+  ),
+  leaf: (
+    <>
+      <path d="M11 20A7 7 0 0 1 4 13V5a1 1 0 0 1 1-1h8a7 7 0 0 1 7 7v1a8 8 0 0 1-8 8Z" />
+      <path d="M4 15s4-1 7-4" />
+    </>
+  ),
+  home: (
+    <>
+      <path d="m3 11 9-8 9 8" />
+      <path d="M5 10v10h14V10" />
+    </>
+  ),
+  arrowUpRight: (
+    <>
+      <path d="M7 17 17 7" />
+      <path d="M9 7h8v8" />
+    </>
+  ),
+  receipt: (
+    <>
+      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" />
+      <path d="M9 8h6M9 12h6" />
+    </>
+  ),
+  piggyBank: (
+    <>
+      <path d="M11 5a6 6 0 0 1 6 6v1l2 1.5V16h-2v2H9v-1a5 5 0 0 1-3-4.58V10a5 5 0 0 1 5-5Z" />
+      <circle cx="15" cy="10" r="0.6" fill="currentColor" />
+      <path d="M6.5 9 5 8" />
+    </>
+  ),
+  barChart: (
+    <>
+      <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+    </>
+  ),
+  battery: (
+    <>
+      <rect x="2" y="7" width="18" height="10" rx="2" />
+      <path d="M22 10v4" />
+      <path d="M6 10v4M10 10v4" />
+    </>
+  ),
+};
 
-/** Fallback panel wattage when the system size can't be read (Standard tier). */
-const DEFAULT_PANEL_WATTS = 440;
+function Icon({ name, className }: { name: IconName; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {ICON_PATHS[name]}
+    </svg>
+  );
+}
 
-/**
- * Relative monthly weights, normalized at use. Consumption peaks in the
- * Sydney winter (heating) and again in high summer (cooling); generation is
- * the opposite, peaking Dec-Jan and bottoming out in June.
- */
-const CONSUMPTION_SEASONALITY = [
-  58, 53, 47, 52, 52, 59, 61, 60, 47, 47, 47, 48,
-];
-const GENERATION_SEASONALITY = [
-  128, 115, 105, 90, 74, 66, 71, 83, 97, 112, 122, 130,
-];
-
-const MONTH_LABELS = [
-  "J",
-  "F",
-  "M",
-  "A",
-  "M",
-  "J",
-  "J",
-  "A",
-  "S",
-  "O",
-  "N",
-  "D",
-];
+function SectionHeading({
+  icon,
+  accentClassName,
+  title,
+  subtitle,
+}: {
+  icon: IconName;
+  accentClassName: string;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="flex items-start gap-1.5">
+      <span
+        className={`flex size-[22px] shrink-0 items-center justify-center rounded-[6px] ${accentClassName}`}
+      >
+        <Icon name={icon} className="size-[13px] text-white" />
+      </span>
+      <div className="min-w-0">
+        <h3 className="font-source-sans text-[13px] font-bold leading-tight text-white">
+          {title}
+        </h3>
+        {subtitle ? (
+          <p className="mt-0.5 font-inter text-[9.5px] leading-tight text-white/50">
+            {subtitle}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function EnergyMetricPill({
   children,
@@ -61,136 +158,221 @@ function EnergyMetricPill({
   );
 }
 
-function EnergyLegendItem({
-  colorClass,
-  label,
-}: {
-  colorClass: string;
-  label: string;
-}) {
+function EnergyBreakdownChart({ monthlySolarPct }: { monthlySolarPct: number[] }) {
   return (
-    <div className="flex items-center gap-[11px]">
-      <span className={`size-[16px] shrink-0 ${colorClass}`} />
-      <span className="font-source-sans text-[24px] font-normal leading-none text-white">
-        {label}
-      </span>
-    </div>
-  );
-}
+    <div className="flex h-full min-h-0 w-full flex-col rounded-[10px] border border-[#F3F4F6] bg-white px-2.5 py-2 shadow-[0px_1.201px_3.604px_0px_rgba(0,0,0,0.1),0px_1.201px_2.402px_0px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center gap-1.5">
+        <span className="flex size-[20px] shrink-0 items-center justify-center rounded-[6px] bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]">
+          <Icon name="barChart" className="size-3 text-white" />
+        </span>
+        <h3 className="font-source-sans text-[13px] font-bold tracking-[-0.3px] text-[#101828]">
+          Electricity usage breakdown
+        </h3>
+      </div>
 
-type UsageMonth = {
-  /** kWh the home uses that month. */
-  consumption: number;
-  /** kWh of that consumption covered by the solar array. */
-  fromSolar: number;
-  /** Remainder still bought from the grid. */
-  fromGrid: number;
-};
-
-function spread(total: number, weights: number[]): number[] {
-  const sum = weights.reduce((acc, w) => acc + w, 0);
-  return weights.map((w) => (total * w) / sum);
-}
-
-/**
- * Turns the two things the customer has actually told us — what they pay, and
- * how big a system fits on their roof — into a 12-month usage split.
- *
- * Self-consumption is capped at that month's consumption: surplus generation
- * is exported, not "used", so it must not inflate the solar bar.
- */
-function buildUsageBreakdown(
-  monthlyBill: number,
-  systemKw: number,
-): UsageMonth[] {
-  const annualConsumption = (monthlyBill * 12) / GRID_RATE_PER_KWH;
-  const annualGeneration = systemKw * SOLAR_YIELD_KWH_PER_KW_YEAR;
-
-  const consumptionByMonth = spread(annualConsumption, CONSUMPTION_SEASONALITY);
-  const generationByMonth = spread(annualGeneration, GENERATION_SEASONALITY);
-
-  return consumptionByMonth.map((consumption, index) => {
-    const fromSolar = Math.min(generationByMonth[index], consumption);
-    return {
-      consumption,
-      fromSolar,
-      fromGrid: Math.max(0, consumption - fromSolar),
-    };
-  });
-}
-
-/** "7.2 kW" → 7.2, else panel count × default wattage, else 0. */
-function resolveSystemKw(systemSize: string, totalPanels: string): number {
-  const sized = systemSize.match(/([\d.]+)\s*kW/i);
-  if (sized) {
-    const kw = Number.parseFloat(sized[1]);
-    if (Number.isFinite(kw) && kw > 0) return kw;
-  }
-
-  const panels = Number.parseInt(totalPanels.replace(/\D/g, ""), 10);
-  if (Number.isFinite(panels) && panels > 0) {
-    return (panels * DEFAULT_PANEL_WATTS) / 1000;
-  }
-  return 0;
-}
-
-function EnergyBreakdownChart({ months }: { months: UsageMonth[] }) {
-  // Bars are scaled against the busiest month so their heights compare.
-  const peak = Math.max(...months.map((m) => m.consumption), 1);
-
-  return (
-    <div className="w-full rounded-[19.219px] border border-[#F3F4F6] bg-white px-[18px] pb-[20px] pt-[24px] shadow-[0px_1.201px_3.604px_0px_rgba(0,0,0,0.1),0px_1.201px_2.402px_0px_rgba(0,0,0,0.1)] sm:px-[28px] sm:pt-[28px]">
-      <h3 className="font-source-sans text-[21.621px] font-bold tracking-[-0.5279px] text-[#101828]">
-        Electricity usage breakdown
-      </h3>
-
-      <div className="mt-[18px]">
-        <div className="relative flex h-[140px] items-end gap-[10px] border-b border-dashed border-[#D9D9D9] px-[8px] pb-[6px]">
-          {months.map((month, index) => {
-            const barHeight = (month.consumption / peak) * 100;
-            const solarShare =
-              month.consumption > 0
-                ? (month.fromSolar / month.consumption) * 100
-                : 0;
-
-            return (
+      <div className="mt-1.5 flex min-h-0 flex-1 flex-col">
+        <div className="relative flex min-h-0 flex-1 items-end gap-[6px] border-b border-dashed border-[#D9D9D9] px-1 pb-1">
+          {monthlySolarPct.map((solarShare, index) => (
+            <div
+              key={index}
+              className="flex h-full flex-1 flex-col items-center justify-end gap-1"
+            >
               <div
-                key={index}
-                className="flex flex-1 flex-col items-center justify-end gap-[10px]"
+                className="flex h-full w-full max-w-[18px] flex-col justify-end overflow-hidden rounded-t-sm bg-[#E3E6EC]"
+                title={`${MONTH_LABELS[index]}: ${solarShare.toFixed(0)}% from solar`}
               >
                 <div
-                  className="flex w-full max-w-[26px] flex-col justify-end overflow-hidden rounded-t-[4px] bg-[#E3E6EC] sm:max-w-[28px]"
-                  style={{ height: `${Math.max(barHeight, 2)}%` }}
-                  title={`${MONTH_LABELS[index]}: ${Math.round(month.consumption)} kWh — ${Math.round(month.fromSolar)} from solar, ${Math.round(month.fromGrid)} from grid`}
-                >
-                  <div
-                    className="w-full bg-[#FDE047]"
-                    style={{ height: `${solarShare}%` }}
-                  />
-                </div>
-                <span className="font-inter text-[14.412px] font-normal leading-none text-[#666]">
-                  {MONTH_LABELS[index]}
-                </span>
+                  className="w-full bg-[#FDE047]"
+                  style={{ height: `${solarShare}%` }}
+                />
               </div>
-            );
-          })}
+              <span className="font-inter text-[10px] font-normal leading-none text-[#666]">
+                {MONTH_LABELS[index]}
+              </span>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-[14px] flex items-center justify-center gap-[22px]">
-          <div className="flex items-center gap-[7px]">
-            <span className="size-[12px] bg-[#FDE047]" />
-            <span className="font-source-sans text-[14.414px] font-normal text-[#F5C026]">
+        <div className="mt-1.5 flex items-center justify-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="size-[9px] bg-[#FDE047]" />
+            <span className="font-source-sans text-[10px] font-normal text-[#F5C026]">
               From solar
             </span>
           </div>
-          <div className="flex items-center gap-[7px]">
-            <span className="size-[12px] bg-[#E3E6EC]" />
-            <span className="font-source-sans text-[14.414px] font-normal text-[#666]">
+          <div className="flex items-center gap-1.5">
+            <span className="size-[9px] bg-[#E3E6EC]" />
+            <span className="font-source-sans text-[10px] font-normal text-[#666]">
               From grid
             </span>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** SVG line chart: annual grid import against battery size, with the "knee" marked. */
+function GridImportChart({
+  importsBySize,
+  currentBatteryKwh,
+  currentImportKwh,
+  recommendedKwh,
+}: {
+  importsBySize: number[];
+  currentBatteryKwh: number;
+  currentImportKwh: number;
+  recommendedKwh: number;
+}) {
+  const w = 320;
+  const h = 150;
+  const padL = 34;
+  const padB = 18;
+  const padT = 34;
+  const padR = 10;
+  const maxKwh = BATTERY_CURVE_SIZES_KWH[BATTERY_CURVE_SIZES_KWH.length - 1];
+  const maxImport = Math.max(...importsBySize, 1);
+
+  const x = (kwh: number) => padL + (kwh / maxKwh) * (w - padL - padR);
+  const y = (imp: number) => padT + (1 - imp / maxImport) * (h - padT - padB);
+
+  const path = BATTERY_CURVE_SIZES_KWH.map(
+    (k, i) => `${i === 0 ? "M" : "L"} ${x(k)} ${y(importsBySize[i])}`,
+  ).join(" ");
+
+  const kneeIdx = BATTERY_CURVE_SIZES_KWH.indexOf(recommendedKwh);
+  const kneeX = x(recommendedKwh);
+  const kneeY = y(importsBySize[kneeIdx] ?? 0);
+  const curX = x(Math.min(currentBatteryKwh, maxKwh));
+  const curY = y(currentImportKwh);
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="block min-h-0 w-full flex-1"
+      >
+        {/* Horizontal gridlines for a more finished, dashboard feel. */}
+        {[0.25, 0.5, 0.75].map((frac) => (
+          <line
+            key={frac}
+            x1={padL}
+            y1={padT + frac * (h - padT - padB)}
+            x2={w - padR}
+            y2={padT + frac * (h - padT - padB)}
+            stroke="#EEF1F6"
+            strokeWidth={1}
+          />
+        ))}
+        <line
+          x1={padL}
+          y1={h - padB}
+          x2={w - padR}
+          y2={h - padB}
+          stroke="#C7CFDB"
+          strokeWidth={1}
+        />
+        <line x1={padL} y1={padT} x2={padL} y2={h - padB} stroke="#C7CFDB" strokeWidth={1} />
+
+        <text x={padL} y={h - 5} fontSize={9} fill="#8b93a3">
+          0
+        </text>
+        <text x={w - padR} y={h - 5} fontSize={9} fill="#8b93a3" textAnchor="end">
+          {maxKwh} kWh
+        </text>
+        <text x={padL} y={14} fontSize={9} fill="#8b93a3">
+          {Math.round(maxImport / 1000)}k kWh/yr
+        </text>
+
+        <path d={path} fill="none" stroke="#2FA8E0" strokeWidth={2} strokeLinejoin="round" />
+
+        <line
+          x1={kneeX}
+          y1={padT}
+          x2={kneeX}
+          y2={h - padB}
+          stroke="#F2941F"
+          strokeWidth={1}
+          strokeDasharray="3 2"
+        />
+        <circle cx={kneeX} cy={kneeY} r={4} fill="#F2941F" stroke="#fff" strokeWidth={1.2} />
+        <circle cx={curX} cy={curY} r={4} fill="#152238" stroke="#fff" strokeWidth={1.2} />
+      </svg>
+
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5 font-inter text-[8.5px] text-[#6a7282]">
+        <span className="flex items-center gap-1">
+          <span className="size-[7px] rounded-full bg-[#F2941F]" />
+          Recommended: {recommendedKwh} kWh
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="size-[7px] rounded-full bg-[#152238]" />
+          Your setting: {currentBatteryKwh} kWh
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function StatTile({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-[10px] bg-white px-2 py-2.5">
+      <p className="font-source-sans text-[19px] font-bold leading-tight text-[#152238]">
+        {value}
+      </p>
+      <p className="text-center font-source-sans text-[9px] font-normal uppercase tracking-[0.5px] text-[#6a7282]">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function ValuePanel({
+  icon,
+  iconClassName,
+  label,
+  kwh,
+  dollar,
+  dollarClassName,
+  breakdown,
+}: {
+  icon: IconName;
+  iconClassName: string;
+  label: string;
+  kwh?: string;
+  dollar: string;
+  dollarClassName?: string;
+  breakdown?: string[];
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col rounded-[10px] border border-white/10 bg-white/[0.06] px-2.5 py-2">
+      <div className="flex items-center gap-1.5">
+        <span className={`flex size-4 shrink-0 items-center justify-center rounded-[4px] ${iconClassName}`}>
+          <Icon name={icon} className="size-2.5 text-white" />
+        </span>
+        <p className="truncate font-inter text-[8.5px] font-semibold uppercase tracking-[0.4px] text-white/55">
+          {label}
+        </p>
+      </div>
+      {kwh ? (
+        <p className="mt-1 font-inter text-[10px] text-white/70">{kwh}</p>
+      ) : null}
+      <p className={`mt-0.5 font-source-sans text-[14.5px] font-bold ${dollarClassName ?? "text-white"}`}>
+        {dollar}
+      </p>
+      {breakdown && breakdown.length > 0 ? (
+        <div className="mt-1 flex flex-1 flex-col justify-end gap-0.5 border-t border-white/10 pt-1 font-inter text-[8.5px] leading-3 text-white/40">
+          {breakdown.map((line, i) => (
+            <span key={i}>{line}</span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -215,9 +397,6 @@ const BILL_MONTHLY_MAX = 10000;
 
 /** Used only when a design has no saved bill yet. */
 const BILL_MONTHLY_DEFAULT = 500;
-
-/** Relative to baseline ($500 → $368 new bill, $132 savings / mo from design defaults). */
-const NEW_BILL_RATIO = 368 / 500;
 
 function periodMultiplier(period: DesignBillPeriod): number {
   switch (period) {
@@ -253,6 +432,9 @@ function formatAud(n: number): string {
 function clampMonthlyBill(monthly: number): number {
   return Math.min(BILL_MONTHLY_MAX, Math.max(BILL_MONTHLY_MIN, monthly));
 }
+
+/** Relative to baseline ($500 -> $368 new bill, $132 savings / mo from design defaults). */
+const NEW_BILL_RATIO = 368 / 500;
 
 function deriveEnergyValues(
   currentMonthly: number,
@@ -299,8 +481,7 @@ function EnergyBillInput({
   );
   const [draftAmount, setDraftAmount] = useState<string | null>(null);
 
-  const inputValue =
-    draftAmount ?? displayAmount.toLocaleString("en-AU");
+  const inputValue = draftAmount ?? displayAmount.toLocaleString("en-AU");
 
   const commitPeriodAmount = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
@@ -383,11 +564,35 @@ function EnergyBillInput({
   );
 }
 
+const BATTERY_MODE_NOTES: Record<BatteryMode, string> = {
+  "self-consumption":
+    "Battery only discharges to cover household load. Uncaptured solar exports at the flat 5c/kWh feed-in rate.",
+  export:
+    "Battery holds charge back from the near-zero midday window and sells it during the 4-7pm peak, after household load is covered first.",
+};
+
+type ValuePeriod = "day" | "week" | "fortnight" | "month" | "year";
+const VALUE_PERIOD_DAYS: Record<ValuePeriod, number> = {
+  day: 1,
+  week: 7,
+  fortnight: 14,
+  month: 30.44,
+  year: 365,
+};
+const VALUE_PERIOD_LABELS: Record<ValuePeriod, string> = {
+  day: "Day",
+  week: "Week",
+  fortnight: "Fortnight",
+  month: "Month",
+  year: "Year",
+};
+
 export const DesignsEnergyStepContent = forwardRef<
   DesignsEnergyStepHandle,
   object
 >(function DesignsEnergyStepContent(_, ref) {
   const proposal = useAppSelector(selectDesignProposal);
+  const dispatch = useAppDispatch();
 
   const [currentMonthly, setCurrentMonthly] = useState(() =>
     clampMonthlyBill(
@@ -399,22 +604,83 @@ export const DesignsEnergyStepContent = forwardRef<
     parseBillPeriod(proposal.pricing.billPeriod),
   );
 
-  const usageMonths = useMemo(
-    () =>
-      buildUsageBreakdown(
-        currentMonthly,
-        resolveSystemKw(
-          proposal.summary.systemSize,
-          proposal.summary.totalPanels,
-        ),
-      ),
-    [currentMonthly, proposal.summary.systemSize, proposal.summary.totalPanels],
+  const [valuePeriod, setValuePeriod] = useState<ValuePeriod>("fortnight");
+
+  const systemKw = useMemo(
+    () => resolveSystemKw(proposal.summary.systemSize, proposal.summary.totalPanels),
+    [proposal.summary.systemSize, proposal.summary.totalPanels],
+  );
+  const inverterCount = Math.max(1, Math.ceil(systemKw / 10));
+
+  const annualConsumptionKwh = useMemo(() => {
+    const annualUsageCharge = Math.max(
+      0,
+      currentMonthly * 12 - DAILY_SUPPLY_CHARGE * 365,
+    );
+    return annualUsageCharge / GRID_RATE_PER_KWH;
+  }, [currentMonthly]);
+
+  const annualGenerationKwh = systemKw * SOLAR_YIELD_KWH_PER_KW_YEAR;
+
+  const batteryMode: BatteryMode = proposal.equipment.batteryMode ?? "self-consumption";
+  const systemAgeYears = proposal.equipment.systemAgeYears ?? 0;
+  const batteryKwh = proposal.equipment.batteryCapacityKwh;
+
+  // Seed the battery slider with the recommended size once, the first time
+  // this design has no saved value — later bill/roof changes intentionally
+  // don't re-seed it, so a manual choice always sticks.
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (seededRef.current || batteryKwh !== undefined) return;
+    seededRef.current = true;
+    const knee = findBatteryKnee(annualConsumptionKwh, annualGenerationKwh);
+    dispatch(
+      mergeProposalData({
+        equipment: { batteryCapacityKwh: knee.recommendedKwh },
+      }),
+    );
+    // Runs once to seed the recommended size; subsequent changes are manual.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const effectiveBatteryKwh = batteryKwh ?? 0;
+
+  const knee = useMemo(
+    () => findBatteryKnee(annualConsumptionKwh, annualGenerationKwh),
+    [annualConsumptionKwh, annualGenerationKwh],
   );
 
+  const sim = useMemo(
+    () =>
+      simulateYear(
+        annualConsumptionKwh,
+        annualGenerationKwh,
+        effectiveBatteryKwh,
+        batteryMode,
+        systemAgeYears,
+      ),
+    [annualConsumptionKwh, annualGenerationKwh, effectiveBatteryKwh, batteryMode, systemAgeYears],
+  );
+
+  const bestCase = useMemo(
+    () => simulateYear(annualConsumptionKwh, annualGenerationKwh, 500, batteryMode, systemAgeYears),
+    [annualConsumptionKwh, annualGenerationKwh, batteryMode, systemAgeYears],
+  );
+
+  const independencePct =
+    annualConsumptionKwh > 0
+      ? Math.max(0, 100 - (sim.annualGridImportKwh / annualConsumptionKwh) * 100)
+      : 0;
+  const genuineFloorPct =
+    annualConsumptionKwh > 0
+      ? (bestCase.annualGridImportKwh / annualConsumptionKwh) * 100
+      : 0;
+
+  const panelRetentionPct = Math.pow(1 - 0.005, systemAgeYears) * 100;
+  const batteryRetentionPct = Math.pow(Math.pow(0.7, 1 / 10), systemAgeYears) * 100;
+
   const energyValues = useMemo(() => {
-    const systemPrice = parseMoneyToNumber(
-      proposal.pricing.totalSystemPrice,
-    );
+    const systemPrice = parseMoneyToNumber(proposal.pricing.totalSystemPrice);
     return deriveEnergyValues(currentMonthly, systemPrice, billPeriod);
   }, [currentMonthly, proposal.pricing.totalSystemPrice, billPeriod]);
 
@@ -426,62 +692,271 @@ export const DesignsEnergyStepContent = forwardRef<
     [energyValues],
   );
 
+  // Consumption & solar value card, for the selected period.
+  const periodFraction = VALUE_PERIOD_DAYS[valuePeriod] / 365;
+  const periodDays = VALUE_PERIOD_DAYS[valuePeriod];
+  const consumptionKwhPeriod = annualConsumptionKwh * periodFraction;
+  const exportKwhPeriod = sim.annualExportKwh * periodFraction;
+  const gridUsedKwhPeriod = sim.annualGridImportKwh * periodFraction;
+  const exportIncomePeriod = exportKwhPeriod * FIT_RATE_PER_KWH;
+  const gridImportCostPeriod = gridUsedKwhPeriod * GRID_RATE_PER_KWH;
+  const supplyChargePeriod = DAILY_SUPPLY_CHARGE * periodDays;
+  const billCostPeriod = supplyChargePeriod + gridImportCostPeriod - exportIncomePeriod;
+  const netPeriod = exportIncomePeriod - gridImportCostPeriod - supplyChargePeriod;
+
+  const recommendApplied = batteryKwh === knee.recommendedKwh;
+
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-[1446px] flex-1 flex-col justify-center px-4 py-6 sm:px-8 sm:py-8 lg:px-[81px] lg:py-8">
-      <div className="mx-auto grid w-full max-w-[1278px] grid-cols-1 gap-5 lg:grid-cols-[591fr_649fr] lg:items-stretch lg:gap-[58px]">
-        <div className="flex w-full min-w-0 items-center rounded-[46px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-6 py-8 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] sm:px-10 sm:py-10 lg:h-full lg:px-[49px] lg:py-[30px]">
-          <div className="mx-auto flex w-full max-w-[448px] flex-col items-center">
+    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1520px] min-h-0 flex-1 flex-col px-4 py-2 sm:px-6 lg:px-8">
+      <div className="mx-auto grid h-full w-full min-h-0 grid-cols-1 gap-3 lg:grid-cols-12 lg:items-stretch lg:gap-4">
+        <div className="flex w-full min-w-0 flex-col overflow-y-auto rounded-[20px] border-[3px] border-design-accent-cyan bg-linear-to-r from-yellow-lemon to-orange-amber px-4 py-3 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] lg:col-span-3">
+          <div className="mx-auto flex w-full max-w-[400px] flex-col items-center">
             <h2
-              className="w-full text-center font-source-sans text-[clamp(28px,4.6vw,40px)] font-bold capitalize leading-[1.2] text-white"
-              style={{ letterSpacing: "0.248px" }}
+              className="w-full text-center font-source-sans text-[clamp(16px,1.9vw,21px)] font-bold capitalize leading-[1.12] text-white"
+              style={{ letterSpacing: "0.2px" }}
             >
-              Tell us about the
-              <br />
-              Energy Bill you pay
+              Design Your Path To $0 Grid Bills
             </h2>
 
-            <div className="mt-6 w-full sm:mt-[12px]">
-                <EnergyBillInput
-                  billPeriod={billPeriod}
-                  onBillPeriodChange={setBillPeriod}
-                  currentMonthlyAmount={currentMonthly}
-                  onMonthlyAmountChange={setCurrentMonthly}
-                />
-              </div>
-
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:mt-[28px] sm:gap-[20px]">
-              <span className="font-source-sans text-[11px] font-normal leading-snug text-[#101828] sm:text-[12px] sm:leading-none">
-                *Analytics calculated using optimal placement
-              </span>
-              <span className="inline-flex size-[12px] shrink-0 items-center justify-center rounded-full border border-[#111] text-[8px] font-bold text-[#111]">
-                i
-              </span>
+            <div className="mt-2 w-full">
+              <EnergyBillInput
+                billPeriod={billPeriod}
+                onBillPeriodChange={setBillPeriod}
+                currentMonthlyAmount={currentMonthly}
+                onMonthlyAmountChange={setCurrentMonthly}
+              />
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:mt-[14px] sm:gap-[16px]">
-                <EnergyMetricPill>
-                  {proposal.summary.totalPanels || "—"} Panels
-                </EnergyMetricPill>
-                <EnergyMetricPill>1 Inverter</EnergyMetricPill>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+              <EnergyMetricPill>
+                {proposal.summary.totalPanels || "—"} Panels
+              </EnergyMetricPill>
+              <EnergyMetricPill>
+                {inverterCount} Inverter{inverterCount > 1 ? "s" : ""}
+              </EnergyMetricPill>
+            </div>
+            <p className="mt-1 text-center font-source-sans text-[9.5px] font-normal leading-snug text-[#101828]/75">
+              Full roof used — {systemKw.toFixed(1)} kW system, regardless of bill size
+            </p>
+
+            {/* Battery sizing */}
+            <div className="mt-2 w-full border-t border-white/40 pt-2">
+              <div className="flex items-center justify-between">
+                <p className="font-source-sans text-[10.5px] font-bold uppercase tracking-[0.5px] text-[#3a3020]">
+                  Battery — the lever for $0 grid
+                </p>
+              </div>
+              {recommendApplied ? (
+                <span className="mt-1 inline-block rounded-full bg-[#152238] px-2 py-[2px] font-source-sans text-[9px] font-bold uppercase tracking-[0.4px] text-yellow-lemon">
+                  Recommended size applied
+                </span>
+              ) : null}
+
+              <div className="mt-1.5">
+                <div className="flex items-center justify-between font-source-sans text-[11px] font-semibold text-[#3a3020]">
+                  <span>Battery capacity</span>
+                  <span className="font-mono">{effectiveBatteryKwh} kWh</span>
+                </div>
+                <div className="mt-0.5">
+                  <SingleScrollBar
+                    value={effectiveBatteryKwh}
+                    onChange={(v) =>
+                      dispatch(
+                        mergeProposalData({
+                          equipment: { batteryCapacityKwh: Math.round(v) },
+                        }),
+                      )
+                    }
+                    min={0}
+                    max={100}
+                    ariaLabel="Battery capacity in kWh"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-1.5 flex gap-1.5">
+                {(["self-consumption", "export"] as BatteryMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() =>
+                      dispatch(mergeProposalData({ equipment: { batteryMode: mode } }))
+                    }
+                    className={`flex-1 rounded-[7px] px-1.5 py-1 font-source-sans text-[10px] font-semibold transition ${
+                      batteryMode === mode
+                        ? "bg-[#152238] text-yellow-lemon"
+                        : "bg-white/40 text-[#3a3020] hover:bg-white/60"
+                    }`}
+                  >
+                    {mode === "self-consumption" ? "Self-Consumption" : "Export-Optimized"}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1 font-inter text-[9px] leading-[1.25] text-[#3a3020]/80">
+                {BATTERY_MODE_NOTES[batteryMode]}
+              </p>
+
+              <div className="mt-1.5">
+                <div className="flex items-center justify-between font-source-sans text-[11px] font-semibold text-[#3a3020]">
+                  <span>System age</span>
+                  <span className="font-mono">
+                    {systemAgeYears === 0 ? "Year 0 (new)" : `Year ${systemAgeYears}`}
+                  </span>
+                </div>
+                <div className="mt-0.5">
+                  <SingleScrollBar
+                    value={systemAgeYears}
+                    onChange={(v) =>
+                      dispatch(
+                        mergeProposalData({
+                          equipment: { systemAgeYears: Math.round(v) },
+                        }),
+                      )
+                    }
+                    min={0}
+                    max={25}
+                    ariaLabel="System age in years"
+                  />
+                </div>
+                {systemAgeYears > 0 ? (
+                  <p className="mt-1 font-inter text-[9px] leading-[1.25] text-[#3a3020]/80">
+                    At year {systemAgeYears}: panels at {panelRetentionPct.toFixed(0)}% output,
+                    battery at {batteryRetentionPct.toFixed(0)}% capacity.
+                  </p>
+                ) : null}
+              </div>
+
+              {independencePct < 99 ? (
+                <div className="mt-1.5 rounded-[7px] bg-white/60 px-2 py-1.5 font-inter text-[9px] leading-[1.3] text-[#5a3a24]">
+                  {genuineFloorPct < 1
+                    ? `${(100 - independencePct).toFixed(0)}% still draws from the grid at this battery size — but generation covers usage every month, so $0 grid is reachable with more storage.`
+                    : `${(100 - independencePct).toFixed(0)}% still draws from the grid, and ~${genuineFloorPct.toFixed(0)}% is unavoidable even with a very large battery — some months' generation falls short of that month's usage.`}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
 
-        <div className="designs-border-gradient w-full min-w-0 rounded-[28px] p-[3px] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] lg:h-full">
-          <div className="flex aspect-[649/525] h-full min-h-[320px] w-full flex-col overflow-y-auto rounded-[25px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)] px-4 py-5 backdrop-blur-[17.8px] sm:min-h-[360px] sm:px-[42px] sm:py-[20px] lg:aspect-auto lg:min-h-0">
-            <div className="mt-6 flex flex-col gap-4 sm:mt-[20px] sm:gap-[12px]">
-              <EnergyLegendItem
-                colorClass="bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]"
-                label="Bill without Solar"
-              />
-              <EnergyLegendItem
-                colorClass="bg-linear-to-r from-yellow-lemon to-orange-amber"
-                label="Bill with Solar and Battery"
-              />
-            </div>
+        <div className="designs-border-gradient flex w-full min-w-0 min-h-0 rounded-[20px] p-[3px] shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] lg:col-span-9">
+          <div className="flex min-h-0 w-full flex-col gap-2 overflow-y-auto rounded-[18px] bg-[linear-gradient(135deg,rgba(48,54,71,0.98)_0%,rgba(33,36,47,0.98)_100%)] px-3 py-2.5 backdrop-blur-[17.8px]">
+            {/* Four-up dashboard: performance + value on top, usage + battery curve below — mirrors the client's no-scroll layout. */}
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-2 sm:grid-rows-[auto_1fr]">
+              {/* System performance */}
+              <div className="flex flex-col rounded-[10px] border border-white/10 bg-white/5 px-2.5 py-2">
+                <SectionHeading
+                  icon="zap"
+                  accentClassName="bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]"
+                  title="System performance"
+                  subtitle="At the battery size and mode set on the left"
+                />
+                <div className="mt-2 flex flex-col justify-center h-full">
+                  <div className="flex items-center gap-1.5">
+                    <StatTile value={`${independencePct.toFixed(0)}%`} label="Grid-free" />
+                    <StatTile value={formatAud(sim.exportIncomeAud)} label="Export income/yr" />
+                    <StatTile value={formatAud(sim.avoidedCostAud)} label="Avoided cost/yr" />
+                  </div>
+                </div>
+              </div>
 
-            <div className="mt-4 flex-1 sm:mt-[22px]">
-              <EnergyBreakdownChart months={usageMonths} />
+              {/* Consumption & solar value */}
+              <div className="flex flex-col rounded-[10px] border border-white/10 bg-white/5 px-2.5 py-2">
+                <SectionHeading
+                  icon="receipt"
+                  accentClassName="bg-linear-to-r from-yellow-lemon to-orange-amber"
+                  title="Consumption & solar value"
+                />
+
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {(Object.keys(VALUE_PERIOD_LABELS) as ValuePeriod[]).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setValuePeriod(p)}
+                      className={`rounded-full px-2 py-0.5 font-source-sans text-[9px] font-semibold transition ${
+                        valuePeriod === p
+                          ? "bg-white text-[#152238]"
+                          : "bg-white/10 text-white/70 hover:bg-white/20"
+                      }`}
+                    >
+                      {VALUE_PERIOD_LABELS[p]}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-1 grid flex-1 grid-cols-2 gap-1">
+                  <ValuePanel
+                    icon="home"
+                    iconClassName="bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]"
+                    label="House consumption"
+                    kwh={`${consumptionKwhPeriod.toLocaleString(undefined, { maximumFractionDigits: 1 })} kWh`}
+                    dollar={formatAud(consumptionKwhPeriod * GRID_RATE_PER_KWH)}
+                  />
+                  <ValuePanel
+                    icon="arrowUpRight"
+                    iconClassName="bg-linear-to-r from-yellow-lemon to-orange-amber"
+                    label="Export to grid"
+                    kwh={`${exportKwhPeriod.toLocaleString(undefined, { maximumFractionDigits: 1 })} kWh`}
+                    dollar={formatAud(exportIncomePeriod)}
+                  />
+                  <ValuePanel
+                    icon="receipt"
+                    iconClassName="bg-white/20"
+                    label="Electricity bill cost"
+                    dollar={
+                      billCostPeriod >= 0
+                        ? formatAud(billCostPeriod)
+                        : `${formatAud(Math.abs(billCostPeriod))} credit`
+                    }
+                    dollarClassName={billCostPeriod < 0 ? "text-[#3ecf7a]" : "text-white"}
+                    breakdown={[
+                      `Supply charge ${formatAud(supplyChargePeriod)}`,
+                      `+ Grid usage ${formatAud(gridImportCostPeriod)}`,
+                      `− Export credit ${formatAud(exportIncomePeriod)}`,
+                    ]}
+                  />
+                  <ValuePanel
+                    icon="piggyBank"
+                    iconClassName={
+                      netPeriod >= 0
+                        ? "bg-[linear-gradient(126deg,#2094F3_0%,#17CFCF_100%)]"
+                        : "bg-linear-to-r from-yellow-lemon to-orange-amber"
+                    }
+                    label="Solar net profit/loss"
+                    dollar={`${netPeriod >= 0 ? "+" : "−"}${formatAud(Math.abs(netPeriod))}`}
+                    dollarClassName={netPeriod >= 0 ? "text-[#3ecf7a]" : "text-orange-amber"}
+                    breakdown={[
+                      `Generated ${(sim.annualGeneratedKwh * periodFraction).toFixed(1)} kWh`,
+                      `→ Stored ${(sim.annualStoredKwh * periodFraction).toFixed(1)} kWh`,
+                      `→ Exported ${exportKwhPeriod.toFixed(1)} kWh (+${formatAud(exportIncomePeriod)})`,
+                      `→ Grid used ${gridUsedKwhPeriod.toFixed(1)} kWh (−${formatAud(gridImportCostPeriod)})`,
+                      `→ Supply −${formatAud(supplyChargePeriod)}`,
+                    ]}
+                  />
+                </div>
+              </div>
+
+              {/* Electricity usage breakdown */}
+              <EnergyBreakdownChart
+                monthlySolarPct={sim.monthly.map((m) => m.solarPct)}
+              />
+
+              {/* Grid import vs battery size */}
+              <div className="flex min-h-0 flex-col rounded-[10px] border border-white/10 bg-white/5 px-2.5 py-2">
+                <SectionHeading
+                  icon="battery"
+                  accentClassName="bg-[#152238]"
+                  title="Grid import vs. battery size"
+                  subtitle="The marker shows where extra storage stops being worth adding"
+                />
+                <div className="mt-1.5 min-h-0 flex-1 rounded-[10px] bg-white px-2 py-1.5">
+                  <GridImportChart
+                    importsBySize={knee.importsBySize}
+                    currentBatteryKwh={effectiveBatteryKwh}
+                    currentImportKwh={sim.annualGridImportKwh}
+                    recommendedKwh={knee.recommendedKwh}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

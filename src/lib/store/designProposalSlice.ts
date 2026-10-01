@@ -100,6 +100,16 @@ export type DesignProposalEquipment = {
   /** Proposal-step panel tier / battery capacity picks — see lib/designs/proposalOptions.ts. */
   panelTierId?: string;
   batteryCapacityId?: string;
+  /**
+   * Energy step's continuous battery sizing (kWh) — independent of the
+   * proposal step's discrete `batteryCapacityId` catalogue picks, but kept
+   * on the same slice so both steps' choices persist together.
+   */
+  batteryCapacityKwh?: number;
+  /** Energy step's dispatch strategy for the battery. */
+  batteryMode?: "self-consumption" | "export";
+  /** Energy step's "system age" slider (years since install) used to preview degradation. */
+  systemAgeYears?: number;
 };
 
 /**
