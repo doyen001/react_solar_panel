@@ -789,9 +789,13 @@ export const DesignsSolarPanelStepContent = forwardRef<
   }, [selectedLocation, solarDesignFromStore]);
 
   const selectedPanelCount = useMemo(() => {
+    // An emptied box means "no explicit count yet" and falls back to the
+    // roof's full capacity — distinct from the user explicitly typing 0,
+    // which must be honored as a real (zero-panel) selection.
+    if (panelCountInput === "") return availablePanelLimit;
     const parsed = Number.parseInt(panelCountInput, 10);
-    if (!Number.isFinite(parsed) || parsed <= 0) return availablePanelLimit;
-    return Math.min(parsed, availablePanelLimit);
+    if (!Number.isFinite(parsed)) return availablePanelLimit;
+    return Math.min(Math.max(parsed, 0), availablePanelLimit);
   }, [availablePanelLimit, panelCountInput]);
 
   const visiblePanels = useMemo(
@@ -801,10 +805,10 @@ export const DesignsSolarPanelStepContent = forwardRef<
 
   const panelCountDisplayValue = useMemo(() => {
     if (!availablePanelLimit) return "";
+    if (panelCountInput === "") return String(availablePanelLimit);
     const parsed = Number.parseInt(panelCountInput, 10);
-    if (!Number.isFinite(parsed) || parsed <= 0)
-      return String(availablePanelLimit);
-    return String(Math.min(parsed, availablePanelLimit));
+    if (!Number.isFinite(parsed)) return String(availablePanelLimit);
+    return String(Math.min(Math.max(parsed, 0), availablePanelLimit));
   }, [availablePanelLimit, panelCountInput]);
 
   const [proposalMetrics, setProposalMetrics] =
