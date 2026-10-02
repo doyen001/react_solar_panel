@@ -17,6 +17,10 @@ import {
   fetchDesignById,
 } from "@/lib/customers/custom-design";
 import { fetchInstallerDesignById } from "@/lib/installers/designs";
+import {
+  clearDesignDraft,
+  loadDesignDraft,
+} from "@/lib/designs/draft-persistence";
 import { fetchCustomerProfile } from "@/lib/customers/profile";
 import { setUser } from "@/lib/store/customerAuthSlice";
 import { DesignTopBar } from "../modules/DesignTopBar";
@@ -78,20 +82,37 @@ export function DesignsHeroSection({
    */
   const installerCustomerId = searchParams.get("customerId");
 
+  // A draft snapshot left by the Proposal step right before a signed-out
+  // visitor got bounced to sign-in/sign-up — that's this same visitor coming
+  // back, not a new one. Read synchronously (once, on mount) so the screen
+  // this page opens on can account for it below without a flash of the
+  // marketing intro before flipping over to the Proposal step.
+  const [initialDraft] = useState(() =>
+    !editingDesignId && !installerCustomerId ? loadDesignDraft() : null,
+  );
+
   // The store is a live singleton for the whole tab, not reset on client-side
   // navigation — so a customer's contact details entered on a previous visit
   // to this page (e.g. an installer's prefill for a different customer, or a
   // customer's own in-progress draft) would otherwise leak into a fresh visit
   // that has no `designId`/`customerId` context of its own. Runs once, before
   // the hydration/prefill effects below, so it never clobbers what they set.
+  //
+  // `initialDraft` is the one exception: restored instead of wiped, then
+  // cleared so it can't leak into a later, unrelated visit.
   const freshVisitResetRef = useRef(false);
   useEffect(() => {
     if (freshVisitResetRef.current) return;
     freshVisitResetRef.current = true;
     if (!editingDesignId && !installerCustomerId) {
-      dispatch(resetProposalData());
+      if (initialDraft) {
+        dispatch(mergeProposalData(initialDraft));
+        clearDesignDraft();
+      } else {
+        dispatch(resetProposalData());
+      }
     }
-  }, [dispatch, editingDesignId, installerCustomerId]);
+  }, [dispatch, editingDesignId, initialDraft, installerCustomerId]);
 
   /**
    * Load the design being edited.
@@ -219,10 +240,13 @@ export function DesignsHeroSection({
     | "proposal"
   >(
     // Update mode opens on the first data step: the marketing intro has nothing
-    // to show someone who is here to change an existing design.
-    editingDesignId ? "register" : "start",
+    // to show someone who is here to change an existing design. A restored
+    // draft resumes right where Finish was clicked from.
+    initialDraft ? "proposal" : editingDesignId ? "register" : "start",
   );
-  const [fillPercent, setFillPercent] = useState(editingDesignId ? 30 : 10);
+  const [fillPercent, setFillPercent] = useState(
+    initialDraft ? 100 : editingDesignId ? 30 : 10,
+  );
 
   const registerStepRef = useRef<DesignsRegisterStepHandle>(null);
   const propertyStepRef = useRef<DesignsPropertyStepHandle>(null);

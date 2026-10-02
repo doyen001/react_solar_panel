@@ -28,6 +28,7 @@ import {
   updateInstallerDesign,
   type InstallerCustomerDesign,
 } from "@/lib/installers/designs";
+import { clearDesignDraft, saveDesignDraft } from "@/lib/designs/draft-persistence";
 import { DesignsProposalDownloadModal } from "./DesignsProposalDownloadModal";
 import {
   DEFAULT_BATTERY_CAPACITY_ID,
@@ -372,8 +373,17 @@ export const DesignsProposalStepContent = forwardRef<
         }
       }
 
+      // A signed-out visitor's save 401s and gets bounced to sign-in/sign-up
+      // (fetchWithCustomerSession's own redirect, with `?from=` pointing back
+      // here) — a fresh mount of this page with no designId/customerId then
+      // resets the wizard's Redux state, so without this snapshot the design
+      // they just finished building would be gone when they came back signed
+      // in. Cleared the moment a save actually succeeds.
+      saveDesignDraft(proposal);
+
       if (editingDesignId) {
         await saveBuilderDesign(editingDesignId, input);
+        clearDesignDraft();
         toast.success("Your design changes were saved.");
         router.push("/customers/design");
         return;
@@ -384,6 +394,7 @@ export const DesignsProposalStepContent = forwardRef<
       // rehydrate anything from `wizardData` — every field the customer had
       // just set, including the Energy step's battery slider, looked reset.
       await saveCustomDesign(input);
+      clearDesignDraft();
       toast.success("Design saved to your account.");
       router.push("/customers/design");
     } catch (err) {
