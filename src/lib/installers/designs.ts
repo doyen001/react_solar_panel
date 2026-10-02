@@ -86,6 +86,22 @@ export async function fetchInstallerDesigns(
   return Array.isArray(json.data) ? json.data : [];
 }
 
+/** One design by id, for an installer opening the Designer on a customer's existing design. */
+export async function fetchInstallerDesignById(
+  id: string,
+  init?: RequestInit,
+): Promise<InstallerCustomerDesign | null> {
+  const res = await fetchWithInstallerSession(`/api/installers/designs/${id}`, {
+    cache: "no-store",
+    ...init,
+  });
+  const json = (await res.json().catch(() => ({}))) as ApiEnvelope<InstallerCustomerDesign>;
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to load design");
+  }
+  return json.data ?? null;
+}
+
 export async function updateInstallerDesign(
   id: string,
   body: {

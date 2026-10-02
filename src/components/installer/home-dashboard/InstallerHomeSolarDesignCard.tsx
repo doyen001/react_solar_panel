@@ -13,8 +13,15 @@ import type { InstallerCustomerSummary } from "@/lib/installers/customers";
  * registering them — the Designer's own contact-details step would just be
  * asking for the same thing again, so this link carries it along and the
  * wizard skips straight past that step when it sees a `customerId`.
+ *
+ * When the customer already has a design, `designId` is included too —
+ * without it the builder always opens in "create" mode and any edit lands on
+ * a brand-new design instead of updating the one shown on this job page.
  */
-function designerHref(customer: InstallerCustomerSummary | null): string {
+function designerHref(
+  customer: InstallerCustomerSummary | null,
+  designId?: string | null,
+): string {
   if (!customer) return "/designs";
   const params = new URLSearchParams({ customerId: customer.id });
   if (customer.firstName) params.set("firstName", customer.firstName);
@@ -22,6 +29,7 @@ function designerHref(customer: InstallerCustomerSummary | null): string {
   if (customer.email) params.set("email", customer.email);
   if (customer.phone) params.set("phone", customer.phone);
   if (customer.address) params.set("address", customer.address);
+  if (designId) params.set("designId", designId);
   return `/designs?${params.toString()}`;
 }
 
@@ -235,7 +243,7 @@ export function InstallerHomeSolarDesignCard({
           </span>
         </div>
         <Link
-          href={designerHref(customer ?? null)}
+          href={designerHref(customer ?? null, design?.id)}
           prefetch={false}
           className="inline-flex shrink-0 items-center gap-[6px] font-dm-sans text-[11px] font-semibold leading-[16.56px] text-[#333333] hover:opacity-80"
         >

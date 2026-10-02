@@ -16,6 +16,7 @@ import {
   fetchCustomDesign,
   fetchDesignById,
 } from "@/lib/customers/custom-design";
+import { fetchInstallerDesignById } from "@/lib/installers/designs";
 import { fetchCustomerProfile } from "@/lib/customers/profile";
 import { setUser } from "@/lib/store/customerAuthSlice";
 import { DesignTopBar } from "../modules/DesignTopBar";
@@ -119,6 +120,23 @@ export function DesignsHeroSection({
     if (!editingDesignId && !customerUser) return;
     hydratedRef.current = true;
 
+    // An installer opening a customer's design has no customer auth cookies
+    // at all — the customer-scoped fetch/profile calls below would just
+    // 401. Load it through the installer-authenticated endpoint instead.
+    if (editingDesignId && installerCustomerId) {
+      void fetchInstallerDesignById(editingDesignId)
+        .then((design) => {
+          if (!design) return;
+          const payload = designToProposalPayload(design);
+          if (payload) dispatch(mergeProposalData(payload));
+        })
+        .catch(() => {
+          // Non-fatal: fall back to the default proposal state.
+        })
+        .finally(() => setHydrating(false));
+      return;
+    }
+
     // Redux auth lives in sessionStorage, so a fresh tab or a direct link to
     // this page has no user even though the cookie still authenticates. Recover
     // it, or anything gated on being signed in — the save button, writing
@@ -143,7 +161,7 @@ export function DesignsHeroSection({
         // Non-fatal: fall back to the default proposal state.
       })
       .finally(() => setHydrating(false));
-  }, [customerUser, dispatch, editingDesignId]);
+  }, [customerUser, dispatch, editingDesignId, installerCustomerId]);
 
   // Pre-fills the contact details an installer already collected when
   // registering this customer, so the (skipped) register step's data is

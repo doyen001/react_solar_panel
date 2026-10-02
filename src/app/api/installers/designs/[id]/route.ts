@@ -5,6 +5,12 @@ import {
 
 type Ctx = { params: Promise<{ id: string }> };
 
+export async function GET(_request: Request, ctx: Ctx) {
+  const { id } = await ctx.params;
+  const res = await backendAuthedFetch("installer", `/designs/${id}`);
+  return forwardBackendJson(res);
+}
+
 export async function PATCH(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const body = await request.text();

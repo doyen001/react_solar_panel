@@ -70,7 +70,7 @@ export function DesignTopBar({ center }: DesignTopBarProps = {}) {
         </p>
       ) : null}
 
-      <div className="flex h-[40px] shrink-0 items-center gap-[16px] z-20">
+      <div className="flex h-full shrink-0 items-center gap-[16px] z-20">
         <button
           type="button"
           aria-label="Help"

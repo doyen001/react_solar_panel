@@ -91,7 +91,7 @@ export type SaveCustomDesignInput = {
  * Returns undefined when nothing was picked, so a save cannot wipe equipment
  * the installer attached just because the builder had no selection.
  */
-function proposalProducts(
+export function proposalProducts(
   proposal: DesignProposalState,
 ): SaveCustomDesignInput["products"] | undefined {
   const panelCount = toPositiveInt(proposal.equipment.numberOfPanels);

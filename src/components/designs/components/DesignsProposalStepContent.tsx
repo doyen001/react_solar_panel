@@ -17,10 +17,17 @@ import {
 } from "@/lib/customers/profile";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  proposalProducts,
   proposalToDesignInput,
   saveBuilderDesign,
   saveCustomDesign,
 } from "@/lib/customers/custom-design";
+import {
+  addProductToInstallerDesign,
+  removeProductFromInstallerDesign,
+  updateInstallerDesign,
+  type InstallerCustomerDesign,
+} from "@/lib/installers/designs";
 import { DesignsProposalDownloadModal } from "./DesignsProposalDownloadModal";
 import {
   DEFAULT_BATTERY_CAPACITY_ID,
@@ -34,6 +41,42 @@ import {
   DEFAULT_FINANCIAL_PROJECTION_ASSUMPTIONS,
   buildFinancialProjectionFromProposal,
 } from "@/lib/proposal/financialProjection";
+
+/**
+ * The installer save endpoint (PATCH /designs/:id) doesn't accept a
+ * `products` array the way the customer builder's PUT does — only the
+ * per-product add/remove endpoints exist for installers. So the wizard's
+ * equipment picks are reconciled against the design's existing products one
+ * at a time: anything newly picked or with a changed quantity is (re)added
+ * (the backend upserts by productId), anything no longer picked is removed.
+ * Without this, equipment chosen in the Items step never shows up on the
+ * installer's job page, which only reads `design.products`.
+ */
+async function syncInstallerDesignProducts(
+  designId: string,
+  desired: { productId: string; quantity: number }[],
+  existing: InstallerCustomerDesign["products"],
+): Promise<void> {
+  const existingByProductId = new Map(
+    (existing ?? [])
+      .filter((item) => item.product?.id)
+      .map((item) => [item.product!.id, item]),
+  );
+
+  for (const item of desired) {
+    const current = existingByProductId.get(item.productId);
+    if (!current || current.quantity !== item.quantity) {
+      await addProductToInstallerDesign(designId, item);
+    }
+  }
+
+  const desiredIds = new Set(desired.map((item) => item.productId));
+  for (const [productId] of existingByProductId) {
+    if (!desiredIds.has(productId)) {
+      await removeProductFromInstallerDesign(designId, productId);
+    }
+  }
+}
 
 function parseMoneyToNumber(raw: string): number {
   const cleaned = raw.replace(/[^0-9.-]/g, "");
@@ -252,6 +295,14 @@ export function DesignsProposalStepContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const editingDesignId = searchParams.get("designId");
+  /**
+   * Set when an installer opened the Designer for a customer (see
+   * InstallerHomeSolarDesignCard) — this session has no customer auth
+   * cookies at all, so saving must go through the installer-authenticated
+   * endpoint instead of the customer one, which would just 401/403.
+   */
+  const installerCustomerId = searchParams.get("customerId");
+  const isInstallerEditing = Boolean(installerCustomerId);
 
   /**
    * In update mode the button always shows: arriving with a designId means an
@@ -259,7 +310,8 @@ export function DesignsProposalStepContent({
    * empty (it is restored from sessionStorage, which a fresh tab lacks) — gating
    * on it hid the only way to save.
    */
-  const showSave = Boolean(editingDesignId) || Boolean(customerUser);
+  const showSave =
+    Boolean(editingDesignId) || Boolean(customerUser) || isInstallerEditing;
 
   /**
    * Persists the builder output so it shows on the customer's design page and
@@ -272,6 +324,33 @@ export function DesignsProposalStepContent({
     if (saving) return;
     setSaving(true);
     try {
+      const input = proposalToDesignInput(proposal);
+
+      // Installer session: no customer cookies to write a profile with, and
+      // the customer-scoped save endpoints reject anyone but the design's
+      // owner — this is the only path an installer can actually write to.
+      if (isInstallerEditing) {
+        if (!editingDesignId) {
+          throw new Error(
+            "This customer has no design yet to save changes to.",
+          );
+        }
+        const updated = await updateInstallerDesign(editingDesignId, {
+          wizardData: input.wizardData,
+          title: input.title,
+          address: input.address,
+          panelCount: input.panelCount,
+          estimatedSavings: input.estimatedSavings,
+        });
+        await syncInstallerDesignProducts(
+          editingDesignId,
+          proposalProducts(proposal) ?? [],
+          updated.products,
+        );
+        toast.success("Design changes saved.");
+        return;
+      }
+
       // Contact details belong to the account record, not the design — the
       // design page, the installer and comms all read it there. Without this
       // write the customer's edit lives only in wizardData and is overwritten
@@ -288,8 +367,6 @@ export function DesignsProposalStepContent({
         }
       }
 
-      const input = proposalToDesignInput(proposal);
-
       if (editingDesignId) {
         await saveBuilderDesign(editingDesignId, input);
         toast.success("Your design changes were saved.");
@@ -297,8 +374,13 @@ export function DesignsProposalStepContent({
         return;
       }
 
+      // Without this redirect the page kept the no-designId URL after saving,
+      // so a reload (or just navigating back into the builder) couldn't
+      // rehydrate anything from `wizardData` — every field the customer had
+      // just set, including the Energy step's battery slider, looked reset.
       await saveCustomDesign(input);
       toast.success("Design saved to your account.");
+      router.push("/customers/design");
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Could not save your design",
