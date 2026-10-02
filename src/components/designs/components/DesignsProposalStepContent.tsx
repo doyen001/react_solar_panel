@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -279,14 +279,25 @@ function BatterySelector({
 
 export type DesignsProposalStepContentProps = {
   customerName?: string;
+  /** Mirrors the internal `saving` state up so the wizard's Finish button can show it. */
+  onSavingChange?: (saving: boolean) => void;
+};
+
+export type DesignsProposalStepHandle = {
+  /** Invoked by the wizard's Finish button — same persistence the old standalone Save button used. */
+  save: () => void;
 };
 
 /**
  * Figma Screen 32 (20:22020) — proposal summary, system details, pricing, CTA.
  */
-export function DesignsProposalStepContent({
-  customerName = "Charli Abdo",
-}: DesignsProposalStepContentProps) {
+export const DesignsProposalStepContent = forwardRef<
+  DesignsProposalStepHandle,
+  DesignsProposalStepContentProps
+>(function DesignsProposalStepContent(
+  { customerName = "Charli Abdo", onSavingChange },
+  ref,
+) {
   const proposal = useAppSelector(selectDesignProposal);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -305,24 +316,17 @@ export function DesignsProposalStepContent({
   const isInstallerEditing = Boolean(installerCustomerId);
 
   /**
-   * In update mode the button always shows: arriving with a designId means an
-   * authenticated fetch already succeeded, and Redux auth can legitimately be
-   * empty (it is restored from sessionStorage, which a fresh tab lacks) — gating
-   * on it hid the only way to save.
-   */
-  const showSave =
-    Boolean(editingDesignId) || Boolean(customerUser) || isInstallerEditing;
-
-  /**
    * Persists the builder output so it shows on the customer's design page and
    * to their installer. When the customer arrived from their design page
    * (`?designId=`) the edit is written back to that design and we return them
-   * there; otherwise it upserts their custom design. Only offered when signed
-   * in — the builder is also a public lead-gen flow.
+   * there; otherwise it upserts their custom design. Triggered by the wizard's
+   * Finish button — there used to also be a standalone Save button here, but
+   * that just duplicated Finish for no reason once Finish itself persists.
    */
   async function handleSaveToAccount() {
     if (saving) return;
     setSaving(true);
+    onSavingChange?.(true);
     try {
       const input = proposalToDesignInput(proposal);
 
@@ -348,6 +352,7 @@ export function DesignsProposalStepContent({
           updated.products,
         );
         toast.success("Design changes saved.");
+        router.push("/installers/dashboard/home");
         return;
       }
 
@@ -387,8 +392,19 @@ export function DesignsProposalStepContent({
       );
     } finally {
       setSaving(false);
+      onSavingChange?.(false);
     }
   }
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      save: () => void handleSaveToAccount(),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [proposal, isInstallerEditing, editingDesignId, customerUser],
+  );
+
   const displayCustomerName = proposal.customer.name || customerName;
 
   const letterFirstName = useMemo(() => {
@@ -628,25 +644,6 @@ export function DesignsProposalStepContent({
                 Download your proposal
               </button>
 
-              {/*
-                Dark fill on purpose: this button sits on the card's
-                yellow-to-orange gradient, where white text on a transparent
-                background is effectively invisible.
-              */}
-              {showSave ? (
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={() => void handleSaveToAccount()}
-                  className="w-full rounded-[14.412px] bg-[#12203a] py-2 font-source-sans text-[18.529px] font-semibold uppercase leading-[27.794px] tracking-[0.9265px] text-white shadow-[0px_0px_20px_0px_rgba(0,0,0,0.25)] transition hover:brightness-125 disabled:opacity-60"
-                >
-                  {saving
-                    ? "Saving…"
-                    : editingDesignId
-                      ? "Save changes"
-                      : "Save to my account"}
-                </button>
-              ) : null}
             </div>
           </div>
         </div>
@@ -659,4 +656,4 @@ export function DesignsProposalStepContent({
       />
     </div>
   );
-}
+});

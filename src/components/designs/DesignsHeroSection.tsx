@@ -47,7 +47,10 @@ import {
   DesignsItemsStepContent,
   type DesignsItemsStepHandle,
 } from "./components/DesignsItemsStepContent";
-import { DesignsProposalStepContent } from "./components/DesignsProposalStepContent";
+import {
+  DesignsProposalStepContent,
+  type DesignsProposalStepHandle,
+} from "./components/DesignsProposalStepContent";
 import { DesignsHeroTagline } from "./components/DesignsHeroTagline";
 import { DesignsSavingsPromoCard } from "./components/DesignsSavingsPromoCard";
 
@@ -227,6 +230,8 @@ export function DesignsHeroSection({
   const solarStepRef = useRef<DesignsSolarPanelStepHandle>(null);
   const energyStepRef = useRef<DesignsEnergyStepHandle>(null);
   const itemsStepRef = useRef<DesignsItemsStepHandle>(null);
+  const proposalStepRef = useRef<DesignsProposalStepHandle>(null);
+  const [finishing, setFinishing] = useState(false);
 
   const progressByScreen = {
     start: 10,
@@ -250,6 +255,13 @@ export function DesignsHeroSection({
   >;
 
   const onNext = () => {
+    // Last step: Finish persists the design instead of advancing further —
+    // this replaces what used to be a separate "Save changes" button on the
+    // Proposal step itself, which just duplicated what Finish should do.
+    if (activeScreen === "proposal") {
+      proposalStepRef.current?.save();
+      return;
+    }
     if (activeScreen === "register") {
       const register = registerStepRef.current?.getValues();
       const name = register?.name.trim() ?? "";
@@ -463,7 +475,11 @@ export function DesignsHeroSection({
               below — finish the steps and save to update it.
             </p>
             <Link
-              href="/customers/design"
+              href={
+                installerCustomerId
+                  ? "/installers/dashboard/home"
+                  : "/customers/design"
+              }
               className="font-source-sans text-[13px] font-medium uppercase tracking-[0.5px] text-white underline"
             >
               Cancel
@@ -501,7 +517,10 @@ export function DesignsHeroSection({
         ) : activeScreen === "items" ? (
           <DesignsItemsStepContent ref={itemsStepRef} />
         ) : activeScreen === "proposal" ? (
-          <DesignsProposalStepContent />
+          <DesignsProposalStepContent
+            ref={proposalStepRef}
+            onSavingChange={setFinishing}
+          />
         ) : (
           <></>
         )}
@@ -513,6 +532,7 @@ export function DesignsHeroSection({
         showBack={activeScreen !== "start"}
         showNext={showNext}
         fillPercent={fillPercent}
+        finishing={finishing}
       />
     </section>
   );

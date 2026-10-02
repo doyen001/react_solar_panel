@@ -9,6 +9,8 @@ type DesignsHeroFooterProps = {
   showBack?: boolean;
   showNext?: boolean;
   fillPercent?: number;
+  /** True while Finish (the last step's `onNext`) is persisting the design. */
+  finishing?: boolean;
 };
 
 /**
@@ -21,6 +23,7 @@ export function DesignsHeroFooter({
   fillPercent = 10,
   showBack = false,
   showNext = false,
+  finishing = false,
 }: DesignsHeroFooterProps) {
   return (
     <div
@@ -48,12 +51,13 @@ export function DesignsHeroFooter({
 
             <button
               type="button"
-              onClick={fillPercent === 100 ? () => {window.location.href = "/installers/auth"} : onNext}
-              className={`inline-flex min-h-12 min-w-[157px] items-center justify-center gap-[14px] rounded-xl font-source-sans text-[18px] font-semibold uppercase leading-6 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-95 ${fillPercent === 100 ? "text-white bg-design-accent-cyan" : "text-black bg-design-next"} ${
+              onClick={onNext}
+              disabled={fillPercent === 100 && finishing}
+              className={`inline-flex min-h-12 min-w-[157px] items-center justify-center gap-[14px] rounded-xl font-source-sans text-[18px] font-semibold uppercase leading-6 shadow-[0px_0px_40px_0px_rgba(140,140,140,0.3)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70 ${fillPercent === 100 ? "text-white bg-design-accent-cyan" : "text-black bg-design-next"} ${
                 showNext ? "" : "invisible pointer-events-none"
               }`}
             >
-              {fillPercent === 100 ? "Finish" : "Next"}
+              {fillPercent === 100 ? (finishing ? "Saving…" : "Finish") : "Next"}
               <Icon
                 name="ArrowRight"
                 className={`size-6 ${fillPercent === 100 ? "text-white" : "text-black"}`}
