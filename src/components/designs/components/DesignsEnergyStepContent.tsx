@@ -350,24 +350,32 @@ function ValuePanel({
   dollarClassName?: string;
   breakdown?: string[];
 }) {
+  const hasBreakdown = Boolean(breakdown && breakdown.length > 0);
+
   return (
     <div className="flex min-w-0 flex-1 flex-col rounded-[10px] border border-white/10 bg-white/[0.06] px-2.5 py-2">
       <div className="flex items-center gap-1.5">
         <span className={`flex size-4 shrink-0 items-center justify-center rounded-[4px] ${iconClassName}`}>
           <Icon name={icon} className="size-2.5 text-white" />
         </span>
-        <p className="truncate font-inter text-[8.5px] font-semibold uppercase tracking-[0.4px] text-white/55">
+        <p className="truncate font-inter text-[11px] font-semibold uppercase tracking-[0.4px] text-white">
           {label}
         </p>
       </div>
       {kwh ? (
-        <p className="mt-1 font-inter text-[10px] text-white/70">{kwh}</p>
+        <p className="mt-1 font-inter text-[13px] text-white">{kwh}</p>
       ) : null}
-      <p className={`mt-0.5 font-source-sans text-[14.5px] font-bold ${dollarClassName ?? "text-white"}`}>
+      <p
+        className={`font-source-sans font-bold ${
+          hasBreakdown
+            ? "mt-1 text-[20px]"
+            : "mt-1 flex flex-1 items-center text-[28px]"
+        } ${dollarClassName ?? "text-white"}`}
+      >
         {dollar}
       </p>
       {breakdown && breakdown.length > 0 ? (
-        <div className="mt-1 flex flex-1 flex-col justify-end gap-0.5 border-t border-white/10 pt-1 font-inter text-[8.5px] leading-3 text-white/40">
+        <div className="mt-1 flex flex-1 flex-col justify-end gap-0.5 border-t border-white/10 pt-1 font-inter text-[10px] leading-3.5 text-white">
           {breakdown.map((line, i) => (
             <span key={i}>{line}</span>
           ))}
@@ -874,8 +882,8 @@ export const DesignsEnergyStepContent = forwardRef<
                       onClick={() => setValuePeriod(p)}
                       className={`rounded-full px-2 py-0.5 font-source-sans text-[9px] font-semibold transition ${
                         valuePeriod === p
-                          ? "bg-white text-[#152238]"
-                          : "bg-white/10 text-white/70 hover:bg-white/20"
+                          ? "bg-white text-orange-amber ring-1 ring-orange-amber"
+                          : "bg-white text-[#152238]/70 hover:text-[#152238]"
                       }`}
                     >
                       {VALUE_PERIOD_LABELS[p]}
