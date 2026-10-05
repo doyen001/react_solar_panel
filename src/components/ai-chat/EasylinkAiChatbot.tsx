@@ -1,9 +1,23 @@
 "use client";
 
 import classNames from "classnames";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { ChatMessageMarkdown } from "@/components/messages/ChatMessageMarkdown";
 import Image from "next/image";
+
+/**
+ * This bot is mounted in the root layout, so anything it imports statically
+ * lands in the bundle of *every* page. `react-markdown` (plus its unified /
+ * remark / micromark tree) is only needed once a reply is on screen, which
+ * can't happen before the panel is opened — so it loads then instead.
+ */
+const ChatMessageMarkdown = dynamic(
+  () =>
+    import("@/components/messages/ChatMessageMarkdown").then(
+      (m) => m.ChatMessageMarkdown,
+    ),
+  { ssr: false },
+);
 
 type ChatRole = "user" | "assistant";
 

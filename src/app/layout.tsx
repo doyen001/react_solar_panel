@@ -1,12 +1,5 @@
 import type { Metadata } from "next";
-import {
-  DM_Sans,
-  Geist,
-  Geist_Mono,
-  Inter,
-  Outfit,
-  Source_Sans_3,
-} from "next/font/google";
+import { DM_Sans, Inter, Outfit, Source_Sans_3 } from "next/font/google";
 import { EasylinkAiChatbot } from "@/components/ai-chat/EasylinkAiChatbot";
 import { ClarityAnalytics } from "@/components/analytics/ClarityAnalytics";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
@@ -15,16 +8,10 @@ import { TopProgressBar } from "@/components/providers/TopProgressBar";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
+// Geist / Geist Mono used to load here too, preloaded on every page via
+// next/font, but nothing in the app actually set its font-family to them
+// (`--font-sans`/`--font-mono` in globals.css now resolve to Source Sans and
+// the system mono stack) — two webfont families nobody was rendering with.
 const sourceSans = Source_Sans_3({
   variable: "--font-source-sans",
   subsets: ["latin"],
@@ -62,7 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${sourceSans.variable} ${outfit.variable} ${inter.variable} ${dmSans.variable} antialiased`}
+        className={`${sourceSans.variable} ${outfit.variable} ${inter.variable} ${dmSans.variable} antialiased`}
         suppressHydrationWarning
       >
         <ReduxProvider>

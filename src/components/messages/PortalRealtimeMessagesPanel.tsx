@@ -1,12 +1,25 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { ConversationSwitcher } from "@/components/customer/messages/ConversationSwitcher";
 import { ChatThreadHeader } from "@/components/customer/messages/ChatThreadHeader";
 import { MessageRichComposer } from "@/components/customer/messages/MessageRichComposer";
 import { ChatThreadMessageRow } from "@/components/customer/messages/ChatThreadMessageRow";
-import { LiveKitCallOverlay } from "@/components/messages/LiveKitCallOverlay";
 import { ChatThreadScrollPane } from "@/components/messages/ChatThreadScrollPane";
+
+/**
+ * The overlay drags in the whole LiveKit client (several hundred KB) and
+ * renders nothing at all unless a call is live, so it is fetched when one
+ * starts rather than on every visit to the messages page.
+ */
+const LiveKitCallOverlay = dynamic(
+  () =>
+    import("@/components/messages/LiveKitCallOverlay").then(
+      (m) => m.LiveKitCallOverlay,
+    ),
+  { ssr: false },
+);
 import type { CustomerUser } from "@/lib/store/customerAuthSlice";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
 import { initialsFromDisplayName } from "@/lib/customer/initialsFromName";
@@ -82,6 +95,10 @@ export function PortalRealtimeMessagesPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
+      {/* Same condition the overlay itself short-circuits on, lifted up here
+          so the lazy chunk isn't requested while there's no call. */}
+      {chat.voiceCall.callState !== "idle" &&
+      chat.voiceCall.callState !== "ended" ? (
       <LiveKitCallOverlay
         callState={chat.voiceCall.callState}
         peerName={chat.activeContactName}
@@ -103,6 +120,7 @@ export function PortalRealtimeMessagesPanel({
         onPeerJoined={chat.voiceCall.onPeerJoined}
         registerMediaControls={chat.voiceCall.registerMediaControls}
       />
+      ) : null}
       <ConversationSwitcher
         contacts={chat.contacts}
         activeId={activeTabId}

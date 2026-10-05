@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { CustomerAvatar } from "@/components/customer/CustomerAvatar";
@@ -11,7 +10,6 @@ import { PreferenceToggle } from "@/components/customer/profile/PreferenceToggle
 import { ProfileContactField } from "@/components/customer/profile/ProfileContactField";
 import { ProfileDocumentRow } from "@/components/customer/profile/ProfileDocumentRow";
 import { ProfileEntityRow } from "@/components/customer/profile/ProfileEntityRow";
-import { profileAssets } from "@/components/customer/profile/profileAssets";
 import { StatusBadge } from "@/components/customer/profile/StatusBadge";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { setUser } from "@/lib/store/customerAuthSlice";
@@ -21,11 +19,7 @@ import {
   formatDocumentSize,
   type CustomerDocument,
 } from "@/lib/customers/documents";
-import {
-  fetchCustomerProfile,
-  profileDiff,
-  updateCustomerProfile,
-} from "@/lib/customers/profile";
+import { profileDiff, updateCustomerProfile } from "@/lib/customers/profile";
 
 export default function CustomerProfilePage() {
   const dispatch = useAppDispatch();
@@ -56,11 +50,9 @@ export default function CustomerProfilePage() {
     return () => controller.abort();
   }, []);
 
-  useEffect(() => {
-    void fetchCustomerProfile().then((profile) => {
-      if (profile) dispatch(setUser(profile));
-    });
-  }, [dispatch]);
+  // No profile fetch here on purpose: the customer layout's
+  // `useHydrateCustomerUser` already fills the store whenever it's empty, so
+  // doing it again here just fired a second identical request on every visit.
 
   const displayName = useMemo(() => {
     const fn = user?.firstName?.trim();

@@ -37,11 +37,23 @@ export function VideoSlider({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  /**
+   * Which slides have been shown at least once — only those render their
+   * media. Every slide used to mount its `<video>`/`<Image>` up front, and
+   * because the inactive ones are merely `opacity-0` (still in the viewport)
+   * the browser downloaded all of them immediately: on the customer hero
+   * that meant multi-MB images nobody had scrolled to yet. Visited slides
+   * stay mounted so going back to one still cross-fades instantly.
+   */
+  const [loadedSlides, setLoadedSlides] = useState<number[]>([0]);
   const goToSlide = useCallback(
     (index: number) => {
       if (index < 0) index = slides.length - 1;
       if (index >= slides.length) index = 0;
       setCurrentSlide(index);
+      setLoadedSlides((prev) =>
+        prev.includes(index) ? prev : [...prev, index],
+      );
       if (index !== 0 && !videoEnded) setVideoEnded(true);
     },
     [videoEnded, slides],
@@ -60,6 +72,7 @@ export function VideoSlider({
   const handleVideoEnd = useCallback(() => {
     setVideoEnded(true);
     setCurrentSlide(1);
+    setLoadedSlides((prev) => (prev.includes(1) ? prev : [...prev, 1]));
   }, []);
 
   return (
@@ -71,7 +84,7 @@ export function VideoSlider({
             i === currentSlide ? "z-1 opacity-100" : "z-0 opacity-0"
           }`}
         >
-          {slide.type === "video" ? (
+          {!loadedSlides.includes(i) ? null : slide.type === "video" ? (
             <video
               ref={videoRef}
               autoPlay
@@ -85,10 +98,13 @@ export function VideoSlider({
           ) : (
             <Image
               src={slide.src}
-              alt="Solar installation"
+              alt={slide.alt}
               fill
+              sizes="100vw"
               className="object-cover"
-              priority={i === 1}
+              // Only the opening slide is worth preloading; `priority` used to
+              // be hardcoded to slide 1, which preloaded an off-screen image.
+              priority={slide.priority ?? i === 0}
             />
           )}
         </div>

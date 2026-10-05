@@ -622,8 +622,11 @@
   --color-svc-glass: rgb(255 255 255 / 0.07);
   --color-svc-glass-strong: rgb(255 255 255 / 0.12);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Source Sans is the real body face; `font-mono` is used in two incidental
+     spots (a payment id, a kWh readout), so it resolves to the system stack
+     rather than costing every page an extra downloaded font family. */
+  --font-sans: var(--font-source-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --font-source-sans: var(--font-source-sans);
   --font-outfit: var(--font-outfit);
   --font-inter: var(--font-inter);
@@ -684,9 +687,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    var(--font-source-sans), var(--font-geist-sans), Arial, Helvetica,
-    sans-serif;
+  font-family: var(--font-source-sans), Arial, Helvetica, sans-serif;
 }
 
 /* Solar Maintenance — full-bleed hero behind AMC card (Figma 1676:378) */
