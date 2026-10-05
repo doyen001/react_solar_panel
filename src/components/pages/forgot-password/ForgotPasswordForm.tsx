@@ -85,6 +85,7 @@ export function ForgotPasswordForm() {
               placeholder="Email"
               type="email"
               inputClassName="text-[16px] tracking-[-0.3125px]"
+              containerClassName="border border-gray-300"
               error={errors.email?.message}
               {...register("email")}
             />

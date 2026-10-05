@@ -14,9 +14,18 @@ import {
   type ResetPasswordFormData,
 } from "@/lib/validations/auth";
 
+const CUSTOMER_AUTH_PATH = "/customers/auth";
+const INSTALLER_AUTH_PATH = "/installers/auth";
+
 export function ResetPasswordForm() {
   const params = useSearchParams();
   const token = params.get("token");
+  // Baked into the link itself (see buildPasswordResetEmail on the backend)
+  // so a customer lands back on /customers/auth and an installer on
+  // /installers/auth — older links sent before this existed have no `role`
+  // param, so this falls back to the customer portal for those.
+  const role = params.get("role");
+  const signInHref = role === "INSTALLER" ? INSTALLER_AUTH_PATH : CUSTOMER_AUTH_PATH;
   const [showPassword, setShowPassword] = useState(false);
   const [done, setDone] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -85,7 +94,7 @@ export function ResetPasswordForm() {
               Your password has been updated. You can now sign in with it.
             </p>
             <Link
-              href="/customers/auth"
+              href={signInHref}
               className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-linear-to-r from-yellow-lemon to-orange-amber px-6 font-inter text-sm font-bold text-warm-black"
             >
               Continue to sign in
@@ -111,6 +120,7 @@ export function ResetPasswordForm() {
               placeholder="New password"
               type={showPassword ? "text" : "password"}
               inputClassName="text-[16px] tracking-[-0.3125px]"
+              containerClassName="border border-gray-300"
               error={errors.password?.message}
               right={
                 <button
@@ -129,6 +139,7 @@ export function ResetPasswordForm() {
               placeholder="Confirm new password"
               type={showPassword ? "text" : "password"}
               inputClassName="text-[16px] tracking-[-0.3125px]"
+              containerClassName="border border-gray-300"
               error={errors.confirmPassword?.message}
               {...register("confirmPassword")}
             />

@@ -8,12 +8,23 @@ export type AuthFieldProps = {
   type?: "text" | "email" | "password" | "tel";
   right?: React.ReactNode;
   inputClassName?: string;
+  /** Extra classes on the input's outer box — e.g. a border, for one-off callers. */
+  containerClassName?: string;
   error?: string;
 };
 
 export const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(
   function AuthField(
-    { icon, placeholder, type = "text", right, inputClassName, error, ...rest },
+    {
+      icon,
+      placeholder,
+      type = "text",
+      right,
+      inputClassName,
+      containerClassName,
+      error,
+      ...rest
+    },
     ref,
   ) {
     const id = useId();
@@ -25,7 +36,7 @@ export const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(
           htmlFor={id}
           className={`flex h-[44px] w-full items-center gap-[12px] rounded-[14px] bg-auth-input px-[16px] shadow-[0px_0px_0px_0px_rgba(196,148,48,0.2)] transition-shadow ${
             hasError ? "ring-1 ring-red-500/60" : ""
-          }`}
+          } ${containerClassName ?? ""}`}
         >
           <span className="grid size-[16px] place-items-center text-auth-placeholder">
             {icon}
