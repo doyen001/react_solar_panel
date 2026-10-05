@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +14,24 @@ import {
   type ForgotPasswordFormData,
 } from "@/lib/validations/auth";
 
+const CUSTOMER_AUTH_PATH = "/customers/auth";
+const INSTALLER_AUTH_PATH = "/installers/auth";
+const ADMIN_AUTH_PATH = "/admin/auth";
+
 export function ForgotPasswordForm() {
+  // This page is shared across all three sign-in portals, each linking here
+  // as `/forgot-password?role=...` — unlike the emailed reset link, there's
+  // no account to look the role up from yet, so the portal the visitor
+  // started from is the only way to know where "Back to sign in" should go.
+  const params = useSearchParams();
+  const role = params.get("role");
+  const signInHref =
+    role === "INSTALLER"
+      ? INSTALLER_AUTH_PATH
+      : role === "ADMIN"
+        ? ADMIN_AUTH_PATH
+        : CUSTOMER_AUTH_PATH;
+
   const [sent, setSent] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -59,7 +77,7 @@ export function ForgotPasswordForm() {
               It expires in 1 hour.
             </p>
             <Link
-              href="/customers/auth"
+              href={signInHref}
               className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl border-2 border-warm-ink/20 px-6 font-inter text-sm font-bold text-warm-ink hover:bg-cream-50"
             >
               Back to sign in
@@ -97,7 +115,7 @@ export function ForgotPasswordForm() {
             />
 
             <Link
-              href="/customers/auth"
+              href={signInHref}
               className="text-center font-source-sans text-[14px] font-medium text-(--color-auth-subtle-60) underline"
             >
               Back to sign in

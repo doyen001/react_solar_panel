@@ -310,7 +310,7 @@ function SignInForm({ onSwitchMode }: { onSwitchMode: () => void }) {
               </span>
             </label>
             <Link
-              href="/forgot-password"
+              href="/forgot-password?role=CUSTOMER"
               className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-60) underline"
             >
               Forgot password?

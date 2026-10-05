@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ForgotPasswordForm } from "@/components/pages/forgot-password/ForgotPasswordForm";
 import { FooterSection } from "@/components/modules/LandingFooter";
 import { Header } from "@/components/modules/LandingHero";
@@ -7,7 +8,11 @@ export default function ForgotPasswordPage() {
     <>
       <Header />
       <main className="flex min-h-screen items-center justify-center bg-solar-gold px-4 py-24">
-        <ForgotPasswordForm />
+        {/* ForgotPasswordForm reads ?role= via useSearchParams, which Next
+            requires a Suspense boundary for during static rendering. */}
+        <Suspense fallback={null}>
+          <ForgotPasswordForm />
+        </Suspense>
       </main>
       <FooterSection showReadyToControlCta={false} />
     </>

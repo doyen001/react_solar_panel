@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -190,12 +191,12 @@ export default function AdminAuthPage() {
                       Remember me
                     </span>
                   </label>
-                  <button
-                    type="button"
+                  <Link
+                    href="/forgot-password?role=ADMIN"
                     className="font-source-sans text-[14px] font-medium leading-[20px] tracking-[-0.1504px] text-(--color-auth-subtle-60) underline"
                   >
                     Forgot password?
-                  </button>
+                  </Link>
                 </div>
 
                 <AuthPrimaryButton

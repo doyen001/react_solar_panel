@@ -16,16 +16,23 @@ import {
 
 const CUSTOMER_AUTH_PATH = "/customers/auth";
 const INSTALLER_AUTH_PATH = "/installers/auth";
+const ADMIN_AUTH_PATH = "/admin/auth";
 
 export function ResetPasswordForm() {
   const params = useSearchParams();
   const token = params.get("token");
   // Baked into the link itself (see buildPasswordResetEmail on the backend)
-  // so a customer lands back on /customers/auth and an installer on
-  // /installers/auth — older links sent before this existed have no `role`
-  // param, so this falls back to the customer portal for those.
+  // so a customer lands back on /customers/auth, an installer on
+  // /installers/auth, and an admin on /admin/auth — older links sent before
+  // this existed have no `role` param, so this falls back to the customer
+  // portal for those.
   const role = params.get("role");
-  const signInHref = role === "INSTALLER" ? INSTALLER_AUTH_PATH : CUSTOMER_AUTH_PATH;
+  const signInHref =
+    role === "INSTALLER"
+      ? INSTALLER_AUTH_PATH
+      : role === "ADMIN"
+        ? ADMIN_AUTH_PATH
+        : CUSTOMER_AUTH_PATH;
   const [showPassword, setShowPassword] = useState(false);
   const [done, setDone] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
