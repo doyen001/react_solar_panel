@@ -21,7 +21,11 @@ import {
 import { useSolarEstimate } from "@/hooks/useSolarEstimate";
 import { useSolarLayers, type SolarLayerType } from "@/hooks/useSolarLayers";
 import type { GeoTiffOverlay } from "@/utils/geotiff";
-import { extractRoofOutlineFromMask } from "@/utils/roofMaskContour";
+import {
+  extractRoofOutlinesFromMask,
+  type LatLngRing,
+  type RoofOutline,
+} from "@/utils/roofMaskContour";
 import type { SolarEstimateResult, SolarPanel } from "@/types/solar";
 import { mergeProposalData } from "@/lib/store/designProposalSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -36,6 +40,18 @@ const ACTIVE_LAYERS: SolarLayerType[] = ["rgb", "mask"];
 
 /** Hard cap on Google Maps Polygon instances for generated panels (perf). Keep ≥ typical “panels that fit” so the map matches the left-panel count. */
 const MAX_MAP_SOLAR_PANEL_POLYGONS = 1500;
+
+/**
+ * Minimum fraction of Google's own `wholeRoofAreaM2` the mask trace has to
+ * cover before it's trusted as "the roof". A simple house roof is usually
+ * one solid, confidently-classified blob close to 100% coverage. A complex
+ * or steeply sloped roof can end up with the mask only flagging a small
+ * flat/confident section — a trace that is *present* but covers, say, 15%
+ * of the real building is a worse starting point than a rectangle roughly
+ * covering the real footprint, even though "present" would otherwise look
+ * like a trustworthy result.
+ */
+const MIN_MASK_COVERAGE_FRACTION = 0.5;
 function formatNumber(n: number): string {
   return n.toLocaleString("en-AU", { maximumFractionDigits: 0 });
 }
@@ -411,22 +427,24 @@ function useImperativePanels(
 }
 
 /**
- * Roof outline: traced polygon from Solar roof-mask GeoTIFF (true footprint),
- * else rectangle from Building Insights `boundingBox`.
+ * Roof outline preview (before the customer enters edit mode): every polygon
+ * traced from the Solar roof-mask GeoTIFF (true footprint, possibly several
+ * disconnected sections on a large roof), else one rectangle from Building
+ * Insights `boundingBox`.
  */
 function useImperativeRoofOutline(
   map: google.maps.Map | null,
-  maskOutline: google.maps.LatLngLiteral[] | null,
+  maskOutlines: LatLngRing[] | null,
   buildingBoundingBox: SolarEstimateResult["boundingBox"] | undefined,
   visible: boolean,
 ) {
-  const overlayRef = useRef<google.maps.Rectangle | google.maps.Polygon | null>(
-    null,
+  const overlaysRef = useRef<(google.maps.Rectangle | google.maps.Polygon)[]>(
+    [],
   );
 
   useEffect(() => {
-    overlayRef.current?.setMap(null);
-    overlayRef.current = null;
+    overlaysRef.current.forEach((o) => o.setMap(null));
+    overlaysRef.current = [];
 
     if (!map || !visible) return;
 
@@ -439,14 +457,13 @@ function useImperativeRoofOutline(
       clickable: false,
     } as const;
 
-    if (maskOutline && maskOutline.length >= 3) {
-      const poly = new google.maps.Polygon({
-        paths: maskOutline,
-        ...opts,
-      });
-      poly.setMap(map);
-      overlayRef.current = poly;
-      return () => poly.setMap(null);
+    if (maskOutlines && maskOutlines.length > 0) {
+      const created = maskOutlines
+        .filter((ring) => ring.length >= 3)
+        .map((ring) => new google.maps.Polygon({ paths: ring, ...opts }));
+      created.forEach((poly) => poly.setMap(map));
+      overlaysRef.current = created;
+      return () => created.forEach((poly) => poly.setMap(null));
     }
 
     if (buildingBoundingBox) {
@@ -460,10 +477,10 @@ function useImperativeRoofOutline(
         ...opts,
       });
       rect.setMap(map);
-      overlayRef.current = rect;
+      overlaysRef.current = [rect];
       return () => rect.setMap(null);
     }
-  }, [map, maskOutline, buildingBoundingBox, visible]);
+  }, [map, maskOutlines, buildingBoundingBox, visible]);
 }
 
 /* ── Roof-polygon editing helpers ───────────────────────────── */
@@ -642,28 +659,75 @@ export const DesignsSolarPanelStepContent = forwardRef<
 
   const maskRaster = maskOverlay?.raster ?? null;
 
-  const roofMaskOutline = useMemo(() => {
-    if (!maskRaster || !selectedLocation) return null;
-    return extractRoofOutlineFromMask(
-      maskRaster,
-      selectedLocation.lat,
-      selectedLocation.lng,
-    );
+  /**
+   * Every roof section traced from the mask, largest first — a large
+   * commercial/industrial roof commonly comes back as several disconnected
+   * blobs (ridge lines, rooftop plant, vents), so this is a list rather than
+   * one outline.
+   */
+  const maskTracedOutlines = useMemo((): RoofOutline[] => {
+    if (!maskRaster || !selectedLocation) return [];
+    return extractRoofOutlinesFromMask(maskRaster);
   }, [maskRaster, selectedLocation]);
 
-  const initialRoofPolygon = useMemo(() => {
+  const roofMaskOutlines = useMemo((): LatLngRing[] | null => {
+    return maskTracedOutlines.length > 0
+      ? maskTracedOutlines.map((o) => o.ring)
+      : null;
+  }, [maskTracedOutlines]);
+
+  /** The largest single traced outline — for call sites that only ever offer the customer one fallback shape to start a *new* roof from (e.g. "+ Add New Roof"). */
+  const roofMaskOutline = roofMaskOutlines?.[0] ?? null;
+
+  /**
+   * True once the mask trace covers enough of Google's own whole-roof figure
+   * to be trusted as "the roof" — see `MIN_MASK_COVERAGE_FRACTION`. With no
+   * whole-roof figure to compare against, any non-empty trace is accepted
+   * (nothing better to fall back to anyway, short of the bounding box).
+   */
+  const maskOutlinesCoverEnoughOfRoof = useMemo(() => {
+    if (maskTracedOutlines.length === 0) return false;
+    const wholeRoofAreaM2 = data?.wholeRoofAreaM2;
+    if (!wholeRoofAreaM2) return true;
+    const tracedAreaM2 = maskTracedOutlines.reduce(
+      (sum, o) => sum + o.areaM2,
+      0,
+    );
+    return tracedAreaM2 >= wholeRoofAreaM2 * MIN_MASK_COVERAGE_FRACTION;
+  }, [data?.wholeRoofAreaM2, maskTracedOutlines]);
+
+  /** True when the starting shape is a real trace of the roof, not a rectangle guess. */
+  const initialRoofIsTraced = Boolean(
+    roofMaskOutlines?.length && maskOutlinesCoverEnoughOfRoof,
+  );
+
+  const initialRoofPolygons = useMemo((): google.maps.LatLngLiteral[][] | null => {
     if (!selectedLocation) return null;
-    if (roofMaskOutline?.length) return roofMaskOutline;
-    if (data?.boundingBox) return boundingBoxToPolygon(data.boundingBox);
+    if (initialRoofIsTraced) return roofMaskOutlines;
+    if (data?.boundingBox) return [boundingBoxToPolygon(data.boundingBox)];
     if (loading || layersLoading) return null;
-    return makeDefaultPolygon(selectedLocation);
+    return [makeDefaultPolygon(selectedLocation)];
   }, [
     data?.boundingBox,
+    initialRoofIsTraced,
     layersLoading,
     loading,
-    roofMaskOutline,
+    roofMaskOutlines,
     selectedLocation,
   ]);
+
+  /**
+   * True while the roof(s) on screen came from a rectangle guess (the
+   * building's bounding box, or — with no Solar API coverage at all — a
+   * plain default square centered on the pin) rather than a real trace of
+   * the roof from imagery. Both are reasonable starting points, but neither
+   * is "AI found your exact roof" the way a mask trace is — worth flagging
+   * so installers know to actually check the shape against the satellite
+   * image instead of trusting it outright, which matters most in dense or
+   * informally-mapped areas where Google's own building-footprint data can
+   * be stale or offset from where the building actually is.
+   */
+  const [roofNeedsVerification, setRoofNeedsVerification] = useState(false);
 
   /* Reset polygon selection when address changes (derived-state pattern, avoids effect) */
   const [prevSelectedLocation, setPrevSelectedLocation] =
@@ -697,7 +761,7 @@ export const DesignsSolarPanelStepContent = forwardRef<
   }, [isEditing, editingRoofs]);
 
   useEffect(() => {
-    if (!selectedLocation || hasInitializedRoof || !initialRoofPolygon) {
+    if (!selectedLocation || hasInitializedRoof || !initialRoofPolygons) {
       return;
     }
     if (
@@ -713,17 +777,22 @@ export const DesignsSolarPanelStepContent = forwardRef<
       return;
     }
 
-    setEditingRoofs([
-      {
+    // One editing roof per detected section — a large roof traced into
+    // several disconnected mask blobs starts the editor with all of them
+    // instead of just whichever one happened to seed first.
+    setEditingRoofs(
+      initialRoofPolygons.map((paths) => ({
         id: ++roofCounter.current,
-        paths: initialRoofPolygon,
-      },
-    ]);
+        paths,
+      })),
+    );
     setIsEditing(true);
     setHasInitializedRoof(true);
+    setRoofNeedsVerification(!initialRoofIsTraced);
   }, [
     hasInitializedRoof,
-    initialRoofPolygon,
+    initialRoofIsTraced,
+    initialRoofPolygons,
     selectedLocation,
     solarDesignFromStore,
   ]);
@@ -851,22 +920,36 @@ export const DesignsSolarPanelStepContent = forwardRef<
     if (!selectedLocation) return;
     setIsEditing(true);
     if (savedRoofs.length > 0) {
+      // Already-saved shapes — the installer confirmed these (or drew them)
+      // before, so there's nothing new to flag.
+      setRoofNeedsVerification(false);
       setEditingRoofs(
         savedRoofs.map((paths) => ({ id: ++roofCounter.current, paths })),
       );
     } else {
-      setEditingRoofs([
-        {
-          id: ++roofCounter.current,
-          paths:
-            roofMaskOutline ??
-            (data?.boundingBox
-              ? boundingBoxToPolygon(data.boundingBox)
-              : makeDefaultPolygon(selectedLocation)),
-        },
-      ]);
+      const isTraced = Boolean(
+        roofMaskOutlines?.length && maskOutlinesCoverEnoughOfRoof,
+      );
+      const fallback: google.maps.LatLngLiteral[][] =
+        isTraced && roofMaskOutlines
+          ? roofMaskOutlines
+          : [
+              data?.boundingBox
+                ? boundingBoxToPolygon(data.boundingBox)
+                : makeDefaultPolygon(selectedLocation),
+            ];
+      setRoofNeedsVerification(!isTraced);
+      setEditingRoofs(
+        fallback.map((paths) => ({ id: ++roofCounter.current, paths })),
+      );
     }
-  }, [data?.boundingBox, roofMaskOutline, savedRoofs, selectedLocation]);
+  }, [
+    data?.boundingBox,
+    maskOutlinesCoverEnoughOfRoof,
+    roofMaskOutlines,
+    savedRoofs,
+    selectedLocation,
+  ]);
 
   const getCurrentEditingPaths = useCallback(() => {
     return editingRoofs.map((roof) => {
@@ -1088,7 +1171,7 @@ export const DesignsSolarPanelStepContent = forwardRef<
   );
   useImperativeRoofOutline(
     mapReady,
-    roofMaskOutline,
+    maskOutlinesCoverEnoughOfRoof ? roofMaskOutlines : null,
     data?.boundingBox,
     showPanels && !isEditing && savedRoofs.length === 0,
   );
@@ -1236,6 +1319,14 @@ export const DesignsSolarPanelStepContent = forwardRef<
               <p className="w-full rounded-[10px] bg-white/70 px-4 py-2 text-center font-inter text-[12px] font-medium text-ink/70">
                 Google Solar imagery is not available for this location yet.
                 These values are estimates based on typical Australian rooftops.
+              </p>
+            )}
+
+            {isEditing && roofNeedsVerification && (
+              <p className="w-full rounded-[10px] border border-amber-300 bg-amber-50/90 px-4 py-2 text-center font-inter text-[12px] font-medium text-amber-900">
+                This shape is a guess, not a traced roof — drag its corners
+                (or add/delete roofs) to match the satellite image before
+                saving.
               </p>
             )}
 

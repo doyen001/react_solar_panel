@@ -2,31 +2,21 @@ import type { GeoTiffRaster } from "@/utils/geotiff";
 
 export type LatLngRing = { lat: number; lng: number }[];
 
-function pixelToLatLng(
-  col: number,
-  row: number,
-  raster: GeoTiffRaster,
-): { lat: number; lng: number } {
-  const { bounds, width, height } = raster;
-  const lng = bounds.west + (col / width) * (bounds.east - bounds.west);
-  const lat = bounds.north + (row / height) * (bounds.south - bounds.north);
-  return { lat, lng };
-}
+export type RoofOutline = {
+  ring: LatLngRing;
+  /** Approximate — pixel count × pixel footprint. The UI recomputes exact area from the saved polygon anyway. */
+  areaM2: number;
+};
 
-function latLngToMaskPixel(
-  lat: number,
-  lng: number,
-  raster: GeoTiffRaster,
-): { col: number; row: number } {
-  const { bounds, width, height } = raster;
-  const col = Math.round(
-    ((lng - bounds.west) / (bounds.east - bounds.west)) * width,
-  );
-  const row = Math.round(
-    ((lat - bounds.north) / (bounds.south - bounds.north)) * height,
-  );
-  return { col, row };
-}
+/**
+ * Roofs below this are treated as noise (antenna shadow, a single stray
+ * pixel at a mask edge, etc.) rather than a real section worth drawing —
+ * smaller than a single solar panel.
+ */
+const MIN_OUTLINE_AREA_M2 = 3;
+
+/** Hard cap so a pathologically fragmented mask can't hand the editor hundreds of tiny polygons. */
+const MAX_OUTLINES = 25;
 
 function isRoof(
   data: GeoTiffRaster["data"],
@@ -39,92 +29,84 @@ function isRoof(
   return v > 0;
 }
 
-function connectedComponentMask(
-  raster: GeoTiffRaster,
-  seedCol: number,
-  seedRow: number,
-): Uint8Array | null {
-  const { data, width, height, noDataValue } = raster;
-  const n = width * height;
-  const idx = seedRow * width + seedCol;
-  if (seedCol < 0 || seedCol >= width || seedRow < 0 || seedRow >= height)
-    return null;
-  if (!isRoof(data, idx, noDataValue)) return null;
-
-  const comp = new Uint8Array(n);
-  const q: number[] = [idx];
-  comp[idx] = 1;
-
-  while (q.length > 0) {
-    const cur = q.pop()!;
-    const r = Math.floor(cur / width);
-    const c = cur - r * width;
-    const nbs = [
-      c - 1 + r * width,
-      c + 1 + r * width,
-      c + (r - 1) * width,
-      c + (r + 1) * width,
-    ];
-    for (const ni of nbs) {
-      if (ni < 0 || ni >= n) continue;
-      const nr = Math.floor(ni / width);
-      const nc = ni - nr * width;
-      if (Math.abs(nr - r) + Math.abs(nc - c) !== 1) continue;
-      if (comp[ni] || !isRoof(data, ni, noDataValue)) continue;
-      comp[ni] = 1;
-      q.push(ni);
-    }
-  }
-  return comp;
+/**
+ * Real-world area of one raster pixel, in m². Google's mask/DSM rasters are
+ * small enough (a few hundred pixels per side, covering one building) that
+ * treating the pixel grid as locally flat is accurate to well under 1%.
+ */
+function pixelAreaM2(raster: GeoTiffRaster): number {
+  const { bounds, width, height } = raster;
+  const centerLatRad = ((bounds.north + bounds.south) / 2) * (Math.PI / 180);
+  const metersPerDegLat = 111_320;
+  const metersPerDegLng = 111_320 * Math.cos(centerLatRad);
+  const pixelWidthDeg = Math.abs(bounds.east - bounds.west) / width;
+  const pixelHeightDeg = Math.abs(bounds.north - bounds.south) / height;
+  return (
+    pixelWidthDeg * metersPerDegLng * (pixelHeightDeg * metersPerDegLat)
+  );
 }
 
-function nearestRoofSeed(
-  raster: GeoTiffRaster,
-  col: number,
-  row: number,
-  maxSteps: number,
-): { col: number; row: number } | null {
+/**
+ * Labels every "is roof" pixel in the raster with which connected blob it
+ * belongs to (4-connected flood fill from every unvisited roof pixel).
+ * Label 0 means "not roof". Large commercial/industrial roofs commonly come
+ * back as *several* disconnected blobs — ridge lines, rooftop plant, vents
+ * and skylights all break the mask — so this intentionally finds all of
+ * them rather than stopping at the first one.
+ */
+function labelConnectedComponents(raster: GeoTiffRaster): {
+  labels: Int32Array;
+  sizes: number[];
+} {
   const { data, width, height, noDataValue } = raster;
-  if (col >= 0 && col < width && row >= 0 && row < height) {
-    if (isRoof(data, row * width + col, noDataValue)) return { col, row };
-  }
-  for (let s = 1; s <= maxSteps; s++) {
-    for (let dr = -s; dr <= s; dr++) {
-      for (const dc of [-s, s]) {
-        const c = col + dc;
-        const r = row + dr;
-        if (
-          c >= 0 &&
-          c < width &&
-          r >= 0 &&
-          r < height &&
-          isRoof(data, r * width + c, noDataValue)
-        )
-          return { col: c, row: r };
+  const n = width * height;
+  const labels = new Int32Array(n);
+  const sizes: number[] = [0]; // sizes[0] is unused — labels start at 1
+
+  const stack: number[] = [];
+  for (let start = 0; start < n; start++) {
+    if (labels[start] !== 0 || !isRoof(data, start, noDataValue)) continue;
+
+    const label = sizes.length;
+    let size = 0;
+    labels[start] = label;
+    stack.push(start);
+
+    while (stack.length > 0) {
+      const cur = stack.pop()!;
+      size++;
+      const r = Math.floor(cur / width);
+      const c = cur - r * width;
+      const neighbors = [
+        r > 0 ? cur - width : -1,
+        r < height - 1 ? cur + width : -1,
+        c > 0 ? cur - 1 : -1,
+        c < width - 1 ? cur + 1 : -1,
+      ];
+      for (const ni of neighbors) {
+        if (ni < 0 || labels[ni] !== 0 || !isRoof(data, ni, noDataValue)) {
+          continue;
+        }
+        labels[ni] = label;
+        stack.push(ni);
       }
     }
-    for (let dc = -s + 1; dc <= s - 1; dc++) {
-      for (const r of [row - s, row + s]) {
-        const c = col + dc;
-        if (
-          c >= 0 &&
-          c < width &&
-          r >= 0 &&
-          r < height &&
-          isRoof(data, r * width + c, noDataValue)
-        )
-          return { col: c, row: r };
-      }
-    }
+
+    sizes.push(size);
   }
-  return null;
+
+  return { labels, sizes };
 }
 
 /**
  * Padded Moore–Neighborhood boundary (8-connected). `comp` is 0/1, same size as raster.
  * Returns vertex list in pixel coords (col, row) along the outer boundary.
  */
-function mooreBoundaryRing(comp: Uint8Array, width: number, height: number): [number, number][] {
+function mooreBoundaryRing(
+  comp: Uint8Array,
+  width: number,
+  height: number,
+): [number, number][] {
   const pw = width + 2;
   const ph = height + 2;
   const pad = new Uint8Array(pw * ph);
@@ -224,42 +206,65 @@ function pointSegDist(
   return Math.hypot(px - qx, py - qy);
 }
 
-function ringToLatLng(ring: [number, number][], raster: GeoTiffRaster): LatLngRing {
+function ringToLatLng(
+  ring: [number, number][],
+  raster: GeoTiffRaster,
+): LatLngRing {
   const { bounds, width, height } = raster;
   const out: LatLngRing = [];
   for (const [col, row] of ring) {
-    const lng =
-      bounds.west + (col / width) * (bounds.east - bounds.west);
-    const lat =
-      bounds.north + (row / height) * (bounds.south - bounds.north);
+    const lng = bounds.west + (col / width) * (bounds.east - bounds.west);
+    const lat = bounds.north + (row / height) * (bounds.south - bounds.north);
     out.push({ lat, lng });
   }
   return out;
 }
 
 /**
- * Roof outline traced from the Solar roof mask: connected component under the pin,
- * then Moore boundary in pixel space → simplified → lat/lng.
- * The Building Insights API does not expose roof vertices; this derives a polygon from raster data.
+ * Every roof outline traced from the Solar roof mask, largest first — not
+ * just the one connected blob nearest the pin.
+ *
+ * The Building Insights API does not expose roof vertices, only a raster
+ * mask of which pixels are roof; on a simple house that mask is one solid
+ * blob and tracing from the pin is enough. On a large commercial/industrial
+ * roof it commonly comes back as *several* disconnected blobs — ridge
+ * lines, rooftop plant, vents and skylights all break the mask — so a
+ * single pin-seeded trace silently returns only whichever fragment happens
+ * to be nearest the pin, which can be a small fraction of the real roof.
+ * This labels every connected component in the whole raster, discards
+ * specks too small to be a real roof section, and traces + simplifies each
+ * of the rest, so auto-detection covers the whole building instead of one
+ * fragment of it.
  */
-export function extractRoofOutlineFromMask(
+export function extractRoofOutlinesFromMask(
   maskRaster: GeoTiffRaster,
-  pinLat: number,
-  pinLng: number,
-): LatLngRing | null {
-  const { col, row } = latLngToMaskPixel(pinLat, pinLng, maskRaster);
-  const seed = nearestRoofSeed(maskRaster, col, row, 120);
-  if (!seed) return null;
-
-  const comp = connectedComponentMask(maskRaster, seed.col, seed.row);
-  if (!comp) return null;
-
+): RoofOutline[] {
   const { width, height } = maskRaster;
-  const ringPx = mooreBoundaryRing(comp, width, height);
-  if (ringPx.length < 3) return null;
+  const { labels, sizes } = labelConnectedComponents(maskRaster);
+  const pxArea = pixelAreaM2(maskRaster);
 
-  const simplified = douglasPeucker(ringPx, 1.0);
-  if (simplified.length < 3) return null;
+  const candidates = sizes
+    .map((size, label) => ({ label, size, areaM2: size * pxArea }))
+    .slice(1) // drop the unused label-0 placeholder
+    .filter((c) => c.areaM2 >= MIN_OUTLINE_AREA_M2)
+    .sort((a, b) => b.areaM2 - a.areaM2)
+    .slice(0, MAX_OUTLINES);
 
-  return ringToLatLng(simplified, maskRaster);
+  const outlines: RoofOutline[] = [];
+  for (const { label, areaM2 } of candidates) {
+    const comp = new Uint8Array(width * height);
+    for (let i = 0; i < labels.length; i++) {
+      if (labels[i] === label) comp[i] = 1;
+    }
+
+    const ringPx = mooreBoundaryRing(comp, width, height);
+    if (ringPx.length < 3) continue;
+
+    const simplified = douglasPeucker(ringPx, 1.0);
+    if (simplified.length < 3) continue;
+
+    outlines.push({ ring: ringToLatLng(simplified, maskRaster), areaM2 });
+  }
+
+  return outlines;
 }
