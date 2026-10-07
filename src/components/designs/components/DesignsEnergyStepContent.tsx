@@ -620,7 +620,7 @@ export const DesignsEnergyStepContent = forwardRef<
     () => resolveSystemKw(proposal.summary.systemSize, proposal.summary.totalPanels),
     [proposal.summary.systemSize, proposal.summary.totalPanels],
   );
-  const inverterCount = Math.max(1, Math.ceil(systemKw / 10));
+  const inverterCount = Math.max(1, Math.ceil(systemKw / 50));
 
   const annualConsumptionKwh = useMemo(() => {
     const annualUsageCharge = Math.max(
@@ -945,13 +945,8 @@ export const DesignsEnergyStepContent = forwardRef<
                 </div>
               </div>
 
-              {/* Electricity usage breakdown */}
-              <EnergyBreakdownChart
-                monthlySolarPct={sim.monthly.map((m) => m.solarPct)}
-              />
-
               {/* Grid import vs battery size */}
-              <div className="flex min-h-0 flex-col rounded-[10px] border border-white/10 bg-white/5 px-2.5 py-2">
+              <div className="flex min-h-[260px] flex-col rounded-[10px] border border-white/10 bg-white/5 px-2.5 py-2">
                 <SectionHeading
                   icon="battery"
                   accentClassName="bg-[#152238]"
@@ -967,6 +962,11 @@ export const DesignsEnergyStepContent = forwardRef<
                   />
                 </div>
               </div>
+
+              {/* Electricity usage breakdown */}
+              <EnergyBreakdownChart
+                monthlySolarPct={sim.monthly.map((m) => m.solarPct)}
+              />
             </div>
           </div>
         </div>
