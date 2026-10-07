@@ -365,15 +365,17 @@ function ValuePanel({
       {kwh ? (
         <p className="mt-1 font-inter text-[13px] text-white">{kwh}</p>
       ) : null}
-      <p
-        className={`font-source-sans font-bold ${
-          hasBreakdown
-            ? "mt-1 text-[20px]"
-            : "mt-1 flex flex-1 items-center text-[28px]"
-        } ${dollarClassName ?? "text-white"}`}
-      >
-        {dollar}
-      </p>
+      <div className="flex items-center justify-center m-auto">
+        <p
+          className={`font-source-sans font-bold ${
+            hasBreakdown
+              ? "mt-1 text-[20px]"
+              : "mt-1 flex flex-1 items-center text-[28px]"
+          } ${dollarClassName ?? "text-white"}`}
+        >
+          {dollar}
+        </p>
+      </div>
       {breakdown && breakdown.length > 0 ? (
         <div className="mt-1 flex flex-1 flex-col justify-end gap-0.5 border-t border-white/10 pt-1 font-inter text-[10px] leading-3.5 text-white">
           {breakdown.map((line, i) => (
